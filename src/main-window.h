@@ -54,7 +54,7 @@ private:
 	Tile_Button *_tileset[NUM_TILES];
 	// GUI outputs
 	Label *_tile_heading;
-	Status_Bar_Field *_tilemap_dimensions, *_tilemap_format, *_hover_id, *_hover_xy;
+	Status_Bar_Field *_tilemap_dimensions, *_tilemap_format, *_hover_id, *_hover_xy, *_hover_landmark;
 	// Conditional menu items
 	Fl_Menu_Item *_reload_tileset_mi = NULL, *_unload_tileset_mi = NULL, *_close_mi = NULL, *_save_mi = NULL, *_save_as_mi = NULL,
 		*_print_mi = NULL;

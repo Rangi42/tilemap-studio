@@ -67,6 +67,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_hover_id = new Status_Bar_Field(0, 0, text_width("ID: $99", 8), 21, "");
 	new Spacer(0, 0, 2, 21);
 	_hover_xy = new Status_Bar_Field(0, 0, text_width("X/Y (999, 999)", 8), 21, "");
+	new Spacer(0, 0, 2, 21);
+	_hover_landmark = new Status_Bar_Field(0, 0, text_width("Landmark (999, 999)", 8), 21, "");
 	_status_bar->end();
 	begin();
 
@@ -571,6 +573,7 @@ void Main_Window::update_status(Tile_Tessera *tt) {
 		_tilemap_dimensions->label("");
 		_hover_id->label("");
 		_hover_xy->label("");
+		_hover_landmark->label("");
 		_status_bar->redraw();
 		return;
 	}
@@ -584,6 +587,7 @@ void Main_Window::update_status(Tile_Tessera *tt) {
 	if (!tt) {
 		_hover_id->label("");
 		_hover_xy->label("");
+		_hover_landmark->label("");
 		_status_bar->redraw();
 		return;
 	}
@@ -591,6 +595,14 @@ void Main_Window::update_status(Tile_Tessera *tt) {
 	_hover_id->copy_label(buffer);
 	sprintf(buffer, "X/Y (%u, %u)", tt->col(), tt->row());
 	_hover_xy->copy_label(buffer);
+	if (_tilemap.width() == 20 && _tilemap.height() == 18 && (Config::format() == Tilemap::Format::FF_END ||
+		Config::format() == Tilemap::Format::RLE_NYBBLES || Config::format() == Tilemap::Format::XY_FLIP)) {
+		sprintf(buffer, "Landmark (%u, %u)", tt->col() * 8 + 4, tt->row() * 8 + 4); // center of tile
+		_hover_landmark->copy_label(buffer);
+	}
+	else {
+		_hover_landmark->label("");
+	}
 }
 
 void Main_Window::update_metadata() {
