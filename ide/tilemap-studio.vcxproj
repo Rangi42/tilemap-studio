@@ -1,0 +1,169 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{A96E1028-F96F-4519-B9DA-24C86DA2AD0D}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>tilemap-studio</RootNamespace>
+    <ProjectName>Tilemap Studio</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\bin\$(Configuration)\</OutDir>
+    <IntDir>..\tmp\$(Configuration)\</IntDir>
+    <TargetName>tilemapstudiod</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\bin\$(Configuration)\</OutDir>
+    <IntDir>..\tmp\$(Configuration)\</IntDir>
+    <TargetName>tilemapstudio</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;NOMINMAX;_CRT_SECURE_NO_WARNINGS;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <DisableSpecificWarnings>4068;4351</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>.;..\include;..\res</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <PreprocessToFile>false</PreprocessToFile>
+      <FloatingPointModel>Fast</FloatingPointModel>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>fltkimagesd.lib;fltkpngd.lib;fltkzlibd.lib;fltkd.lib;opengl32.lib;glu32.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>libcmtd.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>..\lib\Debug</AdditionalLibraryDirectories>
+      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NOMINMAX;_CRT_SECURE_NO_WARNINGS;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <DisableSpecificWarnings>4068;4351</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>.;..\include;..\res</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <DebugInformationFormat>None</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>fltkimages.lib;fltkpng.lib;fltkzlib.lib;fltk.lib;opengl32.lib;glu32.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>..\lib</AdditionalLibraryDirectories>
+      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\config.h" />
+    <ClInclude Include="..\src\help-window.h" />
+    <ClInclude Include="..\src\hex-spinner.h" />
+    <ClInclude Include="..\src\icons.h" />
+    <ClInclude Include="..\src\main-window.h" />
+    <ClInclude Include="..\src\modal-dialog.h" />
+    <ClInclude Include="..\src\option-dialogs.h" />
+    <ClInclude Include="..\src\preferences.h" />
+    <ClInclude Include="..\src\resource.h" />
+    <ClInclude Include="..\src\themes.h" />
+    <ClInclude Include="..\src\tile-buttons.h" />
+    <ClInclude Include="..\src\tilemap.h" />
+    <ClInclude Include="..\src\utils.h" />
+    <ClInclude Include="..\src\version.h" />
+    <ClInclude Include="..\src\widgets.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\config.cpp" />
+    <ClCompile Include="..\src\help-window.cpp" />
+    <ClCompile Include="..\src\hex-spinner.cpp" />
+    <ClCompile Include="..\src\main-window.cpp" />
+    <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\modal-dialog.cpp" />
+    <ClCompile Include="..\src\option-dialogs.cpp" />
+    <ClCompile Include="..\src\preferences.cpp" />
+    <ClCompile Include="..\src\themes.cpp" />
+    <ClCompile Include="..\src\tile-buttons.cpp" />
+    <ClCompile Include="..\src\tilemap.cpp" />
+    <ClCompile Include="..\src\utils.cpp" />
+    <ClCompile Include="..\src\widgets.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\res\app.ico" />
+    <None Include="..\res\app-icon.xpm" />
+    <None Include="..\res\error.xpm" />
+    <None Include="..\res\help.html" />
+    <None Include="..\res\input.xpm" />
+    <None Include="..\res\load.xpm" />
+    <None Include="..\res\new.xpm" />
+    <None Include="..\res\open.xpm" />
+    <None Include="..\res\output.xpm" />
+    <None Include="..\res\print-disabled.xpm" />
+    <None Include="..\res\print.xpm" />
+    <None Include="..\res\redo-disabled.xpm" />
+    <None Include="..\res\redo.xpm" />
+    <None Include="..\res\reload-disabled.xpm" />
+    <None Include="..\res\reload.xpm" />
+    <None Include="..\res\resize-disabled.xpm" />
+    <None Include="..\res\resize.xpm" />
+    <None Include="..\res\save-disabled.xpm" />
+    <None Include="..\res\save.xpm" />
+    <None Include="..\res\success.xpm" />
+    <None Include="..\res\undo-disabled.xpm" />
+    <None Include="..\res\undo.xpm" />
+    <None Include="..\res\warning.xpm" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="tilemap-studio.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
