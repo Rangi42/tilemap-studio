@@ -71,9 +71,9 @@ private:
 public:
 	Resize_Dialog(const char *t);
 	~Resize_Dialog();
-	inline uint8_t tilemap_width(void) const { return (uint8_t)_tilemap_width->value(); }
-	inline uint8_t tilemap_height(void) const { return (uint8_t)_tilemap_height->value(); }
-	inline void tilemap_size(uint8_t w, uint8_t h) {
+	inline size_t tilemap_width(void) const { return (size_t)_tilemap_width->value(); }
+	inline size_t tilemap_height(void) const { return (size_t)_tilemap_height->value(); }
+	inline void tilemap_size(size_t w, size_t h) {
 		initialize();
 		_tilemap_width->value(w);
 		_tilemap_height->value(h);
@@ -96,8 +96,8 @@ private:
 public:
 	Tilemap_Width_Dialog(const char *t);
 	~Tilemap_Width_Dialog();
-	inline int tilemap_width(void) const { return (int)_tilemap_width->value(); }
-	inline void tilemap_width(int n) { initialize(); _tilemap_width->value((double)n); }
+	inline size_t tilemap_width(void) const { return (size_t)_tilemap_width->value(); }
+	inline void tilemap_width(size_t n) { initialize(); _tilemap_width->value((double)n); }
 protected:
 	void initialize_content(void);
 	int refresh_content(int ww, int dy);

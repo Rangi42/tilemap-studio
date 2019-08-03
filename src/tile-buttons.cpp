@@ -49,7 +49,7 @@ void Tile_State::draw(int x, int y, bool active, bool selected) {
 	fl_draw(buffer, x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_ALIGN_CENTER);
 }
 
-Tile_Tessera::Tile_Tessera(int x, int y, uint8_t row, uint8_t col, uint8_t id, bool x_flip, bool y_flip) :
+Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint8_t id, bool x_flip, bool y_flip) :
 	Fl_Box(x, y, TILE_SIZE_2X, TILE_SIZE_2X), _row(row), _col(col), _state(id, x_flip, y_flip) {
 	user_data(NULL);
 	box(FL_NO_BOX);

@@ -104,9 +104,9 @@ void New_Tilemap_Dialog::initialize_content() {
 	_tilemap_height = new OS_Spinner(0, 0, 0, 0, "Height:");
 	// Initialize content group's children
 	_tilemap_width->align(FL_ALIGN_LEFT);
-	_tilemap_width->range(1, 255);
+	_tilemap_width->range(1, 999);
 	_tilemap_height->align(FL_ALIGN_LEFT);
-	_tilemap_height->range(1, 255);
+	_tilemap_height->range(1, 9999);
 }
 
 int New_Tilemap_Dialog::refresh_content(int ww, int dy) {
@@ -182,9 +182,9 @@ void Resize_Dialog::initialize_content() {
 	}
 	// Initialize content group's children
 	_tilemap_width->align(FL_ALIGN_LEFT);
-	_tilemap_width->range(1, 255);
+	_tilemap_width->range(1, 999);
 	_tilemap_height->align(FL_ALIGN_LEFT);
-	_tilemap_height->range(1, 255);
+	_tilemap_height->range(1, 9999);
 	anchor(Preferences::get("resize-anchor", 4));
 }
 
@@ -242,7 +242,7 @@ void Tilemap_Width_Dialog::initialize_content() {
 	_tilemap_width = new OS_Spinner(0, 0, 0, 0, "Width:");
 	// Initialize content group's children
 	_tilemap_width->align(FL_ALIGN_LEFT);
-	_tilemap_width->range(1, 255);
+	_tilemap_width->range(1, 999);
 }
 
 int Tilemap_Width_Dialog::refresh_content(int ww, int dy) {

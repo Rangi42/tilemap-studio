@@ -32,7 +32,7 @@ void Tilemap::width(size_t w) {
 	_width = w;
 	for (size_t i = 0; i < _size; i++) {
 		Tile_Tessera *tt = _tiles[i];
-		tt->coords((uint8_t)(i / w), (uint8_t)(i % w));
+		tt->coords(i / w, i % w);
 	}
 }
 
@@ -78,7 +78,7 @@ void Tilemap::resize(size_t w, size_t h, Resize_Dialog::Hor_Align ha, Resize_Dia
 			tiles[i++] = new Tile_Tessera(0, 0, 0, 0, t);
 		}
 		for (int x = mx; x < mw; x++) {
-			tiles[i++] = j < _size ? (j++, tile((uint8_t)(x - px), (uint8_t)(y - py))) :
+			tiles[i++] = j < _size ? (j++, tile(x - px, y - py)) :
 				new Tile_Tessera(0, 0, 0, 0, t);
 		}
 		for (int x = mw; x < (int)w; x++) {

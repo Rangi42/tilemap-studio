@@ -413,7 +413,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_redo_tb->deimage(REDO_DISABLED_ICON);
 
 	_tilemap_width->value(20);
-	_tilemap_width->range(1, 255);
+	_tilemap_width->range(1, 999);
 	_tilemap_width->callback((Fl_Callback *)tilemap_width_tb_cb, this);
 
 	_resize_tb->tooltip("Resize... (Ctrl+E)");
@@ -598,13 +598,21 @@ void Main_Window::update_status(Tile_Tessera *tt) {
 	}
 	sprintf(buffer, "ID: $%02X", tt->id());
 	_hover_id->copy_label(buffer);
-	sprintf(buffer, "X/Y (%u, %u)", tt->col(), tt->row());
+#ifdef __GNUC__
+	sprintf(buffer, "X/Y (%zu, %zu)", tt->col(), tt->row());
+#else
+	sprintf(buffer, "X/Y (%u, %u)", (uint32_t)tt->col(), (uint32_t)tt->row());
+#endif
 	_hover_xy->copy_label(buffer);
 	if (_tilemap.width() == GAME_BOY_WIDTH && _tilemap.height() == GAME_BOY_HEIGHT &&
 		(Config::format() == Tilemap::Format::FF_END || Config::format() == Tilemap::Format::RLE_NYBBLES ||
 		Config::format() == Tilemap::Format::XY_FLIP)) {
-		int lx = (int)tt->col() * TILE_SIZE + TILE_SIZE / 2, ly = (int)tt->row() * TILE_SIZE + TILE_SIZE / 2;
-		sprintf(buffer, "Landmark (%u, %u)", lx, ly); // center of tile
+		size_t lx = tt->col() * TILE_SIZE + TILE_SIZE / 2, ly = tt->row() * TILE_SIZE + TILE_SIZE / 2; // center of tile
+#ifdef __GNUC__
+		sprintf(buffer, "Landmark (%zu, %zu)", lx, ly);
+#else
+		sprintf(buffer, "Landmark (%u, %u)", (uint32_t)lx, (uint32_t)ly);
+#endif
 		_hover_landmark->copy_label(buffer);
 	}
 	else {
@@ -713,7 +721,7 @@ void Main_Window::update_active_controls() {
 }
 
 void Main_Window::resize_tilemap() {
-	size_t w = (size_t)_resize_dialog->tilemap_width(), h = (size_t)_resize_dialog->tilemap_height();
+	size_t w = _resize_dialog->tilemap_width(), h = _resize_dialog->tilemap_height();
 	size_t n = w * h;
 	if (_tilemap.size() == n) { return; }
 
@@ -741,7 +749,7 @@ void Main_Window::flood_fill(Tile_Tessera *tt) {
 	if (fs == ts) { return; }
 	std::queue<size_t> queue;
 	size_t w = _tilemap.width(), h = _tilemap.height(), n = _tilemap.size();
-	uint8_t row = tt->row(), col = tt->col();
+	size_t row = tt->row(), col = tt->col();
 	size_t i = row * w + col;
 	queue.push(i);
 	while (!queue.empty()) {
@@ -751,7 +759,7 @@ void Main_Window::flood_fill(Tile_Tessera *tt) {
 		Tile_Tessera *ff = _tilemap.tile(j);
 		if (ff->state() != fs) { continue; }
 		ff->state(ts); // fill
-		uint8_t r = ff->row(), c = ff->col();
+		size_t r = ff->row(), c = ff->col();
 		if (c > 0) { queue.push(j-1); } // left
 		if (c < w - 1) { queue.push(j+1); } // right
 		if (r > 0) { queue.push(j-w); } // up
@@ -1218,7 +1226,7 @@ void Main_Window::rainbow_tiles_cb(Fl_Menu_ *m, Main_Window *mw) {
 }
 
 void Main_Window::tilemap_width_cb(Fl_Menu_ *, Main_Window *mw) {
-	mw->_tilemap_width_dialog->tilemap_width((int)mw->_tilemap_width->value());
+	mw->_tilemap_width_dialog->tilemap_width((size_t)mw->_tilemap_width->value());
 	mw->_tilemap_width_dialog->show(mw);
 	if (mw->_tilemap_width_dialog->canceled()) { return; }
 	mw->_tilemap_width->value(mw->_tilemap_width_dialog->tilemap_width());
@@ -1227,7 +1235,7 @@ void Main_Window::tilemap_width_cb(Fl_Menu_ *, Main_Window *mw) {
 
 void Main_Window::resize_cb(Fl_Menu_ *, Main_Window *mw) {
 	if (!mw->_tilemap.size()) { return; }
-	mw->_resize_dialog->tilemap_size((uint8_t)mw->_tilemap.width(), (uint8_t)mw->_tilemap.height());
+	mw->_resize_dialog->tilemap_size(mw->_tilemap.width(), mw->_tilemap.height());
 	mw->_resize_dialog->show(mw);
 	if (mw->_resize_dialog->canceled()) { return; }
 	mw->resize_tilemap();
@@ -1323,11 +1331,12 @@ void Main_Window::tilemap_width_tb_cb(OS_Spinner *, Main_Window *mw) {
 	mw->_tilemap.width((size_t)mw->_tilemap_width->value());
 	int sx = mw->_tilemap_scroll->x() + Fl::box_dx(mw->_tilemap_scroll->box());
 	int sy = mw->_tilemap_scroll->y() + Fl::box_dy(mw->_tilemap_scroll->box());
-	mw->_tilemap.reposition_tiles(sx, sy);
-	mw->_tilemap_scroll->contents(mw->_tilemap.width() * TILE_SIZE_2X, mw->_tilemap.height() * TILE_SIZE_2X);
-	mw->_tilemap_scroll->scroll_to(0, 0);
 	mw->_tilemap_scroll->init_sizes();
+	mw->_tilemap_scroll->contents((int)(mw->_tilemap.width() * TILE_SIZE_2X), (int)(mw->_tilemap.height() * TILE_SIZE_2X));
+	mw->_tilemap_scroll->scroll_to(0, 0);
+	mw->_tilemap.reposition_tiles(sx, sy);
 	mw->_tilemap_scroll->redraw();
+	mw->update_status(NULL);
 }
 
 void Main_Window::tileset_start_tb_cb(OS_Hex_Spinner *, Main_Window *mw) {

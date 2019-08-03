@@ -32,13 +32,13 @@ public:
 
 class Tile_Tessera : public Fl_Box {
 private:
-	uint8_t _row, _col;
+	size_t _row, _col;
 	Tile_State _state;
 public:
-	Tile_Tessera(int x, int y, uint8_t row = 0, uint8_t col = 0, uint8_t id = 0x00, bool x_flip = false, bool y_flip = false);
-	inline uint8_t row(void) const { return _row; }
-	inline uint8_t col(void) const { return _col; }
-	inline void coords(uint8_t row, uint8_t col) { _row = row; _col = col; }
+	Tile_Tessera(int x, int y, size_t row = 0, size_t col = 0, uint8_t id = 0x00, bool x_flip = false, bool y_flip = false);
+	inline size_t row(void) const { return _row; }
+	inline size_t col(void) const { return _col; }
+	inline void coords(size_t row, size_t col) { _row = row; _col = col; }
 	inline Tile_State state(void) const { return _state; }
 	inline void state(Tile_State state) { _state = state; }
 	inline uint8_t id(void) const { return _state.id; }
@@ -53,7 +53,7 @@ public:
 
 class Tile_Button : public Fl_Radio_Button {
 private:
-	uint8_t _row, _col;
+	size_t _row, _col;
 	Tile_State _state;
 public:
 	Tile_Button(int x, int y, uint8_t id = 0x00);
