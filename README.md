@@ -4,7 +4,7 @@ A tilemap editor for [pokecrystal](https://github.com/pret/pokecrystal), [pokere
 
 Inspired by [GSC Town Map Editor](https://hax.iimarckus.org/topic/97/) and [Karteneditor](https://i.imgur.com/70jDfdM.png), but implemented with C++ and [FLTK](http://www.fltk.org/), and with support for tilemaps beyond the Town Map.
 
-Latest prerelease: [**0.1.0**](https://github.com/Rangi42/tilemap-studio/releases/tag/v0.1.0)
+Latest prerelease: [**0.2.0**](https://github.com/Rangi42/tilemap-studio/releases/tag/v0.2.0)
 
 Follow the steps in [INSTALL.md](INSTALL.md) to install the release copy of Tilemap Studio, or the longer instructions to build it yourself from source.
 
