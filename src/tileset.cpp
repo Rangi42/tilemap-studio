@@ -1,6 +1,7 @@
 #pragma warning(push, 0)
 #include <FL/fl_utf8.h>
 #include <FL/Fl_PNG_Image.H>
+#include <FL/fl_draw.H>
 #pragma warning(pop)
 
 #include "utils.h"
@@ -38,10 +39,21 @@ bool Tileset::draw_tile(const Tile_State *ts, int x, int y, bool active) const {
 	uint8_t id = ts->id - _start_id;
 	Fl_RGB_Image *img = active ? _image : _inactive_image;
 	if (!img || id >= _num_tiles) { return false; }
-	// TODO: support flipped graphics
+
 	int wt = img->w() / TILE_SIZE_2X;
 	int tx = id % wt * TILE_SIZE_2X, ty = id / wt * TILE_SIZE_2X;
-	img->draw(x, y, TILE_SIZE_2X, TILE_SIZE_2X, tx, ty);
+	if (!ts->x_flip && !ts->y_flip) {
+		img->draw(x, y, TILE_SIZE_2X, TILE_SIZE_2X, tx, ty);
+		return true;
+	}
+
+	const uchar *data = (const uchar *)img->data()[0];
+	int d = img->d(), ld = img->ld();
+	if (!ld) { ld = img->w() * d; }
+	data += ty * ld + tx * d + (ts->y_flip ? ts->x_flip ? ld + d : ld : ts->x_flip ? d : 0) * (TILE_SIZE_2X - 1);
+	int td = ts->x_flip ? -d : d;
+	int tld = ts->y_flip ? -ld : ld;
+	fl_draw_image(data, x, y, TILE_SIZE_2X, TILE_SIZE_2X, td, tld);
 	return true;
 }
 
