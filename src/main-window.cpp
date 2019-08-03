@@ -19,7 +19,9 @@
 #include "option-dialogs.h"
 #include "preferences.h"
 #include "config.h"
+#include "image.h"
 #include "tilemap.h"
+#include "tileset.h"
 #include "main-window.h"
 #include "icons.h"
 
@@ -32,7 +34,7 @@
 #endif
 
 Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_Window(x, y, w, h, PROGRAM_NAME),
-	_tilemap_file(), _tileset_file(), _recent(), _tilemap(), _wx(x), _wy(y), _ww(w), _wh(h) {
+	_tile_buttons(), _tilemap_file(), _tileset_file(), _recent(), _tilemap(), _tileset(), _wx(x), _wy(y), _ww(w), _wh(h) {
 
 	// Get global configs
 	Tilemap::Format format_config = (Tilemap::Format)Preferences::get("format", Config::format());
@@ -166,7 +168,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 		int tx = ox + (i % 16) * TILE_SIZE_PX, ty = oy + (i / 16) * TILE_SIZE_PX;
 		Tile_Button *tb = new Tile_Button(tx, ty, (uint8_t)i);
 		tb->callback((Fl_Callback *)select_tile_cb, this);
-		_tileset[i] = tb;
+		_tile_buttons[i] = tb;
 	}
 	_tileset_pane->end();
 	_tileset_pane->resizable(NULL);
@@ -433,7 +435,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 
 	_tileset_name->callback((Fl_Callback *)load_tileset_cb, this);
 
-	select_tile_cb(_tileset[0x00], this);
+	select_tile_cb(_tile_buttons[0x00], this);
 
 	_image_to_tiles->callback((Fl_Callback *)image_to_tiles_cb, this);
 
@@ -621,7 +623,7 @@ void Main_Window::update_metadata() {
 		_tilemap_name->label("No file selected");
 		_tilemap_format->label("");
 	}
-	if (false/*TODO: _tileset has image*/) {
+	if (_tileset.num_tiles()) {
 		const char *basename = fl_filename_name(_tileset_file.c_str());
 		_tileset_name->label(basename);
 	}
@@ -671,7 +673,7 @@ void Main_Window::update_active_controls() {
 		_resize_mi->deactivate();
 		_resize_tb->deactivate();
 	}
-	if (false/*TODO: _tileset has image*/) {
+	if (_tileset.num_tiles()) {
 		_reload_tileset_mi->activate();
 		_reload_tb->activate();
 		_unload_tileset_mi->activate();
@@ -695,13 +697,13 @@ void Main_Window::update_active_controls() {
 	}
 	int n = Tilemap::format_tileset_size((Tilemap::Format)Config::format());
 	for (int i = 0; i < n; i++) {
-		_tileset[i]->activate();
+		_tile_buttons[i]->activate();
 	}
 	for (int i = n; i < NUM_TILES; i++) {
-		_tileset[i]->deactivate();
+		_tile_buttons[i]->deactivate();
 	}
 	if (_selected->id() >= n) {
-		select_tile_cb(_tileset[0x00], this);
+		select_tile_cb(_tile_buttons[0x00], this);
 	}
 }
 
@@ -1033,14 +1035,14 @@ void Main_Window::load_tileset_cb(Fl_Widget *, Main_Window *mw) {
 	fputs("load_tileset_cb", stderr);
 }
 
-void Main_Window::reload_tileset_cb(Fl_Widget *, Main_Window *) {
-	if (false/*TODO: _tileset has image*/) { return; }
+void Main_Window::reload_tileset_cb(Fl_Widget *, Main_Window *mw) {
+	if (mw->_tileset.num_tiles()) { return; }
 	// TODO: reload_tileset_cb
 	fputs("reload_tileset_cb", stderr);
 }
 
-void Main_Window::unload_tileset_cb(Fl_Widget *, Main_Window *) {
-	if (false/*TODO: _tileset has image*/) { return; }
+void Main_Window::unload_tileset_cb(Fl_Widget *, Main_Window *mw) {
+	if (mw->_tileset.num_tiles()) { return; }
 	// TODO: unload_tileset_cb
 	fputs("unload_tileset_cb", stderr);
 }
@@ -1063,8 +1065,19 @@ void Main_Window::print_cb(Fl_Widget *, Main_Window *mw) {
 		return;
 	}
 
-	// TODO: print_cb
-	fputs("print_cb", stderr);
+	Image::Result result = Image::write_tilemap_image(filename, mw->_tilemap);
+	if (result) {
+		std::string msg = "Could not print to ";
+		msg = msg + basename + "!\n\n" + Image::error_message(result);
+		mw->_error_dialog->message(msg);
+		mw->_error_dialog->show(mw);
+	}
+	else {
+		std::string msg = "Printed ";
+		msg = msg + basename + "!";
+		mw->_success_dialog->message(msg);
+		mw->_success_dialog->show(mw);
+	}
 }
 
 void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
@@ -1341,7 +1354,7 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 		mw->_x_flip->redraw();
 		mw->_y_flip->redraw();
 		uint8_t id = tt->id();
-		select_tile_cb(mw->_tileset[id], mw);
+		select_tile_cb(mw->_tile_buttons[id], mw);
 	}
 }
 

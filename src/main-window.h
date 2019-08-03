@@ -12,13 +12,13 @@
 
 #include "utils.h"
 #include "widgets.h"
+#include "image.h"
 #include "tile-buttons.h"
 #include "tilemap.h"
+#include "tileset.h"
 #include "modal-dialog.h"
 #include "option-dialogs.h"
 #include "help-window.h"
-
-#define NUM_TILES 256
 
 #define NUM_RECENT 10
 
@@ -51,7 +51,7 @@ private:
 	Label *_flip_heading;
 	OS_Check_Button *_x_flip, *_y_flip;
 	OS_Button *_image_to_tiles;
-	Tile_Button *_tileset[NUM_TILES];
+	Tile_Button *_tile_buttons[NUM_TILES];
 	// GUI outputs
 	Label *_tile_heading;
 	Status_Bar_Field *_tilemap_dimensions, *_tilemap_format, *_hover_id, *_hover_xy, *_hover_landmark;
@@ -73,6 +73,7 @@ private:
 	std::string _tilemap_file, _tileset_file;
 	std::string _recent[NUM_RECENT];
 	Tilemap _tilemap;
+	Tileset _tileset;
 	Tile_Button *_selected = NULL;
 	// Work properties
 	bool _map_editable = false;

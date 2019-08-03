@@ -108,6 +108,7 @@
     <ClInclude Include="..\src\help-window.h" />
     <ClInclude Include="..\src\hex-spinner.h" />
     <ClInclude Include="..\src\icons.h" />
+    <ClInclude Include="..\src\image.h" />
     <ClInclude Include="..\src\main-window.h" />
     <ClInclude Include="..\src\modal-dialog.h" />
     <ClInclude Include="..\src\option-dialogs.h" />
@@ -116,6 +117,7 @@
     <ClInclude Include="..\src\themes.h" />
     <ClInclude Include="..\src\tile-buttons.h" />
     <ClInclude Include="..\src\tilemap.h" />
+    <ClInclude Include="..\src\tileset.h" />
     <ClInclude Include="..\src\utils.h" />
     <ClInclude Include="..\src\version.h" />
     <ClInclude Include="..\src\widgets.h" />
@@ -124,6 +126,7 @@
     <ClCompile Include="..\src\config.cpp" />
     <ClCompile Include="..\src\help-window.cpp" />
     <ClCompile Include="..\src\hex-spinner.cpp" />
+    <ClCompile Include="..\src\image.cpp" />
     <ClCompile Include="..\src\main-window.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\modal-dialog.cpp" />
@@ -132,6 +135,7 @@
     <ClCompile Include="..\src\themes.cpp" />
     <ClCompile Include="..\src\tile-buttons.cpp" />
     <ClCompile Include="..\src\tilemap.cpp" />
+    <ClCompile Include="..\src\tileset.cpp" />
     <ClCompile Include="..\src\utils.cpp" />
     <ClCompile Include="..\src\widgets.cpp" />
   </ItemGroup>
