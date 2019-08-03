@@ -1,6 +1,11 @@
 #include <cstdio>
 
+#pragma warning(push, 0)
+#include <FL/Fl_Image_Surface.H>
+#pragma warning(pop)
+
 #include "tilemap.h"
+#include "tiled-image.h"
 #include "config.h"
 
 Tilemap::Tilemap() : _size(0), _width(0), _tiles(NULL), _result(TILEMAP_NULL),
@@ -106,7 +111,7 @@ void Tilemap::clear() {
 void Tilemap::reposition_tiles(int x, int y) {
 	for (size_t i = 0; i < _size; i++) {
 		Tile_Tessera *tt = _tiles[i];
-		int tx = x + (int)tt->col() * TILE_SIZE_PX, ty = y + (int)tt->row() * TILE_SIZE_PX;
+		int tx = x + (int)tt->col() * TILE_SIZE_2X, ty = y + (int)tt->row() * TILE_SIZE_2X;
 		tt->position(tx, ty);
 	}
 }
@@ -445,12 +450,38 @@ bool Tilemap::write_tiles(const char *f) {
 	return true;
 }
 
+Fl_RGB_Image *Tilemap::print_tilemap() const {
+	Fl_Image_Surface *surface = new Fl_Image_Surface((int)width() * TILE_SIZE_2X, (int)height() * TILE_SIZE_2X);
+	surface->set_current();
+	for (size_t i = 0; i < _size; i++) {
+		Tile_Tessera *tt = _tiles[i];
+		int dx = (int)tt->col() * TILE_SIZE_2X, dy = (int)tt->row() * TILE_SIZE_2X;
+		surface->draw(tt, dx, dy);
+	}
+	Fl_RGB_Image *img = surface->image();
+	delete surface;
+	Fl_Display_Device::display_device()->set_current();
+	return img;
+}
+
 void Tilemap::guess_width() {
-	if (_size % 20 == 0) { _width = 20; return; } // Game Boy screen width
-	if (_size % 32 == 0) { _width = 32; return; } // Game Boy VRAM width
-	if (_size % 18 == 0 && _size / 18 <= 20) { _width = _size / 18; return; } // Game Boy screen height
-	if (_size % 12 == 0 && _size / 12 <= 20) { _width = _size / 12; return; } // Game Boy screen height minus textbox height
-	_width = 16;
+	if (_size % GAME_BOY_WIDTH == 0) {
+		_width = GAME_BOY_WIDTH;
+	}
+	else if (_size % GAME_BOY_HEIGHT == 0 && _size / GAME_BOY_HEIGHT <= GAME_BOY_WIDTH) {
+		_width = _size / GAME_BOY_HEIGHT;
+	}
+	else if (_size % 32 == 0) {
+		// Game Boy VRAM width
+		_width = 32;
+	}
+	else if (_size % (GAME_BOY_HEIGHT - 6) == 0 && _size / (GAME_BOY_HEIGHT - 6) <= GAME_BOY_WIDTH) {
+		// Game Boy screen height minus textbox height
+		_width = _size / (GAME_BOY_HEIGHT - 6);
+	}
+	else {
+		_width = 16;
+	}
 }
 
 int Tilemap::format_tileset_size(Format fmt) {

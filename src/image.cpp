@@ -6,35 +6,12 @@
 
 #pragma warning(push, 0)
 #include <FL/Fl.H>
-#include <FL/Fl_Image_Surface.H>
-#include <FL/fl_draw.H>
 #pragma warning(pop)
 
 #include "utils.h"
-#include "tilemap.h"
-#include "tileset.h"
 #include "image.h"
 
-Image::Result Image::write_tilemap_image(const char *f, const Tilemap &tilemap) {
-	size_t w = tilemap.width() * TILE_SIZE_PX;
-	size_t h = tilemap.height() * TILE_SIZE_PX;
-	Fl_Image_Surface *surface = new Fl_Image_Surface((int)w, (int)h);
-	surface->set_current();
-	size_t n = tilemap.size();
-	for (size_t i = 0; i < n; i++) {
-		Tile_Tessera *tt = tilemap.tile(i);
-		int dx = (int)tt->col() * TILE_SIZE_PX, dy = (int)tt->row() * TILE_SIZE_PX;
-		surface->draw(tt, dx, dy);
-	}
-	Fl_RGB_Image *img = surface->image();
-	delete surface;
-	Fl_Display_Device::display_device()->set_current();
-	Result result = write_image(f, w, h, img);
-	delete img;
-	return result;
-}
-
-Image::Result Image::write_image(const char *f, size_t w, size_t h, Fl_RGB_Image *img) {
+Image::Result Image::write_image(const char *f, Fl_RGB_Image *img) {
 	FILE *file = fl_fopen(f, "wb");
 	if (!file) { return IMAGE_BAD_FILE; }
 	// Create the necessary PNG structures
@@ -51,6 +28,7 @@ Image::Result Image::write_image(const char *f, size_t w, size_t h, Fl_RGB_Image
 	png_set_compression_method(png, Z_DEFLATED);
 	png_set_compression_buffer_size(png, 8192);
 	// Write the PNG IHDR chunk
+	size_t w = img->w(), h = img->h();
 	png_set_IHDR(png, info, (png_uint_32)w, (png_uint_32)h, 8, PNG_COLOR_TYPE_RGB,
 		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 	// Write the other PNG header chunks

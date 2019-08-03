@@ -6,7 +6,10 @@
 #include "themes.h"
 #include "config.h"
 #include "main-window.h"
+#include "tiled-image.h"
 #include "tile-buttons.h"
+
+Tileset *Tile_State::_tileset = NULL;
 
 static const Fl_Color bg_colors[16] = {
 	fl_rgb_color(0x12, 0x34, 0x56), fl_rgb_color(0x12, 0x1B, 0x56), fl_rgb_color(0x23, 0x12, 0x56), fl_rgb_color(0x3C, 0x12, 0x56),
@@ -22,31 +25,32 @@ static const Fl_Color fg_colors[16] = {
 };
 
 static void draw_selection_border(int x, int y) {
-	fl_rect(x, y, TILE_SIZE_PX, TILE_SIZE_PX, FL_BLACK);
-	fl_rect(x+1, y+1, TILE_SIZE_PX-2, TILE_SIZE_PX-2, FL_WHITE);
-	fl_rect(x+2, y+2, TILE_SIZE_PX-4, TILE_SIZE_PX-4, FL_BLACK);
+	fl_rect(x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_BLACK);
+	fl_rect(x+1, y+1, TILE_SIZE_2X-2, TILE_SIZE_2X-2, FL_WHITE);
+	fl_rect(x+2, y+2, TILE_SIZE_2X-4, TILE_SIZE_2X-4, FL_BLACK);
 }
 
 Tile_State::Tile_State(uint8_t id_, bool x_flip_, bool y_flip_) : id(id_), x_flip(x_flip_), y_flip(y_flip_) {}
 
 void Tile_State::draw(int x, int y, bool active, bool selected) {
+	if (_tileset->draw_tile(this, x, y, active)) { return; }
 	char hi = (char)((id & 0xF0) >> 4), lo = (char)(id & 0x0F);
 	const char buffer[3] = {hi > 9 ? 'A' + hi - 10 : '0' + hi, lo > 9 ? 'A' + lo - 10 : '0' + lo, '\0'};
 	bool r = Config::rainbow_tiles();
 	Fl_Color bg = bg_colors[r ? lo : 0];
 	if (!active) { bg = fl_inactive(bg); }
-	fl_rectf(x, y, TILE_SIZE_PX, TILE_SIZE_PX, bg);
+	fl_rectf(x, y, TILE_SIZE_2X, TILE_SIZE_2X, bg);
 	Fl_Font f = x_flip || y_flip ? FL_COURIER_ITALIC : FL_COURIER;
 	int s = OS::is_consolas() ? 11 : 10;
 	fl_font(f, s);
 	Fl_Color fg = selected ? FL_YELLOW : x_flip ? y_flip ? FL_YELLOW : FL_MAGENTA : y_flip ? FL_CYAN : fg_colors[r ? hi : 0];
 	if (!active) { fg = fl_inactive(fg); }
 	fl_color(fg);
-	fl_draw(buffer, x, y, TILE_SIZE_PX, TILE_SIZE_PX, FL_ALIGN_CENTER);
+	fl_draw(buffer, x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_ALIGN_CENTER);
 }
 
 Tile_Tessera::Tile_Tessera(int x, int y, uint8_t row, uint8_t col, uint8_t id, bool x_flip, bool y_flip) :
-	Fl_Box(x, y, TILE_SIZE_PX, TILE_SIZE_PX), _row(row), _col(col), _state(id, x_flip, y_flip) {
+	Fl_Box(x, y, TILE_SIZE_2X, TILE_SIZE_2X), _row(row), _col(col), _state(id, x_flip, y_flip) {
 	user_data(NULL);
 	box(FL_NO_BOX);
 	labeltype(FL_NO_LABEL);
@@ -93,7 +97,7 @@ int Tile_Tessera::handle(int event) {
 	return Fl_Box::handle(event);
 }
 
-Tile_Button::Tile_Button(int x, int y, uint8_t id) : Fl_Radio_Button(x, y, TILE_SIZE_PX, TILE_SIZE_PX), _state(id) {
+Tile_Button::Tile_Button(int x, int y, uint8_t id) : Fl_Radio_Button(x, y, TILE_SIZE_2X, TILE_SIZE_2X), _state(id) {
 	user_data(NULL);
 	box(FL_NO_BOX);
 	labeltype(FL_NO_LABEL);

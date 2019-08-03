@@ -12,8 +12,8 @@
 
 #define NUM_FORMATS 6
 
-#define DEFAULT_WIDTH 20
-#define DEFAULT_HEIGHT 18
+#define GAME_BOY_WIDTH 20
+#define GAME_BOY_HEIGHT 18
 
 class Tilemap {
 protected:
@@ -60,6 +60,7 @@ public:
 	Result read_tiles(const char *f);
 	bool can_write_tiles(void);
 	bool write_tiles(const char *f);
+	Fl_RGB_Image *print_tilemap(void) const;
 private:
 	void guess_width(void);
 public:

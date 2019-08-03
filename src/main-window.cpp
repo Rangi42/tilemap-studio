@@ -20,6 +20,7 @@
 #include "preferences.h"
 #include "config.h"
 #include "image.h"
+#include "tiled-image.h"
 #include "tilemap.h"
 #include "tileset.h"
 #include "main-window.h"
@@ -35,6 +36,8 @@
 
 Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_Window(x, y, w, h, PROGRAM_NAME),
 	_tile_buttons(), _tilemap_file(), _tileset_file(), _recent(), _tilemap(), _tileset(), _wx(x), _wy(y), _ww(w), _wh(h) {
+
+	Tile_State::tileset(&_tileset);
 
 	// Get global configs
 	Tilemap::Format format_config = (Tilemap::Format)Preferences::get("format", Config::format());
@@ -165,7 +168,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_tileset_pane = new Workpane(wx, wy, 258, 258);
 	int ox = wx + Fl::box_dx(_tileset_pane->box()), oy = wy + Fl::box_dy(_tileset_pane->box());
 	for (int i = 0; i < NUM_TILES; i++) {
-		int tx = ox + (i % 16) * TILE_SIZE_PX, ty = oy + (i / 16) * TILE_SIZE_PX;
+		int tx = ox + (i % TILES_PER_ROW) * TILE_SIZE_2X, ty = oy + (i / TILES_PER_ROW) * TILE_SIZE_2X;
 		Tile_Button *tb = new Tile_Button(tx, ty, (uint8_t)i);
 		tb->callback((Fl_Callback *)select_tile_cb, this);
 		_tile_buttons[i] = tb;
@@ -464,8 +467,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_success_dialog->width_range(280, 700);
 	_unsaved_dialog->width_range(280, 700);
 
-	_new_tilemap_dialog->tilemap_width(DEFAULT_WIDTH);
-	_new_tilemap_dialog->tilemap_height(DEFAULT_HEIGHT);
+	_new_tilemap_dialog->tilemap_width(GAME_BOY_WIDTH);
+	_new_tilemap_dialog->tilemap_height(GAME_BOY_HEIGHT);
 
 	std::string subject(PROGRAM_NAME " " PROGRAM_VERSION_STRING), message(
 		"Copyright \xc2\xa9 " CURRENT_YEAR " " PROGRAM_AUTHOR ".\n"
@@ -597,9 +600,11 @@ void Main_Window::update_status(Tile_Tessera *tt) {
 	_hover_id->copy_label(buffer);
 	sprintf(buffer, "X/Y (%u, %u)", tt->col(), tt->row());
 	_hover_xy->copy_label(buffer);
-	if (_tilemap.width() == 20 && _tilemap.height() == 18 && (Config::format() == Tilemap::Format::FF_END ||
-		Config::format() == Tilemap::Format::RLE_NYBBLES || Config::format() == Tilemap::Format::XY_FLIP)) {
-		sprintf(buffer, "Landmark (%u, %u)", tt->col() * 8 + 4, tt->row() * 8 + 4); // center of tile
+	if (_tilemap.width() == GAME_BOY_WIDTH && _tilemap.height() == GAME_BOY_HEIGHT &&
+		(Config::format() == Tilemap::Format::FF_END || Config::format() == Tilemap::Format::RLE_NYBBLES ||
+		Config::format() == Tilemap::Format::XY_FLIP)) {
+		int lx = (int)tt->col() * TILE_SIZE + TILE_SIZE / 2, ly = (int)tt->row() * TILE_SIZE + TILE_SIZE / 2;
+		sprintf(buffer, "Landmark (%u, %u)", lx, ly); // center of tile
 		_hover_landmark->copy_label(buffer);
 	}
 	else {
@@ -881,9 +886,20 @@ bool Main_Window::save_tilemap(bool force) {
 }
 
 void Main_Window::load_tileset(const char *filename) {
+	unload_tileset_cb(NULL, this);
 	const char *basename = fl_filename_name(filename);
-	// TODO: load_tileset
-	fputs("load_tileset", stderr);
+	Tileset::Result result = _tileset.read_tiles(filename);
+	if (result) {
+		_tileset.clear();
+		std::string msg = "Error reading ";
+		msg = msg + basename + "!\n\n" + Tileset::error_message(result);
+		_error_dialog->message(msg);
+		_error_dialog->show(this);
+		return;
+	}
+	_tileset_file = filename;
+	update_active_controls();
+	redraw();
 }
 
 void Main_Window::drag_and_drop_tilemap_cb(DnD_Receiver *dndr, Main_Window *mw) {
@@ -1031,20 +1047,18 @@ void Main_Window::load_tileset_cb(Fl_Widget *, Main_Window *mw) {
 		return;
 	}
 
-	// TODO: load_tileset_cb
-	fputs("load_tileset_cb", stderr);
+	mw->load_tileset(filename);
 }
 
 void Main_Window::reload_tileset_cb(Fl_Widget *, Main_Window *mw) {
-	if (mw->_tileset.num_tiles()) { return; }
-	// TODO: reload_tileset_cb
-	fputs("reload_tileset_cb", stderr);
+	if (!mw->_tileset.num_tiles()) { return; }
+	mw->load_tileset(mw->_tileset_file.c_str());
 }
 
 void Main_Window::unload_tileset_cb(Fl_Widget *, Main_Window *mw) {
-	if (mw->_tileset.num_tiles()) { return; }
-	// TODO: unload_tileset_cb
-	fputs("unload_tileset_cb", stderr);
+	if (!mw->_tileset.num_tiles()) { return; }
+	mw->_tileset.clear();
+	mw->redraw();
 }
 
 void Main_Window::print_cb(Fl_Widget *, Main_Window *mw) {
@@ -1065,7 +1079,9 @@ void Main_Window::print_cb(Fl_Widget *, Main_Window *mw) {
 		return;
 	}
 
-	Image::Result result = Image::write_tilemap_image(filename, mw->_tilemap);
+	Fl_RGB_Image *img = mw->_tilemap.print_tilemap();
+	Image::Result result = Image::write_image(filename, img);
+	delete img;
 	if (result) {
 		std::string msg = "Could not print to ";
 		msg = msg + basename + "!\n\n" + Image::error_message(result);
@@ -1129,60 +1145,70 @@ void Main_Window::redo_cb(Fl_Widget *, Main_Window *mw) {
 void Main_Window::classic_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_classic_theme();
 	mw->_classic_theme_mi->setonly();
+	mw->_tileset.refresh_inactive_image();
 	mw->redraw();
 }
 
 void Main_Window::aero_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_aero_theme();
 	mw->_aero_theme_mi->setonly();
+	mw->_tileset.refresh_inactive_image();
 	mw->redraw();
 }
 
 void Main_Window::metro_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_metro_theme();
 	mw->_metro_theme_mi->setonly();
+	mw->_tileset.refresh_inactive_image();
 	mw->redraw();
 }
 
 void Main_Window::aqua_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_aqua_theme();
 	mw->_aqua_theme_mi->setonly();
+	mw->_tileset.refresh_inactive_image();
 	mw->redraw();
 }
 
 void Main_Window::greybird_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_greybird_theme();
 	mw->_greybird_theme_mi->setonly();
+	mw->_tileset.refresh_inactive_image();
 	mw->redraw();
 }
 
 void Main_Window::metal_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_metal_theme();
 	mw->_metal_theme_mi->setonly();
+	mw->_tileset.refresh_inactive_image();
 	mw->redraw();
 }
 
 void Main_Window::blue_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_blue_theme();
 	mw->_blue_theme_mi->setonly();
+	mw->_tileset.refresh_inactive_image();
 	mw->redraw();
 }
 
 void Main_Window::olive_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_olive_theme();
 	mw->_olive_theme_mi->setonly();
+	mw->_tileset.refresh_inactive_image();
 	mw->redraw();
 }
 
 void Main_Window::rose_gold_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_rose_gold_theme();
 	mw->_rose_gold_theme_mi->setonly();
+	mw->_tileset.refresh_inactive_image();
 	mw->redraw();
 }
 
 void Main_Window::dark_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_dark_theme();
 	mw->_dark_theme_mi->setonly();
+	mw->_tileset.refresh_inactive_image();
 	mw->redraw();
 }
 
@@ -1298,7 +1324,7 @@ void Main_Window::tilemap_width_tb_cb(OS_Spinner *, Main_Window *mw) {
 	int sx = mw->_tilemap_scroll->x() + Fl::box_dx(mw->_tilemap_scroll->box());
 	int sy = mw->_tilemap_scroll->y() + Fl::box_dy(mw->_tilemap_scroll->box());
 	mw->_tilemap.reposition_tiles(sx, sy);
-	mw->_tilemap_scroll->contents(mw->_tilemap.width() * TILE_SIZE_PX, mw->_tilemap.height() * TILE_SIZE_PX);
+	mw->_tilemap_scroll->contents(mw->_tilemap.width() * TILE_SIZE_2X, mw->_tilemap.height() * TILE_SIZE_2X);
 	mw->_tilemap_scroll->scroll_to(0, 0);
 	mw->_tilemap_scroll->init_sizes();
 	mw->_tilemap_scroll->redraw();

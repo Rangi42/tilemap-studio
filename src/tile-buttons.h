@@ -7,10 +7,15 @@
 #pragma warning(pop)
 
 #include "utils.h"
+#include "tileset.h"
 
-#define TILE_SIZE_PX 16
+class Tileset;
 
 struct Tile_State {
+private:
+	static Tileset *_tileset;
+public:
+	inline static void tileset(Tileset *t) { _tileset = t; }
 public:
 	uint8_t id;
 	bool x_flip, y_flip;
