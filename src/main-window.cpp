@@ -487,7 +487,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 		);
 
 	update_recent_tilemaps();
-	update_metadata();
+	update_tilemap_metadata();
+	update_tileset_metadata();
 	update_active_controls();
 }
 
@@ -620,7 +621,7 @@ void Main_Window::update_status(Tile_Tessera *tt) {
 	}
 }
 
-void Main_Window::update_metadata() {
+void Main_Window::update_tilemap_metadata() {
 	if (_tilemap.size()) {
 		if (_tilemap_file.empty()) {
 			_tilemap_name->label(NEW_TILEMAP_NAME);
@@ -636,6 +637,9 @@ void Main_Window::update_metadata() {
 		_tilemap_name->label("No file selected");
 		_tilemap_format->label("");
 	}
+}
+
+void Main_Window::update_tileset_metadata() {
 	if (_tileset.num_tiles()) {
 		const char *basename = fl_filename_name(_tileset_file.c_str());
 		_tileset_name->label(basename);
@@ -824,7 +828,7 @@ void Main_Window::open_tilemap(const char *filename, size_t width, size_t height
 	_png_chooser->preset_file(buffer);
 
 	store_recent_tilemap();
-	update_metadata();
+	update_tilemap_metadata();
 	update_status(NULL);
 	update_active_controls();
 	redraw();
@@ -875,7 +879,7 @@ bool Main_Window::save_tilemap(bool force) {
 	char buffer[FL_PATH_MAX] = {};
 	sprintf(buffer, PROGRAM_NAME " - %s", basename);
 	copy_label(buffer);
-	update_metadata();
+	update_tilemap_metadata();
 
 	strcpy(buffer, basename);
 	fl_filename_setext(buffer, FL_PATH_MAX, ".png");
@@ -906,6 +910,7 @@ void Main_Window::load_tileset(const char *filename) {
 		return;
 	}
 	_tileset_file = filename;
+	update_tileset_metadata();
 	update_active_controls();
 	redraw();
 }
@@ -1000,7 +1005,7 @@ void Main_Window::close_cb(Fl_Widget *, Main_Window *mw) {
 	mw->_tilemap_scroll->contents(0, 0);
 	mw->init_sizes();
 	mw->_tilemap_file.clear();
-	mw->update_metadata();
+	mw->update_tilemap_metadata();
 	mw->update_status(NULL);
 	mw->update_active_controls();
 	mw->redraw();
@@ -1060,12 +1065,16 @@ void Main_Window::load_tileset_cb(Fl_Widget *, Main_Window *mw) {
 
 void Main_Window::reload_tileset_cb(Fl_Widget *, Main_Window *mw) {
 	if (!mw->_tileset.num_tiles()) { return; }
-	mw->load_tileset(mw->_tileset_file.c_str());
+	std::string filename(mw->_tileset_file);
+	mw->load_tileset(filename.c_str());
 }
 
 void Main_Window::unload_tileset_cb(Fl_Widget *, Main_Window *mw) {
 	if (!mw->_tileset.num_tiles()) { return; }
 	mw->_tileset.clear();
+	mw->_tileset_file.clear();
+	mw->update_tileset_metadata();
+	mw->update_active_controls();
 	mw->redraw();
 }
 
