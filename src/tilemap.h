@@ -24,24 +24,22 @@ protected:
 	};
 public:
 	enum Format { PLAIN, RLE, FF_END, RLE_FF_END, RLE_NYBBLES, XY_FLIP };
-	enum Result { TILEMAP_OK, TILEMAP_BAD_FILE, TILEMAP_EMPTY, TILEMAP_TOO_LARGE, TILEMAP_TOO_SHORT_FF, TILEMAP_TOO_LONG_FF,
+	enum Result { TILEMAP_OK, TILEMAP_BAD_FILE, TILEMAP_EMPTY, TILEMAP_TOO_SHORT_FF, TILEMAP_TOO_LONG_FF,
 		TILEMAP_TOO_SHORT_00, TILEMAP_TOO_LONG_00, TILEMAP_TOO_SHORT_RLE, TILEMAP_NULL };
 private:
-	size_t _size, _width;
-	Tile_Tessera **_tiles;
+	std::vector<Tile_Tessera *> _tiles;
+	size_t _width;
 	Result _result;
 	bool _modified;
 	std::deque<Tilemap_State> _history, _future;
 public:
 	Tilemap();
 	~Tilemap();
-	inline size_t size(void) const { return _size; }
-	void size(size_t w, size_t h);
-	void size(size_t n);
+	inline size_t size(void) const { return _tiles.size(); }
 	inline size_t width(void) const { return _width; }
 	void width(size_t w);
 	void resize(size_t w, size_t h, Resize_Dialog::Hor_Align ha, Resize_Dialog::Vert_Align va);
-	inline size_t height(void) const { return (_size + _width - 1) / _width; }
+	inline size_t height(void) const { return (size() + _width - 1) / _width; }
 	inline Tile_Tessera *tile(size_t x, size_t y) const { return _tiles[y * _width + x]; }
 	inline Tile_Tessera *tile(size_t i) const { return _tiles[i]; }
 	inline void tile(size_t x, size_t y, Tile_Tessera *tt) { _tiles[y * _width + x] = tt; }
