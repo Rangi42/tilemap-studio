@@ -162,6 +162,7 @@ void Tilemap::new_tiles(size_t w, size_t h) {
 		Tile_Tessera *tt = new Tile_Tessera(0, 0, 0, 0, Config::start());
 		_tiles[i] = tt;
 	}
+	_modified = true;
 }
 
 Tilemap::Result Tilemap::read_tiles(const char *f) {

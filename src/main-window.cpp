@@ -765,7 +765,6 @@ void Main_Window::substitute_tile(Tile_Tessera *tt) {
 }
 
 void Main_Window::open_tilemap(const char *filename, size_t width, size_t height) {
-	_unsaved = false;
 	close_cb(NULL, this);
 
 	const char *basename;
@@ -787,7 +786,6 @@ void Main_Window::open_tilemap(const char *filename, size_t width, size_t height
 	else {
 		_tilemap_file = "";
 		basename = NEW_TILEMAP_NAME;
-		_unsaved = true;
 
 		_tilemap.new_tiles(width, height);
 	}
@@ -832,6 +830,7 @@ void Main_Window::open_recent_tilemap(int n) {
 	}
 
 	const char *filename = _recent[n].c_str();
+	_tilemap.modified(false);
 	open_tilemap(filename);
 }
 
@@ -856,8 +855,6 @@ bool Main_Window::save_tilemap(bool force) {
 			return false;
 		}
 	}
-
-	_unsaved = false;
 	_tilemap.modified(false);
 
 	char buffer[FL_PATH_MAX] = {};
@@ -914,6 +911,7 @@ void Main_Window::new_cb(Fl_Widget *, Main_Window *mw) {
 	mw->_new_tilemap_dialog->show(mw);
 	if (mw->_new_tilemap_dialog->canceled()) { return; }
 
+	mw->_tilemap.modified(false);
 	mw->new_tilemap(mw->_new_tilemap_dialog->tilemap_width(), mw->_new_tilemap_dialog->tilemap_height());
 }
 
@@ -940,6 +938,7 @@ void Main_Window::open_cb(Fl_Widget *, Main_Window *mw) {
 		return;
 	}
 
+	mw->_tilemap.modified(false);
 	mw->open_tilemap(filename);
 }
 
@@ -968,7 +967,6 @@ void Main_Window::close_cb(Fl_Widget *, Main_Window *mw) {
 		if (mw->_unsaved_dialog->canceled()) { return; }
 	}
 
-	mw->_unsaved = false;
 	mw->label(PROGRAM_NAME);
 	mw->_tilemap.clear();
 	mw->_tilemap_scroll->clear();
@@ -1072,6 +1070,15 @@ void Main_Window::print_cb(Fl_Widget *, Main_Window *mw) {
 void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 	// Override default behavior of Esc to close main window
 	if (Fl::event() == FL_SHORTCUT && Fl::event_key() == FL_Escape) { return; }
+
+	if (mw->unsaved()) {
+		std::string msg = mw->modified_filename();
+		msg = msg + " has unsaved changes!\n\n"
+			"Exit anyway?";
+		mw->_unsaved_dialog->message(msg);
+		mw->_unsaved_dialog->show(mw);
+		if (mw->_unsaved_dialog->canceled()) { return; }
+	}
 
 	// Save global config
 	Preferences::set("theme", OS::current_theme());

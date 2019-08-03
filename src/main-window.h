@@ -75,7 +75,7 @@ private:
 	Tilemap _tilemap;
 	Tile_Button *_selected = NULL;
 	// Work properties
-	bool _unsaved = false, _map_editable = false;
+	bool _map_editable = false;
 	// Window size cache
 	int _wx, _wy, _ww, _wh;
 #ifndef _WIN32
@@ -86,11 +86,11 @@ public:
 	Main_Window(int x, int y, int w, int h, const char *l = NULL);
 	~Main_Window();
 	void show(void);
-	inline bool unsaved(void) const { return _unsaved; }
+	inline bool unsaved(void) const { return _tilemap.modified(); }
 	inline bool x_flip(void) const { return !!_x_flip->value(); }
 	inline bool y_flip(void) const { return !!_y_flip->value(); }
 	inline const char *modified_filename(void) const {
-		return _unsaved ? _tilemap_file.empty() ? NEW_TILEMAP_NAME : fl_filename_name(_tilemap_file.c_str()) : "";
+		return unsaved() ? _tilemap_file.empty() ? NEW_TILEMAP_NAME : fl_filename_name(_tilemap_file.c_str()) : "";
 	}
 	inline void map_editable(bool e) { _map_editable = e; }
 	int handle(int event);
