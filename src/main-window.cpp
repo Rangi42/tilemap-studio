@@ -20,7 +20,6 @@
 #include "preferences.h"
 #include "config.h"
 #include "image.h"
-#include "tiled-image.h"
 #include "tilemap.h"
 #include "tileset.h"
 #include "main-window.h"

@@ -6,7 +6,7 @@
 #include "themes.h"
 #include "config.h"
 #include "main-window.h"
-#include "tiled-image.h"
+#include "tileset.h"
 #include "tile-buttons.h"
 
 Tileset *Tile_State::_tileset = NULL;

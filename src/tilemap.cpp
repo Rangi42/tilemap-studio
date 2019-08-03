@@ -5,7 +5,7 @@
 #pragma warning(pop)
 
 #include "tilemap.h"
-#include "tiled-image.h"
+#include "tileset.h"
 #include "config.h"
 
 Tilemap::Tilemap() : _tiles(), _width(0), _result(TILEMAP_NULL), _modified(false),
