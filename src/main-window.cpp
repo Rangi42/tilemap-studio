@@ -43,10 +43,12 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	int start_config = Preferences::get("start", Config::start());
 	int tiles2x_config = Preferences::get("tiles2x", Config::tiles2x());
 	int rainbow_tiles_config = Preferences::get("rainbow", Config::rainbow_tiles());
+	int colors_config = Preferences::get("colors", Config::colors());
 	Config::format(format_config);
 	Config::start((uint8_t)start_config);
 	Config::tiles2x(!!tiles2x_config);
 	Config::rainbow_tiles(!!rainbow_tiles_config);
+	Config::colors(!!colors_config);
 
 	for (int i = 0; i < NUM_RECENT; i++) {
 		_recent[i] = Preferences::get_string(Fl_Preferences::Name("recent%d", i));
@@ -179,7 +181,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	wgt_w = MAX(text_width("A", 2), text_width("F", 2)) + wgt_h;
 	wgt_off = text_width("Color:", 3);
 	_color = new OS_Spinner(wx+wgt_off, wy, wgt_w, wgt_h, "Color:");
-	wx += _color->w() + wgt_off + wgt_m; ww -= _color->w() + wgt_off + wgt_m;
+	wx += _color->w() + wgt_off + 2; ww -= _color->w() + wgt_off + 2;
+	_show_colors = new Toggle_Switch(wx, wy, wgt_h / 2 + 2, wgt_h);
+	wx += _show_colors->w() + wgt_m; ww -= _show_colors->w() + wgt_m;
 	wgt_w = text_width("Flip:", 4);
 	_flip_heading = new Label(wx, wy, wgt_w, wgt_h, "Flip:");
 	wx += _flip_heading->w(); ww -= _flip_heading->w();
@@ -448,6 +452,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 
 	_color->value(0);
 	_color->range(0, 3);
+
+	_show_colors->value(Config::colors());
+	_show_colors->callback((Fl_Callback *)show_colors_cb, this);
 
 	_flip_heading->box(FL_FLAT_BOX);
 	_flip_heading->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
@@ -1154,6 +1161,7 @@ void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 	Preferences::set("format", Config::format());
 	Preferences::set("start", (int)Config::start());
 	Preferences::set("tiles2x", Config::tiles2x());
+	Preferences::set("colors", Config::colors());
 	for (int i = 0; i < NUM_RECENT; i++) {
 		Preferences::set_string(Fl_Preferences::Name("recent%d", i), mw->_recent[i]);
 	}
@@ -1386,6 +1394,11 @@ void Main_Window::tiles2x_tb_cb(OS_Check_Button *, Main_Window *mw) {
 	else {
 		mw->_2x_tiles_mi->clear();
 	}
+}
+
+void Main_Window::show_colors_cb(Toggle_Switch *, Main_Window *mw) {
+	Config::colors(!!mw->_show_colors->value());
+	mw->redraw();
 }
 
 void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {

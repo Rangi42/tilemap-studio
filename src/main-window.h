@@ -50,6 +50,7 @@ private:
 	Label_Button *_tileset_name;
 	Label *_flip_heading;
 	OS_Spinner *_color;
+	Toggle_Switch *_show_colors;
 	OS_Check_Button *_x_flip, *_y_flip;
 	Toolbar_Button *_image_to_tiles_tb;
 	Tile_Button *_tile_buttons[NUM_TILES];
@@ -166,6 +167,7 @@ private:
 	static void tilemap_width_tb_cb(OS_Spinner *ss, Main_Window *mw);
 	static void tileset_start_tb_cb(OS_Hex_Spinner *xs, Main_Window *mw);
 	static void tiles2x_tb_cb(OS_Check_Button *cb, Main_Window *mw);
+	static void show_colors_cb(Toggle_Switch *ts, Main_Window *mw);
 	// Tilemap
 	static void change_tile_cb(Tile_Tessera *tt, Main_Window *mw);
 	// Tileset

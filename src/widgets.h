@@ -86,6 +86,14 @@ public:
 	OS_Hex_Spinner(int x, int y, int w, int h, const char *l = NULL);
 };
 
+class Toggle_Switch : public Fl_Check_Button {
+public:
+	Toggle_Switch(int x, int y, int w, int h, const char *l = NULL);
+protected:
+	void draw(void);
+	int handle(int event);
+};
+
 class HTML_View : public Fl_Help_View {
 public:
 	HTML_View(int x, int y, int w, int h, const char *l = NULL);

@@ -209,6 +209,47 @@ OS_Hex_Spinner::OS_Hex_Spinner(int x, int y, int w, int h, const char *l) : Hex_
 	_down_button.down_box(OS_MINI_DEPRESSED_DOWN_BOX);
 }
 
+Toggle_Switch::Toggle_Switch(int x, int y, int w, int h, const char *l) : Fl_Check_Button(x, y, w, h, l) {
+	box(OS_BUTTON_UP_BOX);
+	down_box(OS_DEPRESSED_DOWN_BOX);
+}
+
+void Toggle_Switch::draw() {
+	// Based on Fl_Light_Button::draw()
+	Fl_Boxtype bb = Fl::scheme() ? value() ? OS::current_theme() == OS::GREYBIRD ? OS_DEFAULT_BUTTON_BOX :
+		OS_DEPRESSED_DOWN_BOX : OS_BUTTON_UP_BOX : OS_SPACER_THIN_DOWN_BOX;
+	Fl_Color bc = value() ? FL_SELECTION_COLOR : FL_DARK2;
+	draw_box(bb, x(), y(), w(), h(), active_r() ? bc : fl_inactive(bc));
+	int sh = MIN(w() - Fl::box_dw(bb), (h() - Fl::box_dh(bb)) * 2 / 3);
+	int sy = value() ? y() + 1 : y() + h() - 1 - sh;
+	draw_box(box(), x()+1, sy, w()-2, sh, FL_GRAY);
+	if (Fl::focus() == this) { draw_focus(); }
+}
+
+int Toggle_Switch::handle(int event) {
+	if (OS::current_theme() != OS::AQUA) {
+		switch (event) {
+		case FL_ENTER:
+			if (active_r()) {
+				box(OS_HOVERED_UP_BOX);
+				redraw();
+				return 1;
+			}
+			return 0;
+		case FL_LEAVE:
+		case FL_HIDE:
+		case FL_DEACTIVATE:
+			box(OS_BUTTON_UP_BOX);
+			redraw();
+			return 1;
+		}
+	}
+	if (event == FL_PUSH) {
+		Fl::focus(this);
+	}
+	return Fl_Check_Button::handle(event);
+}
+
 HTML_View::HTML_View(int x, int y, int w, int h, const char *l) : Fl_Help_View(x, y, w, h, l) {
 	box(OS_INPUT_THIN_DOWN_BOX);
 	// TODO: scrollbar_.slider(OS_MINI_BUTTON_UP_BOX);

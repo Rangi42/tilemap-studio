@@ -10,6 +10,7 @@ private:
 	static uint8_t _start;
 	static bool _2x_tiles;
 	static bool _rainbow_tiles;
+	static bool _colors;
 public:
 	inline static Tilemap::Format format(void) { return _format; }
 	inline static void format(Tilemap::Format f) { _format = f; }
@@ -19,6 +20,8 @@ public:
 	inline static void tiles2x(bool t) { _2x_tiles = t; }
 	inline static bool rainbow_tiles(void) { return _rainbow_tiles; }
 	inline static void rainbow_tiles(bool r) { _rainbow_tiles = r; }
+	inline static bool colors(void) { return _colors; }
+	inline static void colors(bool c) { _colors = c; }
 };
 
 #endif

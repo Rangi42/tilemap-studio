@@ -2507,6 +2507,11 @@ void OS::use_native_fonts() {
 	const char *monospace_fonts[3] = {"Consolas", "Lucida Console", "Courier New"};
 	int monospace_i = use_any_font(FL_COURIER, monospace_fonts, sizeof(monospace_fonts));
 	if (monospace_i == 0) { _is_consolas = true; }
+	// Use common bold monospace font
+	const char *bold_monospace_fonts[3] = {
+		"Consolas bold", "Lucida Console bold", "Courier New bold"
+	};
+	use_any_font(FL_COURIER_BOLD, bold_monospace_fonts, sizeof(bold_monospace_fonts));
 	// Use common italic monospace font
 	const char *italic_monospace_fonts[3] = {
 		"Consolas italic", "Lucida Console italic", "Courier New italic"
@@ -2523,6 +2528,11 @@ void OS::use_native_fonts() {
 		"Ubuntu Mono", "Noto Sans Mono", "Droid Sans Mono", "DejaVu Sans Mono"
 	};
 	use_any_font(FL_COURIER, monospace_fonts, sizeof(monospace_fonts));
+	// Use common bold monospace font
+	const char *bold_monospace_fonts[4] = {
+		"Ubuntu Mono bold", "Noto Sans Mono bold", "Droid Sans Mono bold", "DejaVu Sans Mono bold"
+	};
+	use_any_font(FL_COURIER_BOLD, bold_monospace_fonts, sizeof(bold_monospace_fonts));
 	// Use common italic monospace font
 	const char *italic_monospace_fonts[4] = {
 		"Ubuntu Mono italic", "Noto Sans Mono italic", "Droid Sans Mono italic", "DejaVu Sans Mono italic"
