@@ -282,7 +282,7 @@ int Tileset_Start_Dialog::refresh_content(int ww, int dy) {
 
 Image_To_Tiles_Dialog::Image_To_Tiles_Dialog(const char *t) : Option_Dialog(320, t), _image_heading(NULL),
 	_tilemap_heading(NULL), _tileset_heading(NULL), _image(NULL), _tilemap(NULL), _tileset(NULL), _image_name(NULL),
-	_tilemap_name(NULL), _tileset_name(NULL), _format(NULL), _start_id(NULL), _2x_tiles(NULL), _use_7f(NULL),
+	_tilemap_name(NULL), _tileset_name(NULL), _format(NULL), _start_id(NULL), _16px_tiles(NULL), _use_7f(NULL),
 	_image_chooser(NULL), _tilemap_chooser(NULL), _tileset_chooser(NULL) {}
 
 Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
@@ -297,7 +297,7 @@ Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
 	delete _tileset_name;
 	delete _format;
 	delete _start_id;
-	delete _2x_tiles;
+	delete _16px_tiles;
 	delete _use_7f;
 	delete _image_chooser;
 	delete _tilemap_chooser;
@@ -326,7 +326,7 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_tileset_name = new Label_Button(0, 0, 0, 0, "No file selected");
 	_format = new Dropdown(0, 0, 0, 0, "Format:");
 	_start_id = new OS_Hex_Spinner(0, 0, 0, 0, "Start:");
-	_2x_tiles = new OS_Check_Button(0, 0, 0, 0, "2x Tiles");
+	_16px_tiles = new OS_Check_Button(0, 0, 0, 0, "16px Tiles");
 	_use_7f = new OS_Check_Button(0, 0, 0, 0, "Use $7F for Blank Spaces");
 	_image_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
 	_tilemap_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
@@ -400,11 +400,11 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	_start_id->resize(wgt_off+wgt2_off, dy, wgt2_w, wgt_h);
 	dy += wgt_h + wgt_m;
 
-	wgt_w = text_width(_2x_tiles->label(), 2) + wgt_h;
+	wgt_w = text_width(_16px_tiles->label(), 2) + wgt_h;
 	wgt_off = win_m;
-	_2x_tiles->resize(wgt_off, dy, wgt_w, wgt_h);
+	_16px_tiles->resize(wgt_off, dy, wgt_w, wgt_h);
 	wgt_w = text_width(_use_7f->label(), 2) + wgt_h;
-	wgt_off += _2x_tiles->w() + wgt_m;
+	wgt_off += _16px_tiles->w() + wgt_m;
 	_use_7f->resize(wgt_off, dy, wgt_w, wgt_h);
 
 	_image_filename.clear();

@@ -123,7 +123,7 @@ private:
 	Label_Button *_image_name, *_tilemap_name, *_tileset_name;
 	Dropdown *_format;
 	OS_Hex_Spinner *_start_id;
-	OS_Check_Button *_2x_tiles, *_use_7f;
+	OS_Check_Button *_16px_tiles, *_use_7f;
 	Fl_Native_File_Chooser *_image_chooser, *_tilemap_chooser, *_tileset_chooser;
 	std::string _image_filename, _tilemap_filename, _tileset_filename;
 public:
@@ -136,8 +136,8 @@ public:
 	inline void format(int f) { initialize(); _format->value(f); }
 	inline uint8_t start_id(void) const { return (uint8_t)_start_id->value(); }
 	inline void start_id(uint8_t n) { initialize(); _start_id->value((int)n); }
-	inline bool tiles2x(void) const { return !!_2x_tiles->value(); }
-	inline void tiles2x(bool t) { initialize(); _2x_tiles->value(t); }
+	inline bool tiles_16px(void) const { return !!_16px_tiles->value(); }
+	inline void tiles_16px(bool t) { initialize(); _16px_tiles->value(t); }
 private:
 	void update_ok_button(void);
 protected:

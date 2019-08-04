@@ -109,7 +109,7 @@ void Tile_State::draw(int x, int y, bool active, bool selected) {
 		fl_color(fg);
 		fl_draw(buffer, x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_ALIGN_CENTER);
 	}
-	if (Config::colors() && color > -1) {
+	if (Config::attributes() && color > -1) {
 		sgb_color_images[color].draw(x, y, TILE_SIZE_2X, TILE_SIZE_2X);
 		const char buffer[2] = {'0' + (char)color, '\0'};
 		fl_font(FL_COURIER_BOLD, s);

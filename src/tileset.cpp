@@ -68,7 +68,7 @@ Tileset::Result Tileset::read_png_graphics(const char *f) {
 	if (!png || png->fail()) { return (_result = TILESET_BAD_FILE); }
 
 	_image = png;
-	if (!Config::tiles2x()) {
+	if (!Config::tiles_16px()) {
 		_image = (Fl_RGB_Image *)png->copy(png->w() * 2, png->h() * 2);
 		delete png;
 		if (!_image || _image->fail()) { return (_result = TILESET_BAD_FILE); }
