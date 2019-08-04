@@ -176,6 +176,10 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_tileset_pane->resizable(NULL);
 	wy += _tileset_pane->h() + win_m;
 	_right_group->begin();
+	wgt_w = MAX(text_width("A", 2), text_width("F", 2)) + wgt_h;
+	wgt_off = text_width("Color:", 3);
+	_color = new OS_Spinner(wx+wgt_off, wy, wgt_w, wgt_h, "Color:");
+	wx += _color->w() + wgt_off + wgt_m; ww -= _color->w() + wgt_off + wgt_m;
 	wgt_w = text_width("Flip:", 4);
 	_flip_heading = new Label(wx, wy, wgt_w, wgt_h, "Flip:");
 	wx += _flip_heading->w(); ww -= _flip_heading->w();
@@ -185,9 +189,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	wgt_w = text_width("Y", 2) + wgt_h;
 	_y_flip = new OS_Check_Button(wx, wy, wgt_w, wgt_h, "Y");
 	wx += _y_flip->w(); ww -= _y_flip->w();
-	wgt_w = text_width("Image to Tiles...", 12);
-	wgt_off = ww - wgt_w;
-	_image_to_tiles = new OS_Button(wx+wgt_off, wy, wgt_w, wgt_h, "Image to Tiles...");
+	wgt_off = ww - wgt_h;
+	_image_to_tiles_tb = new Toolbar_Button(wx+wgt_off, wy, wgt_h, wgt_h);
 	_right_group->end();
 	_right_group->resizable(NULL);
 	_main_group->begin();
@@ -319,6 +322,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 			FL_MENU_RADIO | (Config::format() == Tilemap::Format::RLE_NYBBLES ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("PC Town Map (&X\x2fY flip)", 0, (Fl_Callback *)pc_town_map_format_cb, this,
 			FL_MENU_RADIO | (Config::format() == Tilemap::Format::XY_FLIP ? FL_MENU_VALUE : 0)),
+		OS_MENU_ITEM("&SGB border (tile + attribute)", 0, (Fl_Callback *)sgb_border_format_cb, this,
+			FL_MENU_RADIO | (Config::format() == Tilemap::Format::TILE_ATTR ? FL_MENU_VALUE : 0)),
 		{},
 		OS_MENU_ITEM("Tileset &Start...", 0, (Fl_Callback *)tileset_start_cb, this, 0),
 		OS_MENU_ITEM("2x &Tiles", 0, (Fl_Callback *)tiles2x_cb, this,
@@ -354,6 +359,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_pokegear_card_format_mi = PM_FIND_MENU_ITEM_CB(pokegear_card_format_cb);
 	_rby_town_map_format_mi = PM_FIND_MENU_ITEM_CB(rby_town_map_format_cb);
 	_pc_town_map_format_mi = PM_FIND_MENU_ITEM_CB(pc_town_map_format_cb);
+	_sgb_border_format_mi = PM_FIND_MENU_ITEM_CB(sgb_border_format_cb);
 	_2x_tiles_mi = PM_FIND_MENU_ITEM_CB(tiles2x_cb);
 	_rainbow_tiles_mi = PM_FIND_MENU_ITEM_CB(rainbow_tiles_cb);
 	// Conditional menu items
@@ -396,6 +402,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_format->add("Pok\xc3\xa9gear card (RLE + $FF end)"); // RLE_FF_END
 	_format->add("RBY Town Map (RLE nybbles + $00 end)"); // RLE_NYBBLES
 	_format->add("PC Town Map (X\\/Y flip)");             // XY_FLIP
+	_format->add("SGB border (tile + attribute)");        // TILE_ATTR
 	_format->value(Config::format());
 	_format->callback((Fl_Callback *)format_tb_cb, this);
 
@@ -439,9 +446,15 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 
 	select_tile_cb(_tile_buttons[0x00], this);
 
-	_image_to_tiles->callback((Fl_Callback *)image_to_tiles_cb, this);
+	_color->value(0);
+	_color->range(0, 3);
 
 	_flip_heading->box(FL_FLAT_BOX);
+	_flip_heading->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
+
+	_image_to_tiles_tb->tooltip("Image to Tiles... (Ctrl+I)");
+	_image_to_tiles_tb->callback((Fl_Callback *)image_to_tiles_cb, this);
+	_image_to_tiles_tb->image(INPUT_ICON);
 
 	// Configure dialogs
 
@@ -699,7 +712,14 @@ void Main_Window::update_active_controls() {
 		_reload_tb->deactivate();
 		_unload_tileset_mi->deactivate();
 	}
-	if (Config::format() == Tilemap::Format::XY_FLIP) {
+	if (Config::format() == Tilemap::Format::TILE_ATTR) {
+		_color->activate();
+	}
+	else {
+		_color->value(0);
+		_color->deactivate();
+	}
+	if (Config::format() == Tilemap::Format::XY_FLIP || Config::format() == Tilemap::Format::TILE_ATTR) {
 		_flip_heading->activate();
 		_x_flip->activate();
 		_y_flip->activate();
@@ -1301,6 +1321,13 @@ void Main_Window::pc_town_map_format_cb(Fl_Menu_ *, Main_Window *mw) {
 	mw->redraw();
 }
 
+void Main_Window::sgb_border_format_cb(Fl_Menu_ *, Main_Window *mw) {
+	Config::format(Tilemap::Format::TILE_ATTR);
+	mw->_format->value(Config::format());
+	mw->update_active_controls();
+	mw->redraw();
+}
+
 void Main_Window::tileset_start_cb(Fl_Menu_ *, Main_Window *mw) {
 	mw->_tileset_start_dialog->start_id(Config::start());
 	mw->_tileset_start_dialog->show(mw);
@@ -1326,8 +1353,8 @@ void Main_Window::tiles2x_cb(Fl_Menu_ *m, Main_Window *mw) {
 void Main_Window::format_tb_cb(Dropdown *, Main_Window *mw) {
 	Config::format((Tilemap::Format)mw->_format->value());
 	Fl_Menu_Item *menu_items[NUM_FORMATS] = {
-		mw->_plain_format_mi, mw->_rle_format_mi, mw->_gsc_town_map_format_mi,
-		mw->_pokegear_card_format_mi, mw->_rby_town_map_format_mi, mw->_pc_town_map_format_mi
+		mw->_plain_format_mi, mw->_rle_format_mi, mw->_gsc_town_map_format_mi, mw->_pokegear_card_format_mi,
+		mw->_rby_town_map_format_mi, mw->_pc_town_map_format_mi, mw->_sgb_border_format_mi
 	};
 	menu_items[Config::format()]->setonly();
 	mw->update_active_controls();
@@ -1392,8 +1419,11 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 	}
 	else if (Fl::event_button() == FL_RIGHT_MOUSE) {
 		// Right-click to select
+		int color = tt->sgb_color();
+		mw->_color->value(color > -1 ? color : 0);
 		mw->_x_flip->value(tt->x_flip());
 		mw->_y_flip->value(tt->y_flip());
+		mw->_color->redraw();
 		mw->_x_flip->redraw();
 		mw->_y_flip->redraw();
 		uint8_t id = tt->id();

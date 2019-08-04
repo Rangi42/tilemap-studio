@@ -10,7 +10,7 @@
 
 #define MAX_HISTORY_SIZE 100
 
-#define NUM_FORMATS 6
+#define NUM_FORMATS 7
 
 #define GAME_BOY_WIDTH 20
 #define GAME_BOY_HEIGHT 18
@@ -23,7 +23,7 @@ protected:
 		Tilemap_State(size_t n) : states(n) {}
 	};
 public:
-	enum Format { PLAIN, RLE, FF_END, RLE_FF_END, RLE_NYBBLES, XY_FLIP };
+	enum Format { PLAIN, RLE, FF_END, RLE_FF_END, RLE_NYBBLES, XY_FLIP, TILE_ATTR };
 	enum Result { TILEMAP_OK, TILEMAP_BAD_FILE, TILEMAP_EMPTY, TILEMAP_TOO_SHORT_FF, TILEMAP_TOO_LONG_FF,
 		TILEMAP_TOO_SHORT_00, TILEMAP_TOO_LONG_00, TILEMAP_TOO_SHORT_RLE, TILEMAP_NULL };
 private:

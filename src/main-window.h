@@ -37,7 +37,7 @@ private:
 		*_greybird_theme_mi = NULL, *_metal_theme_mi = NULL, *_blue_theme_mi = NULL, *_olive_theme_mi = NULL,
 		*_rose_gold_theme_mi = NULL, *_dark_theme_mi = NULL;
 	Fl_Menu_Item *_plain_format_mi = NULL, *_rle_format_mi = NULL, *_gsc_town_map_format_mi = NULL, *_pokegear_card_format_mi = NULL,
-		*_rby_town_map_format_mi = NULL, *_pc_town_map_format_mi = NULL;
+		*_rby_town_map_format_mi = NULL, *_pc_town_map_format_mi = NULL, *_sgb_border_format_mi = NULL;
 	Fl_Menu_Item *_2x_tiles_mi = NULL, *_rainbow_tiles_mi = NULL;
 	Toolbar_Button *_new_tb, *_open_tb, *_save_tb, *_print_tb;
 	Dropdown *_format;
@@ -49,8 +49,9 @@ private:
 	OS_Check_Button *_2x_tiles;
 	Label_Button *_tileset_name;
 	Label *_flip_heading;
+	OS_Spinner *_color;
 	OS_Check_Button *_x_flip, *_y_flip;
-	OS_Button *_image_to_tiles;
+	Toolbar_Button *_image_to_tiles_tb;
 	Tile_Button *_tile_buttons[NUM_TILES];
 	// GUI outputs
 	Label *_tile_heading;
@@ -88,8 +89,9 @@ public:
 	~Main_Window();
 	void show(void);
 	inline bool unsaved(void) const { return _tilemap.modified(); }
-	inline bool x_flip(void) const { return !!_x_flip->value(); }
-	inline bool y_flip(void) const { return !!_y_flip->value(); }
+	inline bool x_flip(void) const { return _x_flip->active() && !!_x_flip->value(); }
+	inline bool y_flip(void) const { return _y_flip->active() && !!_y_flip->value(); }
+	inline int sgb_color(void) const { return _color->active() ? (int)_color->value() : -1; }
 	inline const char *modified_filename(void) const {
 		return unsaved() ? _tilemap_file.empty() ? NEW_TILEMAP_NAME : fl_filename_name(_tilemap_file.c_str()) : "";
 	}
@@ -153,6 +155,7 @@ private:
 	static void pokegear_card_format_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void rby_town_map_format_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void pc_town_map_format_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void sgb_border_format_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void tileset_start_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void tiles2x_cb(Fl_Menu_ *m, Main_Window *mw);
 	// Help menu

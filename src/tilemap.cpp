@@ -182,7 +182,11 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 	}
 
 	else if (fmt == Format::RLE) {
-		for (long s = 0; s < c; s += 2) {
+		if (c % 2) {
+			fclose(file);
+			return (_result = TILEMAP_TOO_SHORT_FF);
+		}
+		for (long i = 0; i < c; i += 2) {
 			int v = fgetc(file);
 			int r = fgetc(file);
 			if (r == EOF) {
@@ -190,7 +194,7 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 				for (Tile_Tessera *tt : tiles) { delete tt; }
 				return (_result = TILEMAP_TOO_SHORT_RLE);
 			}
-			for (int i = 0; i < r; i++) {
+			for (int j = 0; j < r; j++) {
 				tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint8_t)v));
 			}
 		}
@@ -215,7 +219,11 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 	}
 
 	else if (fmt == Format::RLE_FF_END) {
-		for (long s = 0; s < c - 1; s += 2) {
+		if (!(c % 2)) {
+			fclose(file);
+			return (_result = TILEMAP_TOO_SHORT_FF);
+		}
+		for (long i = 0; i < c - 1; i += 2) {
 			int v = fgetc(file);
 			if (v == 0xFF) {
 				fclose(file);
@@ -228,7 +236,7 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 				for (Tile_Tessera *tt : tiles) { delete tt; }
 				return (_result = TILEMAP_TOO_LONG_FF);
 			}
-			for (int i = 0; i < r; i++) {
+			for (int j = 0; j < r; j++) {
 				tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint8_t)v));
 			}
 		}
@@ -241,7 +249,7 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 	}
 
 	else if (fmt == Format::RLE_NYBBLES) {
-		for (long s = 0; s < c - 1; s++) {
+		for (long i = 0; i < c - 1; i++) {
 			int b = fgetc(file);
 			if (b == 0x00) {
 				fclose(file);
@@ -249,7 +257,7 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 				return (_result = TILEMAP_TOO_LONG_00);
 			}
 			int v = (b & 0xF0) >> 4, r = b & 0x0F;
-			for (int i = 0; i < r; i++) {
+			for (int j = 0; j < r; j++) {
 				tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint8_t)v));
 			}
 		}
@@ -281,6 +289,20 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 		}
 	}
 
+	else if (fmt == Format::TILE_ATTR) {
+		if (c % 2) {
+			fclose(file);
+			return (_result = TILEMAP_TOO_SHORT_FF);
+		}
+		for (long i = 0; i < c; i += 2) {
+			int v = fgetc(file);
+			int a = fgetc(file);
+			bool x_flip = !!(a & 0x40), y_flip = !!(a & 0x80);
+			int color = (a & 0xC) >> 2;
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint8_t)v, x_flip, y_flip, color));
+		}
+	}
+
 	fclose(file);
 
 	_tiles.swap(tiles);
@@ -298,7 +320,10 @@ bool Tilemap::can_write_tiles() {
 		if (tt->id() >= m) {
 			return false;
 		}
-		if ((tt->x_flip() || tt->y_flip()) && fmt != Format::XY_FLIP) {
+		if ((tt->x_flip() || tt->y_flip()) && fmt != Format::XY_FLIP && fmt != Format::TILE_ATTR) {
+			return false;
+		}
+		if (tt->sgb_color() > -1 && fmt != Format::TILE_ATTR) {
 			return false;
 		}
 	}
@@ -342,6 +367,17 @@ bool Tilemap::write_tiles(const char *f) {
 			fputc(b, file);
 		}
 	}
+	else if (fmt == Format::TILE_ATTR) {
+		for (Tile_Tessera *tt : _tiles) {
+			uint8_t v = tt->id();
+			fputc(v, file);
+			uint8_t a = 0x10;
+			if (tt->x_flip()) { v |= 0x40; }
+			if (tt->y_flip()) { v |= 0x80; }
+			if (tt->sgb_color() > -1) { v |= tt->sgb_color() << 2; }
+			fputc(a, file);
+		}
+	}
 
 	if (fmt == Format::RLE_NYBBLES) {
 		fputc(0x00, file);
@@ -369,7 +405,7 @@ Fl_RGB_Image *Tilemap::print_tilemap() const {
 
 void Tilemap::guess_width() {
 	size_t n = size();
-	if (n % GAME_BOY_WIDTH == 0) {
+	if (n % GAME_BOY_WIDTH == 0 && n / GAME_BOY_WIDTH <= GAME_BOY_HEIGHT) {
 		_width = GAME_BOY_WIDTH;
 	}
 	else if (n % GAME_BOY_HEIGHT == 0 && n / GAME_BOY_HEIGHT <= GAME_BOY_WIDTH) {
@@ -407,18 +443,20 @@ int Tilemap::format_tileset_size(Format fmt) {
 
 const char *Tilemap::format_name(Format fmt) {
 	switch (fmt) {
-	case Tilemap::Format::PLAIN:
+	case Format::PLAIN:
 		return "Plain";
-	case Tilemap::Format::RLE:
+	case Format::RLE:
 		return "Run-length encoded";
-	case Tilemap::Format::FF_END:
+	case Format::FF_END:
 		return "GSC Town Map";
-	case Tilemap::Format::RLE_FF_END:
+	case Format::RLE_FF_END:
 		return "Pok\xc3\xa9gear card";
-	case Tilemap::Format::RLE_NYBBLES:
+	case Format::RLE_NYBBLES:
 		return "RBY Town Map";
-	case Tilemap::Format::XY_FLIP:
+	case Format::XY_FLIP:
 		return "PC Town Map";
+	case Format::TILE_ATTR:
+		return "SGB border";
 	default:
 		return "Any";
 	}
@@ -426,18 +464,19 @@ const char *Tilemap::format_name(Format fmt) {
 
 const char *Tilemap::format_extension(Format fmt) {
 	switch (fmt) {
-	case Tilemap::Format::PLAIN:
-		return ".tilemap"; // e.g. pokecrystal/gfx/card_flip/card_flip.tilemap
-	case Tilemap::Format::RLE:
-	case Tilemap::Format::RLE_NYBBLES:
-		return ".rle"; // e.g. pokered/gfx/town_map.rle
-	case Tilemap::Format::FF_END:
-	case Tilemap::Format::XY_FLIP:
-		return ".bin"; // e.g. pokecrystal/gfx/pokegear/*.bin, polishedcrystal/gfx/town_map/*.bin
-	case Tilemap::Format::RLE_FF_END:
-		return ".tilemap.rle"; // e.g. pokecrystal/gfx/pokegear/*.tilemap.bin
+	case Format::PLAIN:
 	default:
-		return ".map"; // e.g. GSC Town Map Editor's *.map
+		return ".tilemap"; // e.g. pokecrystal/gfx/card_flip/card_flip.tilemap
+	case Format::RLE:
+	case Format::RLE_NYBBLES:
+		return ".rle"; // e.g. pokered/gfx/town_map.rle
+	case Format::FF_END:
+	case Format::XY_FLIP:
+		return ".bin"; // e.g. pokecrystal/gfx/pokegear/*.bin, polishedcrystal/gfx/town_map/*.bin
+	case Format::RLE_FF_END:
+		return ".tilemap.rle"; // e.g. pokecrystal/gfx/pokegear/*.tilemap.bin
+	case Format::TILE_ATTR:
+		return ".map"; // e.g. pokered/gfx/{red|blue}/sgbborder.map
 	}
 }
 

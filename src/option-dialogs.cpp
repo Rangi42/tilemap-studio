@@ -347,6 +347,7 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_format->add("Pok\xc3\xa9gear card (RLE + $FF end)"); // RLE_FF_END
 	_format->add("RBY Town Map (RLE nybbles + $00 end)"); // RLE_NYBBLES
 	_format->add("PC Town Map (X\\/Y flip)");             // XY_FLIP
+	_format->add("SGB border (tile + attribute)");        // TILE_ATTR
 	_image_chooser->title("Read Image");
 	_image_chooser->filter("Image Files\t*.{png,bmp}\n");
 	_tilemap_chooser->title("Write Tilemap");
