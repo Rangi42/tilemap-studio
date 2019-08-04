@@ -768,7 +768,7 @@ void Main_Window::resize_tilemap() {
 
 void Main_Window::flood_fill(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
-	Tile_State ts(_selected->id(), x_flip(), y_flip());
+	Tile_State ts(_selected->id(), x_flip(), y_flip(), sgb_color());
 	if (fs == ts) { return; }
 	std::queue<size_t> queue;
 	size_t w = _tilemap.width(), h = _tilemap.height(), n = _tilemap.size();
@@ -792,7 +792,7 @@ void Main_Window::flood_fill(Tile_Tessera *tt) {
 
 void Main_Window::substitute_tile(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
-	Tile_State ts(_selected->id(), x_flip(), y_flip());
+	Tile_State ts(_selected->id(), x_flip(), y_flip(), sgb_color());
 	size_t n = _tilemap.size();
 	for (size_t i = 0; i < n; i++) {
 		Tile_Tessera *ff = _tilemap.tile(i);
@@ -1411,6 +1411,7 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 		else {
 			// Left-click/drag to edit
 			tt->id(mw->_selected->id());
+			tt->sgb_color(mw->sgb_color());
 			tt->x_flip(mw->x_flip());
 			tt->y_flip(mw->y_flip());
 			tt->damage(1);
