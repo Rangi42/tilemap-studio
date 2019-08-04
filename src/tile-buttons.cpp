@@ -159,3 +159,8 @@ void Tile_Button::draw() {
 		draw_selection_border(x(), y());
 	}
 }
+
+int Tile_Button::handle(int event) {
+	// Don't interfere with dragging onto the parent Droppable|Workpane
+	return event == FL_ENTER || event == FL_LEAVE || event == FL_DRAG ? 0 : Fl_Radio_Button::handle(event);
+}

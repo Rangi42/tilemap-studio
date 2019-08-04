@@ -68,6 +68,7 @@ public:
 	inline uint8_t id(void) const { return _state.id; }
 	inline void id(uint8_t id) { _state.id = id; }
 	void draw(void);
+	int handle(int event);
 };
 
 #endif
