@@ -8,8 +8,7 @@
 #include "tileset.h"
 #include "config.h"
 
-Tilemap::Tilemap() : _tiles(), _width(0), _result(TILEMAP_NULL), _modified(false),
-	_history(MAX_HISTORY_SIZE), _future(MAX_HISTORY_SIZE) {}
+Tilemap::Tilemap() : _tiles(), _width(0), _result(TILEMAP_NULL), _modified(false), _history(), _future() {}
 
 Tilemap::~Tilemap() {
 	clear();
