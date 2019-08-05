@@ -55,26 +55,25 @@ void Tilemap::resize(size_t w, size_t h, Resize_Dialog::Hor_Align ha, Resize_Dia
 	tiles.reserve(n);
 	int mx = MAX(px, 0), my = MAX(py, 0), mw = MIN(w, width() + px), mh = MIN(h, height() + py);
 	size_t i = 0;
-	uint8_t t = Config::start();
 	for (int y = 0; y < py; y++) {
 		for (int x = 0; x < (int)w; x++) {
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, t));
+			tiles.emplace_back(new Tile_Tessera(0, 0));
 		}
 	}
 	for (int y = my; y < mh; y++) {
 		for (int x = 0; x < px; x++) {
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, t));
+			tiles.emplace_back(new Tile_Tessera(0, 0));
 		}
 		for (int x = mx; x < mw; x++) {
-			tiles.emplace_back(i < size() ? (i++, tile(x - px, y - py)) : new Tile_Tessera(0, 0, 0, 0, t));
+			tiles.emplace_back(i < size() ? (i++, tile(x - px, y - py)) : new Tile_Tessera(0, 0));
 		}
 		for (int x = mw; x < (int)w; x++) {
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, t));
+			tiles.emplace_back(new Tile_Tessera(0, 0));
 		}
 	}
 	for (int y = mh; y < (int)h; y++) {
 		for (int x = 0; x < (int)w; x++) {
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, t));
+			tiles.emplace_back(new Tile_Tessera(0, 0));
 		}
 	}
 
@@ -152,9 +151,8 @@ void Tilemap::new_tiles(size_t w, size_t h) {
 	clear();
 	size_t n = w * h;
 	_tiles.reserve(n);
-	uint8_t id = Config::start();
 	for (size_t i = 0; i < n; i++) {
-		_tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, id));
+		_tiles.emplace_back(new Tile_Tessera(0, 0));
 	}
 	_width = w;
 	_modified = true;

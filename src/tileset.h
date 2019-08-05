@@ -25,7 +25,6 @@ public:
 		TILESET_TOO_SHORT, TILESET_TOO_LARGE, TILESET_BAD_CMD, TILESET_NULL };
 private:
 	Fl_RGB_Image *_image, *_inactive_image;
-	uint8_t _start_id;
 	size_t _num_tiles;
 	Result _result;
 public:

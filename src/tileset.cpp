@@ -9,7 +9,7 @@
 #include "tile-buttons.h"
 #include "config.h"
 
-Tileset::Tileset() : _image(NULL), _inactive_image(NULL), _start_id(0x00), _num_tiles(0), _result(TILESET_NULL) {}
+Tileset::Tileset() : _image(NULL), _inactive_image(NULL), _num_tiles(0), _result(TILESET_NULL) {}
 
 Tileset::~Tileset() {
 	clear();
@@ -20,7 +20,6 @@ void Tileset::clear() {
 	_image = NULL;
 	delete _inactive_image;
 	_inactive_image = NULL;
-	_start_id = 0x00;
 	_num_tiles = 0;
 	_result = TILESET_NULL;
 }
@@ -36,7 +35,7 @@ bool Tileset::refresh_inactive_image() {
 }
 
 bool Tileset::draw_tile(const Tile_State *ts, int x, int y, bool active) const {
-	uint8_t id = ts->id - _start_id;
+	uint8_t id = ts->id;
 	Fl_RGB_Image *img = active ? _image : _inactive_image;
 	if (!img || id >= _num_tiles) { return false; }
 
@@ -64,15 +63,11 @@ Tileset::Result Tileset::read_tiles(const char *f) {
 }
 
 Tileset::Result Tileset::read_png_graphics(const char *f) {
-	Fl_PNG_Image *png = new Fl_PNG_Image(f);
-	if (!png || png->fail()) { return (_result = TILESET_BAD_FILE); }
+	Fl_PNG_Image png(f);
+	if (png.fail()) { return (_result = TILESET_BAD_FILE); }
 
-	_image = png;
-	if (!Config::tiles_16px()) {
-		_image = (Fl_RGB_Image *)png->copy(png->w() * 2, png->h() * 2);
-		delete png;
-		if (!_image || _image->fail()) { return (_result = TILESET_BAD_FILE); }
-	}
+	_image = (Fl_RGB_Image *)png.copy(png.w() * 2, png.h() * 2);
+	if (!_image || _image->fail()) { return (_result = TILESET_BAD_FILE); }
 
 	if (!refresh_inactive_image()) {
 		clear();
@@ -85,8 +80,7 @@ Tileset::Result Tileset::read_png_graphics(const char *f) {
 	w /= TILE_SIZE_2X;
 	h /= TILE_SIZE_2X;
 	_num_tiles = w * h;
-	_start_id = Config::start();
-	if (_start_id + _num_tiles > NUM_TILES) { return (_result = TILESET_TOO_LARGE); }
+	if (_num_tiles > NUM_TILES) { return (_result = TILESET_TOO_LARGE); }
 
 	return (_result = TILESET_OK);
 }

@@ -103,19 +103,6 @@ protected:
 	int refresh_content(int ww, int dy);
 };
 
-class Tileset_Start_Dialog : public Option_Dialog {
-private:
-	OS_Hex_Spinner *_start_id;
-public:
-	Tileset_Start_Dialog(const char *t);
-	~Tileset_Start_Dialog();
-	inline uint8_t start_id(void) const { return (uint8_t)_start_id->value(); }
-	inline void start_id(uint8_t n) { initialize(); _start_id->value((int)n); }
-protected:
-	void initialize_content(void);
-	int refresh_content(int ww, int dy);
-};
-
 class Image_To_Tiles_Dialog : public Option_Dialog {
 private:
 	Label *_image_heading, *_tilemap_heading, *_tileset_heading;
@@ -123,7 +110,7 @@ private:
 	Label_Button *_image_name, *_tilemap_name, *_tileset_name;
 	Dropdown *_format;
 	OS_Hex_Spinner *_start_id;
-	OS_Check_Button *_16px_tiles, *_use_7f;
+	OS_Check_Button *_use_7f;
 	Fl_Native_File_Chooser *_image_chooser, *_tilemap_chooser, *_tileset_chooser;
 	std::string _image_filename, _tilemap_filename, _tileset_filename;
 public:
@@ -136,8 +123,6 @@ public:
 	inline void format(int f) { initialize(); _format->value(f); }
 	inline uint8_t start_id(void) const { return (uint8_t)_start_id->value(); }
 	inline void start_id(uint8_t n) { initialize(); _start_id->value((int)n); }
-	inline bool tiles_16px(void) const { return !!_16px_tiles->value(); }
-	inline void tiles_16px(bool t) { initialize(); _16px_tiles->value(t); }
 private:
 	void update_ok_button(void);
 protected:

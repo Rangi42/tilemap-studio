@@ -40,13 +40,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 
 	// Get global configs
 	Tilemap::Format format_config = (Tilemap::Format)Preferences::get("format", Config::format());
-	int start_config = Preferences::get("start", Config::start());
-	int tiles_16px_config = Preferences::get("tiles16px", Config::tiles_16px());
 	int rainbow_tiles_config = Preferences::get("rainbow", Config::rainbow_tiles());
 	int attributes_config = Preferences::get("colors", Config::attributes());
 	Config::format(format_config);
-	Config::start((uint8_t)start_config);
-	Config::tiles_16px(!!tiles_16px_config);
 	Config::rainbow_tiles(!!rainbow_tiles_config);
 	Config::attributes(!!attributes_config);
 
@@ -83,6 +79,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_main_group = new Fl_Group(wx, wy, ww, wh);
 	wx += win_m; ww -= win_m * 2;
 	wy += win_m; wh -= win_m * 2;
+	// Left group
 	_left_group = new Fl_Group(wx, wy, ww-280, wh);
 	int gx = _left_group->x(), gy = _left_group->y(), gw = _left_group->w(), gh = _left_group->h();
 	_left_top_bar = new Fl_Group(gx, gy, gw, wgt_h);
@@ -133,9 +130,11 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_tilemap_scroll->resizable(NULL);
 	_left_group->resizable(_tilemap_scroll);
 	wx += _left_group->w() + win_m; ww -= _left_group->w() + win_m;
+	// Middle spacer
 	_main_group->begin();
 	Spacer *mid_spacer = new Spacer(wx, wy, 2, wh);
 	wx += mid_spacer->w() + win_m; ww -= mid_spacer->w() + win_m;
+	// Right group
 	_right_group = new Fl_Group(wx, wy, ww, wh);
 	_right_top_bar = new Fl_Group(wx, wy, ww, wgt_h);
 	bx = _right_top_bar->x(), by = _right_top_bar->y(), bw = _right_top_bar->w(), bh = _right_top_bar->h();
@@ -146,11 +145,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	bx += _load_tb->w(); bw -= _load_tb->w();
 	_reload_tb = new Toolbar_Button(bx, by, wgt_h, wgt_h);
 	bx += _reload_tb->w(); bw -= _reload_tb->w();
-	wgt_off = MAX(text_width("AA", 2), text_width("FF", 2)) + wgt_h;
-	wgt_w = text_width("16px Tiles", 2) + wgt_h;
-	_start_id = new OS_Hex_Spinner(bx+bw-wgt_w-win_m-wgt_off, by, wgt_off, bh, "Start:");
-	bx += _start_id->w() + win_m; bw -= _start_id->w() + win_m;
-	_16px_tiles = new OS_Check_Button(bx+bw-wgt_w, by, wgt_w, bh, "16px Tiles");
+	_image_to_tiles_tb = new Toolbar_Button(bx+bw-wgt_h, by, wgt_h, wgt_h);
 	_right_top_bar->end();
 	_right_top_bar->resizable(NULL);
 	wy += _right_top_bar->h() + wgt_m;
@@ -192,9 +187,6 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	wx += _x_flip->w(); ww -= _x_flip->w();
 	wgt_w = text_width("Y", 2) + wgt_h;
 	_y_flip = new OS_Check_Button(wx, wy, wgt_w, wgt_h, "Y");
-	wx += _y_flip->w(); ww -= _y_flip->w();
-	wgt_off = ww - wgt_h;
-	_image_to_tiles_tb = new Toolbar_Button(wx+wgt_off, wy, wgt_h, wgt_h);
 	_right_group->end();
 	_right_group->resizable(NULL);
 	_main_group->begin();
@@ -213,7 +205,6 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_new_tilemap_dialog = new New_Tilemap_Dialog("New Tilemap");
 	_tilemap_width_dialog = new Tilemap_Width_Dialog("Tilemap Width");
 	_resize_dialog = new Resize_Dialog("Resize Tilemap");
-	_tileset_start_dialog = new Tileset_Start_Dialog("Tileset Start");
 	_image_to_tiles_dialog = new Image_To_Tiles_Dialog("Image to Tiles");
 	_help_window = new Help_Window(48, 48, 500, 400, PROGRAM_NAME " Help");
 
@@ -329,9 +320,6 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 		OS_MENU_ITEM("&SGB border (tile + attribute)", FL_COMMAND + '7', (Fl_Callback *)sgb_border_format_cb, this,
 			FL_MENU_RADIO | (Config::format() == Tilemap::Format::TILE_ATTR ? FL_MENU_VALUE : 0)),
 		{},
-		OS_MENU_ITEM("Tileset &Start...", FL_COMMAND + 'I', (Fl_Callback *)tileset_start_cb, this, 0),
-		OS_MENU_ITEM("16px &Tiles", FL_COMMAND + 'X', (Fl_Callback *)tiles_16px_cb, this,
-			FL_MENU_TOGGLE | (Config::tiles_16px() ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("Show SGB &Colors", FL_COMMAND + 'G', (Fl_Callback *)show_attributes_cb, this,
 			FL_MENU_TOGGLE | (Config::attributes() ? FL_MENU_VALUE : 0)),
 		{},
@@ -367,7 +355,6 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_pc_town_map_format_mi = PM_FIND_MENU_ITEM_CB(pc_town_map_format_cb);
 	_sgb_border_format_mi = PM_FIND_MENU_ITEM_CB(sgb_border_format_cb);
 	_rainbow_tiles_mi = PM_FIND_MENU_ITEM_CB(rainbow_tiles_cb);
-	_16px_tiles_mi = PM_FIND_MENU_ITEM_CB(tiles_16px_cb);
 	_show_attributes_mi = PM_FIND_MENU_ITEM_CB(show_attributes_cb);
 	// Conditional menu items
 	_reload_tileset_mi = PM_FIND_MENU_ITEM_CB(reload_tileset_cb);
@@ -443,11 +430,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_reload_tb->image(RELOAD_ICON);
 	_reload_tb->deimage(RELOAD_DISABLED_ICON);
 
-	_start_id->value(Config::start());
-	_start_id->callback((Fl_Callback *)tileset_start_tb_cb, this);
-
-	_16px_tiles->value(Config::tiles_16px());
-	_16px_tiles->callback((Fl_Callback *)tiles_16px_tb_cb, this);
+	_image_to_tiles_tb->tooltip("Image to Tiles... (Ctrl+I)");
+	_image_to_tiles_tb->callback((Fl_Callback *)image_to_tiles_cb, this);
+	_image_to_tiles_tb->image(INPUT_ICON);
 
 	_tileset_name->callback((Fl_Callback *)load_tileset_cb, this);
 
@@ -461,10 +446,6 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 
 	_flip_heading->box(FL_FLAT_BOX);
 	_flip_heading->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
-
-	_image_to_tiles_tb->tooltip("Image to Tiles... (Ctrl+I)");
-	_image_to_tiles_tb->callback((Fl_Callback *)image_to_tiles_cb, this);
-	_image_to_tiles_tb->image(INPUT_ICON);
 
 	// Configure dialogs
 
@@ -530,7 +511,6 @@ Main_Window::~Main_Window() {
 	delete _unsaved_dialog;
 	delete _about_dialog;
 	delete _resize_dialog;
-	delete _tileset_start_dialog;
 	delete _image_to_tiles_dialog;
 	delete _help_window;
 }
@@ -1166,8 +1146,6 @@ void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 	Preferences::set("w", mw->w());
 	Preferences::set("h", mw->h());
 	Preferences::set("format", Config::format());
-	Preferences::set("start", (int)Config::start());
-	Preferences::set("tiles16px", Config::tiles_16px());
 	Preferences::set("attributes", Config::attributes());
 	for (int i = 0; i < NUM_RECENT; i++) {
 		Preferences::set_string(Fl_Preferences::Name("recent%d", i), mw->_recent[i]);
@@ -1286,10 +1264,8 @@ void Main_Window::resize_cb(Fl_Menu_ *, Main_Window *mw) {
 
 void Main_Window::image_to_tiles_cb(Fl_Widget *, Main_Window *mw) {
 	mw->_image_to_tiles_dialog->format(Config::format());
-	mw->_image_to_tiles_dialog->start_id(Config::start());
-	mw->_image_to_tiles_dialog->tiles_16px(Config::tiles_16px());
 	mw->_image_to_tiles_dialog->show(mw);
-	if (mw->_tileset_start_dialog->canceled()) { return; }
+	if (mw->_image_to_tiles_dialog->canceled()) { return; }
 	// TODO: image_to_tiles_cb
 	fputs("image_to_tiles_cb", stderr);
 }
@@ -1343,12 +1319,10 @@ void Main_Window::sgb_border_format_cb(Fl_Menu_ *, Main_Window *mw) {
 	mw->redraw();
 }
 
-void Main_Window::tileset_start_cb(Fl_Menu_ *, Main_Window *mw) {
-	mw->_tileset_start_dialog->start_id(Config::start());
-	mw->_tileset_start_dialog->show(mw);
-	if (mw->_tileset_start_dialog->canceled()) { return; }
-	mw->_start_id->value(mw->_tileset_start_dialog->start_id());
-	mw->_start_id->redraw();
+void Main_Window::show_attributes_cb(Fl_Menu_ *m, Main_Window *mw) {
+	Config::attributes(!!m->mvalue()->value());
+	mw->_show_attributes->value(Config::attributes());
+	mw->redraw();
 }
 
 void Main_Window::help_cb(Fl_Widget *, Main_Window *mw) {
@@ -1357,18 +1331,6 @@ void Main_Window::help_cb(Fl_Widget *, Main_Window *mw) {
 
 void Main_Window::about_cb(Fl_Widget *, Main_Window *mw) {
 	mw->_about_dialog->show(mw);
-}
-
-void Main_Window::tiles_16px_cb(Fl_Menu_ *m, Main_Window *mw) {
-	Config::tiles_16px(!!m->mvalue()->value());
-	mw->_16px_tiles->value(Config::tiles_16px());
-	mw->_16px_tiles->redraw();
-}
-
-void Main_Window::show_attributes_cb(Fl_Menu_ *m, Main_Window *mw) {
-	Config::attributes(!!m->mvalue()->value());
-	mw->_show_attributes->value(Config::attributes());
-	mw->redraw();
 }
 
 void Main_Window::format_tb_cb(Dropdown *, Main_Window *mw) {
@@ -1393,20 +1355,6 @@ void Main_Window::tilemap_width_tb_cb(OS_Spinner *, Main_Window *mw) {
 	mw->_tilemap.reposition_tiles(sx, sy);
 	mw->_tilemap_scroll->redraw();
 	mw->update_status(NULL);
-}
-
-void Main_Window::tileset_start_tb_cb(OS_Hex_Spinner *, Main_Window *mw) {
-	Config::start((uint8_t)mw->_start_id->value());
-}
-
-void Main_Window::tiles_16px_tb_cb(OS_Check_Button *, Main_Window *mw) {
-	Config::tiles_16px(!!mw->_16px_tiles->value());
-	if (Config::tiles_16px()) {
-		mw->_16px_tiles_mi->set();
-	}
-	else {
-		mw->_16px_tiles_mi->clear();
-	}
 }
 
 void Main_Window::show_attributes_tb_cb(Toggle_Switch *, Main_Window *mw) {

@@ -38,21 +38,19 @@ private:
 		*_rose_gold_theme_mi = NULL, *_dark_theme_mi = NULL;
 	Fl_Menu_Item *_plain_format_mi = NULL, *_rle_format_mi = NULL, *_gsc_town_map_format_mi = NULL, *_pokegear_card_format_mi = NULL,
 		*_rby_town_map_format_mi = NULL, *_pc_town_map_format_mi = NULL, *_sgb_border_format_mi = NULL;
-	Fl_Menu_Item *_rainbow_tiles_mi = NULL, *_16px_tiles_mi = NULL, *_show_attributes_mi = NULL;
+	Fl_Menu_Item *_rainbow_tiles_mi = NULL, *_show_attributes_mi = NULL;
 	Toolbar_Button *_new_tb, *_open_tb, *_save_tb, *_print_tb;
 	Dropdown *_format;
 	Label_Button *_tilemap_name;
 	Toolbar_Button *_undo_tb, *_redo_tb, *_resize_tb;
 	OS_Spinner *_tilemap_width;
 	Toolbar_Button *_load_tb, *_reload_tb;
-	OS_Hex_Spinner *_start_id;
-	OS_Check_Button *_16px_tiles;
+	Toolbar_Button *_image_to_tiles_tb;
 	Label_Button *_tileset_name;
 	Label *_flip_heading;
 	OS_Spinner *_color;
 	Toggle_Switch *_show_attributes;
 	OS_Check_Button *_x_flip, *_y_flip;
-	Toolbar_Button *_image_to_tiles_tb;
 	Tile_Button *_tile_buttons[NUM_TILES];
 	// GUI outputs
 	Label *_tile_heading;
@@ -68,7 +66,6 @@ private:
 	New_Tilemap_Dialog *_new_tilemap_dialog;
 	Tilemap_Width_Dialog *_tilemap_width_dialog;
 	Resize_Dialog *_resize_dialog;
-	Tileset_Start_Dialog *_tileset_start_dialog;
 	Image_To_Tiles_Dialog *_image_to_tiles_dialog;
 	Help_Window *_help_window;
 	// Data
@@ -157,8 +154,6 @@ private:
 	static void rby_town_map_format_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void pc_town_map_format_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void sgb_border_format_cb(Fl_Menu_ *m, Main_Window *mw);
-	static void tileset_start_cb(Fl_Menu_ *m, Main_Window *mw);
-	static void tiles_16px_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void show_attributes_cb(Fl_Menu_ *m, Main_Window *mw);
 	// Help menu
 	static void help_cb(Fl_Widget *w, Main_Window *mw);
@@ -166,8 +161,6 @@ private:
 	// Toolbar buttons
 	static void format_tb_cb(Dropdown *dd, Main_Window *mw);
 	static void tilemap_width_tb_cb(OS_Spinner *ss, Main_Window *mw);
-	static void tileset_start_tb_cb(OS_Hex_Spinner *xs, Main_Window *mw);
-	static void tiles_16px_tb_cb(OS_Check_Button *cb, Main_Window *mw);
 	static void show_attributes_tb_cb(Toggle_Switch *ts, Main_Window *mw);
 	// Tilemap
 	static void change_tile_cb(Tile_Tessera *tt, Main_Window *mw);
