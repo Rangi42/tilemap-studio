@@ -38,7 +38,7 @@ private:
 		*_rose_gold_theme_mi = NULL, *_dark_theme_mi = NULL;
 	Fl_Menu_Item *_plain_format_mi = NULL, *_rle_format_mi = NULL, *_gsc_town_map_format_mi = NULL, *_pokegear_card_format_mi = NULL,
 		*_rby_town_map_format_mi = NULL, *_pc_town_map_format_mi = NULL, *_sgb_border_format_mi = NULL;
-	Fl_Menu_Item *_16px_tiles_mi = NULL, *_rainbow_tiles_mi = NULL;
+	Fl_Menu_Item *_rainbow_tiles_mi = NULL, *_16px_tiles_mi = NULL, *_show_attributes_mi = NULL;
 	Toolbar_Button *_new_tb, *_open_tb, *_save_tb, *_print_tb;
 	Dropdown *_format;
 	Label_Button *_tilemap_name;

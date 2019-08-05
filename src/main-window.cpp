@@ -366,8 +366,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_rby_town_map_format_mi = PM_FIND_MENU_ITEM_CB(rby_town_map_format_cb);
 	_pc_town_map_format_mi = PM_FIND_MENU_ITEM_CB(pc_town_map_format_cb);
 	_sgb_border_format_mi = PM_FIND_MENU_ITEM_CB(sgb_border_format_cb);
-	_16px_tiles_mi = PM_FIND_MENU_ITEM_CB(tiles_16px_cb);
 	_rainbow_tiles_mi = PM_FIND_MENU_ITEM_CB(rainbow_tiles_cb);
+	_16px_tiles_mi = PM_FIND_MENU_ITEM_CB(tiles_16px_cb);
+	_show_attributes_mi = PM_FIND_MENU_ITEM_CB(show_attributes_cb);
 	// Conditional menu items
 	_reload_tileset_mi = PM_FIND_MENU_ITEM_CB(reload_tileset_cb);
 	_unload_tileset_mi = PM_FIND_MENU_ITEM_CB(unload_tileset_cb);
@@ -453,7 +454,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	select_tile_cb(_tile_buttons[0x00], this);
 
 	_color->value(0);
-	_color->range(0, 3);
+	_color->range(0, NUM_SGB_COLORS - 1);
 
 	_show_attributes->value(Config::attributes());
 	_show_attributes->callback((Fl_Callback *)show_attributes_tb_cb, this);
@@ -723,10 +724,14 @@ void Main_Window::update_active_controls() {
 	}
 	if (Config::format() == Tilemap::Format::TILE_ATTR) {
 		_color->activate();
+		_show_attributes->activate();
+		_show_attributes_mi->activate();
 	}
 	else {
 		_color->value(0);
 		_color->deactivate();
+		_show_attributes->deactivate();
+		_show_attributes_mi->deactivate();
 	}
 	if (Config::format() == Tilemap::Format::XY_FLIP || Config::format() == Tilemap::Format::TILE_ATTR) {
 		_flip_heading->activate();
@@ -1406,6 +1411,12 @@ void Main_Window::tiles_16px_tb_cb(OS_Check_Button *, Main_Window *mw) {
 
 void Main_Window::show_attributes_tb_cb(Toggle_Switch *, Main_Window *mw) {
 	Config::attributes(!!mw->_show_attributes->value());
+	if (Config::attributes()) {
+		mw->_show_attributes_mi->set();
+	}
+	else {
+		mw->_show_attributes_mi->clear();
+	}
 	mw->redraw();
 }
 
