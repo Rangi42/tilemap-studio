@@ -322,6 +322,7 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_format->add("RBY Town Map (RLE nybbles + $00 end)"); // RLE_NYBBLES
 	_format->add("PC Town Map (X\\/Y flip)");             // XY_FLIP
 	_format->add("SGB border (tile + attribute)");        // TILE_ATTR
+	_start_id->value(0x00);
 	_image_chooser->title("Read Image");
 	_image_chooser->filter("Image Files\t*.{png,bmp}\n");
 	_tilemap_chooser->title("Write Tilemap");
@@ -365,16 +366,16 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	_tileset_name->resize(wgt_off, dy, ww-wgt_w-wgt_h, wgt_h);
 	dy += wgt_h + wgt_m;
 
-	wgt_off = win_m + text_width(_format->label(), 2);
-	wgt_w = ww - wgt_off - win_m;
+	wgt_off = win_m + text_width(_format->label(), 3);
+	wgt_w = ww - wgt_off + win_m;
 	_format->resize(wgt_off, dy, wgt_w, wgt_h);
 	dy += wgt_h + wgt_m;
 
-	wgt_w = text_width(_start_id->label(), 2) + wgt_h;
-	wgt_off = win_m;
+	wgt_w = MAX(text_width("AA", 2), text_width("FF", 2)) + wgt_h;
+	wgt_off = win_m + text_width(_start_id->label(), 3);
 	_start_id->resize(wgt_off, dy, wgt_w, wgt_h);
-	wgt_w = text_width(_use_7f->label(), 2) + wgt_h;
-	wgt_off += _start_id->w() + wgt_m;
+	wgt_w = text_width(_use_7f->label(), 3) + wgt_h;
+	wgt_off += _start_id->w() + win_m;
 	_use_7f->resize(wgt_off, dy, wgt_w, wgt_h);
 
 	_image_filename.clear();
