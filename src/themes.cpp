@@ -940,8 +940,8 @@ static void use_aqua_scheme() {
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_BOX, aqua_depressed_down_box, 1, 1, 2, 2);
 	Fl::set_boxtype(OS_HOVERED_UP_FRAME, OS_BUTTON_UP_FRAME);
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_FRAME, aqua_depressed_down_frame, 1, 1, 2, 2);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, aqua_input_thin_down_box, 2, 3, 4, 4);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, aqua_input_thin_down_frame, 2, 3, 4, 4);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, aqua_input_thin_down_box, 2, 2, 4, 4);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, aqua_input_thin_down_frame, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_DEFAULT_BUTTON_BOX, aqua_default_button_box, 1, 1, 2, 2);
 	Fl::set_boxtype(OS_TOOLBAR_BUTTON_HOVER_BOX, FL_FLAT_BOX);
 	Fl::set_boxtype(OS_SWATCH_FRAME, aqua_swatch_box, 2, 2, 4, 4);
