@@ -210,8 +210,8 @@ OS_Hex_Spinner::OS_Hex_Spinner(int x, int y, int w, int h, const char *l) : Hex_
 }
 
 Toggle_Switch::Toggle_Switch(int x, int y, int w, int h, const char *l) : Fl_Check_Button(x, y, w, h, l) {
-	box(OS_BUTTON_UP_BOX);
-	down_box(OS_DEPRESSED_DOWN_BOX);
+	box(OS_MINI_BUTTON_UP_BOX);
+	down_box(OS_MINI_DEPRESSED_DOWN_BOX);
 }
 
 void Toggle_Switch::draw() {
@@ -220,14 +220,14 @@ void Toggle_Switch::draw() {
 		OS_DEPRESSED_DOWN_BOX : OS_BUTTON_UP_BOX : OS_SPACER_THIN_DOWN_BOX;
 	Fl_Color bc = value() ? FL_SELECTION_COLOR : FL_DARK2;
 	draw_box(bb, x(), y(), w(), h(), active_r() ? bc : fl_inactive(bc));
-	int sh = MIN(w() - Fl::box_dw(bb), (h() - Fl::box_dh(bb)) * 2 / 3);
+	int sh = MIN(w() - 2, (h() - 2) * 2 / 3);
 	int sy = value() ? y() + 1 : y() + h() - 1 - sh;
 	draw_box(box(), x()+1, sy, w()-2, sh, FL_GRAY);
 	if (Fl::focus() == this) { draw_focus(); }
 }
 
 int Toggle_Switch::handle(int event) {
-	if (OS::current_theme() != OS::AQUA) {
+	if (OS::current_theme() != OS::AQUA && OS::current_theme() != OS::OLIVE) {
 		switch (event) {
 		case FL_ENTER:
 			if (active_r()) {
@@ -239,7 +239,7 @@ int Toggle_Switch::handle(int event) {
 		case FL_LEAVE:
 		case FL_HIDE:
 		case FL_DEACTIVATE:
-			box(OS_BUTTON_UP_BOX);
+			box(OS_MINI_BUTTON_UP_BOX);
 			redraw();
 			return 1;
 		}
