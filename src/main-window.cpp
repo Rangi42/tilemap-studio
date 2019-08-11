@@ -514,6 +514,10 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 #include "help.html" // a C++11 raw string literal
 		);
 
+	// TODO: enable Image to Tiles
+	_image_to_tiles_tb->hide();
+	const_cast<Fl_Menu_Item *>(_menu_bar->find_item((Fl_Callback *)image_to_tiles_cb))->deactivate();
+
 	update_recent_tilemaps();
 	update_recent_tilesets();
 	update_tilemap_metadata();
