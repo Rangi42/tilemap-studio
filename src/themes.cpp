@@ -87,16 +87,17 @@ static Fl_Color devalued(Fl_Color c, float a) {
 
 static void vertical_gradient(int x1, int y1, int x2, int y2, Fl_Color c1, Fl_Color c2) {
 	int imax = y2 - y1;
+	int d = imax ? imax : 1;
 	if (Fl::draw_box_active()) {
 		for (int i = 0; i <= imax; i++) {
-			float w = 1.0f - (float)i / imax;
+			float w = 1.0f - (float)i / d;
 			fl_color(fl_color_average(c1, c2, w));
 			fl_xyline(x1, y1+i, x2);
 		}
 	}
 	else {
 		for (int i = 0; i <= imax; i++) {
-			float w = 1.0f - (float)i / imax;
+			float w = 1.0f - (float)i / d;
 			fl_color(fl_inactive(fl_color_average(c1, c2, w)));
 			fl_xyline(x1, y1+i, x2);
 		}
@@ -105,16 +106,17 @@ static void vertical_gradient(int x1, int y1, int x2, int y2, Fl_Color c1, Fl_Co
 
 static void horizontal_gradient(int x1, int y1, int x2, int y2, Fl_Color c1, Fl_Color c2) {
 	int imax = x2 - x1;
+	int d = imax ? imax : 1;
 	if (Fl::draw_box_active()) {
 		for (int i = 0; i <= imax; i++) {
-			float w = 1.0f - (float)i / imax;
+			float w = 1.0f - (float)i / d;
 			fl_color(fl_color_average(c1, c2, w));
 			fl_yxline(x1+i, y1, y2);
 		}
 	}
 	else {
 		for (int i = 0; i <= imax; i++) {
-			float w = 1.0f - (float)i / imax;
+			float w = 1.0f - (float)i / d;
 			fl_color(fl_inactive(fl_color_average(c1, c2, w)));
 			fl_yxline(x1+i, y1, y2);
 		}
