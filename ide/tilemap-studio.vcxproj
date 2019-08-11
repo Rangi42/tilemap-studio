@@ -140,6 +140,7 @@
     <ClCompile Include="..\src\widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\res\add.xpm" />
     <None Include="..\res\app.ico" />
     <None Include="..\res\app-icon.xpm" />
     <None Include="..\res\error.xpm" />

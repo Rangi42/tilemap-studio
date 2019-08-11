@@ -184,6 +184,9 @@
     <None Include="..\res\warning.xpm">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\res\add.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="tilemap-studio.rc">

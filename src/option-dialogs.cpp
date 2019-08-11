@@ -256,6 +256,46 @@ int Tilemap_Width_Dialog::refresh_content(int ww, int dy) {
 	return wgt_h;
 }
 
+Add_Tileset_Dialog::Add_Tileset_Dialog(const char *t) : Option_Dialog(194, t), _tileset_header(NULL), _start(NULL) {}
+
+Add_Tileset_Dialog::~Add_Tileset_Dialog() {
+	delete _tileset_header;
+	delete _start;
+}
+
+void Add_Tileset_Dialog::limit_tileset_options(const char *filename) {
+	initialize();
+	const char *name = fl_filename_name(filename);
+	char buffer[FL_PATH_MAX] = {};
+	strcpy(buffer, name);
+	strcat(buffer, ":");
+	_tileset_header->copy_label(buffer);
+}
+
+void Add_Tileset_Dialog::initialize_content() {
+	// Populate content group
+	_tileset_header = new Label(0, 0, 0, 0);
+	_start = new OS_Hex_Spinner(0, 0, 0, 0, "Start at ID:");
+	// Initialize content group's children
+	_start->align(FL_ALIGN_LEFT);
+	_start->range(0x00, 0xFF);
+	_start->value(0x00);
+}
+
+int Add_Tileset_Dialog::refresh_content(int ww, int dy) {
+	int wgt_h = 22, win_m = 10, wgt_m = 4;
+	int ch = wgt_h + wgt_m + wgt_h;
+	_content->resize(win_m, dy, ww, ch);
+
+	_tileset_header->resize(win_m, dy, ww, wgt_h);
+	dy += wgt_h + wgt_m;
+	int wgt_off = win_m + text_width(_start->label(), 2);
+	int wgt_w = MAX(text_width("AA", 2), text_width("FF", 2)) + wgt_h;
+	_start->resize(wgt_off, dy, wgt_w, wgt_h);
+
+	return ch;
+}
+
 Image_To_Tiles_Dialog::Image_To_Tiles_Dialog(const char *t) : Option_Dialog(320, t), _image_heading(NULL),
 	_tilemap_heading(NULL), _tileset_heading(NULL), _image(NULL), _tilemap(NULL), _tileset(NULL), _image_name(NULL),
 	_tilemap_name(NULL), _tileset_name(NULL), _format(NULL), _start_id(NULL), _use_7f(NULL), _image_chooser(NULL),

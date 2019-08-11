@@ -1,6 +1,8 @@
 #ifndef TILE_BUTTON_H
 #define TILE_BUTTON_H
 
+#include <vector>
+
 #pragma warning(push, 0)
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Radio_Button.H>
@@ -15,9 +17,9 @@ class Tileset;
 
 struct Tile_State {
 private:
-	static Tileset *_tileset;
+	static std::vector<Tileset> *_tilesets;
 public:
-	inline static void tileset(Tileset *t) { _tileset = t; }
+	inline static void tilesets(std::vector<Tileset> *ts) { _tilesets = ts; }
 public:
 	uint8_t id;
 	bool x_flip, y_flip;

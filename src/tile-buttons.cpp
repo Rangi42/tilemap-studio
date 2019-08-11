@@ -89,14 +89,23 @@ static void draw_selection_border(int x, int y) {
 	fl_rect(x+2, y+2, TILE_SIZE_2X-4, TILE_SIZE_2X-4, FL_BLACK);
 }
 
-Tileset *Tile_State::_tileset = NULL;
+std::vector<Tileset> *Tile_State::_tilesets = NULL;
 
 Tile_State::Tile_State(uint8_t id_, bool x_flip_, bool y_flip_, int color_) : id(id_),
 	x_flip(x_flip_), y_flip(y_flip_), color(color_) {}
 
 void Tile_State::draw(int x, int y, bool active, bool selected) {
 	int s = OS::is_consolas() ? 11 : 10;
-	if (!_tileset->draw_tile(this, x, y, active)) {
+	bool gfx = false;
+	if (_tilesets) {
+		for (std::vector<Tileset>::reverse_iterator it = _tilesets->rbegin(); it != _tilesets->rend(); ++it) {
+			if (it->draw_tile(this, x, y, active)) {
+				gfx = true;
+				break;
+			}
+		}
+	}
+	if (!gfx) {
 		char hi = (char)((id & 0xF0) >> 4), lo = (char)(id & 0x0F);
 		const char buffer[3] = {hi > 9 ? 'A' + hi - 10 : '0' + hi, lo > 9 ? 'A' + lo - 10 : '0' + lo, '\0'};
 		bool r = Config::rainbow_tiles();

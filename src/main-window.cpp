@@ -34,9 +34,9 @@
 #endif
 
 Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_Window(x, y, w, h, PROGRAM_NAME),
-	_tile_buttons(), _tilemap_file(), _tileset_file(), _recent(), _tilemap(), _tileset(), _wx(x), _wy(y), _ww(w), _wh(h) {
+	_tile_buttons(), _tilemap_file(), _tileset_files(), _recent(), _tilemap(), _tilesets(), _wx(x), _wy(y), _ww(w), _wh(h) {
 
-	Tile_State::tileset(&_tileset);
+	Tile_State::tilesets(&_tilesets);
 
 	// Get global configs
 	Tilemap::Format format_config = (Tilemap::Format)Preferences::get("format", Config::format());
@@ -143,8 +143,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	bx += tileset_heading->w(); bw -= tileset_heading->w();
 	_load_tb = new Toolbar_Button(bx, by, wgt_h, wgt_h);
 	bx += _load_tb->w(); bw -= _load_tb->w();
+	_add_tb = new Toolbar_Button(bx, by, wgt_h, wgt_h);
+	bx += _add_tb->w(); bw -= _add_tb->w();
 	_reload_tb = new Toolbar_Button(bx, by, wgt_h, wgt_h);
-	bx += _reload_tb->w(); bw -= _reload_tb->w();
 	_image_to_tiles_tb = new Toolbar_Button(bx+bw-wgt_h, by, wgt_h, wgt_h);
 	_right_top_bar->end();
 	_right_top_bar->resizable(NULL);
@@ -205,6 +206,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_new_tilemap_dialog = new New_Tilemap_Dialog("New Tilemap");
 	_tilemap_width_dialog = new Tilemap_Width_Dialog("Tilemap Width");
 	_resize_dialog = new Resize_Dialog("Resize Tilemap");
+	_add_tileset_dialog = new Add_Tileset_Dialog("Add Tileset");
 	_image_to_tiles_dialog = new Image_To_Tiles_Dialog("Image to Tiles");
 	_help_window = new Help_Window(48, 48, 500, 400, PROGRAM_NAME " Help");
 
@@ -263,8 +265,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 		OS_MENU_ITEM("&Save", FL_COMMAND + 's', (Fl_Callback *)save_cb, this, 0),
 		OS_MENU_ITEM("Save &As...", FL_COMMAND + 'S', (Fl_Callback *)save_as_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("Load &Tileset...", FL_COMMAND + 't', (Fl_Callback *)load_tileset_cb, this, 0),
-		OS_MENU_ITEM("Re&load Tileset", FL_COMMAND + 'r', (Fl_Callback *)reload_tileset_cb, this, 0),
-		OS_MENU_ITEM("&Unload Tileset", FL_COMMAND + 'W', (Fl_Callback *)unload_tileset_cb, this, FL_MENU_DIVIDER),
+		OS_MENU_ITEM("A&dd Tileset...", FL_COMMAND + 'a', (Fl_Callback *)add_tileset_cb, this, 0),
+		OS_MENU_ITEM("Re&load Tilesets", FL_COMMAND + 'r', (Fl_Callback *)reload_tilesets_cb, this, 0),
+		OS_MENU_ITEM("&Unload Tilesets", FL_COMMAND + 'W', (Fl_Callback *)unload_tilesets_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&Print...", FL_COMMAND + 'p', (Fl_Callback *)print_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("E&xit", FL_ALT + FL_F + 4, (Fl_Callback *)exit_cb, this, 0),
 		{},
@@ -357,8 +360,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_rainbow_tiles_mi = PM_FIND_MENU_ITEM_CB(rainbow_tiles_cb);
 	_show_attributes_mi = PM_FIND_MENU_ITEM_CB(show_attributes_cb);
 	// Conditional menu items
-	_reload_tileset_mi = PM_FIND_MENU_ITEM_CB(reload_tileset_cb);
-	_unload_tileset_mi = PM_FIND_MENU_ITEM_CB(unload_tileset_cb);
+	_reload_tilesets_mi = PM_FIND_MENU_ITEM_CB(reload_tilesets_cb);
+	_unload_tilesets_mi = PM_FIND_MENU_ITEM_CB(unload_tilesets_cb);
 	_close_mi = PM_FIND_MENU_ITEM_CB(close_cb);
 	_save_mi = PM_FIND_MENU_ITEM_CB(save_cb);
 	_save_as_mi = PM_FIND_MENU_ITEM_CB(save_as_cb);
@@ -425,8 +428,12 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_load_tb->callback((Fl_Callback *)load_tileset_cb, this);
 	_load_tb->image(LOAD_ICON);
 
-	_reload_tb->tooltip("Reload Tileset... (Ctrl+R)");
-	_reload_tb->callback((Fl_Callback *)reload_tileset_cb, this);
+	_add_tb->tooltip("Add Tileset... (Ctrl+A)");
+	_add_tb->callback((Fl_Callback *)add_tileset_cb, this);
+	_add_tb->image(ADD_ICON);
+
+	_reload_tb->tooltip("Reload Tilesets... (Ctrl+R)");
+	_reload_tb->callback((Fl_Callback *)reload_tilesets_cb, this);
 	_reload_tb->image(RELOAD_ICON);
 	_reload_tb->deimage(RELOAD_DISABLED_ICON);
 
@@ -642,12 +649,20 @@ void Main_Window::update_tilemap_metadata() {
 }
 
 void Main_Window::update_tileset_metadata() {
-	if (_tileset.num_tiles()) {
-		const char *basename = fl_filename_name(_tileset_file.c_str());
-		_tileset_name->label(basename);
+	if (!_tilesets.empty()) {
+		if (_tilesets.size() == 1) {
+			std::string &f = _tileset_files[0];
+			const char *basename = fl_filename_name(f.c_str());
+			_tileset_name->label(basename);
+		}
+		else {
+			char buffer[FL_PATH_MAX] = {};
+			sprintf(buffer, "%d files", _tilesets.size());
+			_tileset_name->copy_label(buffer);
+		}
 	}
 	else {
-		_tileset_name->label("No file selected");
+		_tileset_name->label("No files selected");
 	}
 }
 
@@ -692,15 +707,15 @@ void Main_Window::update_active_controls() {
 		_resize_mi->deactivate();
 		_resize_tb->deactivate();
 	}
-	if (_tileset.num_tiles()) {
-		_reload_tileset_mi->activate();
+	if (!_tilesets.empty()) {
+		_reload_tilesets_mi->activate();
 		_reload_tb->activate();
-		_unload_tileset_mi->activate();
+		_unload_tilesets_mi->activate();
 	}
 	else {
-		_reload_tileset_mi->deactivate();
+		_reload_tilesets_mi->deactivate();
 		_reload_tb->deactivate();
-		_unload_tileset_mi->deactivate();
+		_unload_tilesets_mi->deactivate();
 	}
 	if (Config::format() == Tilemap::Format::TILE_ATTR) {
 		_color->activate();
@@ -910,19 +925,20 @@ bool Main_Window::save_tilemap(bool force) {
 	return true;
 }
 
-void Main_Window::load_tileset(const char *filename) {
-	unload_tileset_cb(NULL, this);
+void Main_Window::add_tileset(const char *filename, uint8_t start) {
 	const char *basename = fl_filename_name(filename);
-	Tileset::Result result = _tileset.read_tiles(filename);
+	Tileset tileset(start);
+	Tileset::Result result = tileset.read_tiles(filename);
 	if (result) {
-		_tileset.clear();
 		std::string msg = "Error reading ";
 		msg = msg + basename + "!\n\n" + Tileset::error_message(result);
 		_error_dialog->message(msg);
 		_error_dialog->show(this);
+		tileset.clear();
 		return;
 	}
-	_tileset_file = filename;
+	_tilesets.push_back(tileset);
+	_tileset_files.push_back(filename);
 	update_tileset_metadata();
 	update_active_controls();
 	redraw();
@@ -1076,16 +1092,50 @@ void Main_Window::load_tileset_cb(Fl_Widget *, Main_Window *mw) {
 	mw->load_tileset(filename);
 }
 
-void Main_Window::reload_tileset_cb(Fl_Widget *, Main_Window *mw) {
-	if (!mw->_tileset.num_tiles()) { return; }
-	std::string filename(mw->_tileset_file);
-	mw->load_tileset(filename.c_str());
+void Main_Window::add_tileset_cb(Fl_Widget *, Main_Window *mw) {
+	int status = mw->_tileset_load_chooser->show();
+	if (status == 1) { return; }
+
+	const char *filename = mw->_tileset_load_chooser->filename();
+	const char *basename = fl_filename_name(filename);
+	if (status == -1) {
+		std::string msg = "Could not open ";
+		msg = msg + basename + "!\n\n" + mw->_tileset_load_chooser->errmsg();
+		mw->_error_dialog->message(msg);
+		mw->_error_dialog->show(mw);
+		return;
+	}
+
+	mw->_add_tileset_dialog->limit_tileset_options(filename);
+	mw->_add_tileset_dialog->start(mw->_selected ? mw->_selected->id() : 0x00);
+	mw->_add_tileset_dialog->show(mw);
+	if (mw->_add_tileset_dialog->canceled()) { return; }
+	uint8_t start = mw->_add_tileset_dialog->start();
+	mw->add_tileset(filename, start);
 }
 
-void Main_Window::unload_tileset_cb(Fl_Widget *, Main_Window *mw) {
-	if (!mw->_tileset.num_tiles()) { return; }
-	mw->_tileset.clear();
-	mw->_tileset_file.clear();
+void Main_Window::reload_tilesets_cb(Fl_Widget *, Main_Window *mw) {
+	if (mw->_tilesets.empty()) { return; }
+
+	std::vector<Tileset> tilesets(mw->_tilesets);
+	std::vector<std::string> tileset_files(mw->_tileset_files);
+	mw->_tilesets.clear();
+	mw->_tileset_files.clear();
+	size_t n = tilesets.size();
+	for (size_t i = 0; i < n; i++) {
+		const char *filename = tileset_files[i].c_str();
+		uint8_t start = tilesets[i].start();
+		mw->add_tileset(filename, start);
+	}
+}
+
+void Main_Window::unload_tilesets_cb(Fl_Widget *, Main_Window *mw) {
+	if (mw->_tilesets.empty()) { return; }
+	for (Tileset &t : mw->_tilesets) {
+		t.clear();
+	}
+	mw->_tilesets.clear();
+	mw->_tileset_files.clear();
 	mw->update_tileset_metadata();
 	mw->update_active_controls();
 	mw->redraw();
@@ -1174,70 +1224,90 @@ void Main_Window::redo_cb(Fl_Widget *, Main_Window *mw) {
 void Main_Window::classic_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_classic_theme();
 	mw->_classic_theme_mi->setonly();
-	mw->_tileset.refresh_inactive_image();
+	for (Tileset &t : mw->_tilesets) {
+		t.refresh_inactive_image();
+	}
 	mw->redraw();
 }
 
 void Main_Window::aero_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_aero_theme();
 	mw->_aero_theme_mi->setonly();
-	mw->_tileset.refresh_inactive_image();
+	for (Tileset &t : mw->_tilesets) {
+		t.refresh_inactive_image();
+	}
 	mw->redraw();
 }
 
 void Main_Window::metro_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_metro_theme();
 	mw->_metro_theme_mi->setonly();
-	mw->_tileset.refresh_inactive_image();
+	for (Tileset &t : mw->_tilesets) {
+		t.refresh_inactive_image();
+	}
 	mw->redraw();
 }
 
 void Main_Window::aqua_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_aqua_theme();
 	mw->_aqua_theme_mi->setonly();
-	mw->_tileset.refresh_inactive_image();
+	for (Tileset &t : mw->_tilesets) {
+		t.refresh_inactive_image();
+	}
 	mw->redraw();
 }
 
 void Main_Window::greybird_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_greybird_theme();
 	mw->_greybird_theme_mi->setonly();
-	mw->_tileset.refresh_inactive_image();
+	for (Tileset &t : mw->_tilesets) {
+		t.refresh_inactive_image();
+	}
 	mw->redraw();
 }
 
 void Main_Window::metal_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_metal_theme();
 	mw->_metal_theme_mi->setonly();
-	mw->_tileset.refresh_inactive_image();
+	for (Tileset &t : mw->_tilesets) {
+		t.refresh_inactive_image();
+	}
 	mw->redraw();
 }
 
 void Main_Window::blue_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_blue_theme();
 	mw->_blue_theme_mi->setonly();
-	mw->_tileset.refresh_inactive_image();
+	for (Tileset &t : mw->_tilesets) {
+		t.refresh_inactive_image();
+	}
 	mw->redraw();
 }
 
 void Main_Window::olive_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_olive_theme();
 	mw->_olive_theme_mi->setonly();
-	mw->_tileset.refresh_inactive_image();
+	for (Tileset &t : mw->_tilesets) {
+		t.refresh_inactive_image();
+	}
 	mw->redraw();
 }
 
 void Main_Window::rose_gold_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_rose_gold_theme();
 	mw->_rose_gold_theme_mi->setonly();
-	mw->_tileset.refresh_inactive_image();
+	for (Tileset &t : mw->_tilesets) {
+		t.refresh_inactive_image();
+	}
 	mw->redraw();
 }
 
 void Main_Window::dark_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_dark_theme();
 	mw->_dark_theme_mi->setonly();
-	mw->_tileset.refresh_inactive_image();
+	for (Tileset &t : mw->_tilesets) {
+		t.refresh_inactive_image();
+	}
 	mw->redraw();
 }
 

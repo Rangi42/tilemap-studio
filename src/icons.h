@@ -8,6 +8,7 @@
 #include "new.xpm"
 #include "open.xpm"
 #include "load.xpm"
+#include "add.xpm"
 #include "reload.xpm"
 #include "reload-disabled.xpm"
 #include "save.xpm"
@@ -26,6 +27,7 @@
 static Fl_Pixmap NEW_ICON(NEW_XPM);
 static Fl_Pixmap OPEN_ICON(OPEN_XPM);
 static Fl_Pixmap LOAD_ICON(LOAD_XPM);
+static Fl_Pixmap ADD_ICON(ADD_XPM);
 static Fl_Pixmap RELOAD_ICON(RELOAD_XPM);
 static Fl_Pixmap RELOAD_DISABLED_ICON(RELOAD_DISABLED_XPM);
 static Fl_Pixmap SAVE_ICON(SAVE_XPM);

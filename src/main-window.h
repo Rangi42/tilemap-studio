@@ -2,6 +2,7 @@
 #define MAIN_WINDOW_H
 
 #include <unordered_map>
+#include <vector>
 
 #pragma warning(push, 0)
 #include <FL/Fl_Double_Window.H>
@@ -44,7 +45,7 @@ private:
 	Label_Button *_tilemap_name;
 	Toolbar_Button *_undo_tb, *_redo_tb, *_resize_tb;
 	OS_Spinner *_tilemap_width;
-	Toolbar_Button *_load_tb, *_reload_tb;
+	Toolbar_Button *_load_tb, *_add_tb, *_reload_tb;
 	Toolbar_Button *_image_to_tiles_tb;
 	Label_Button *_tileset_name;
 	Label *_flip_heading;
@@ -56,7 +57,7 @@ private:
 	Label *_tile_heading;
 	Status_Bar_Field *_tilemap_dimensions, *_tilemap_format, *_hover_id, *_hover_xy, *_hover_landmark;
 	// Conditional menu items
-	Fl_Menu_Item *_reload_tileset_mi = NULL, *_unload_tileset_mi = NULL, *_close_mi = NULL, *_save_mi = NULL, *_save_as_mi = NULL,
+	Fl_Menu_Item *_reload_tilesets_mi = NULL, *_unload_tilesets_mi = NULL, *_close_mi = NULL, *_save_mi = NULL, *_save_as_mi = NULL,
 		*_print_mi = NULL;
 	Fl_Menu_Item *_undo_mi = NULL, *_redo_mi = NULL;
 	Fl_Menu_Item *_tilemap_width_mi = NULL, *_resize_mi = NULL;
@@ -66,13 +67,15 @@ private:
 	New_Tilemap_Dialog *_new_tilemap_dialog;
 	Tilemap_Width_Dialog *_tilemap_width_dialog;
 	Resize_Dialog *_resize_dialog;
+	Add_Tileset_Dialog *_add_tileset_dialog;
 	Image_To_Tiles_Dialog *_image_to_tiles_dialog;
 	Help_Window *_help_window;
 	// Data
-	std::string _tilemap_file, _tileset_file;
+	std::string _tilemap_file;
+	std::vector<std::string> _tileset_files;
 	std::string _recent[NUM_RECENT];
 	Tilemap _tilemap;
-	Tileset _tileset;
+	std::vector<Tileset> _tilesets;
 	Tile_Button *_selected = NULL;
 	// Work properties
 	bool _map_editable = false;
@@ -101,7 +104,8 @@ public:
 	inline void new_tilemap(size_t width, size_t height) { open_tilemap(NULL, width, height); }
 	void open_tilemap(const char *filename, size_t width = 0, size_t height = 0);
 	void open_recent_tilemap(int n);
-	void load_tileset(const char *filename);
+	inline void load_tileset(const char *filename) { unload_tilesets_cb(NULL, this); add_tileset(filename, 0x00); }
+	void add_tileset(const char *filename, uint8_t start);
 private:
 	void store_recent_tilemap(void);
 	void update_recent_tilemaps(void);
@@ -123,8 +127,9 @@ private:
 	static void save_cb(Fl_Widget *w, Main_Window *mw);
 	static void save_as_cb(Fl_Widget *w, Main_Window *mw);
 	static void load_tileset_cb(Fl_Widget *w, Main_Window *mw);
-	static void reload_tileset_cb(Fl_Widget *w, Main_Window *mw);
-	static void unload_tileset_cb(Fl_Widget *w, Main_Window *mw);
+	static void add_tileset_cb(Fl_Widget *w, Main_Window *mw);
+	static void reload_tilesets_cb(Fl_Widget *w, Main_Window *mw);
+	static void unload_tilesets_cb(Fl_Widget *w, Main_Window *mw);
 	static void print_cb(Fl_Widget *w, Main_Window *mw);
 	static void exit_cb(Fl_Widget *w, Main_Window *mw);
 	// Edit menu

@@ -103,6 +103,21 @@ protected:
 	int refresh_content(int ww, int dy);
 };
 
+class Add_Tileset_Dialog : public Option_Dialog {
+private:
+	Label *_tileset_header;
+	OS_Hex_Spinner *_start;
+public:
+	Add_Tileset_Dialog(const char *t);
+	~Add_Tileset_Dialog();
+	inline uint8_t start(void) const { return (uint8_t)_start->value(); }
+	inline void start(uint8_t n) { initialize(); _start->value(n); }
+	void limit_tileset_options(const char *filename);
+protected:
+	void initialize_content(void);
+	int refresh_content(int ww, int dy);
+};
+
 class Image_To_Tiles_Dialog : public Option_Dialog {
 private:
 	Label *_image_heading, *_tilemap_heading, *_tileset_heading;

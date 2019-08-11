@@ -9,11 +9,9 @@
 #include "tile-buttons.h"
 #include "config.h"
 
-Tileset::Tileset() : _image(NULL), _inactive_image(NULL), _num_tiles(0), _result(TILESET_NULL) {}
+Tileset::Tileset(uint8_t start) : _image(NULL), _inactive_image(NULL), _num_tiles(0), _start(start), _result(TILESET_NULL) {}
 
-Tileset::~Tileset() {
-	clear();
-}
+Tileset::~Tileset() {}
 
 void Tileset::clear() {
 	delete _image;
@@ -21,6 +19,7 @@ void Tileset::clear() {
 	delete _inactive_image;
 	_inactive_image = NULL;
 	_num_tiles = 0;
+	_start = 0x00;
 	_result = TILESET_NULL;
 }
 
@@ -35,12 +34,14 @@ bool Tileset::refresh_inactive_image() {
 }
 
 bool Tileset::draw_tile(const Tile_State *ts, int x, int y, bool active) const {
-	uint8_t id = ts->id;
+	if (ts->id < _start) { return false; }
+	uint8_t index = ts->id - _start;
+	if (index >= _num_tiles) { return false; }
 	Fl_RGB_Image *img = active ? _image : _inactive_image;
-	if (!img || id >= _num_tiles) { return false; }
+	if (!img) { return false; }
 
 	int wt = img->w() / TILE_SIZE_2X;
-	int tx = id % wt * TILE_SIZE_2X, ty = id / wt * TILE_SIZE_2X;
+	int tx = index % wt * TILE_SIZE_2X, ty = index / wt * TILE_SIZE_2X;
 	if (!ts->x_flip && !ts->y_flip) {
 		img->draw(x, y, TILE_SIZE_2X, TILE_SIZE_2X, tx, ty);
 		return true;
