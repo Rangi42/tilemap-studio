@@ -289,7 +289,7 @@ int Add_Tileset_Dialog::refresh_content(int ww, int dy) {
 
 	_tileset_header->resize(win_m, dy, ww, wgt_h);
 	dy += wgt_h + wgt_m;
-	int wgt_off = win_m + text_width(_start->label(), 2);
+	int wgt_off = win_m + text_width(_start->label(), 3);
 	int wgt_w = MAX(text_width("AA", 2), text_width("FF", 2)) + wgt_h;
 	_start->resize(wgt_off, dy, wgt_w, wgt_h);
 
