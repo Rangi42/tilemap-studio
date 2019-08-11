@@ -106,7 +106,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_left_group->begin();
 	_left_bottom_bar = new Fl_Group(gx, gy, gw, wgt_h);
 	bx = _left_bottom_bar->x(), by = _left_bottom_bar->y(), bw = _left_bottom_bar->w(), bh = _left_bottom_bar->h();
-	wgt_off = wgt_m + wgt_h * 4 + text_width("Width:", 2) + text_width("999", 2);
+	wgt_off = wgt_h * 4 + wgt_m + 6 + text_width("Width:", 2) + text_width("999", 2);
 	wgt_w = bw - wgt_off;
 	_tilemap_name = new Label_Button(bx, by, wgt_w, bh);
 	bx += wgt_w;
