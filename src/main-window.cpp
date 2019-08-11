@@ -34,7 +34,8 @@
 #endif
 
 Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_Window(x, y, w, h, PROGRAM_NAME),
-	_tile_buttons(), _tilemap_file(), _tileset_files(), _recent(), _tilemap(), _tilesets(), _wx(x), _wy(y), _ww(w), _wh(h) {
+	_tile_buttons(), _tilemap_file(), _tileset_files(), _recent_tilemaps(), _recent_tilesets(), _tilemap(), _tilesets(),
+	_wx(x), _wy(y), _ww(w), _wh(h) {
 
 	Tile_State::tilesets(&_tilesets);
 
@@ -47,7 +48,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	Config::attributes(!!attributes_config);
 
 	for (int i = 0; i < NUM_RECENT; i++) {
-		_recent[i] = Preferences::get_string(Fl_Preferences::Name("recent%d", i));
+		_recent_tilemaps[i] = Preferences::get_string(Fl_Preferences::Name("recent-map%d", i));
+		_recent_tilesets[i] = Preferences::get_string(Fl_Preferences::Name("recent-set%d", i));
 	}
 
 	// Populate window
@@ -247,19 +249,19 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 		OS_SUBMENU("&File"),
 		OS_MENU_ITEM("&New", FL_COMMAND + 'n', (Fl_Callback *)new_cb, this, 0),
 		OS_MENU_ITEM("&Open...", FL_COMMAND + 'o', (Fl_Callback *)open_cb, this, 0),
-		OS_MENU_ITEM("Open &Recent", 0, NULL, NULL, FL_SUBMENU | FL_MENU_DIVIDER),
-		// NUM_RECENT items with callback open_recent_cb
-		OS_NULL_MENU_ITEM(FL_ALT + '1', (Fl_Callback *)open_recent_cb, this, 0),
-		OS_NULL_MENU_ITEM(FL_ALT + '2', (Fl_Callback *)open_recent_cb, this, 0),
-		OS_NULL_MENU_ITEM(FL_ALT + '3', (Fl_Callback *)open_recent_cb, this, 0),
-		OS_NULL_MENU_ITEM(FL_ALT + '4', (Fl_Callback *)open_recent_cb, this, 0),
-		OS_NULL_MENU_ITEM(FL_ALT + '5', (Fl_Callback *)open_recent_cb, this, 0),
-		OS_NULL_MENU_ITEM(FL_ALT + '6', (Fl_Callback *)open_recent_cb, this, 0),
-		OS_NULL_MENU_ITEM(FL_ALT + '7', (Fl_Callback *)open_recent_cb, this, 0),
-		OS_NULL_MENU_ITEM(FL_ALT + '8', (Fl_Callback *)open_recent_cb, this, 0),
-		OS_NULL_MENU_ITEM(FL_ALT + '9', (Fl_Callback *)open_recent_cb, this, 0),
-		OS_NULL_MENU_ITEM(FL_ALT + '0', (Fl_Callback *)open_recent_cb, this, 0),
-		OS_MENU_ITEM("Clear &Recent", 0, (Fl_Callback *)clear_recent_cb, this, 0),
+		OS_MENU_ITEM("Open &Recent", 0, NULL, NULL, FL_SUBMENU),
+		// NUM_RECENT items with callback open_recent_tilemap_cb
+		OS_NULL_MENU_ITEM(FL_ALT + '1', (Fl_Callback *)open_recent_tilemap_cb, this, 0),
+		OS_NULL_MENU_ITEM(FL_ALT + '2', (Fl_Callback *)open_recent_tilemap_cb, this, 0),
+		OS_NULL_MENU_ITEM(FL_ALT + '3', (Fl_Callback *)open_recent_tilemap_cb, this, 0),
+		OS_NULL_MENU_ITEM(FL_ALT + '4', (Fl_Callback *)open_recent_tilemap_cb, this, 0),
+		OS_NULL_MENU_ITEM(FL_ALT + '5', (Fl_Callback *)open_recent_tilemap_cb, this, 0),
+		OS_NULL_MENU_ITEM(FL_ALT + '6', (Fl_Callback *)open_recent_tilemap_cb, this, 0),
+		OS_NULL_MENU_ITEM(FL_ALT + '7', (Fl_Callback *)open_recent_tilemap_cb, this, 0),
+		OS_NULL_MENU_ITEM(FL_ALT + '8', (Fl_Callback *)open_recent_tilemap_cb, this, 0),
+		OS_NULL_MENU_ITEM(FL_ALT + '9', (Fl_Callback *)open_recent_tilemap_cb, this, 0),
+		OS_NULL_MENU_ITEM(FL_ALT + '0', (Fl_Callback *)open_recent_tilemap_cb, this, 0),
+		OS_MENU_ITEM("Clear &Recent", 0, (Fl_Callback *)clear_recent_tilemaps_cb, this, 0),
 		{},
 		OS_MENU_ITEM("&Close", FL_COMMAND + 'w', (Fl_Callback *)close_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&Save", FL_COMMAND + 's', (Fl_Callback *)save_cb, this, 0),
@@ -267,6 +269,20 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 		OS_MENU_ITEM("Load &Tileset...", FL_COMMAND + 't', (Fl_Callback *)load_tileset_cb, this, 0),
 		OS_MENU_ITEM("A&dd Tileset...", FL_COMMAND + 'a', (Fl_Callback *)add_tileset_cb, this, 0),
 		OS_MENU_ITEM("Re&load Tilesets", FL_COMMAND + 'r', (Fl_Callback *)reload_tilesets_cb, this, 0),
+		OS_MENU_ITEM("Load R&ecent", 0, NULL, NULL, FL_SUBMENU),
+		// NUM_RECENT items with callback load_recent_tileset_cb
+		OS_NULL_MENU_ITEM(FL_ALT + FL_SHIFT + '1', (Fl_Callback *)load_recent_tileset_cb, this, 0),
+		OS_NULL_MENU_ITEM(FL_ALT + FL_SHIFT + '2', (Fl_Callback *)load_recent_tileset_cb, this, 0),
+		OS_NULL_MENU_ITEM(FL_ALT + FL_SHIFT + '3', (Fl_Callback *)load_recent_tileset_cb, this, 0),
+		OS_NULL_MENU_ITEM(FL_ALT + FL_SHIFT + '4', (Fl_Callback *)load_recent_tileset_cb, this, 0),
+		OS_NULL_MENU_ITEM(FL_ALT + FL_SHIFT + '5', (Fl_Callback *)load_recent_tileset_cb, this, 0),
+		OS_NULL_MENU_ITEM(FL_ALT + FL_SHIFT + '6', (Fl_Callback *)load_recent_tileset_cb, this, 0),
+		OS_NULL_MENU_ITEM(FL_ALT + FL_SHIFT + '7', (Fl_Callback *)load_recent_tileset_cb, this, 0),
+		OS_NULL_MENU_ITEM(FL_ALT + FL_SHIFT + '8', (Fl_Callback *)load_recent_tileset_cb, this, 0),
+		OS_NULL_MENU_ITEM(FL_ALT + FL_SHIFT + '9', (Fl_Callback *)load_recent_tileset_cb, this, 0),
+		OS_NULL_MENU_ITEM(FL_ALT + FL_SHIFT + '0', (Fl_Callback *)load_recent_tileset_cb, this, 0),
+		OS_MENU_ITEM("Clear &Recent", 0, (Fl_Callback *)clear_recent_tilesets_cb, this, 0),
+		{},
 		OS_MENU_ITEM("&Unload Tilesets", FL_COMMAND + 'W', (Fl_Callback *)unload_tilesets_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&Print...", FL_COMMAND + 'p', (Fl_Callback *)print_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("E&xit", FL_ALT + FL_F + 4, (Fl_Callback *)exit_cb, this, 0),
@@ -335,9 +351,11 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_menu_bar->copy(menu_items);
 
 	// Initialize menu bar items
-	int first_recent_i = _menu_bar->find_index((Fl_Callback *)open_recent_cb);
+	int first_recent_tilemap_i = _menu_bar->find_index((Fl_Callback *)open_recent_tilemap_cb);
+	int first_recent_tileset_i = _menu_bar->find_index((Fl_Callback *)load_recent_tileset_cb);
 	for (int i = 0; i < NUM_RECENT; i++) {
-		_recent_mis[i] = const_cast<Fl_Menu_Item *>(&_menu_bar->menu()[first_recent_i + i]);
+		_recent_tilemap_mis[i] = const_cast<Fl_Menu_Item *>(&_menu_bar->menu()[first_recent_tilemap_i + i]);
+		_recent_tileset_mis[i] = const_cast<Fl_Menu_Item *>(&_menu_bar->menu()[first_recent_tileset_i + i]);
 	}
 #define PM_FIND_MENU_ITEM_CB(c) (const_cast<Fl_Menu_Item *>(_menu_bar->find_item((Fl_Callback *)(c))))
 	_classic_theme_mi = PM_FIND_MENU_ITEM_CB(classic_theme_cb);
@@ -497,6 +515,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 		);
 
 	update_recent_tilemaps();
+	update_recent_tilesets();
 	update_tilemap_metadata();
 	update_tileset_metadata();
 	update_active_controls();
@@ -556,31 +575,62 @@ int Main_Window::handle(int event) {
 void Main_Window::store_recent_tilemap() {
 	std::string last(_tilemap_file);
 	for (int i = 0; i < NUM_RECENT; i++) {
-		if (_recent[i] == _tilemap_file) {
-			_recent[i] = last;
+		if (_recent_tilemaps[i] == _tilemap_file) {
+			_recent_tilemaps[i] = last;
 			break;
 		}
-		std::swap(last, _recent[i]);
+		std::swap(last, _recent_tilemaps[i]);
 	}
 	update_recent_tilemaps();
 }
 
- void Main_Window::update_recent_tilemaps() {
+void Main_Window::update_recent_tilemaps() {
 	int last = -1;
 	for (int i = 0; i < NUM_RECENT; i++) {
-		if (_recent[i].empty()) {
-			_recent_mis[i]->label("");
-			_recent_mis[i]->hide();
+		if (_recent_tilemaps[i].empty()) {
+			_recent_tilemap_mis[i]->label("");
+			_recent_tilemap_mis[i]->hide();
 		}
 		else {
-			const char *basename = fl_filename_name(_recent[i].c_str());
-			_recent_mis[i]->label(basename);
-			_recent_mis[i]->show();
+			const char *basename = fl_filename_name(_recent_tilemaps[i].c_str());
+			_recent_tilemap_mis[i]->label(basename);
+			_recent_tilemap_mis[i]->show();
 			last = i;
 		}
-		_recent_mis[i]->flags &= ~FL_MENU_DIVIDER;
+		_recent_tilemap_mis[i]->flags &= ~FL_MENU_DIVIDER;
 	}
-	_recent_mis[last]->flags |= FL_MENU_DIVIDER;
+	_recent_tilemap_mis[last]->flags |= FL_MENU_DIVIDER;
+}
+
+void Main_Window::store_recent_tileset() {
+	const std::string &tileset_file = _tileset_files.back();
+	std::string last(tileset_file);
+	for (int i = 0; i < NUM_RECENT; i++) {
+		if (_recent_tilesets[i] == tileset_file) {
+			_recent_tilesets[i] = last;
+			break;
+		}
+		std::swap(last, _recent_tilesets[i]);
+	}
+	update_recent_tilesets();
+}
+
+void Main_Window::update_recent_tilesets() {
+	int last = -1;
+	for (int i = 0; i < NUM_RECENT; i++) {
+		if (_recent_tilesets[i].empty()) {
+			_recent_tileset_mis[i]->label("");
+			_recent_tileset_mis[i]->hide();
+		}
+		else {
+			const char *basename = fl_filename_name(_recent_tilesets[i].c_str());
+			_recent_tileset_mis[i]->label(basename);
+			_recent_tileset_mis[i]->show();
+			last = i;
+		}
+		_recent_tileset_mis[i]->flags &= ~FL_MENU_DIVIDER;
+	}
+	_recent_tileset_mis[last]->flags |= FL_MENU_DIVIDER;
 }
 
 void Main_Window::update_status(Tile_Tessera *tt) {
@@ -651,7 +701,7 @@ void Main_Window::update_tilemap_metadata() {
 void Main_Window::update_tileset_metadata() {
 	if (!_tilesets.empty()) {
 		if (_tilesets.size() == 1) {
-			std::string &f = _tileset_files[0];
+			std::string &f = _tileset_files.front();
 			const char *basename = fl_filename_name(f.c_str());
 			_tileset_name->label(basename);
 		}
@@ -863,7 +913,7 @@ void Main_Window::open_tilemap(const char *filename, size_t width, size_t height
 }
 
 void Main_Window::open_recent_tilemap(int n) {
-	if (n < 0 || n >= NUM_RECENT || _recent[n].empty()) {
+	if (n < 0 || n >= NUM_RECENT || _recent_tilemaps[n].empty()) {
 		return;
 	}
 
@@ -876,7 +926,7 @@ void Main_Window::open_recent_tilemap(int n) {
 		if (_unsaved_dialog->canceled()) { return; }
 	}
 
-	const char *filename = _recent[n].c_str();
+	const char *filename = _recent_tilemaps[n].c_str();
 	_tilemap.modified(false);
 	open_tilemap(filename);
 }
@@ -939,9 +989,28 @@ void Main_Window::add_tileset(const char *filename, uint8_t start) {
 	}
 	_tilesets.push_back(tileset);
 	_tileset_files.push_back(filename);
+	store_recent_tileset();
 	update_tileset_metadata();
 	update_active_controls();
 	redraw();
+}
+
+void Main_Window::load_recent_tileset(int n) {
+	if (n < 0 || n >= NUM_RECENT || _recent_tilesets[n].empty()) {
+		return;
+	}
+
+	if (_tilesets.size() > 1) {
+		std::string msg = "You have added ";
+		msg = msg + std::to_string(_tilesets.size()) + " tilesets!\n\n"
+			"Load another tileset anyway?";
+		_unsaved_dialog->message(msg);
+		_unsaved_dialog->show(this);
+		if (_unsaved_dialog->canceled()) { return; }
+	}
+
+	const char *filename = _recent_tilesets[n].c_str();
+	load_tileset(filename);
 }
 
 void Main_Window::drag_and_drop_tilemap_cb(DnD_Receiver *dndr, Main_Window *mw) {
@@ -1002,16 +1071,29 @@ void Main_Window::open_cb(Fl_Widget *, Main_Window *mw) {
 	mw->open_tilemap(filename);
 }
 
-void Main_Window::open_recent_cb(Fl_Menu_ *m, Main_Window *mw) {
-	int first_recent_i = m->find_index((Fl_Callback *)open_recent_cb);
+void Main_Window::open_recent_tilemap_cb(Fl_Menu_ *m, Main_Window *mw) {
+	int first_recent_i = m->find_index((Fl_Callback *)open_recent_tilemap_cb);
 	int i = m->find_index(m->mvalue()) - first_recent_i;
 	mw->open_recent_tilemap(i);
 }
 
-void Main_Window::clear_recent_cb(Fl_Menu_ *, Main_Window *mw) {
+void Main_Window::clear_recent_tilemaps_cb(Fl_Menu_ *, Main_Window *mw) {
 	for (int i = 0; i < NUM_RECENT; i++) {
-		mw->_recent[i].clear();
-		mw->_recent_mis[i]->hide();
+		mw->_recent_tilemaps[i].clear();
+		mw->_recent_tilemap_mis[i]->hide();
+	}
+}
+
+void Main_Window::load_recent_tileset_cb(Fl_Menu_ *m, Main_Window *mw) {
+	int first_recent_i = m->find_index((Fl_Callback *)load_recent_tileset_cb);
+	int i = m->find_index(m->mvalue()) - first_recent_i;
+	mw->load_recent_tileset(i);
+}
+
+void Main_Window::clear_recent_tilesets_cb(Fl_Menu_ *, Main_Window *mw) {
+	for (int i = 0; i < NUM_RECENT; i++) {
+		mw->_recent_tilesets[i].clear();
+		mw->_recent_tileset_mis[i]->hide();
 	}
 }
 
@@ -1076,6 +1158,15 @@ void Main_Window::save_as_cb(Fl_Widget *, Main_Window *mw) {
 }
 
 void Main_Window::load_tileset_cb(Fl_Widget *, Main_Window *mw) {
+	if (mw->_tilesets.size() > 1) {
+		std::string msg = "You have added ";
+		msg = msg + std::to_string(mw->_tilesets.size()) + " tilesets!\n\n"
+			"Load another tileset anyway?";
+		mw->_unsaved_dialog->message(msg);
+		mw->_unsaved_dialog->show(mw);
+		if (mw->_unsaved_dialog->canceled()) { return; }
+	}
+
 	int status = mw->_tileset_load_chooser->show();
 	if (status == 1) { return; }
 
@@ -1129,8 +1220,18 @@ void Main_Window::reload_tilesets_cb(Fl_Widget *, Main_Window *mw) {
 	}
 }
 
-void Main_Window::unload_tilesets_cb(Fl_Widget *, Main_Window *mw) {
+void Main_Window::unload_tilesets_cb(Fl_Widget *w, Main_Window *mw) {
 	if (mw->_tilesets.empty()) { return; }
+
+	if (w && mw->_tilesets.size() > 1) {
+		std::string msg = "You have added ";
+		msg = msg + std::to_string(mw->_tilesets.size()) + " tilesets!\n\n"
+			"Unload them anyway?";
+		mw->_unsaved_dialog->message(msg);
+		mw->_unsaved_dialog->show(mw);
+		if (mw->_unsaved_dialog->canceled()) { return; }
+	}
+
 	for (Tileset &t : mw->_tilesets) {
 		t.clear();
 	}
@@ -1198,7 +1299,10 @@ void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 	Preferences::set("format", Config::format());
 	Preferences::set("attributes", Config::attributes());
 	for (int i = 0; i < NUM_RECENT; i++) {
-		Preferences::set_string(Fl_Preferences::Name("recent%d", i), mw->_recent[i]);
+		Preferences::set_string(Fl_Preferences::Name("recent-map%d", i), mw->_recent_tilemaps[i]);
+	}
+	for (int i = 0; i < NUM_RECENT; i++) {
+		Preferences::set_string(Fl_Preferences::Name("recent-set%d", i), mw->_recent_tilesets[i]);
 	}
 	if (mw->_resize_dialog->initialized()) {
 		Preferences::set("resize-anchor", mw->_resize_dialog->anchor());

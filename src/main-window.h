@@ -33,7 +33,7 @@ private:
 	Toolbar *_status_bar;
 	// GUI inputs
 	DnD_Receiver *_tilemap_dnd_receiver, *_tileset_dnd_receiver;
-	Fl_Menu_Item *_recent_mis[NUM_RECENT];
+	Fl_Menu_Item *_recent_tilemap_mis[NUM_RECENT], *_recent_tileset_mis[NUM_RECENT];
 	Fl_Menu_Item *_classic_theme_mi = NULL, *_aero_theme_mi = NULL, *_metro_theme_mi = NULL, *_aqua_theme_mi = NULL,
 		*_greybird_theme_mi = NULL, *_metal_theme_mi = NULL, *_blue_theme_mi = NULL, *_olive_theme_mi = NULL,
 		*_rose_gold_theme_mi = NULL, *_dark_theme_mi = NULL;
@@ -73,7 +73,7 @@ private:
 	// Data
 	std::string _tilemap_file;
 	std::vector<std::string> _tileset_files;
-	std::string _recent[NUM_RECENT];
+	std::string _recent_tilemaps[NUM_RECENT], _recent_tilesets[NUM_RECENT];
 	Tilemap _tilemap;
 	std::vector<Tileset> _tilesets;
 	Tile_Button *_selected = NULL;
@@ -106,9 +106,12 @@ public:
 	void open_recent_tilemap(int n);
 	inline void load_tileset(const char *filename) { unload_tilesets_cb(NULL, this); add_tileset(filename, 0x00); }
 	void add_tileset(const char *filename, uint8_t start);
+	void load_recent_tileset(int n);
 private:
 	void store_recent_tilemap(void);
 	void update_recent_tilemaps(void);
+	void store_recent_tileset(void);
+	void update_recent_tilesets(void);
 	void update_tilemap_metadata(void);
 	void update_tileset_metadata(void);
 	void update_active_controls(void);
@@ -121,14 +124,16 @@ private:
 	// File menu
 	static void new_cb(Fl_Widget *w, Main_Window *mw);
 	static void open_cb(Fl_Widget *w, Main_Window *mw);
-	static void open_recent_cb(Fl_Menu_ *m, Main_Window *mw);
-	static void clear_recent_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void open_recent_tilemap_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void clear_recent_tilemaps_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void close_cb(Fl_Widget *w, Main_Window *mw);
 	static void save_cb(Fl_Widget *w, Main_Window *mw);
 	static void save_as_cb(Fl_Widget *w, Main_Window *mw);
 	static void load_tileset_cb(Fl_Widget *w, Main_Window *mw);
 	static void add_tileset_cb(Fl_Widget *w, Main_Window *mw);
 	static void reload_tilesets_cb(Fl_Widget *w, Main_Window *mw);
+	static void load_recent_tileset_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void clear_recent_tilesets_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void unload_tilesets_cb(Fl_Widget *w, Main_Window *mw);
 	static void print_cb(Fl_Widget *w, Main_Window *mw);
 	static void exit_cb(Fl_Widget *w, Main_Window *mw);
