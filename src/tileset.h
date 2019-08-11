@@ -11,7 +11,8 @@
 #define TILE_SIZE 8
 #define TILE_SIZE_2X (TILE_SIZE * 2)
 
-#define BYTES_PER_1BPP_TILE (TILE_SIZE * TILE_SIZE / 8)
+#define NUM_HUES 4
+#define BYTES_PER_1BPP_TILE (TILE_SIZE * TILE_SIZE / TILE_SIZE)
 #define BYTES_PER_2BPP_TILE (BYTES_PER_1BPP_TILE * 2)
 
 #define NUM_TILES 256
@@ -40,6 +41,14 @@ public:
 	Result read_tiles(const char *f);
 private:
 	Result read_png_graphics(const char *f);
+	Result read_bmp_graphics(const char *f);
+	Result read_1bpp_graphics(const char *f);
+	Result read_2bpp_graphics(const char *f);
+	Result read_1bpp_lz_graphics(const char *f);
+	Result read_2bpp_lz_graphics(const char *f);
+	Result parse_1bpp_data(size_t n, uchar *data);
+	Result parse_2bpp_data(size_t n, uchar *data);
+	Result postprocess_graphics(Fl_RGB_Image *img);
 public:
 	static const char *error_message(Result result);
 };

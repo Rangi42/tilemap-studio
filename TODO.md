@@ -2,7 +2,6 @@
 
 ## Features
 
-* **Load tileset graphics** (support GIF, BMP, 1BPP, 2BPP, and LZ-compressed BPP)
 * **Generate tilemaps and tilesets from images**
 * Support offset and length when adding tileset images
 * Export all tilesets as a .tileset file
