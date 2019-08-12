@@ -369,9 +369,9 @@ bool Tilemap::write_tiles(const char *f) {
 			uint8_t v = tt->id();
 			fputc(v, file);
 			uint8_t a = 0x10;
-			if (tt->x_flip()) { v |= 0x40; }
-			if (tt->y_flip()) { v |= 0x80; }
-			if (tt->sgb_color() > -1) { v |= tt->sgb_color() << 2; }
+			if (tt->x_flip()) { a |= 0x40; }
+			if (tt->y_flip()) { a |= 0x80; }
+			if (tt->sgb_color() > -1) { a |= tt->sgb_color() << 2; }
 			fputc(a, file);
 		}
 	}
