@@ -106,12 +106,17 @@ protected:
 class Add_Tileset_Dialog : public Option_Dialog {
 private:
 	Label *_tileset_header;
-	OS_Hex_Spinner *_start;
+	OS_Hex_Spinner *_start_id;
+	OS_Spinner *_offset, *_length;
 public:
 	Add_Tileset_Dialog(const char *t);
 	~Add_Tileset_Dialog();
-	inline uint8_t start(void) const { return (uint8_t)_start->value(); }
-	inline void start(uint8_t n) { initialize(); _start->value(n); }
+	inline int start_id(void) const { return _start_id->value(); }
+	inline void start_id(int n) { initialize(); _start_id->value(n); }
+	inline int offset(void) const { return (int)_offset->value(); }
+	inline void offset(int n) { initialize(); _offset->value((double)n); }
+	inline int length(void) const { return (int)_length->value(); }
+	inline void length(int n) { initialize(); _length->value((double)n); }
 	void limit_tileset_options(const char *filename);
 protected:
 	void initialize_content(void);
@@ -137,7 +142,7 @@ public:
 	inline int format(void) const { return _format->value(); }
 	inline void format(int f) { initialize(); _format->value(f); }
 	inline uint8_t start_id(void) const { return (uint8_t)_start_id->value(); }
-	inline void start_id(uint8_t n) { initialize(); _start_id->value((int)n); }
+	inline void start_id(uint8_t n) { initialize(); _start_id->value(n); }
 private:
 	void update_ok_button(void);
 protected:

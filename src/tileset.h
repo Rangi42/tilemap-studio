@@ -27,13 +27,15 @@ public:
 private:
 	Fl_RGB_Image *_image, *_inactive_image;
 	size_t _num_tiles;
-	uint8_t _start;
+	int _start_id, _offset, _length;
 	Result _result;
 public:
-	Tileset(uint8_t start);
+	Tileset(int start_id, int offset, int length);
 	~Tileset();
 	inline size_t num_tiles(void) const { return _num_tiles; }
-	inline uint8_t start(void) const { return _start; }
+	inline int start_id(void) const { return _start_id; }
+	inline int offset(void) const { return _offset; }
+	inline int length(void) const { return _length; }
 	inline Result result(void) const { return _result; }
 	void clear(void);
 	bool refresh_inactive_image(void);

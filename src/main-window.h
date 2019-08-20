@@ -104,8 +104,8 @@ public:
 	inline void new_tilemap(size_t width, size_t height) { open_tilemap(NULL, width, height); }
 	void open_tilemap(const char *filename, size_t width = 0, size_t height = 0);
 	void open_recent_tilemap(int n);
-	inline void load_tileset(const char *filename) { unload_tilesets_cb(NULL, this); add_tileset(filename, 0x00); }
-	void add_tileset(const char *filename, uint8_t start);
+	inline void load_tileset(const char *filename) { unload_tilesets_cb(NULL, this); add_tileset(filename); }
+	void add_tileset(const char *filename, int start = 0x00, int offset = 0, int length = 0);
 	void load_recent_tileset(int n);
 private:
 	void store_recent_tilemap(void);

@@ -256,11 +256,14 @@ int Tilemap_Width_Dialog::refresh_content(int ww, int dy) {
 	return wgt_h;
 }
 
-Add_Tileset_Dialog::Add_Tileset_Dialog(const char *t) : Option_Dialog(194, t), _tileset_header(NULL), _start(NULL) {}
+Add_Tileset_Dialog::Add_Tileset_Dialog(const char *t) : Option_Dialog(270, t), _tileset_header(NULL), _start_id(NULL),
+	_offset(NULL), _length(NULL) {}
 
 Add_Tileset_Dialog::~Add_Tileset_Dialog() {
 	delete _tileset_header;
-	delete _start;
+	delete _start_id;
+	delete _offset;
+	delete _length;
 }
 
 void Add_Tileset_Dialog::limit_tileset_options(const char *filename) {
@@ -275,23 +278,37 @@ void Add_Tileset_Dialog::limit_tileset_options(const char *filename) {
 void Add_Tileset_Dialog::initialize_content() {
 	// Populate content group
 	_tileset_header = new Label(0, 0, 0, 0);
-	_start = new OS_Hex_Spinner(0, 0, 0, 0, "Start at ID:");
+	_start_id = new OS_Hex_Spinner(0, 0, 0, 0, "Start at ID:");
+	_offset = new OS_Spinner(0, 0, 0, 0, "Offset:");
+	_length = new OS_Spinner(0, 0, 0, 0, "Length:");
 	// Initialize content group's children
-	_start->align(FL_ALIGN_LEFT);
-	_start->range(0x00, 0xFF);
-	_start->value(0x00);
+	_start_id->align(FL_ALIGN_LEFT);
+	_start_id->range(0x00, 0xFF);
+	_start_id->value(0x00);
+	_offset->align(FL_ALIGN_LEFT);
+	_offset->range(0, 255);
+	_offset->value(0);
+	_length->align(FL_ALIGN_LEFT);
+	_length->range(0, 256);
+	_length->value(256);
 }
 
 int Add_Tileset_Dialog::refresh_content(int ww, int dy) {
 	int wgt_h = 22, win_m = 10, wgt_m = 4;
-	int ch = wgt_h + wgt_m + wgt_h;
+	int ch = (wgt_h + wgt_m) * 2 + wgt_h;
 	_content->resize(win_m, dy, ww, ch);
 
 	_tileset_header->resize(win_m, dy, ww, wgt_h);
 	dy += wgt_h + wgt_m;
-	int wgt_off = win_m + text_width(_start->label(), 3);
+	int wgt_off = win_m + text_width(_start_id->label(), 3);
 	int wgt_w = MAX(text_width("AA", 2), text_width("FF", 2)) + wgt_h;
-	_start->resize(wgt_off, dy, wgt_w, wgt_h);
+	_start_id->resize(wgt_off, dy, wgt_w, wgt_h);
+	dy += wgt_h + wgt_m;
+	wgt_off = win_m + text_width(_offset->label(), 3);
+	wgt_w = text_width("999", 2) + wgt_h;
+	_offset->resize(wgt_off, dy, wgt_w, wgt_h);
+	wgt_off = _offset->x() + _offset->w() + win_m + text_width(_length->label(), 3);
+	_length->resize(wgt_off, dy, wgt_w, wgt_h);
 
 	return ch;
 }

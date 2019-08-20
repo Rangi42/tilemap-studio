@@ -979,9 +979,9 @@ bool Main_Window::save_tilemap(bool force) {
 	return true;
 }
 
-void Main_Window::add_tileset(const char *filename, uint8_t start) {
+void Main_Window::add_tileset(const char *filename, int start, int offset, int length) {
 	const char *basename = fl_filename_name(filename);
-	Tileset tileset(start);
+	Tileset tileset(start, offset, length);
 	Tileset::Result result = tileset.read_tiles(filename);
 	if (result) {
 		std::string msg = "Error reading ";
@@ -1202,11 +1202,13 @@ void Main_Window::add_tileset_cb(Fl_Widget *, Main_Window *mw) {
 	}
 
 	mw->_add_tileset_dialog->limit_tileset_options(filename);
-	mw->_add_tileset_dialog->start(mw->_selected ? mw->_selected->id() : 0x00);
+	mw->_add_tileset_dialog->start_id(mw->_selected ? mw->_selected->id() : 0x00);
 	mw->_add_tileset_dialog->show(mw);
 	if (mw->_add_tileset_dialog->canceled()) { return; }
-	uint8_t start = mw->_add_tileset_dialog->start();
-	mw->add_tileset(filename, start);
+	int start = mw->_add_tileset_dialog->start_id();
+	int offset = mw->_add_tileset_dialog->offset();
+	int length = mw->_add_tileset_dialog->length();
+	mw->add_tileset(filename, start, offset, length);
 }
 
 void Main_Window::reload_tilesets_cb(Fl_Widget *, Main_Window *mw) {
@@ -1219,8 +1221,8 @@ void Main_Window::reload_tilesets_cb(Fl_Widget *, Main_Window *mw) {
 	size_t n = tilesets.size();
 	for (size_t i = 0; i < n; i++) {
 		const char *filename = tileset_files[i].c_str();
-		uint8_t start = tilesets[i].start();
-		mw->add_tileset(filename, start);
+		Tileset &t = tilesets[i];
+		mw->add_tileset(filename, t.start_id(), t.offset(), t.length());
 	}
 }
 
