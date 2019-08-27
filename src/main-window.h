@@ -117,6 +117,7 @@ private:
 	void update_active_controls(void);
 	void resize_tilemap(void);
 	bool save_tilemap(bool force);
+	void image_to_tiles(void);
 private:
 	// Drag-and-drop
 	static void drag_and_drop_tilemap_cb(DnD_Receiver *dndr, Main_Window *mw);

@@ -4,13 +4,12 @@
 #include <deque>
 #include <vector>
 
+#include "config.h"
 #include "utils.h"
 #include "tile-buttons.h"
 #include "option-dialogs.h"
 
 #define MAX_HISTORY_SIZE 100
-
-#define NUM_FORMATS 7
 
 #define GAME_BOY_WIDTH 20
 #define GAME_BOY_HEIGHT 18
@@ -23,7 +22,6 @@ protected:
 		Tilemap_State(size_t n) : states(n) {}
 	};
 public:
-	enum Format { PLAIN, RLE, FF_END, RLE_FF_END, RLE_NYBBLES, XY_FLIP, TILE_ATTR };
 	enum Result { TILEMAP_OK, TILEMAP_BAD_FILE, TILEMAP_EMPTY, TILEMAP_TOO_SHORT_FF, TILEMAP_TOO_LONG_FF,
 		TILEMAP_TOO_SHORT_00, TILEMAP_TOO_LONG_00, TILEMAP_TOO_SHORT_RLE, TILEMAP_NULL };
 private:
@@ -57,14 +55,15 @@ public:
 	void new_tiles(size_t w, size_t h);
 	Result read_tiles(const char *f);
 	bool can_write_tiles(void);
-	bool write_tiles(const char *f);
+	inline bool write_tiles(const char *f) { return write_tiles(f, _tiles, Config::format()); }
 	Fl_RGB_Image *print_tilemap(void) const;
 private:
 	void guess_width(void);
 public:
-	static int format_tileset_size(Format fmt);
-	static const char *format_name(Format fmt);
-	static const char *format_extension(Format fmt);
+	static bool write_tiles(const char *f, std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt);
+	static int format_tileset_size(Tilemap_Format fmt);
+	static const char *format_name(Tilemap_Format fmt);
+	static const char *format_extension(Tilemap_Format fmt);
 	static const char *error_message(Result result);
 };
 

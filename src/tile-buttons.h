@@ -40,7 +40,7 @@ private:
 	size_t _row, _col;
 	Tile_State _state;
 public:
-	Tile_Tessera(int x, int y, size_t row = 0, size_t col = 0, uint8_t id = 0x00,
+	Tile_Tessera(int x = 0, int y = 0, size_t row = 0, size_t col = 0, uint8_t id = 0x00,
 		bool x_flip = false, bool y_flip = false, int color = -1);
 	inline size_t row(void) const { return _row; }
 	inline size_t col(void) const { return _col; }

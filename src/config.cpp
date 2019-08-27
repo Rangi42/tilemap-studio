@@ -1,5 +1,5 @@
 #include "config.h"
 
-Tilemap::Format Config::_format = Tilemap::Format::PLAIN;
+Tilemap_Format Config::_format = Tilemap_Format::PLAIN;
 bool Config::_rainbow_tiles = false;
 bool Config::_attributes = false;

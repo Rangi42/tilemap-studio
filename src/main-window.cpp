@@ -9,6 +9,9 @@
 #include <FL/Fl_Menu_Bar.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Toggle_Button.H>
+#include <FL/Fl_PNG_Image.H>
+#include <FL/Fl_BMP_Image.H>
+#include <FL/Fl_Image_Surface.H>
 #pragma warning(pop)
 
 #include "version.h"
@@ -22,6 +25,7 @@
 #include "image.h"
 #include "tilemap.h"
 #include "tileset.h"
+#include "tile.h"
 #include "main-window.h"
 #include "icons.h"
 
@@ -40,7 +44,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	Tile_State::tilesets(&_tilesets);
 
 	// Get global configs
-	Tilemap::Format format_config = (Tilemap::Format)Preferences::get("format", Config::format());
+	Tilemap_Format format_config = (Tilemap_Format)Preferences::get("format", Config::format());
 	int rainbow_tiles_config = Preferences::get("rainbow", Config::rainbow_tiles());
 	int attributes_config = Preferences::get("colors", Config::attributes());
 	Config::format(format_config);
@@ -325,19 +329,19 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 		OS_SUBMENU("&Options"),
 		OS_MENU_ITEM("&Format", 0, NULL, NULL, FL_SUBMENU),
 		OS_MENU_ITEM("&Plain", FL_COMMAND + '1', (Fl_Callback *)plain_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap::Format::PLAIN ? FL_MENU_VALUE : 0)),
+			FL_MENU_RADIO | (Config::format() == Tilemap_Format::PLAIN ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&Run-length encoded (RLE)", FL_COMMAND + '2', (Fl_Callback *)rle_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap::Format::RLE ? FL_MENU_VALUE : 0)),
+			FL_MENU_RADIO | (Config::format() == Tilemap_Format::RLE ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("GSC &Town Map ($FF end)", FL_COMMAND + '3', (Fl_Callback *)gsc_town_map_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap::Format::FF_END ? FL_MENU_VALUE : 0)),
+			FL_MENU_RADIO | (Config::format() == Tilemap_Format::FF_END ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("Pok\xc3\xa9gear &card (RLE + $FF end)", FL_COMMAND + '4', (Fl_Callback *)pokegear_card_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap::Format::RLE_FF_END ? FL_MENU_VALUE : 0)),
+			FL_MENU_RADIO | (Config::format() == Tilemap_Format::RLE_FF_END ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("RBY Town Map (RLE &nybbles + $00 end)", FL_COMMAND + '5', (Fl_Callback *)rby_town_map_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap::Format::RLE_NYBBLES ? FL_MENU_VALUE : 0)),
+			FL_MENU_RADIO | (Config::format() == Tilemap_Format::RLE_NYBBLES ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("PC Town Map (&X\x2fY flip)", FL_COMMAND + '6', (Fl_Callback *)pc_town_map_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap::Format::XY_FLIP ? FL_MENU_VALUE : 0)),
+			FL_MENU_RADIO | (Config::format() == Tilemap_Format::XY_FLIP ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&SGB border (tile + attribute)", FL_COMMAND + '7', (Fl_Callback *)sgb_border_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap::Format::TILE_ATTR ? FL_MENU_VALUE : 0)),
+			FL_MENU_RADIO | (Config::format() == Tilemap_Format::TILE_ATTR ? FL_MENU_VALUE : 0)),
 		{},
 		OS_MENU_ITEM("Show SGB &Colors", FL_COMMAND + 'G', (Fl_Callback *)show_attributes_cb, this,
 			FL_MENU_TOGGLE | (Config::attributes() ? FL_MENU_VALUE : 0)),
@@ -514,10 +518,6 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 #include "help.html" // a C++11 raw string literal
 		);
 
-	// TODO: enable Image to Tiles
-	_image_to_tiles_tb->hide();
-	const_cast<Fl_Menu_Item *>(_menu_bar->find_item((Fl_Callback *)image_to_tiles_cb))->deactivate();
-
 	update_recent_tilemaps();
 	update_recent_tilesets();
 	update_tilemap_metadata();
@@ -669,8 +669,8 @@ void Main_Window::update_status(Tile_Tessera *tt) {
 #endif
 	_hover_xy->copy_label(buffer);
 	if (_tilemap.width() == GAME_BOY_WIDTH && _tilemap.height() == GAME_BOY_HEIGHT &&
-		(Config::format() == Tilemap::Format::FF_END || Config::format() == Tilemap::Format::RLE_NYBBLES ||
-		Config::format() == Tilemap::Format::XY_FLIP)) {
+		(Config::format() == Tilemap_Format::FF_END || Config::format() == Tilemap_Format::RLE_NYBBLES ||
+		Config::format() == Tilemap_Format::XY_FLIP)) {
 		size_t lx = tt->col() * TILE_SIZE + TILE_SIZE / 2, ly = tt->row() * TILE_SIZE + TILE_SIZE / 2; // center of tile
 #ifdef __GNUC__
 		sprintf(buffer, "Landmark (%zu, %zu)", lx, ly);
@@ -771,7 +771,7 @@ void Main_Window::update_active_controls() {
 		_reload_tb->deactivate();
 		_unload_tilesets_mi->deactivate();
 	}
-	if (Config::format() == Tilemap::Format::TILE_ATTR) {
+	if (Config::format() == Tilemap_Format::TILE_ATTR) {
 		_color->activate();
 		_show_attributes->activate();
 		_show_attributes_mi->activate();
@@ -782,7 +782,7 @@ void Main_Window::update_active_controls() {
 		_show_attributes->deactivate();
 		_show_attributes_mi->deactivate();
 	}
-	if (Config::format() == Tilemap::Format::XY_FLIP || Config::format() == Tilemap::Format::TILE_ATTR) {
+	if (Config::format() == Tilemap_Format::XY_FLIP || Config::format() == Tilemap_Format::TILE_ATTR) {
 		_flip_heading->activate();
 		_x_flip->activate();
 		_y_flip->activate();
@@ -794,7 +794,7 @@ void Main_Window::update_active_controls() {
 		_y_flip->clear();
 		_y_flip->deactivate();
 	}
-	int n = Tilemap::format_tileset_size((Tilemap::Format)Config::format());
+	int n = Tilemap::format_tileset_size(Config::format());
 	for (int i = 0; i < n; i++) {
 		_tile_buttons[i]->activate();
 	}
@@ -1017,6 +1017,142 @@ void Main_Window::load_recent_tileset(int n) {
 	load_tileset(filename);
 }
 
+void Main_Window::image_to_tiles() {
+	const char *image_filename = _image_to_tiles_dialog->image_filename();
+	const char *image_basename = fl_filename_name(image_filename);
+
+	Fl_RGB_Image *img = NULL;
+	if (ends_with(image_filename, ".bmp") || ends_with(image_filename, ".BMP")) {
+		img = new Fl_BMP_Image(image_filename);
+	}
+	else {
+		img = new Fl_PNG_Image(image_filename);
+	}
+	if (!img || img->fail()) {
+		delete img;
+		std::string msg = "Could not convert ";
+		msg = msg + image_basename + "!\n\nCannot open file.";
+		_error_dialog->message(msg);
+		_error_dialog->show(this);
+		return;
+	}
+
+	size_t n = 0;
+	Tile *tiles = get_image_tiles(img, n);
+	delete img;
+	if (!tiles || !n) {
+		delete [] tiles;
+		std::string msg = "Could not convert ";
+		msg = msg + image_basename + "!\n\nImage dimensions do not fit the tile grid.";
+		_error_dialog->message(msg);
+		_error_dialog->show(this);
+		return;
+	}
+
+	std::vector<Tile_Tessera *> tilemap;
+	std::vector<size_t> tileset;
+
+	Tile_Tessera *tessera = new Tile_Tessera[NUM_TILES]();
+	for (int i = 0; i < NUM_TILES; i++) {
+		tessera[i].id((uint8_t)i);
+	}
+
+	uint8_t start_id = _image_to_tiles_dialog->start_id();
+	bool use_7f = _image_to_tiles_dialog->use_7f();
+	for (size_t i = 0; i < n; i++) {
+		Tile &tile = tiles[i];
+		if (use_7f && is_blank_tile(tile)) {
+			tilemap.push_back(&tessera[SPACE_TILE_ID]);
+			continue;
+		}
+		size_t ti = 0, nt = tileset.size();
+		for (; ti < nt; ti++) {
+			size_t j = tileset[ti];
+			if (are_identical_tiles(tile, tiles[j])) {
+				break;
+			}
+		}
+		if (ti == nt) {
+			if (nt + (size_t)start_id > 0xFF) {
+				delete [] tiles;
+				delete [] tessera;
+				std::string msg = "Could not convert ";
+				msg = msg + image_basename + "!\n\nToo many unique tiles.";
+				_error_dialog->message(msg);
+				_error_dialog->show(this);
+				return;
+			}
+			tileset.push_back(i);
+		}
+		uint8_t id = start_id + (uint8_t)ti;
+		tilemap.push_back(&tessera[id]);
+	}
+
+	const char *tilemap_filename = _image_to_tiles_dialog->tilemap_filename();
+	const char *tilemap_basename = fl_filename_name(tilemap_filename);
+	Tilemap_Format fmt = _image_to_tiles_dialog->format();
+	if (!Tilemap::write_tiles(tilemap_filename, tilemap, fmt)) {
+		delete [] tiles;
+		delete [] tessera;
+		std::string msg = "Could not write to ";
+		msg = msg + tilemap_basename + "!";
+		_error_dialog->message(msg);
+		_error_dialog->show(this);
+		return;
+	}
+
+	delete [] tessera;
+
+	const char *tileset_filename = _image_to_tiles_dialog->tileset_filename();
+	const char *tileset_basename = fl_filename_name(tileset_filename);
+	int nt = (int)tileset.size();
+	int tw = MIN(nt, 16);
+	int th = (nt + tw - 1) / tw;
+
+	Fl_Image_Surface *surface = new Fl_Image_Surface(tw * TILE_SIZE, th * TILE_SIZE);
+	surface->set_current();
+
+	fl_rectf(0, 0, tw * TILE_SIZE, th * TILE_SIZE, FL_WHITE);
+	for (int i = 0; i < nt; i++) {
+		size_t ti = tileset[i];
+		Tile &tile = tiles[ti];
+		int x = i % tw, y = i / tw;
+		for (int ty = 0; ty < TILE_SIZE; ty++) {
+			for (int tx = 0; tx < TILE_SIZE; tx++) {
+				fl_color(tile[ty * TILE_SIZE + tx]);
+				fl_point(x * TILE_SIZE + tx, y * TILE_SIZE + ty);
+			}
+		}
+	}
+
+	Fl_RGB_Image *timg = surface->image();
+	delete surface;
+	Fl_Display_Device::display_device()->set_current();
+
+	Image::Result result = Image::write_image(tileset_filename, timg);
+	delete timg;
+	if (result) {
+		delete [] tiles;
+		std::string msg = "Could not write to ";
+		msg = msg + tileset_basename + "!\n\n" + Image::error_message(result);
+		_error_dialog->message(msg);
+		_error_dialog->show(this);
+	}
+
+	delete [] tiles;
+
+	std::string msg = "Converted ";
+	msg = msg + image_basename + " to\n" + tilemap_basename + " and " + tileset_basename + "!";
+	_success_dialog->message(msg);
+	_success_dialog->show(this);
+
+	_format->value((int)fmt);
+	format_tb_cb(NULL, this);
+	open_tilemap(tilemap_filename);
+	unload_tilesets_cb(NULL, this);
+	add_tileset(tileset_filename, start_id);
+}
+
 void Main_Window::drag_and_drop_tilemap_cb(DnD_Receiver *dndr, Main_Window *mw) {
 	Fl_Window *top = Fl::modal();
 	if (top && top != mw) { return; }
@@ -1142,7 +1278,7 @@ void Main_Window::save_as_cb(Fl_Widget *, Main_Window *mw) {
 	int status = mw->_tilemap_save_chooser->show();
 	if (status == 1) { return; }
 
-	Tilemap::Format fmt = Config::format();
+	Tilemap_Format fmt = Config::format();
 
 	char filename[FL_PATH_MAX] = {};
 	const char *ext = Tilemap::format_extension(fmt);
@@ -1446,54 +1582,53 @@ void Main_Window::image_to_tiles_cb(Fl_Widget *, Main_Window *mw) {
 	mw->_image_to_tiles_dialog->format(Config::format());
 	mw->_image_to_tiles_dialog->show(mw);
 	if (mw->_image_to_tiles_dialog->canceled()) { return; }
-	// TODO: image_to_tiles_cb
-	fputs("image_to_tiles_cb", stderr);
+	mw->image_to_tiles();
 }
 
 void Main_Window::plain_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap::Format::PLAIN);
+	Config::format(Tilemap_Format::PLAIN);
 	mw->_format->value(Config::format());
 	mw->update_active_controls();
 	mw->redraw();
 }
 
 void Main_Window::rle_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap::Format::RLE);
+	Config::format(Tilemap_Format::RLE);
 	mw->_format->value(Config::format());
 	mw->update_active_controls();
 	mw->redraw();
 }
 
 void Main_Window::gsc_town_map_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap::Format::FF_END);
+	Config::format(Tilemap_Format::FF_END);
 	mw->_format->value(Config::format());
 	mw->update_active_controls();
 	mw->redraw();
 }
 
 void Main_Window::pokegear_card_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap::Format::RLE_FF_END);
+	Config::format(Tilemap_Format::RLE_FF_END);
 	mw->_format->value(Config::format());
 	mw->update_active_controls();
 	mw->redraw();
 }
 
 void Main_Window::rby_town_map_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap::Format::RLE_NYBBLES);
+	Config::format(Tilemap_Format::RLE_NYBBLES);
 	mw->_format->value(Config::format());
 	mw->update_active_controls();
 	mw->redraw();
 }
 
 void Main_Window::pc_town_map_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap::Format::XY_FLIP);
+	Config::format(Tilemap_Format::XY_FLIP);
 	mw->_format->value(Config::format());
 	mw->update_active_controls();
 	mw->redraw();
 }
 
 void Main_Window::sgb_border_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap::Format::TILE_ATTR);
+	Config::format(Tilemap_Format::TILE_ATTR);
 	mw->_format->value(Config::format());
 	mw->update_active_controls();
 	mw->redraw();
@@ -1514,7 +1649,7 @@ void Main_Window::about_cb(Fl_Widget *, Main_Window *mw) {
 }
 
 void Main_Window::format_tb_cb(Dropdown *, Main_Window *mw) {
-	Config::format((Tilemap::Format)mw->_format->value());
+	Config::format((Tilemap_Format)mw->_format->value());
 	Fl_Menu_Item *menu_items[NUM_FORMATS] = {
 		mw->_plain_format_mi, mw->_rle_format_mi, mw->_gsc_town_map_format_mi, mw->_pokegear_card_format_mi,
 		mw->_rby_town_map_format_mi, mw->_pc_town_map_format_mi, mw->_sgb_border_format_mi
