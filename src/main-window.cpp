@@ -1052,30 +1052,29 @@ void Main_Window::image_to_tiles() {
 	std::vector<Tile_Tessera *> tilemap;
 	std::vector<size_t> tileset;
 
-	Tile_Tessera *tessera = new Tile_Tessera[NUM_TILES]();
-	for (int i = 0; i < NUM_TILES; i++) {
-		tessera[i].id((uint8_t)i);
-	}
-
+	Tilemap_Format fmt = _image_to_tiles_dialog->format();
 	uint8_t start_id = _image_to_tiles_dialog->start_id();
 	bool use_7f = _image_to_tiles_dialog->use_7f();
 	for (size_t i = 0; i < n; i++) {
 		Tile &tile = tiles[i];
 		if (use_7f && is_blank_tile(tile)) {
-			tilemap.push_back(&tessera[SPACE_TILE_ID]);
+			tilemap.push_back(new Tile_Tessera(0, 0, 0, 0, SPACE_TILE_ID));
 			continue;
 		}
 		size_t ti = 0, nt = tileset.size();
+		bool x_flip = false, y_flip = false;
 		for (; ti < nt; ti++) {
 			size_t j = tileset[ti];
-			if (are_identical_tiles(tile, tiles[j])) {
+			if (are_identical_tiles(tile, tiles[j], fmt, x_flip, y_flip)) {
 				break;
 			}
 		}
 		if (ti == nt) {
 			if (nt + (size_t)start_id > 0xFF) {
+				for (Tile_Tessera *tt : tilemap) {
+					delete tt;
+				}
 				delete [] tiles;
-				delete [] tessera;
 				std::string msg = "Could not convert ";
 				msg = msg + image_basename + "!\n\nToo many unique tiles.";
 				_error_dialog->message(msg);
@@ -1085,15 +1084,17 @@ void Main_Window::image_to_tiles() {
 			tileset.push_back(i);
 		}
 		uint8_t id = start_id + (uint8_t)ti;
-		tilemap.push_back(&tessera[id]);
+		Tile_Tessera *tt = new Tile_Tessera(0, 0, 0, 0, id, x_flip, y_flip);
+		tilemap.push_back(tt);
 	}
 
 	const char *tilemap_filename = _image_to_tiles_dialog->tilemap_filename();
 	const char *tilemap_basename = fl_filename_name(tilemap_filename);
-	Tilemap_Format fmt = _image_to_tiles_dialog->format();
 	if (!Tilemap::write_tiles(tilemap_filename, tilemap, fmt)) {
+		for (Tile_Tessera *tt : tilemap) {
+			delete tt;
+		}
 		delete [] tiles;
-		delete [] tessera;
 		std::string msg = "Could not write to ";
 		msg = msg + tilemap_basename + "!";
 		_error_dialog->message(msg);
@@ -1101,7 +1102,10 @@ void Main_Window::image_to_tiles() {
 		return;
 	}
 
-	delete [] tessera;
+
+	for (Tile_Tessera *tt : tilemap) {
+		delete tt;
+	}
 
 	const char *tileset_filename = _image_to_tiles_dialog->tileset_filename();
 	const char *tileset_basename = fl_filename_name(tileset_filename);

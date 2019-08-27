@@ -9,13 +9,47 @@ bool is_blank_tile(Tile &tile) {
 	return true;
 }
 
-bool are_identical_tiles(Tile &t1, Tile &t2) {
+bool are_identical_tiles(Tile &t1, Tile &t2, Tilemap_Format fmt, bool &x_flip, bool &y_flip) {
 	for (int i = 0; i < NUM_TILE_PIXELS; i++) {
 		if (t1[i] != t2[i]) {
-			return false;
+			goto not_identical;
 		}
 	}
 	return true;
+not_identical:
+	if (fmt == Tilemap_Format::XY_FLIP || fmt == Tilemap_Format::TILE_ATTR) {
+		for (int y = 0; y < TILE_SIZE; y++) {
+			for (int x = 0; x < TILE_SIZE; x++) {
+				if (t1[y*TILE_SIZE+x] != t2[y*TILE_SIZE+TILE_SIZE-x-1]) {
+					goto not_x_flipped;
+				}
+			}
+		}
+		x_flip = true;
+		return true;
+not_x_flipped:
+		for (int y = 0; y < TILE_SIZE; y++) {
+			for (int x = 0; x < TILE_SIZE; x++) {
+				if (t1[y*TILE_SIZE+x] != t2[(TILE_SIZE-y-1)*TILE_SIZE+x]) {
+					goto not_y_flipped;
+				}
+			}
+		}
+		y_flip = true;
+		return true;
+not_y_flipped:
+		for (int y = 0; y < TILE_SIZE; y++) {
+			for (int x = 0; x < TILE_SIZE; x++) {
+				if (t1[y*TILE_SIZE+x] != t2[(TILE_SIZE-y-1)*TILE_SIZE+TILE_SIZE-x-1]) {
+					goto not_xy_flipped;
+				}
+			}
+		}
+		x_flip = y_flip = true;
+		return true;
+	}
+not_xy_flipped:
+	return false;
 }
 
 Tile *get_image_tiles(Fl_RGB_Image *img, size_t &n) {
