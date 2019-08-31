@@ -64,19 +64,20 @@ Tile *get_image_tiles(Fl_RGB_Image *img, size_t &n) {
 	const uchar *data = (const uchar *)img->data()[0];
 	int d = img->d(), ld = img->ld();
 	if (!ld) { ld = img->w() * d; }
-	int p = d > 1;
+	int dp = d > 1;
 
 	Tile *tiles = new Tile[n]();
 	for (int y = 0; y < h; y++) {
 		for (int x = 0; x < w; x++) {
 			int i = y * w + x;
 			for (int ty = 0; ty < TILE_SIZE; ty++) {
+				int oy = (y * TILE_SIZE + ty) * ld;
 				for (int tx = 0; tx < TILE_SIZE; tx++) {
+					int ox = (x * TILE_SIZE + tx) * d;
+					const uchar *px = data + oy + ox;
+					uchar r = px[0], g = px[dp], b = px[dp+dp];
 					int ti = ty * TILE_SIZE + tx;
-					int off = (y * TILE_SIZE + ty) * ld + (x * TILE_SIZE + tx) * d;
-					uchar r = data[off], g = data[off+p], b = data[off+p+p];
-					Fl_Color rgb = fl_rgb_color(r, g, b);
-					tiles[i][ti] = rgb;
+					tiles[i][ti] = fl_rgb_color(r, g, b);
 				}
 			}
 		}

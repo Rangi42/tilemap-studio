@@ -126,6 +126,17 @@ void Tile_State::draw(int x, int y, bool active, bool selected) {
 	}
 }
 
+void Tile_State::print(int x, int y) {
+	if (_tilesets) {
+		for (std::vector<Tileset>::reverse_iterator it = _tilesets->rbegin(); it != _tilesets->rend(); ++it) {
+			if (it->print_tile(this, x, y)) {
+				return;
+			}
+		}
+	}
+	fl_rectf(x, y, TILE_SIZE, TILE_SIZE, FL_WHITE);
+}
+
 Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint8_t id, bool x_flip, bool y_flip, int color) :
 	Fl_Box(x, y, TILE_SIZE_2X, TILE_SIZE_2X), _row(row), _col(col), _state(id, x_flip, y_flip, color) {
 	user_data(NULL);

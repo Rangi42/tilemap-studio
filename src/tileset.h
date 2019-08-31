@@ -40,6 +40,7 @@ public:
 	void clear(void);
 	bool refresh_inactive_image(void);
 	bool draw_tile(const Tile_State *ts, int x, int y, bool active) const;
+	bool print_tile(const Tile_State *ts, int x, int y) const;
 	Result read_tiles(const char *f);
 private:
 	Result read_png_graphics(const char *f);

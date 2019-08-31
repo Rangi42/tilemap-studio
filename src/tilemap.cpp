@@ -389,11 +389,11 @@ bool Tilemap::write_tiles(const char *f, std::vector<Tile_Tessera *> &tiles, Til
 }
 
 Fl_RGB_Image *Tilemap::print_tilemap() const {
-	Fl_Image_Surface *surface = new Fl_Image_Surface((int)width() * TILE_SIZE_2X, (int)height() * TILE_SIZE_2X);
+	Fl_Image_Surface *surface = new Fl_Image_Surface((int)width() * TILE_SIZE, (int)height() * TILE_SIZE);
 	surface->set_current();
 	for (Tile_Tessera *tt : _tiles) {
-		int dx = (int)tt->col() * TILE_SIZE_2X, dy = (int)tt->row() * TILE_SIZE_2X;
-		surface->draw(tt, dx, dy);
+		int dx = (int)tt->col() * TILE_SIZE, dy = (int)tt->row() * TILE_SIZE;
+		tt->print(dx, dy);
 	}
 	Fl_RGB_Image *img = surface->image();
 	delete surface;

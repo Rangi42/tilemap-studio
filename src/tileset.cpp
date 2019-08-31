@@ -64,6 +64,33 @@ bool Tileset::draw_tile(const Tile_State *ts, int x, int y, bool active) const {
 	return true;
 }
 
+bool Tileset::print_tile(const Tile_State *ts, int x, int y) const {
+	int index = (int)ts->id - _start_id + _offset;
+	int limit = (int)_num_tiles - _offset;
+	if (_length > 0 && _length < limit) { limit = _length + _offset; }
+	if (index < _offset || index >= limit || !_image) { return false; }
+
+	int wt = _image->w() / TILE_SIZE_2X;
+	int tx = index % wt * TILE_SIZE_2X, ty = index / wt * TILE_SIZE_2X;
+
+	const uchar *data = (const uchar *)_image->data()[0];
+	int d = _image->d(), ld = _image->ld();
+	if (!ld) { ld = _image->w() * d; }
+	int dp = d > 1;
+
+	for (int dy = 0; dy < TILE_SIZE; dy++) {
+		int oy = (ty + 2 * (ts->y_flip ? TILE_SIZE - dy - 1 : dy)) * ld;
+		for (int dx = 0; dx < TILE_SIZE; dx++) {
+			int ox = (tx + 2 * (ts->x_flip ? TILE_SIZE - dx - 1 : dx)) * d;
+			const uchar *px = data + oy + ox;
+			uchar r = px[0], g = px[dp], b = px[dp+dp];
+			fl_color(r, g, b);
+			fl_point(x + dx, y + dy);
+		}
+	}
+	return true;
+}
+
 Tileset::Result Tileset::read_tiles(const char *f) {
 	std::string s(f);
 	if (ends_with(s, ".png") || ends_with(s, ".PNG")) { return read_png_graphics(f); }

@@ -27,6 +27,7 @@ public:
 public:
 	Tile_State(uint8_t id = 0x00, bool x_flip = false, bool y_flip = false, int color = -1);
 	void draw(int x, int y, bool active, bool selected = false);
+	void print(int x, int y);
 	inline bool operator==(const Tile_State &other) const {
 		return id == other.id && x_flip == other.x_flip && y_flip == other.y_flip && color == other.color;
 	}
@@ -55,6 +56,7 @@ public:
 	inline void y_flip(bool y_flip) { _state.y_flip = y_flip; }
 	inline int sgb_color(void) const { return _state.color; }
 	inline void sgb_color(int color) { _state.color = color; }
+	inline void print(int dx, int dy) { _state.print(dx, dy); }
 	void draw(void);
 	int handle(int event);
 };
