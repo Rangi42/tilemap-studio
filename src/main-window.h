@@ -44,12 +44,12 @@ private:
 	Dropdown *_format;
 	Label_Button *_tilemap_name;
 	Toolbar_Button *_undo_tb, *_redo_tb, *_resize_tb;
-	OS_Spinner *_tilemap_width;
+	Default_Spinner *_tilemap_width;
 	Toolbar_Button *_load_tb, *_add_tb, *_reload_tb;
 	Toolbar_Button *_image_to_tiles_tb;
 	Label_Button *_tileset_name;
 	Label *_flip_heading;
-	OS_Spinner *_color;
+	Default_Spinner *_color;
 	Toggle_Switch *_show_attributes;
 	OS_Check_Button *_x_flip, *_y_flip;
 	Tile_Button *_tile_buttons[NUM_TILES];

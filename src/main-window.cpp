@@ -123,7 +123,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	new Fl_Box(bx, by, 2, wgt_h); bx += 2;
 	wgt_off = text_width("Width:", 2);
 	wgt_w = text_width("999", 2) + wgt_h;
-	_tilemap_width = new OS_Spinner(bx+wgt_off, by, wgt_w, wgt_h, "Width:");
+	_tilemap_width = new Default_Spinner(bx+wgt_off, by, wgt_w, wgt_h, "Width:");
 	bx += wgt_off + wgt_w + wgt_m; bw -= wgt_off + wgt_w + wgt_m;
 	_resize_tb = new Toolbar_Button(bx, by, wgt_h, wgt_h);
 	bx += _resize_tb->w();
@@ -182,7 +182,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_right_group->begin();
 	wgt_w = MAX(text_width("A", 2), text_width("F", 2)) + wgt_h;
 	wgt_off = text_width("Color:", 3);
-	_color = new OS_Spinner(wx+wgt_off, wy, wgt_w, wgt_h, "Color:");
+	_color = new Default_Spinner(wx+wgt_off, wy, wgt_w, wgt_h, "Color:");
 	wx += _color->w() + wgt_off + 2; ww -= _color->w() + wgt_off + 2;
 	_show_attributes = new Toggle_Switch(wx, wy, wgt_h / 2 + 2, wgt_h);
 	wx += _show_attributes->w() + wgt_m; ww -= _show_attributes->w() + wgt_m;
@@ -437,7 +437,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_redo_tb->image(REDO_ICON);
 	_redo_tb->deimage(REDO_DISABLED_ICON);
 
-	_tilemap_width->value(20);
+	_tilemap_width->default_value(GAME_BOY_WIDTH);
 	_tilemap_width->range(1, 999);
 	_tilemap_width->callback((Fl_Callback *)tilemap_width_tb_cb, this);
 
@@ -467,7 +467,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 
 	select_tile_cb(_tile_buttons[0x00], this);
 
-	_color->value(0);
+	_color->default_value(0);
 	_color->range(0, NUM_SGB_COLORS - 1);
 
 	_show_attributes->value(Config::attributes());
@@ -777,7 +777,7 @@ void Main_Window::update_active_controls() {
 		_show_attributes_mi->activate();
 	}
 	else {
-		_color->value(0);
+		_color->default_value(0);
 		_color->deactivate();
 		_show_attributes->deactivate();
 		_show_attributes_mi->deactivate();
@@ -822,7 +822,7 @@ void Main_Window::resize_tilemap() {
 		_tilemap_scroll->add(tt);
 	}
 
-	_tilemap_width->value(w);
+	_tilemap_width->default_value(w);
 	tilemap_width_tb_cb(NULL, this);
 	update_status(NULL);
 	update_active_controls();
@@ -898,7 +898,7 @@ void Main_Window::open_tilemap(const char *filename, size_t width, size_t height
 		_tilemap_scroll->add(tt);
 	}
 
-	_tilemap_width->value(_tilemap.width());
+	_tilemap_width->default_value(_tilemap.width());
 	tilemap_width_tb_cb(NULL, this);
 
 	// set filenames
@@ -1570,7 +1570,7 @@ void Main_Window::tilemap_width_cb(Fl_Menu_ *, Main_Window *mw) {
 	mw->_tilemap_width_dialog->tilemap_width((size_t)mw->_tilemap_width->value());
 	mw->_tilemap_width_dialog->show(mw);
 	if (mw->_tilemap_width_dialog->canceled()) { return; }
-	mw->_tilemap_width->value(mw->_tilemap_width_dialog->tilemap_width());
+	mw->_tilemap_width->default_value(mw->_tilemap_width_dialog->tilemap_width());
 	tilemap_width_tb_cb(mw->_tilemap_width, mw);
 }
 
@@ -1720,7 +1720,7 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 	else if (Fl::event_button() == FL_RIGHT_MOUSE) {
 		// Right-click to select
 		int color = tt->sgb_color();
-		mw->_color->value(color > -1 ? color : 0);
+		mw->_color->default_value(color > -1 ? color : 0);
 		mw->_x_flip->value(tt->x_flip());
 		mw->_y_flip->value(tt->y_flip());
 		mw->_color->redraw();

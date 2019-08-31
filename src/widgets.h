@@ -86,6 +86,28 @@ public:
 	OS_Hex_Spinner(int x, int y, int w, int h, const char *l = NULL);
 };
 
+class Default_Spinner : public OS_Spinner {
+private:
+	double _default_value;
+public:
+	Default_Spinner(int x, int y, int w, int h, const char *l = NULL);
+	inline double default_value(void) const { return _default_value; }
+	inline void default_value(double v) { _default_value = v; value(_default_value); }
+protected:
+	int handle(int event);
+};
+
+class Default_Hex_Spinner : public OS_Hex_Spinner {
+private:
+	int _default_value;
+public:
+	Default_Hex_Spinner(int x, int y, int w, int h, const char *l = NULL);
+	inline int default_value(void) const { return _default_value; }
+	inline void default_value(int v) { _default_value = v; value(_default_value); }
+protected:
+	int handle(int event);
+};
+
 class Toggle_Switch : public Fl_Check_Button {
 public:
 	Toggle_Switch(int x, int y, int w, int h, const char *l = NULL);

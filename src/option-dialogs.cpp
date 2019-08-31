@@ -173,8 +173,8 @@ void Resize_Dialog::anchor_label(int x, int y, const char *l) {
 
 void Resize_Dialog::initialize_content() {
 	// Populate content group
-	_tilemap_width = new OS_Spinner(0, 0, 0, 0, "Width:");
-	_tilemap_height = new OS_Spinner(0, 0, 0, 0, "Height:");
+	_tilemap_width = new Default_Spinner(0, 0, 0, 0, "Width:");
+	_tilemap_height = new Default_Spinner(0, 0, 0, 0, "Height:");
 	for (int i = 0; i < 9; i++) {
 		Anchor_Button *ab = new Anchor_Button(i);
 		ab->callback((Fl_Callback *)anchor_button_cb, this);
@@ -278,19 +278,19 @@ void Add_Tileset_Dialog::limit_tileset_options(const char *filename) {
 void Add_Tileset_Dialog::initialize_content() {
 	// Populate content group
 	_tileset_header = new Label(0, 0, 0, 0);
-	_start_id = new OS_Hex_Spinner(0, 0, 0, 0, "Start at ID:");
-	_offset = new OS_Spinner(0, 0, 0, 0, "Offset:");
-	_length = new OS_Spinner(0, 0, 0, 0, "Length:");
+	_start_id = new Default_Hex_Spinner(0, 0, 0, 0, "Start at ID:");
+	_offset = new Default_Spinner(0, 0, 0, 0, "Offset:");
+	_length = new Default_Spinner(0, 0, 0, 0, "Length:");
 	// Initialize content group's children
 	_start_id->align(FL_ALIGN_LEFT);
 	_start_id->range(0x00, 0xFF);
-	_start_id->value(0x00);
+	_start_id->default_value(0x00);
 	_offset->align(FL_ALIGN_LEFT);
 	_offset->range(0, 255);
-	_offset->value(0);
+	_offset->default_value(0);
 	_length->align(FL_ALIGN_LEFT);
 	_length->range(0, 256);
-	_length->value(256);
+	_length->default_value(0);
 }
 
 int Add_Tileset_Dialog::refresh_content(int ww, int dy) {
@@ -357,7 +357,7 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_tilemap_name = new Label_Button(0, 0, 0, 0, "No file selected");
 	_tileset_name = new Label_Button(0, 0, 0, 0, "No file selected");
 	_format = new Dropdown(0, 0, 0, 0, "Format:");
-	_start_id = new OS_Hex_Spinner(0, 0, 0, 0, "Start at ID:");
+	_start_id = new Default_Hex_Spinner(0, 0, 0, 0, "Start at ID:");
 	_use_7f = new OS_Check_Button(0, 0, 0, 0, "Use $7F for Blank Spaces");
 	_image_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
 	_tilemap_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
@@ -379,7 +379,7 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_format->add("RBY Town Map (RLE nybbles + $00 end)"); // RLE_NYBBLES
 	_format->add("PC Town Map (X\\/Y flip)");             // XY_FLIP
 	_format->add("SGB border (tile + attribute)");        // TILE_ATTR
-	_start_id->value(0x00);
+	_start_id->default_value(0x00);
 	_image_chooser->title("Read Image");
 	_image_chooser->filter("Image Files\t*.{png,bmp}\n");
 	_tilemap_chooser->title("Write Tilemap");

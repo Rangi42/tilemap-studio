@@ -67,7 +67,7 @@ public:
 	enum Hor_Align { LEFT, CENTER, RIGHT };
 	enum Vert_Align { TOP, MIDDLE, BOTTOM };
 private:
-	OS_Spinner *_tilemap_width, *_tilemap_height;
+	Default_Spinner *_tilemap_width, *_tilemap_height;
 	Anchor_Button *_anchor_buttons[9];
 public:
 	Resize_Dialog(const char *t);
@@ -76,8 +76,8 @@ public:
 	inline size_t tilemap_height(void) const { return (size_t)_tilemap_height->value(); }
 	inline void tilemap_size(size_t w, size_t h) {
 		initialize();
-		_tilemap_width->value(w);
-		_tilemap_height->value(h);
+		_tilemap_width->default_value(w);
+		_tilemap_height->default_value(h);
 	}
 	Hor_Align horizontal_anchor(void) const;
 	Vert_Align vertical_anchor(void) const;
@@ -107,8 +107,8 @@ protected:
 class Add_Tileset_Dialog : public Option_Dialog {
 private:
 	Label *_tileset_header;
-	OS_Hex_Spinner *_start_id;
-	OS_Spinner *_offset, *_length;
+	Default_Hex_Spinner *_start_id;
+	Default_Spinner *_offset, *_length;
 public:
 	Add_Tileset_Dialog(const char *t);
 	~Add_Tileset_Dialog();
@@ -130,7 +130,7 @@ private:
 	Toolbar_Button *_image, *_tilemap, *_tileset;
 	Label_Button *_image_name, *_tilemap_name, *_tileset_name;
 	Dropdown *_format;
-	OS_Hex_Spinner *_start_id;
+	Default_Hex_Spinner *_start_id;
 	OS_Check_Button *_use_7f;
 	Fl_Native_File_Chooser *_image_chooser, *_tilemap_chooser, *_tileset_chooser;
 	std::string _image_filename, _tilemap_filename, _tileset_filename;
