@@ -106,8 +106,9 @@ void Tile_State::draw(int x, int y, bool active, bool selected) {
 		}
 	}
 	if (!gfx) {
-		char hi = (char)((id & 0xF0) >> 4), lo = (char)(id & 0x0F);
-		const char buffer[3] = {hi > 9 ? 'A' + hi - 10 : '0' + hi, lo > 9 ? 'A' + lo - 10 : '0' + lo, '\0'};
+		uint8_t hi = (id & 0xF0) >> 4, lo = id & 0x0F;
+		char l1 = (char)(hi > 9 ? 'A' + hi - 10 : '0' + hi), l2 = (char)(lo > 9 ? 'A' + lo - 10 : '0' + lo);
+		const char buffer[3] = {l1, l2, '\0'};
 		bool r = Config::rainbow_tiles();
 		Fl_Color bg = bg_colors[r ? lo : 0];
 		if (!active) { bg = fl_inactive(bg); }
@@ -120,7 +121,7 @@ void Tile_State::draw(int x, int y, bool active, bool selected) {
 	}
 	if (Config::attributes() && color > -1) {
 		sgb_color_images[color].draw(x, y, TILE_SIZE_2X, TILE_SIZE_2X);
-		const char buffer[2] = {'0' + (char)color, '\0'};
+		const char buffer[2] = {(char)('0' + color), '\0'};
 		fl_font(FL_COURIER_BOLD, s);
 		draw_outlined_text(buffer, x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_ALIGN_CENTER, sgb_colors[color]);
 	}

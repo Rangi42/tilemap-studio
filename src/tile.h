@@ -19,4 +19,4 @@ bool is_blank_tile(Tile &tile);
 bool are_identical_tiles(Tile &t1, Tile &t2, Tilemap_Format fmt, bool &x_flip, bool &y_flip);
 Tile *get_image_tiles(Fl_RGB_Image *img, size_t &n);
 
-#endif TILE_H
+#endif

@@ -711,7 +711,11 @@ void Main_Window::update_tileset_metadata() {
 		}
 		else {
 			char buffer[FL_PATH_MAX] = {};
-			sprintf(buffer, "%d files", _tilesets.size());
+#ifdef __GNUC__
+			sprintf(buffer, "%zu files", _tilesets.size());
+#else
+			sprintf(buffer, "%u files", _tilesets.size());
+#endif
 			_tileset_name->copy_label(buffer);
 		}
 	}
