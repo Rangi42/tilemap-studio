@@ -55,6 +55,7 @@ void Option_Dialog::refresh() {
 	_canceled = false;
 	_dialog->copy_label(_title);
 	// Refresh widget positions and sizes
+	fl_font(OS_FONT, OS_FONT_SIZE);
 	int dy = 10;
 	dy += refresh_content(_width - 20, dy) + 16;
 #ifdef _WIN32
