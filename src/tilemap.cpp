@@ -358,7 +358,8 @@ bool Tilemap::write_tiles(const char *f, std::vector<Tile_Tessera *> &tiles, Til
 		for (size_t i = 0; i < n;) {
 			Tile_Tessera *tt = tiles[i++];
 			uint8_t v = tt->id(), r = 1;
-			while (i < n && tiles[i++]->id() == v) {
+			while (i < n && tiles[i]->id() == v) {
+				i++;
 				if (++r == 0x0F) { break; } // maximum nybble
 			}
 			uint8_t b = (v << 4) | r;
