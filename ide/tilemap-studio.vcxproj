@@ -117,6 +117,7 @@
     <ClInclude Include="..\src\themes.h" />
     <ClInclude Include="..\src\tile-buttons.h" />
     <ClInclude Include="..\src\tile.h" />
+    <ClInclude Include="..\src\tilemap-format.h" />
     <ClInclude Include="..\src\tilemap.h" />
     <ClInclude Include="..\src\tileset.h" />
     <ClInclude Include="..\src\utils.h" />
@@ -136,6 +137,7 @@
     <ClCompile Include="..\src\themes.cpp" />
     <ClCompile Include="..\src\tile-buttons.cpp" />
     <ClCompile Include="..\src\tile.cpp" />
+    <ClCompile Include="..\src\tilemap-format.cpp" />
     <ClCompile Include="..\src\tilemap.cpp" />
     <ClCompile Include="..\src\tileset.cpp" />
     <ClCompile Include="..\src\utils.cpp" />

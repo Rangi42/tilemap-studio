@@ -2,10 +2,7 @@
 #define CONFIG_H
 
 #include "utils.h"
-
-#define NUM_FORMATS 7
-
-enum Tilemap_Format { PLAIN, RLE, FF_END, RLE_FF_END, RLE_NYBBLES, XY_FLIP, TILE_ATTR };
+#include "tilemap-format.h"
 
 class Config {
 private:

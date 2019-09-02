@@ -61,9 +61,6 @@ private:
 	void guess_width(void);
 public:
 	static bool write_tiles(const char *f, std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt);
-	static int format_tileset_size(Tilemap_Format fmt);
-	static const char *format_name(Tilemap_Format fmt);
-	static const char *format_extension(Tilemap_Format fmt);
 	static const char *error_message(Result result);
 };
 

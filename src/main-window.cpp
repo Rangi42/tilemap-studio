@@ -693,7 +693,7 @@ void Main_Window::update_tilemap_metadata() {
 			const char *basename = fl_filename_name(_tilemap_file.c_str());
 			_tilemap_name->label(basename);
 		}
-		const char *name = _tilemap.format_name(Config::format());
+		const char *name = format_name(Config::format());
 		_tilemap_format->label(name);
 	}
 	else {
@@ -798,7 +798,7 @@ void Main_Window::update_active_controls() {
 		_y_flip->clear();
 		_y_flip->deactivate();
 	}
-	int n = Tilemap::format_tileset_size(Config::format());
+	int n = format_tileset_size(Config::format());
 	for (int i = 0; i < n; i++) {
 		_tile_buttons[i]->activate();
 	}
@@ -945,7 +945,7 @@ bool Main_Window::save_tilemap(bool force) {
 
 	if (!_tilemap.can_write_tiles()) {
 		std::string msg = "Cannot format the tilemap as ";
-		msg = msg + Tilemap::format_name(Config::format()) + "!";
+		msg = msg + format_name(Config::format()) + "!";
 		_error_dialog->message(msg);
 		_error_dialog->show(this);
 		return false;
@@ -1289,7 +1289,7 @@ void Main_Window::save_as_cb(Fl_Widget *, Main_Window *mw) {
 	Tilemap_Format fmt = Config::format();
 
 	char filename[FL_PATH_MAX] = {};
-	const char *ext = Tilemap::format_extension(fmt);
+	const char *ext = format_extension(fmt);
 	add_dot_ext(mw->_tilemap_save_chooser->filename(), ext, filename);
 	const char *basename = fl_filename_name(filename);
 

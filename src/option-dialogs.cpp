@@ -470,7 +470,9 @@ void Image_To_Tiles_Dialog::tilemap_cb(Fl_Widget *, Image_To_Tiles_Dialog *itd) 
 		itd->_tilemap_name->label("No file selected");
 	}
 	else {
-		const char *filename = itd->_tilemap_chooser->filename();
+		char filename[FL_PATH_MAX] = {};
+		const char *ext = format_extension(itd->format());
+		add_dot_ext(itd->_tilemap_chooser->filename(), ext, filename);
 		const char *basename = fl_filename_name(filename);
 		itd->_tilemap_filename = filename;
 		itd->_tilemap_name->copy_label(basename);
@@ -486,7 +488,8 @@ void Image_To_Tiles_Dialog::tileset_cb(Fl_Widget *, Image_To_Tiles_Dialog *itd) 
 		itd->_tileset_name->label("No file selected");
 	}
 	else {
-		const char *filename = itd->_tileset_chooser->filename();
+		char filename[FL_PATH_MAX] = {};
+		add_dot_ext(itd->_tileset_chooser->filename(), ".png", filename);
 		const char *basename = fl_filename_name(filename);
 		itd->_tileset_filename = filename;
 		itd->_tileset_name->copy_label(basename);
