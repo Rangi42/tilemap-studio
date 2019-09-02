@@ -8,6 +8,6 @@ Latest prerelease: [**0.4.0**](https://github.com/Rangi42/tilemap-studio/release
 
 Follow the steps in [INSTALL.md](INSTALL.md) to install the release copy of Tilemap Studio, or the longer instructions to build it yourself from source.
 
-The [example/](example/) directory contains different kinds of tilemaps and tileset graphics. **pokered/town_map.rle** is an RBY Town Map; **pokecrystal/\*.bin** are GSC Town Maps; **pokecrystal/\*.tilemap.rle** are Pokégear cards; and **polishedcrystal/\*.bin** are PC Town Maps.
+The [example/](example/) directory contains different kinds of tilemaps and tileset graphics. **pokered/town_map.rle** is an RBY Town Map; **pokecrystal/\*.bin** are GSC Town Maps; **pokecrystal/\*.tilemap.rle** are Pokégear cards; **polishedcrystal/\*.bin** are PC Town Maps; **polishedcrystal/sgb_border.map** is an SGB border; and **prism/*.bin** are plain tilemaps.
 
 ![Screenshot](screenshot.png)
