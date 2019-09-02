@@ -10,4 +10,6 @@ Follow the steps in [INSTALL.md](INSTALL.md) to install the release copy of Tile
 
 The [example/](example/) directory contains different kinds of tilemaps and tileset graphics. **pokered/town_map.rle** is an RBY Town Map; **pokecrystal/\*.bin** are GSC Town Maps; **pokecrystal/\*.tilemap.rle** are Pokégear cards; **polishedcrystal/\*.bin** are PC Town Maps; **polishedcrystal/sgb_border.map** is an SGB border; and **prism/*.bin** are plain tilemaps.
 
+More information is at the [Skeetendo Forums](https://hax.iimarckus.org/topic/7691/). If you have questions or comments, please go there.
+
 ![Screenshot](screenshot.png)
