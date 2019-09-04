@@ -83,6 +83,23 @@ static void draw_outlined_text(const char *l, int x, int y, int w, int h, Fl_Ali
 	fl_draw(l, x, y, w, h, a);
 }
 
+static void draw_grid(int x, int y) {
+	fl_color(fl_rgb_color(0x40));
+	for (int i = 1; i < TILE_SIZE_2X; i += 4) {
+		fl_point(x+i, y+TILE_SIZE_2X-1);
+		fl_point(x+i+1, y+TILE_SIZE_2X-1);
+		fl_point(x+TILE_SIZE_2X-1, y+i);
+		fl_point(x+TILE_SIZE_2X-1, y+i+1);
+	}
+	fl_color(fl_rgb_color(0xC0));
+	for (int i = 0; i < TILE_SIZE_2X; i += 4) {
+		fl_point(x+i, y+TILE_SIZE_2X-1);
+		fl_point(x+i+3, y+TILE_SIZE_2X-1);
+		fl_point(x+TILE_SIZE_2X-1, y+i);
+		fl_point(x+TILE_SIZE_2X-1, y+i+3);
+	}
+}
+
 static void draw_selection_border(int x, int y) {
 	fl_rect(x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_BLACK);
 	fl_rect(x+1, y+1, TILE_SIZE_2X-2, TILE_SIZE_2X-2, FL_WHITE);
@@ -187,6 +204,9 @@ Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint8_t id, boo
 
 void Tile_Tessera::draw() {
 	_state.draw(x(), y(), !!active());
+	if (Config::grid()) {
+		draw_grid(x(), y());
+	}
 	if (this == Fl::belowmouse()) {
 		draw_selection_border(x(), y());
 	}
@@ -234,6 +254,9 @@ Tile_Button::Tile_Button(int x, int y, uint8_t id) : Fl_Radio_Button(x, y, TILE_
 
 void Tile_Button::draw() {
 	_state.draw(x(), y(), !!active(), !!value());
+	if (Config::grid()) {
+		draw_grid(x(), y());
+	}
 	if (value()) {
 		draw_selection_border(x(), y());
 	}

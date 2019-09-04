@@ -45,9 +45,11 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 
 	// Get global configs
 	Tilemap_Format format_config = (Tilemap_Format)Preferences::get("format", Config::format());
+	int grid_config = Preferences::get("grid", Config::grid());
 	int rainbow_tiles_config = Preferences::get("rainbow", Config::rainbow_tiles());
 	int attributes_config = Preferences::get("colors", Config::attributes());
 	Config::format(format_config);
+	Config::grid(!!grid_config);
 	Config::rainbow_tiles(!!rainbow_tiles_config);
 	Config::attributes(!!attributes_config);
 
@@ -318,6 +320,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 		OS_MENU_ITEM("&Dark", 0, (Fl_Callback *)dark_theme_cb, this,
 			FL_MENU_RADIO | (OS::current_theme() == OS::DARK ? FL_MENU_VALUE : 0)),
 		{},
+		OS_MENU_ITEM("&Grid", FL_COMMAND + 'g', (Fl_Callback *)grid_cb, this,
+			FL_MENU_TOGGLE | (Config::grid() ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&Rainbow Tiles", FL_COMMAND + 'b', (Fl_Callback *)rainbow_tiles_cb, this,
 			FL_MENU_TOGGLE | (Config::rainbow_tiles() ? FL_MENU_VALUE : 0)),
 		{},
@@ -379,6 +383,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_rby_town_map_format_mi = PM_FIND_MENU_ITEM_CB(rby_town_map_format_cb);
 	_pc_town_map_format_mi = PM_FIND_MENU_ITEM_CB(pc_town_map_format_cb);
 	_sgb_border_format_mi = PM_FIND_MENU_ITEM_CB(sgb_border_format_cb);
+	_grid_mi = PM_FIND_MENU_ITEM_CB(grid_cb);
 	_rainbow_tiles_mi = PM_FIND_MENU_ITEM_CB(rainbow_tiles_cb);
 	_show_attributes_mi = PM_FIND_MENU_ITEM_CB(show_attributes_cb);
 	// Conditional menu items
@@ -1446,6 +1451,10 @@ void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 	Preferences::set("y", mw->y());
 	Preferences::set("w", mw->w());
 	Preferences::set("h", mw->h());
+	Preferences::set("grid", Config::grid());
+	Preferences::set("rainbow", Config::rainbow_tiles());
+	Preferences::set("colors", Config::attributes());
+	Preferences::set("grid", Config::grid());
 	Preferences::set("format", Config::format());
 	Preferences::set("attributes", Config::attributes());
 	for (int i = 0; i < NUM_RECENT; i++) {
@@ -1562,6 +1571,11 @@ void Main_Window::dark_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	for (Tileset &t : mw->_tilesets) {
 		t.refresh_inactive_image();
 	}
+	mw->redraw();
+}
+
+void Main_Window::grid_cb(Fl_Menu_ *m, Main_Window *mw) {
+	Config::grid(!!m->mvalue()->value());
 	mw->redraw();
 }
 

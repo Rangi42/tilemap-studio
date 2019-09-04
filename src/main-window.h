@@ -39,7 +39,7 @@ private:
 		*_rose_gold_theme_mi = NULL, *_dark_theme_mi = NULL;
 	Fl_Menu_Item *_plain_format_mi = NULL, *_rle_format_mi = NULL, *_gsc_town_map_format_mi = NULL, *_pokegear_card_format_mi = NULL,
 		*_rby_town_map_format_mi = NULL, *_pc_town_map_format_mi = NULL, *_sgb_border_format_mi = NULL;
-	Fl_Menu_Item *_rainbow_tiles_mi = NULL, *_show_attributes_mi = NULL;
+	Fl_Menu_Item *_grid_mi, *_rainbow_tiles_mi = NULL, *_show_attributes_mi = NULL;
 	Toolbar_Button *_new_tb, *_open_tb, *_save_tb, *_print_tb;
 	Dropdown *_format;
 	Label_Button *_tilemap_name;
@@ -152,6 +152,7 @@ private:
 	static void olive_theme_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void rose_gold_theme_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void dark_theme_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void grid_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void rainbow_tiles_cb(Fl_Menu_ *m, Main_Window *mw);
 	// Tools menu
 	static void tilemap_width_cb(Fl_Menu_ *m, Main_Window *mw);
