@@ -874,6 +874,22 @@ void Main_Window::substitute_tile(Tile_Tessera *tt) {
 	}
 }
 
+void Main_Window::swap_tiles(Tile_Tessera *tt) {
+	Tile_State s1 = tt->state();
+	Tile_State s2(_selected->id(), x_flip(), y_flip(), sgb_color());
+	if (s1 == s2) { return; }
+	size_t n = _tilemap.size();
+	for (size_t i = 0; i < n; i++) {
+		Tile_Tessera *ff = _tilemap.tile(i);
+		if (ff->state() == s1) {
+			ff->state(s2);
+		}
+		else if (ff->state() == s2) {
+			ff->state(s1);
+		}
+	}
+}
+
 void Main_Window::open_tilemap(const char *filename, size_t width, size_t height) {
 	close_cb(NULL, this);
 
@@ -1722,6 +1738,12 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 		else if (Fl::event_ctrl()) {
 			// Ctrl+left-click to replace
 			mw->substitute_tile(tt);
+			mw->_tilemap_scroll->redraw();
+			mw->_tilemap.modified(true);
+		}
+		else if (Fl::event_alt()) {
+			// Alt+click to swap
+			mw->swap_tiles(tt);
 			mw->_tilemap_scroll->redraw();
 			mw->_tilemap.modified(true);
 		}

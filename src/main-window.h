@@ -101,6 +101,7 @@ public:
 	void update_status(Tile_Tessera *tt);
 	void flood_fill(Tile_Tessera *tt);
 	void substitute_tile(Tile_Tessera *tt);
+	void swap_tiles(Tile_Tessera *tt);
 	inline void new_tilemap(size_t width, size_t height) { open_tilemap(NULL, width, height); }
 	void open_tilemap(const char *filename, size_t width = 0, size_t height = 0);
 	void open_recent_tilemap(int n);
