@@ -373,13 +373,9 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_image_name->callback((Fl_Callback *)image_cb, this);
 	_tilemap_name->callback((Fl_Callback *)tilemap_cb, this);
 	_tileset_name->callback((Fl_Callback *)tileset_cb, this);
-	_format->add("Plain");                                // PLAIN
-	_format->add("Run-length encoded (RLE)");             // RLE
-	_format->add("GSC Town Map ($FF end)");               // FF_END
-	_format->add("Pok\xc3\xa9gear card (RLE + $FF end)"); // RLE_FF_END
-	_format->add("RBY Town Map (RLE nybbles + $00 end)"); // RLE_NYBBLES
-	_format->add("PC Town Map (X\\/Y flip)");             // XY_FLIP
-	_format->add("SGB border (tile + attribute)");        // TILE_ATTR
+	for (int i = 0; i < NUM_FORMATS; i++) {
+		_format->add(format_name((Tilemap_Format)i));
+	}
 	_start_id->default_value(0x00);
 	_image_chooser->title("Read Image");
 	_image_chooser->filter("Image Files\t*.{png,bmp}\n");

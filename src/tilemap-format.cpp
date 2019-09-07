@@ -20,19 +20,17 @@ int format_tileset_size(Tilemap_Format fmt) {
 const char *format_name(Tilemap_Format fmt) {
 	switch (fmt) {
 	case Tilemap_Format::PLAIN:
-		return "Plain";
-	case Tilemap_Format::RLE:
-		return "Run-length encoded";
-	case Tilemap_Format::FF_END:
-		return "GSC Town Map";
-	case Tilemap_Format::RLE_FF_END:
-		return "Pok\xc3\xa9gear card";
+		return "Plain tiles";
+	case Tilemap_Format::TILE_ATTR:
+		return "Tiles + attributes";
 	case Tilemap_Format::RLE_NYBBLES:
 		return "RBY Town Map";
+	case Tilemap_Format::FF_END:
+		return "GSC Town Map";
 	case Tilemap_Format::XY_FLIP:
 		return "PC Town Map";
-	case Tilemap_Format::TILE_ATTR:
-		return "SGB border";
+	case Tilemap_Format::RLE_FF_END:
+		return "Pok\xc3\xa9gear card";
 	default:
 		return "Any";
 	}
@@ -43,7 +41,6 @@ const char *format_extension(Tilemap_Format fmt) {
 	case Tilemap_Format::PLAIN:
 	default:
 		return ".tilemap"; // e.g. pokecrystal/gfx/card_flip/card_flip.tilemap
-	case Tilemap_Format::RLE:
 	case Tilemap_Format::RLE_NYBBLES:
 		return ".rle"; // e.g. pokered/gfx/town_map.rle
 	case Tilemap_Format::FF_END:

@@ -1,9 +1,9 @@
 #ifndef TILEMAP_FORMAT_H
 #define TILEMAP_FORMAT_H
 
-#define NUM_FORMATS 7
+#define NUM_FORMATS 6
 
-enum Tilemap_Format { PLAIN, RLE, FF_END, RLE_FF_END, RLE_NYBBLES, XY_FLIP, TILE_ATTR };
+enum Tilemap_Format { PLAIN, TILE_ATTR, RLE_NYBBLES, FF_END, XY_FLIP, RLE_FF_END };
 
 int format_tileset_size(Tilemap_Format fmt);
 const char *format_name(Tilemap_Format fmt);

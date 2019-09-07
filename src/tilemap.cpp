@@ -184,20 +184,6 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 		}
 	}
 
-	else if (fmt == Tilemap_Format::RLE) {
-		if (c % 2) {
-			fclose(file);
-			return (_result = TILEMAP_TOO_SHORT_FF);
-		}
-		for (long i = 0; i < c; i += 2) {
-			int v = fgetc(file);
-			int r = fgetc(file);
-			for (int j = 0; j < r; j++) {
-				tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint8_t)v));
-			}
-		}
-	}
-
 	else if (fmt == Tilemap_Format::FF_END) {
 		for (long i = 0; i < c - 1; i++) {
 			int b = fgetc(file);
@@ -340,7 +326,7 @@ bool Tilemap::write_tiles(const char *f, std::vector<Tile_Tessera *> &tiles, Til
 			fputc(v, file);
 		}
 	}
-	else if (fmt == Tilemap_Format::RLE || fmt == Tilemap_Format::RLE_FF_END) {
+	else if (fmt == Tilemap_Format::RLE_FF_END) {
 		size_t n = tiles.size();
 		for (size_t i = 0; i < n;) {
 			Tile_Tessera *tt = tiles[i++];
