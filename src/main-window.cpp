@@ -298,7 +298,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 		OS_MENU_ITEM("&Redo", FL_COMMAND + 'y', (Fl_Callback *)redo_cb, this, 0),
 		{},
 		OS_SUBMENU("&View"),
-		OS_MENU_ITEM("&Theme", 0, NULL, NULL, FL_SUBMENU),
+		OS_MENU_ITEM("&Theme", 0, NULL, NULL, FL_SUBMENU | FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&Classic", 0, (Fl_Callback *)classic_theme_cb, this,
 			FL_MENU_RADIO | (OS::current_theme() == OS::CLASSIC ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&Aero", 0, (Fl_Callback *)aero_theme_cb, this,
