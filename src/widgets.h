@@ -9,6 +9,7 @@
 #include <FL/Fl_Spinner.H>
 #include <FL/Fl_Choice.H>
 #include <FL/Fl_Group.H>
+#include <FL/Fl_Tabs.H>
 #include <FL/Fl_Scroll.H>
 #include <FL/Fl_Check_Button.H>
 #include <FL/Fl_Radio_Round_Button.H>
@@ -125,6 +126,17 @@ class Dropdown : public Fl_Choice {
 public:
 	Dropdown(int x, int y, int w, int h, const char *l = NULL);
 	void draw(void);
+};
+
+class OS_Tabs : public Fl_Tabs {
+public:
+	OS_Tabs(int x, int y, int w, int h, const char *l = NULL);
+};
+
+class OS_Tab : public Fl_Group {
+public:
+	OS_Tab(int x, int y, int w, int h, const char *l = NULL);
+	void refresh(void);
 };
 
 class OS_Scroll : public Fl_Scroll {

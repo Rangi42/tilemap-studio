@@ -375,6 +375,24 @@ void Dropdown::draw() {
 	draw_label();
 }
 
+OS_Tabs::OS_Tabs(int x, int y, int w, int h, const char *l) : Fl_Tabs(x, y, w, h, l) {
+	labelfont(OS_FONT);
+	labelsize(OS_FONT_SIZE);
+	box(OS_TABS_BOX);
+	selection_color(OS_TAB_COLOR);
+}
+
+OS_Tab::OS_Tab(int x, int y, int w, int h, const char *l) : Fl_Group(x, y, w, h, l) {
+	labelfont(OS_FONT);
+	labelsize(OS_FONT_SIZE);
+	resizable(NULL);
+	refresh();
+}
+
+void OS_Tab::refresh() {
+	color(OS::current_theme() == OS::METAL ? FL_BACKGROUND_COLOR : OS_TAB_COLOR);
+}
+
 OS_Scroll::OS_Scroll(int x, int y, int w, int h, const char *l) : Fl_Scroll(x, y, w, h, l) {
 	scrollbar.slider(OS_MINI_BUTTON_UP_BOX);
 	hscrollbar.slider(OS_MINI_BUTTON_UP_BOX);

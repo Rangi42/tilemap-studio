@@ -814,6 +814,14 @@ void Main_Window::update_active_controls() {
 	}
 }
 
+void Main_Window::refresh_theme() {
+	// TODO: call refresh() on every OS_Tab
+	for (Tileset &t : _tilesets) {
+		t.refresh_inactive_image();
+	}
+	redraw();
+}
+
 void Main_Window::resize_tilemap() {
 	size_t w = _resize_dialog->tilemap_width(), h = _resize_dialog->tilemap_height();
 	size_t n = w * h;
@@ -1502,91 +1510,61 @@ void Main_Window::redo_cb(Fl_Widget *, Main_Window *mw) {
 void Main_Window::classic_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_classic_theme();
 	mw->_classic_theme_mi->setonly();
-	for (Tileset &t : mw->_tilesets) {
-		t.refresh_inactive_image();
-	}
-	mw->redraw();
+	mw->refresh_theme();
 }
 
 void Main_Window::aero_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_aero_theme();
 	mw->_aero_theme_mi->setonly();
-	for (Tileset &t : mw->_tilesets) {
-		t.refresh_inactive_image();
-	}
-	mw->redraw();
+	mw->refresh_theme();
 }
 
 void Main_Window::metro_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_metro_theme();
 	mw->_metro_theme_mi->setonly();
-	for (Tileset &t : mw->_tilesets) {
-		t.refresh_inactive_image();
-	}
-	mw->redraw();
+	mw->refresh_theme();
 }
 
 void Main_Window::aqua_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_aqua_theme();
 	mw->_aqua_theme_mi->setonly();
-	for (Tileset &t : mw->_tilesets) {
-		t.refresh_inactive_image();
-	}
-	mw->redraw();
+	mw->refresh_theme();
 }
 
 void Main_Window::greybird_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_greybird_theme();
 	mw->_greybird_theme_mi->setonly();
-	for (Tileset &t : mw->_tilesets) {
-		t.refresh_inactive_image();
-	}
-	mw->redraw();
+	mw->refresh_theme();
 }
 
 void Main_Window::metal_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_metal_theme();
 	mw->_metal_theme_mi->setonly();
-	for (Tileset &t : mw->_tilesets) {
-		t.refresh_inactive_image();
-	}
-	mw->redraw();
+	mw->refresh_theme();
 }
 
 void Main_Window::blue_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_blue_theme();
 	mw->_blue_theme_mi->setonly();
-	for (Tileset &t : mw->_tilesets) {
-		t.refresh_inactive_image();
-	}
-	mw->redraw();
+	mw->refresh_theme();
 }
 
 void Main_Window::olive_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_olive_theme();
 	mw->_olive_theme_mi->setonly();
-	for (Tileset &t : mw->_tilesets) {
-		t.refresh_inactive_image();
-	}
-	mw->redraw();
+	mw->refresh_theme();
 }
 
 void Main_Window::rose_gold_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_rose_gold_theme();
 	mw->_rose_gold_theme_mi->setonly();
-	for (Tileset &t : mw->_tilesets) {
-		t.refresh_inactive_image();
-	}
-	mw->redraw();
+	mw->refresh_theme();
 }
 
 void Main_Window::dark_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_dark_theme();
 	mw->_dark_theme_mi->setonly();
-	for (Tileset &t : mw->_tilesets) {
-		t.refresh_inactive_image();
-	}
-	mw->redraw();
+	mw->refresh_theme();
 }
 
 void Main_Window::grid_cb(Fl_Menu_ *m, Main_Window *mw) {
