@@ -672,16 +672,26 @@ void Main_Window::update_status(Tile_Tessera *tt) {
 	sprintf(buffer, "X/Y (%u, %u)", (uint32_t)tt->col(), (uint32_t)tt->row());
 #endif
 	_hover_xy->copy_label(buffer);
-	if (_tilemap.width() == GAME_BOY_WIDTH && _tilemap.height() == GAME_BOY_HEIGHT &&
-		(Config::format() == Tilemap_Format::FF_END || Config::format() == Tilemap_Format::RLE_NYBBLES ||
-		Config::format() == Tilemap_Format::XY_FLIP)) {
-		size_t lx = tt->col() * TILE_SIZE + TILE_SIZE / 2, ly = tt->row() * TILE_SIZE + TILE_SIZE / 2; // center of tile
+	if (_tilemap.width() == GAME_BOY_WIDTH && _tilemap.height() == GAME_BOY_HEIGHT) {
+		if (Config::format() == Tilemap_Format::FF_END || Config::format() == Tilemap_Format::XY_FLIP) {
+			size_t lx = tt->col() * TILE_SIZE + TILE_SIZE / 2;
+			size_t ly = tt->row() * TILE_SIZE + TILE_SIZE / 2;
 #ifdef __GNUC__
-		sprintf(buffer, "Landmark (%zu, %zu)", lx, ly);
+			sprintf(buffer, "Landmark (%zu, %zu)", lx, ly);
 #else
-		sprintf(buffer, "Landmark (%u, %u)", (uint32_t)lx, (uint32_t)ly);
+			sprintf(buffer, "Landmark (%u, %u)", (uint32_t)lx, (uint32_t)ly);
 #endif
-		_hover_landmark->copy_label(buffer);
+			_hover_landmark->copy_label(buffer);
+		}
+		else if (Config::format() == Tilemap_Format::RLE_NYBBLES &&
+			tt->col() >= 2 && tt->col() <= 0xF + 2 && tt->row() >= 1 && tt->row() <= 0xF + 1) {
+			int lx = (int)tt->col() - 2, ly = (int)tt->row() - 1;
+			sprintf(buffer, "EMAP $%X, $%X", lx, ly);
+			_hover_landmark->copy_label(buffer);
+		}
+		else {
+			_hover_landmark->label("");
+		}
 	}
 	else {
 		_hover_landmark->label("");
