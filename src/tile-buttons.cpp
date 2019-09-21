@@ -194,6 +194,17 @@ void Tile_State::print(int x, int y) {
 	print_digit(x+4, y+2, lo);
 }
 
+Tile_Swatch::Tile_Swatch(int x, int y, int w, int h) : Fl_Box(x, y, w, h), _state(0x00, false, false, -1) {
+	user_data(NULL);
+	box(OS_SPACER_THIN_DOWN_FRAME);
+	labeltype(FL_NO_LABEL);
+}
+
+void Tile_Swatch::draw() {
+	draw_box();
+	_state.draw(x() + Fl::box_dx(box()), y() + Fl::box_dy(box()), !!active());
+}
+
 Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint8_t id, bool x_flip, bool y_flip, int color) :
 	Fl_Box(x, y, TILE_SIZE_2X, TILE_SIZE_2X), _row(row), _col(col), _state(id, x_flip, y_flip, color) {
 	user_data(NULL);

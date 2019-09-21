@@ -155,8 +155,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	int qx = gx + gw - wgt_w - wgt_m * 2 - wgt_h * 3;
 	_tile_heading = new Label(qx, gy, wgt_w, wgt_h, "Tile: $0:00");
 	qx += _tile_heading->w() + wgt_m;
-	Fl_Box *todo_swatch = new Spacer(qx+2, gy+2, wgt_h-4, wgt_h-4);
-	qx += todo_swatch->w() + 4 + wgt_m;
+	_current_tile = new Tile_Swatch(qx+2, gy+2, TILE_SIZE_2X+2, TILE_SIZE_2X+2);
+	qx += _current_tile->w() + 4 + wgt_m;
 	_x_flip_tb = new Toolbar_Toggle_Button(qx, gy, wgt_h, wgt_h);
 	qx += _x_flip_tb->w();
 	_y_flip_tb = new Toolbar_Toggle_Button(qx, gy, wgt_h, wgt_h);
@@ -467,10 +467,12 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_x_flip_tb->tooltip("X Flip (Horizontal)");
 	_x_flip_tb->image(X_FLIP_ICON);
 	_x_flip_tb->deimage(X_FLIP_DISABLED_ICON);
+	_x_flip_tb->callback((Fl_Callback *)x_flip_cb, this);
 
 	_y_flip_tb->tooltip("Y Flip (Vertical)");
 	_y_flip_tb->image(Y_FLIP_ICON);
 	_y_flip_tb->deimage(Y_FLIP_DISABLED_ICON);
+	_y_flip_tb->callback((Fl_Callback *)y_flip_cb, this);
 
 	_color->default_value(0);
 	_color->range(0, NUM_SGB_COLORS - 1);
@@ -825,8 +827,10 @@ void Main_Window::update_active_controls() {
 	else {
 		_x_flip_tb->clear();
 		_x_flip_tb->deactivate();
+		_x_flip_tb->do_callback();
 		_y_flip_tb->clear();
 		_y_flip_tb->deactivate();
+		_y_flip_tb->do_callback();
 	}
 	int n = format_tileset_size(Config::format());
 	for (int i = 0; i < n; i++) {
@@ -1711,6 +1715,16 @@ void Main_Window::tilemap_width_tb_cb(OS_Spinner *, Main_Window *mw) {
 	mw->update_status(NULL);
 }
 
+void Main_Window::x_flip_cb(Toolbar_Toggle_Button *, Main_Window *mw) {
+	mw->_current_tile->x_flip(mw->x_flip());
+	mw->_current_tile->redraw();
+}
+
+void Main_Window::y_flip_cb(Toolbar_Toggle_Button *, Main_Window *mw) {
+	mw->_current_tile->y_flip(mw->y_flip());
+	mw->_current_tile->redraw();
+}
+
 void Main_Window::tilemap_tabs_cb(OS_Tabs *, Main_Window *mw) {
 	Config::attributes(mw->_tilemap_tabs->value() == mw->_tilemap_attributes_tab);
 	mw->redraw();
@@ -1769,8 +1783,10 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 void Main_Window::select_tile_cb(Tile_Button *tb, Main_Window *mw) {
 	tb->setonly();
 	mw->_selected = tb;
+	mw->_current_tile->id(tb->id());
 	char buffer[32];
 	sprintf(buffer, "Tile: $%02X", tb->id());
 	mw->_tile_heading->copy_label(buffer);
+	mw->_current_tile->redraw();
 	mw->_tile_heading->redraw();
 }

@@ -55,6 +55,7 @@ private:
 	OS_Check_Button *_priority, *_obp1;
 	// GUI outputs
 	Label *_width_heading, *_tileset_name, *_tilemap_name, *_tile_heading;
+	Tile_Swatch *_current_tile;
 	Status_Bar_Field *_tilemap_dimensions, *_tilemap_format, *_hover_id, *_hover_xy, *_hover_landmark;
 	// Conditional menu items
 	Fl_Menu_Item *_reload_tilesets_mi = NULL, *_unload_tilesets_mi = NULL, *_close_mi = NULL, *_save_mi = NULL,
@@ -175,6 +176,8 @@ private:
 	static void grid_tb_cb(Toolbar_Button *tb, Main_Window *mw);
 	static void rainbow_tiles_tb_cb(Toolbar_Button *tb, Main_Window *mw);
 	static void tilemap_width_tb_cb(OS_Spinner *ss, Main_Window *mw);
+	static void x_flip_cb(Toolbar_Toggle_Button *tb, Main_Window *mw);
+	static void y_flip_cb(Toolbar_Toggle_Button *tb, Main_Window *mw);
 	// Tilemap
 	static void tilemap_tabs_cb(OS_Tabs *ts, Main_Window *mw);
 	static void change_tile_cb(Tile_Tessera *tt, Main_Window *mw);

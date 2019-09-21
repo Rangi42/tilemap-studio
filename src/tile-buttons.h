@@ -36,6 +36,22 @@ public:
 	}
 };
 
+class Tile_Swatch : public Fl_Box {
+private:
+	Tile_State _state;
+public:
+	Tile_Swatch(int x, int y, int w, int h);
+	inline Tile_State state(void) const { return _state; }
+	inline void state(Tile_State state) { _state = state; }
+	inline uint8_t id(void) const { return _state.id; }
+	inline void id(uint8_t id) { _state.id = id; }
+	inline bool x_flip(void) const { return _state.x_flip; }
+	inline void x_flip(bool x_flip) { _state.x_flip = x_flip; }
+	inline bool y_flip(void) const { return _state.y_flip; }
+	inline void y_flip(bool y_flip) { _state.y_flip = y_flip; }
+	void draw(void);
+};
+
 class Tile_Tessera : public Fl_Box {
 private:
 	size_t _row, _col;
