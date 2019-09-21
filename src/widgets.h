@@ -109,14 +109,6 @@ protected:
 	int handle(int event);
 };
 
-class Toggle_Switch : public Fl_Check_Button {
-public:
-	Toggle_Switch(int x, int y, int w, int h, const char *l = NULL);
-protected:
-	void draw(void);
-	int handle(int event);
-};
-
 class HTML_View : public Fl_Help_View {
 public:
 	HTML_View(int x, int y, int w, int h, const char *l = NULL);
@@ -136,7 +128,6 @@ public:
 class OS_Tab : public Fl_Group {
 public:
 	OS_Tab(int x, int y, int w, int h, const char *l = NULL);
-	void refresh(void);
 };
 
 class OS_Scroll : public Fl_Scroll {
@@ -185,6 +176,16 @@ public:
 protected:
 	void draw(void);
 	int handle(int event);
+};
+
+class Toolbar_Toggle_Button : public Toolbar_Button {
+public:
+	Toolbar_Toggle_Button(int x, int y, int w, int h, const char *l = NULL);
+};
+
+class Toolbar_Radio_Button : public Toolbar_Button {
+public:
+	Toolbar_Radio_Button(int x, int y, int w, int h, const char *l = NULL);
 };
 
 class Status_Bar_Field : public Fl_Box {

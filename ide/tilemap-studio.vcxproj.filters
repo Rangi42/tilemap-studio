@@ -199,6 +199,30 @@
     <None Include="..\res\add.xpm">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\res\grid.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\rainbow.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\x-flip.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\x-flip-disabled.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\y-flip.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\y-flip-disabled.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\reformat.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\reformat-disabled.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="tilemap-studio.rc">

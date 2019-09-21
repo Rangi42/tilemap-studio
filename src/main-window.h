@@ -27,9 +27,13 @@ class Main_Window : public Fl_Double_Window {
 private:
 	// GUI containers
 	Fl_Menu_Bar *_menu_bar;
-	Fl_Group *_main_group, *_left_group, *_right_group, *_left_top_bar, *_left_bottom_bar, *_right_top_bar, *_right_bottom_bar;
-	Workspace *_tilemap_scroll;
+	Toolbar *_toolbar;
+	Fl_Group *_main_group, *_left_group, *_right_group;
+	OS_Tabs *_tileset_tabs, *_tilemap_tabs;
+	OS_Tab *_tileset_bank0_tab, *_tileset_bank1_tab, *_tileset_bank2_tab, *_tileset_bank3_tab;
 	Workpane *_tileset_pane;
+	OS_Tab *_tilemap_tiles_tab, *_tilemap_attributes_tab;
+	Workspace *_tilemap_scroll;
 	Toolbar *_status_bar;
 	// GUI inputs
 	DnD_Receiver *_tilemap_dnd_receiver, *_tileset_dnd_receiver;
@@ -39,28 +43,24 @@ private:
 		*_rose_gold_theme_mi = NULL, *_dark_theme_mi = NULL;
 	Fl_Menu_Item *_plain_format_mi = NULL, *_sgb_border_format_mi = NULL, *_rby_town_map_format_mi = NULL,
 		*_gsc_town_map_format_mi = NULL, *_pc_town_map_format_mi = NULL, *_pokegear_card_format_mi = NULL;
-	Fl_Menu_Item *_grid_mi, *_rainbow_tiles_mi = NULL, *_show_attributes_mi = NULL;
-	Toolbar_Button *_new_tb, *_open_tb, *_save_tb, *_print_tb;
-	Dropdown *_format;
-	Label_Button *_tilemap_name;
-	Toolbar_Button *_undo_tb, *_redo_tb, *_resize_tb;
+	Fl_Menu_Item *_grid_mi, *_rainbow_tiles_mi = NULL;
+	Toolbar_Button *_new_tb, *_open_tb, *_save_tb, *_print_tb, *_load_tb, *_add_tb, *_reload_tb, *_undo_tb, *_redo_tb;
+	Toolbar_Toggle_Button *_grid_tb, *_rainbow_tiles_tb;
 	Default_Spinner *_tilemap_width;
-	Toolbar_Button *_load_tb, *_add_tb, *_reload_tb;
+	Toolbar_Button *_resize_tb, *_reformat_tb;
 	Toolbar_Button *_image_to_tiles_tb;
-	Label_Button *_tileset_name;
-	Label *_flip_heading;
-	Default_Spinner *_color;
-	Toggle_Switch *_show_attributes;
-	OS_Check_Button *_x_flip, *_y_flip;
+	Toolbar_Toggle_Button *_x_flip_tb, *_y_flip_tb;
 	Tile_Button *_tile_buttons[NUM_TILES];
+	Default_Spinner *_color;
+	OS_Check_Button *_priority, *_obp1;
 	// GUI outputs
-	Label *_tile_heading;
+	Label *_width_heading, *_tileset_name, *_tilemap_name, *_tile_heading;
 	Status_Bar_Field *_tilemap_dimensions, *_tilemap_format, *_hover_id, *_hover_xy, *_hover_landmark;
 	// Conditional menu items
-	Fl_Menu_Item *_reload_tilesets_mi = NULL, *_unload_tilesets_mi = NULL, *_close_mi = NULL, *_save_mi = NULL, *_save_as_mi = NULL,
-		*_print_mi = NULL;
+	Fl_Menu_Item *_reload_tilesets_mi = NULL, *_unload_tilesets_mi = NULL, *_close_mi = NULL, *_save_mi = NULL,
+		*_save_as_mi = NULL, *_print_mi = NULL;
 	Fl_Menu_Item *_undo_mi = NULL, *_redo_mi = NULL;
-	Fl_Menu_Item *_tilemap_width_mi = NULL, *_resize_mi = NULL;
+	Fl_Menu_Item *_tilemap_width_mi = NULL, *_resize_mi = NULL, *_reformat_mi = NULL;
 	// Dialogs
 	Fl_Native_File_Chooser *_tilemap_open_chooser, *_tilemap_save_chooser, *_tileset_load_chooser, *_png_chooser;
 	Modal_Dialog *_error_dialog, *_warning_dialog, *_success_dialog, *_unsaved_dialog, *_about_dialog;
@@ -90,8 +90,8 @@ public:
 	~Main_Window();
 	void show(void);
 	inline bool unsaved(void) const { return _tilemap.modified(); }
-	inline bool x_flip(void) const { return _x_flip->active() && !!_x_flip->value(); }
-	inline bool y_flip(void) const { return _y_flip->active() && !!_y_flip->value(); }
+	inline bool x_flip(void) const { return _x_flip_tb->active() && !!_x_flip_tb->value(); }
+	inline bool y_flip(void) const { return _y_flip_tb->active() && !!_y_flip_tb->value(); }
 	inline int sgb_color(void) const { return _color->active() ? (int)_color->value() : -1; }
 	inline const char *modified_filename(void) const {
 		return unsaved() ? _tilemap_file.empty() ? NEW_TILEMAP_NAME : fl_filename_name(_tilemap_file.c_str()) : "";
@@ -159,23 +159,24 @@ private:
 	// Tools menu
 	static void tilemap_width_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void resize_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void reformat_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void image_to_tiles_cb(Fl_Widget *w, Main_Window *mw);
-	// Options menu
+	// Format menu
 	static void plain_format_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void sgb_border_format_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void rby_town_map_format_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void gsc_town_map_format_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void pc_town_map_format_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void pokegear_card_format_cb(Fl_Menu_ *m, Main_Window *mw);
-	static void show_attributes_cb(Fl_Menu_ *m, Main_Window *mw);
 	// Help menu
 	static void help_cb(Fl_Widget *w, Main_Window *mw);
 	static void about_cb(Fl_Widget *w, Main_Window *mw);
 	// Toolbar buttons
-	static void format_tb_cb(Dropdown *dd, Main_Window *mw);
+	static void grid_tb_cb(Toolbar_Button *tb, Main_Window *mw);
+	static void rainbow_tiles_tb_cb(Toolbar_Button *tb, Main_Window *mw);
 	static void tilemap_width_tb_cb(OS_Spinner *ss, Main_Window *mw);
-	static void show_attributes_tb_cb(Toggle_Switch *ts, Main_Window *mw);
 	// Tilemap
+	static void tilemap_tabs_cb(OS_Tabs *ts, Main_Window *mw);
 	static void change_tile_cb(Tile_Tessera *tt, Main_Window *mw);
 	// Tileset
 	static void select_tile_cb(Tile_Button *tb, Main_Window *mw);

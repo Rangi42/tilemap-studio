@@ -251,47 +251,6 @@ int Default_Hex_Spinner::handle(int event) {
 	return Hex_Spinner::handle(event);
 }
 
-Toggle_Switch::Toggle_Switch(int x, int y, int w, int h, const char *l) : Fl_Check_Button(x, y, w, h, l) {
-	box(OS_MINI_BUTTON_UP_BOX);
-	down_box(OS_MINI_DEPRESSED_DOWN_BOX);
-}
-
-void Toggle_Switch::draw() {
-	// Based on Fl_Light_Button::draw()
-	Fl_Boxtype bb = Fl::scheme() ? value() ? OS::current_theme() == OS::GREYBIRD ? OS_DEFAULT_BUTTON_BOX :
-		OS_DEPRESSED_DOWN_BOX : OS_BUTTON_UP_BOX : OS_SPACER_THIN_DOWN_BOX;
-	Fl_Color bc = value() ? FL_SELECTION_COLOR : FL_DARK2;
-	draw_box(bb, x(), y(), w(), h(), active_r() ? bc : fl_inactive(bc));
-	int sh = MIN(w() - 2, (h() - 2) * 2 / 3);
-	int sy = value() ? y() + 1 : y() + h() - 1 - sh;
-	draw_box(box(), x()+1, sy, w()-2, sh, FL_GRAY);
-	if (Fl::focus() == this) { draw_focus(); }
-}
-
-int Toggle_Switch::handle(int event) {
-	if (OS::current_theme() != OS::AQUA && OS::current_theme() != OS::OLIVE) {
-		switch (event) {
-		case FL_ENTER:
-			if (active_r()) {
-				box(OS_HOVERED_UP_BOX);
-				redraw();
-				return 1;
-			}
-			return 0;
-		case FL_LEAVE:
-		case FL_HIDE:
-		case FL_DEACTIVATE:
-			box(OS_MINI_BUTTON_UP_BOX);
-			redraw();
-			return 1;
-		}
-	}
-	if (event == FL_PUSH) {
-		Fl::focus(this);
-	}
-	return Fl_Check_Button::handle(event);
-}
-
 HTML_View::HTML_View(int x, int y, int w, int h, const char *l) : Fl_Help_View(x, y, w, h, l) {
 	box(OS_INPUT_THIN_DOWN_BOX);
 	// TODO: scrollbar_.slider(OS_MINI_BUTTON_UP_BOX);
@@ -386,11 +345,7 @@ OS_Tab::OS_Tab(int x, int y, int w, int h, const char *l) : Fl_Group(x, y, w, h,
 	labelfont(OS_FONT);
 	labelsize(OS_FONT_SIZE);
 	resizable(NULL);
-	refresh();
-}
-
-void OS_Tab::refresh() {
-	color(OS::current_theme() == OS::METAL ? FL_BACKGROUND_COLOR : OS_TAB_COLOR);
+	color(OS_TAB_COLOR);
 }
 
 OS_Scroll::OS_Scroll(int x, int y, int w, int h, const char *l) : Fl_Scroll(x, y, w, h, l) {
@@ -570,6 +525,16 @@ int Toolbar_Button::handle(int event) {
 		Fl::focus(this);
 	}
 	return Fl_Button::handle(event);
+}
+
+Toolbar_Toggle_Button::Toolbar_Toggle_Button(int x, int y, int w, int h, const char *l) :
+	Toolbar_Button(x, y, w, h, l) {
+	type(FL_TOGGLE_BUTTON);
+}
+
+Toolbar_Radio_Button::Toolbar_Radio_Button(int x, int y, int w, int h, const char *l) :
+	Toolbar_Button(x, y, w, h, l) {
+	type(FL_RADIO_BUTTON);
 }
 
 Status_Bar_Field::Status_Bar_Field(int x, int y, int w, int h, const char *l) : Fl_Box(x, y, w, h, l),
