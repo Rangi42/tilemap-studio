@@ -816,6 +816,7 @@ void Main_Window::update_active_controls() {
 		_obp1->deactivate();
 		_tilemap_attributes_tab->deactivate();
 		_tilemap_tabs->value(_tilemap_tiles_tab);
+		_tilemap_tabs->do_callback();
 	}
 	if (Config::format() == Tilemap_Format::XY_FLIP || Config::format() == Tilemap_Format::TILE_ATTR) {
 		_x_flip_tb->activate();

@@ -6,6 +6,7 @@
 #include <FL/Fl_Spinner.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Toggle_Button.H>
+#include <FL/Fl_Tooltip.H>
 #include <FL/Fl_Menu_.H>
 #include <FL/fl_draw.H>
 #pragma warning(pop)
@@ -334,12 +335,50 @@ void Dropdown::draw() {
 	draw_label();
 }
 
-// TODO: don't switch to inactive tabs
 OS_Tabs::OS_Tabs(int x, int y, int w, int h, const char *l) : Fl_Tabs(x, y, w, h, l) {
 	labelfont(OS_FONT);
 	labelsize(OS_FONT_SIZE);
 	box(OS_TABS_BOX);
 	selection_color(OS_TAB_COLOR);
+}
+
+int OS_Tabs::handle(int event) {
+	// Based on Fl_Tabs::handle()
+	Fl_Widget *o;
+	switch (event) {
+	case FL_PUSH:
+		// Assume a tab height of 20 since tab_height() is inaccessible
+		if (Fl::event_y() > y() + 20) {
+			return Fl_Group::handle(event);
+		}
+		// fallthrough
+	case FL_DRAG:
+	case FL_RELEASE:
+		o = which(Fl::event_x(), Fl::event_y());
+		if (!o->active()) {
+			return 0;
+		}
+		if (event == FL_RELEASE) {
+			push(NULL);
+			if (o && Fl::visible_focus() && Fl::focus() != this) {
+				Fl::focus(this);
+				redraw_tabs();
+			}
+			if (o && (value(o) || (when() & FL_WHEN_NOT_CHANGED))) {
+				Fl_Widget_Tracker wp(o);
+				set_changed();
+				do_callback();
+				if (wp.deleted()) {
+					return 1;
+				}
+			}
+			Fl_Tooltip::current(o);
+		} else {
+			push(o);
+		}
+		return 1;
+	}
+	return Fl_Tabs::handle(event);
 }
 
 OS_Tab::OS_Tab(int x, int y, int w, int h, const char *l) : Fl_Group(x, y, w, h, l) {

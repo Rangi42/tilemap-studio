@@ -123,6 +123,8 @@ public:
 class OS_Tabs : public Fl_Tabs {
 public:
 	OS_Tabs(int x, int y, int w, int h, const char *l = NULL);
+protected:
+	int handle(int event);
 };
 
 class OS_Tab : public Fl_Group {
