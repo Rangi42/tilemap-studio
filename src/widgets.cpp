@@ -355,7 +355,7 @@ int OS_Tabs::handle(int event) {
 	case FL_DRAG:
 	case FL_RELEASE:
 		o = which(Fl::event_x(), Fl::event_y());
-		if (!o->active()) {
+		if (o && !o->active()) {
 			return 0;
 		}
 		if (event == FL_RELEASE) {
