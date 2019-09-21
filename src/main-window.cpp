@@ -798,16 +798,24 @@ void Main_Window::update_active_controls() {
 		_reload_tb->deactivate();
 		_unload_tilesets_mi->deactivate();
 	}
+	// TODO: support tile banks 1-3
+	_tileset_bank1_tab->deactivate();
+	_tileset_bank2_tab->deactivate();
+	_tileset_bank3_tab->deactivate();
+	_tileset_tabs->value(_tileset_bank0_tab);
 	if (Config::format() == Tilemap_Format::TILE_ATTR) {
 		_color->activate();
 		_priority->activate();
 		_obp1->activate();
+		_tilemap_attributes_tab->activate();
 	}
 	else {
 		_color->default_value(0);
 		_color->deactivate();
 		_priority->deactivate();
 		_obp1->deactivate();
+		_tilemap_attributes_tab->deactivate();
+		_tilemap_tabs->value(_tilemap_tiles_tab);
 	}
 	if (Config::format() == Tilemap_Format::XY_FLIP || Config::format() == Tilemap_Format::TILE_ATTR) {
 		_x_flip_tb->activate();

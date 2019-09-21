@@ -334,6 +334,7 @@ void Dropdown::draw() {
 	draw_label();
 }
 
+// TODO: don't switch to inactive tabs
 OS_Tabs::OS_Tabs(int x, int y, int w, int h, const char *l) : Fl_Tabs(x, y, w, h, l) {
 	labelfont(OS_FONT);
 	labelsize(OS_FONT_SIZE);
