@@ -281,9 +281,9 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 		for (long i = 0; i < c; i += 2) {
 			int v = fgetc(file);
 			int a = fgetc(file);
-			bool x_flip = !!(a & 0x40), y_flip = !!(a & 0x80);
+			bool x_flip = !!(a & 0x40), y_flip = !!(a & 0x80), priority = !!(a & 0x20), obp1 = !!(a & 0x10);
 			int color = (a & 0xC) >> 2;
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint8_t)v, x_flip, y_flip, color));
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint8_t)v, x_flip, y_flip, priority, obp1, color));
 		}
 	}
 
@@ -356,7 +356,9 @@ bool Tilemap::write_tiles(const char *f, std::vector<Tile_Tessera *> &tiles, Til
 		for (Tile_Tessera *tt : tiles) {
 			uint8_t v = tt->id();
 			fputc(v, file);
-			uint8_t a = 0x10;
+			uint8_t a = 0;
+			if (tt->obp1()) { a |= 0x10; }
+			if (tt->priority()) { a |= 0x20; }
 			if (tt->x_flip()) { a |= 0x40; }
 			if (tt->y_flip()) { a |= 0x80; }
 			if (tt->sgb_color() > -1) { a |= tt->sgb_color() << 2; }

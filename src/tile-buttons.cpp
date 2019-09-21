@@ -108,8 +108,8 @@ static void draw_selection_border(int x, int y) {
 
 std::vector<Tileset> *Tile_State::_tilesets = NULL;
 
-Tile_State::Tile_State(uint8_t id_, bool x_flip_, bool y_flip_, int color_) : id(id_),
-	x_flip(x_flip_), y_flip(y_flip_), color(color_) {}
+Tile_State::Tile_State(uint8_t id_, bool x_flip_, bool y_flip_, bool priority_, bool obp1_, int color_) : id(id_),
+	x_flip(x_flip_), y_flip(y_flip_), priority(priority_), obp1(obp1_), color(color_) {}
 
 void Tile_State::draw(int x, int y, bool active, bool selected) {
 	int s = OS::is_consolas() ? 11 : 10;
@@ -194,7 +194,7 @@ void Tile_State::print(int x, int y) {
 	print_digit(x+4, y+2, lo);
 }
 
-Tile_Swatch::Tile_Swatch(int x, int y, int w, int h) : Fl_Box(x, y, w, h), _state(0x00, false, false, -1) {
+Tile_Swatch::Tile_Swatch(int x, int y, int w, int h) : Fl_Box(x, y, w, h), _state() {
 	user_data(NULL);
 	box(OS_SPACER_THIN_DOWN_FRAME);
 	labeltype(FL_NO_LABEL);
@@ -205,8 +205,9 @@ void Tile_Swatch::draw() {
 	_state.draw(x() + Fl::box_dx(box()), y() + Fl::box_dy(box()), !!active());
 }
 
-Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint8_t id, bool x_flip, bool y_flip, int color) :
-	Fl_Box(x, y, TILE_SIZE_2X, TILE_SIZE_2X), _row(row), _col(col), _state(id, x_flip, y_flip, color) {
+Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint8_t id, bool x_flip, bool y_flip,
+	bool priority, bool obp1, int color) :
+	Fl_Box(x, y, TILE_SIZE_2X, TILE_SIZE_2X), _row(row), _col(col), _state(id, x_flip, y_flip, priority, obp1, color) {
 	user_data(NULL);
 	box(FL_NO_BOX);
 	labeltype(FL_NO_LABEL);

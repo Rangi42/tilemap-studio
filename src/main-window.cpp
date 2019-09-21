@@ -876,7 +876,7 @@ void Main_Window::resize_tilemap() {
 
 void Main_Window::flood_fill(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
-	Tile_State ts(_selected->id(), x_flip(), y_flip(), sgb_color());
+	Tile_State ts(_selected->id(), x_flip(), y_flip(), priority(), obp1(), sgb_color());
 	if (fs == ts) { return; }
 	std::queue<size_t> queue;
 	size_t w = _tilemap.width(), h = _tilemap.height(), n = _tilemap.size();
@@ -900,7 +900,7 @@ void Main_Window::flood_fill(Tile_Tessera *tt) {
 
 void Main_Window::substitute_tile(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
-	Tile_State ts(_selected->id(), x_flip(), y_flip(), sgb_color());
+	Tile_State ts(_selected->id(), x_flip(), y_flip(), priority(), obp1(), sgb_color());
 	size_t n = _tilemap.size();
 	for (size_t i = 0; i < n; i++) {
 		Tile_Tessera *ff = _tilemap.tile(i);
@@ -912,7 +912,7 @@ void Main_Window::substitute_tile(Tile_Tessera *tt) {
 
 void Main_Window::swap_tiles(Tile_Tessera *tt) {
 	Tile_State s1 = tt->state();
-	Tile_State s2(_selected->id(), x_flip(), y_flip(), sgb_color());
+	Tile_State s2(_selected->id(), x_flip(), y_flip(), priority(), obp1(), sgb_color());
 	if (s1 == s2) { return; }
 	size_t n = _tilemap.size();
 	for (size_t i = 0; i < n; i++) {
@@ -1774,9 +1774,13 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 		mw->_x_flip_tb->do_callback();
 		mw->_y_flip_tb->value(tt->y_flip());
 		mw->_y_flip_tb->do_callback();
+		mw->_priority->value(tt->priority());
+		mw->_obp1->value(tt->obp1());
 		mw->_color->redraw();
 		mw->_x_flip_tb->redraw();
 		mw->_y_flip_tb->redraw();
+		mw->_priority->redraw();
+		mw->_obp1->redraw();
 		uint8_t id = tt->id();
 		select_tile_cb(mw->_tile_buttons[id], mw);
 	}

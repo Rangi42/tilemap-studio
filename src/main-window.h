@@ -94,6 +94,8 @@ public:
 	inline bool x_flip(void) const { return _x_flip_tb->active() && !!_x_flip_tb->value(); }
 	inline bool y_flip(void) const { return _y_flip_tb->active() && !!_y_flip_tb->value(); }
 	inline int sgb_color(void) const { return _color->active() ? (int)_color->value() : -1; }
+	inline bool priority(void) const { return _priority->active() && !!_priority->value(); }
+	inline bool obp1(void) const { return _obp1->active() && !!_obp1->value(); }
 	inline const char *modified_filename(void) const {
 		return unsaved() ? _tilemap_file.empty() ? NEW_TILEMAP_NAME : fl_filename_name(_tilemap_file.c_str()) : "";
 	}
