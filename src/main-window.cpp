@@ -82,7 +82,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_grid_tb = new Toolbar_Toggle_Button(0, 0, 24, 24);
 	_rainbow_tiles_tb = new Toolbar_Toggle_Button(0, 0, 24, 24);
 	new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
-	int wgt_w = text_width("Width:", 2);
+	int wgt_w = text_width("Width:", 4);
 	_width_heading = new Label(0, 0, wgt_w, 24, "Width:");
 	wgt_w = text_width("999", 2) + 22;
 	_tilemap_width = new Default_Spinner(0, 0, wgt_w, 22);
@@ -165,7 +165,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	wgt_w = MAX(text_width("A", 2), text_width("F", 2)) + wgt_h;
 	int wgt_off = text_width("Color:", 3);
 	_color = new Default_Spinner(gx+wgt_off, gy, wgt_w, wgt_h, "Color:");
-	gx += _color->w() + wgt_off + wgt_m;
+	gx += _color->w() + wgt_off + wgt_m + win_m;
 	wgt_w = text_width("Priority", 2) + wgt_h;
 	_priority = new OS_Check_Button(gx, gy, wgt_w, wgt_h, "Priority");
 	gx += _priority->w() + wgt_m;
@@ -443,6 +443,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_rainbow_tiles_tb->callback((Fl_Callback *)rainbow_tiles_tb_cb, this);
 	_rainbow_tiles_tb->image(RAINBOW_ICON);
 	_rainbow_tiles_tb->value(Config::rainbow_tiles());
+
+	_width_heading->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
 	_tilemap_width->default_value(GAME_BOY_WIDTH);
 	_tilemap_width->range(1, 999);
