@@ -1771,7 +1771,9 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 		int color = tt->sgb_color();
 		mw->_color->default_value(color > -1 ? color : 0);
 		mw->_x_flip_tb->value(tt->x_flip());
+		mw->_x_flip_tb->do_callback();
 		mw->_y_flip_tb->value(tt->y_flip());
+		mw->_y_flip_tb->do_callback();
 		mw->_color->redraw();
 		mw->_x_flip_tb->redraw();
 		mw->_y_flip_tb->redraw();
