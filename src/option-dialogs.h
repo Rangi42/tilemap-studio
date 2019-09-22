@@ -142,8 +142,8 @@ public:
 	inline const char *tileset_filename(void) const { return _tileset_filename.c_str(); }
 	inline Tilemap_Format format(void) const { return (Tilemap_Format)_format->value(); }
 	inline void format(Tilemap_Format f) { initialize(); _format->value((int)f); }
-	inline uint8_t start_id(void) const { return (uint8_t)_start_id->value(); }
-	inline void start_id(uint8_t n) { initialize(); _start_id->value(n); }
+	inline uint16_t start_id(void) const { return (uint16_t)_start_id->value(); }
+	inline void start_id(uint16_t n) { initialize(); _start_id->value(n); }
 	inline bool use_7f(void) const { return !!_use_7f->value(); }
 private:
 	void update_ok_button(void);

@@ -21,11 +21,11 @@ private:
 public:
 	inline static void tilesets(std::vector<Tileset> *ts) { _tilesets = ts; }
 public:
-	uint8_t id;
+	uint16_t id;
 	bool x_flip, y_flip, priority, obp1;
 	int color;
 public:
-	Tile_State(uint8_t id = 0x00, bool x_flip = false, bool y_flip = false, bool priority = false,
+	Tile_State(uint16_t id = 0x000, bool x_flip = false, bool y_flip = false, bool priority = false,
 		bool obp1 = false, int color = -1);
 	void draw(int x, int y, bool active, bool selected = false);
 	void print(int x, int y);
@@ -45,8 +45,8 @@ public:
 	Tile_Swatch(int x, int y, int w, int h);
 	inline Tile_State state(void) const { return _state; }
 	inline void state(Tile_State state) { _state = state; }
-	inline uint8_t id(void) const { return _state.id; }
-	inline void id(uint8_t id) { _state.id = id; }
+	inline uint16_t id(void) const { return _state.id; }
+	inline void id(uint16_t id) { _state.id = id; }
 	inline bool x_flip(void) const { return _state.x_flip; }
 	inline void x_flip(bool x_flip) { _state.x_flip = x_flip; }
 	inline bool y_flip(void) const { return _state.y_flip; }
@@ -59,15 +59,15 @@ private:
 	size_t _row, _col;
 	Tile_State _state;
 public:
-	Tile_Tessera(int x = 0, int y = 0, size_t row = 0, size_t col = 0, uint8_t id = 0x00,
+	Tile_Tessera(int x = 0, int y = 0, size_t row = 0, size_t col = 0, uint16_t id = 0x000,
 		bool x_flip = false, bool y_flip = false, bool priority = false, bool obp1 = false, int color = -1);
 	inline size_t row(void) const { return _row; }
 	inline size_t col(void) const { return _col; }
 	inline void coords(size_t row, size_t col) { _row = row; _col = col; }
 	inline Tile_State state(void) const { return _state; }
 	inline void state(Tile_State state) { _state = state; }
-	inline uint8_t id(void) const { return _state.id; }
-	inline void id(uint8_t id) { _state.id = id; }
+	inline uint16_t id(void) const { return _state.id; }
+	inline void id(uint16_t id) { _state.id = id; }
 	inline bool x_flip(void) const { return _state.x_flip; }
 	inline void x_flip(bool x_flip) { _state.x_flip = x_flip; }
 	inline bool y_flip(void) const { return _state.y_flip; }
@@ -88,11 +88,11 @@ private:
 	size_t _row, _col;
 	Tile_State _state;
 public:
-	Tile_Button(int x, int y, uint8_t id = 0x00);
+	Tile_Button(int x, int y, uint16_t id = 0x000);
 	inline Tile_State state(void) const { return _state; }
 	inline void state(Tile_State state) { _state = state; }
-	inline uint8_t id(void) const { return _state.id; }
-	inline void id(uint8_t id) { _state.id = id; }
+	inline uint16_t id(void) const { return _state.id; }
+	inline void id(uint16_t id) { _state.id = id; }
 	void draw(void);
 	int handle(int event);
 };

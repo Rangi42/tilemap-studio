@@ -131,27 +131,57 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_tileset_tabs = new OS_Tabs(gx, qy, gw, gw+tab_h);
 	qy += tab_h;
 	_tileset_bank0_tab = new OS_Tab(gx, qy, gw, gw, " 0 ");
-	_tileset_pane = new Workpane(gx+5, qy+5, gw-10, gw-10);
-	int ox = _tileset_pane->x() + Fl::box_dx(_tileset_pane->box());
-	int oy = _tileset_pane->y() + Fl::box_dy(_tileset_pane->box());
-	for (int i = 0; i < NUM_TILES; i++) {
+	_tileset_bank0_pane = new Workpane(gx+5, qy+5, gw-10, gw-10);
+	int ox = _tileset_bank0_pane->x() + Fl::box_dx(_tileset_bank0_pane->box());
+	int oy = _tileset_bank0_pane->y() + Fl::box_dy(_tileset_bank0_pane->box());
+	for (int i = 0; i < TILES_PER_BANK; i++) {
 		int tx = ox + (i % TILES_PER_ROW) * TILE_SIZE_2X, ty = oy + (i / TILES_PER_ROW) * TILE_SIZE_2X;
-		Tile_Button *tb = new Tile_Button(tx, ty, (uint8_t)i);
+		Tile_Button *tb = new Tile_Button(tx, ty, (uint16_t)i);
 		tb->callback((Fl_Callback *)select_tile_cb, this);
 		_tile_buttons[i] = tb;
 	}
-	_tileset_pane->end();
-	_tileset_pane->resizable(NULL);
+	_tileset_bank0_pane->end();
+	_tileset_bank0_pane->resizable(NULL);
 	_tileset_tabs->begin();
 	_tileset_bank1_tab = new OS_Tab(gx, qy, gw, gw, " 1 ");
+	_tileset_bank1_pane = new Workpane(gx+5, qy+5, gw-10, gw-10);
+	for (int i = 0; i < TILES_PER_BANK; i++) {
+		int tx = ox + (i % TILES_PER_ROW) * TILE_SIZE_2X, ty = oy + (i / TILES_PER_ROW) * TILE_SIZE_2X;
+		int id = i + 0x100;
+		Tile_Button *tb = new Tile_Button(tx, ty, (uint16_t)id);
+		tb->callback((Fl_Callback *)select_tile_cb, this);
+		_tile_buttons[id] = tb;
+	}
+	_tileset_bank1_pane->end();
+	_tileset_bank1_pane->resizable(NULL);
 	_tileset_bank1_tab->end();
 	_tileset_bank2_tab = new OS_Tab(gx, qy, gw, gw, " 2 ");
+	_tileset_bank2_pane = new Workpane(gx+5, qy+5, gw-10, gw-10);
+	for (int i = 0; i < TILES_PER_BANK; i++) {
+		int tx = ox + (i % TILES_PER_ROW) * TILE_SIZE_2X, ty = oy + (i / TILES_PER_ROW) * TILE_SIZE_2X;
+		int id = i + 0x200;
+		Tile_Button *tb = new Tile_Button(tx, ty, (uint16_t)id);
+		tb->callback((Fl_Callback *)select_tile_cb, this);
+		_tile_buttons[id] = tb;
+	}
+	_tileset_bank2_pane->end();
+	_tileset_bank2_pane->resizable(NULL);
 	_tileset_bank2_tab->end();
 	_tileset_bank3_tab = new OS_Tab(gx, qy, gw, gw, " 3 ");
+	_tileset_bank3_pane = new Workpane(gx+5, qy+5, gw-10, gw-10);
+	for (int i = 0; i < TILES_PER_BANK; i++) {
+		int tx = ox + (i % TILES_PER_ROW) * TILE_SIZE_2X, ty = oy + (i / TILES_PER_ROW) * TILE_SIZE_2X;
+		int id = i + 0x300;
+		Tile_Button *tb = new Tile_Button(tx, ty, (uint16_t)id);
+		tb->callback((Fl_Callback *)select_tile_cb, this);
+		_tile_buttons[id] = tb;
+	}
+	_tileset_bank3_pane->end();
+	_tileset_bank3_pane->resizable(NULL);
 	_tileset_bank3_tab->end();
 	_tileset_tabs->resizable(NULL);
 	_left_group->begin();
-	wgt_w = text_width("Tile: $F:FF", 2);
+	wgt_w = text_width("Tile: $F:FF", 4);
 	int qx = gx + gw - wgt_w - wgt_m * 2 - wgt_h * 3;
 	_tile_heading = new Label(qx, gy, wgt_w, wgt_h, "Tile: $0:00");
 	qx += _tile_heading->w() + wgt_m;
@@ -240,7 +270,10 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 
 	// Configure workspaces
 	_tilemap_scroll->dnd_receiver(_tilemap_dnd_receiver);
-	_tileset_pane->dnd_receiver(_tileset_dnd_receiver);
+	_tileset_bank0_pane->dnd_receiver(_tileset_dnd_receiver);
+	_tileset_bank1_pane->dnd_receiver(_tileset_dnd_receiver);
+	_tileset_bank2_pane->dnd_receiver(_tileset_dnd_receiver);
+	_tileset_bank3_pane->dnd_receiver(_tileset_dnd_receiver);
 
 	// Configure menu bar
 	_menu_bar->box(OS_PANEL_THIN_UP_BOX);
@@ -331,15 +364,17 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 		OS_SUBMENU("F&ormat"),
 		OS_MENU_ITEM("Plain &tiles", FL_COMMAND + '1', (Fl_Callback *)plain_format_cb, this,
 			FL_MENU_RADIO | (Config::format() == Tilemap_Format::PLAIN ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("Tiles + &attributes", FL_COMMAND + '2', (Fl_Callback *)sgb_border_format_cb, this,
+		OS_MENU_ITEM("&SGB tiles + attributes", FL_COMMAND + '2', (Fl_Callback *)sgb_border_format_cb, this,
 			FL_MENU_RADIO | (Config::format() == Tilemap_Format::TILE_ATTR ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("&RBY Town Map", FL_COMMAND + '3', (Fl_Callback *)rby_town_map_format_cb, this,
+		OS_MENU_ITEM("GB&A tiles + colors", FL_COMMAND + '3', (Fl_Callback *)gba_format_cb, this,
+			FL_MENU_RADIO | (Config::format() == Tilemap_Format::TEN_BIT ? FL_MENU_VALUE : 0)),
+		OS_MENU_ITEM("&RBY Town Map", FL_COMMAND + '4', (Fl_Callback *)rby_town_map_format_cb, this,
 			FL_MENU_RADIO | (Config::format() == Tilemap_Format::RLE_NYBBLES ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("&GSC Town Map", FL_COMMAND + '4', (Fl_Callback *)gsc_town_map_format_cb, this,
+		OS_MENU_ITEM("&GSC Town Map", FL_COMMAND + '5', (Fl_Callback *)gsc_town_map_format_cb, this,
 			FL_MENU_RADIO | (Config::format() == Tilemap_Format::FF_END ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("&PC Town Map", FL_COMMAND + '5', (Fl_Callback *)pc_town_map_format_cb, this,
+		OS_MENU_ITEM("&PC Town Map", FL_COMMAND + '6', (Fl_Callback *)pc_town_map_format_cb, this,
 			FL_MENU_RADIO | (Config::format() == Tilemap_Format::XY_FLIP ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("Pok\xc3\xa9gear &card", FL_COMMAND + '6', (Fl_Callback *)pokegear_card_format_cb, this,
+		OS_MENU_ITEM("Pok\xc3\xa9gear &card", FL_COMMAND + '7', (Fl_Callback *)pokegear_card_format_cb, this,
 			FL_MENU_RADIO | (Config::format() == Tilemap_Format::RLE_FF_END ? FL_MENU_VALUE : 0)),
 		{},
 		OS_SUBMENU("&Help"),
@@ -370,6 +405,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_dark_theme_mi = PM_FIND_MENU_ITEM_CB(dark_theme_cb);
 	_plain_format_mi = PM_FIND_MENU_ITEM_CB(plain_format_cb);
 	_sgb_border_format_mi = PM_FIND_MENU_ITEM_CB(sgb_border_format_cb);
+	_gba_format_mi = PM_FIND_MENU_ITEM_CB(gba_format_cb);
 	_rby_town_map_format_mi = PM_FIND_MENU_ITEM_CB(rby_town_map_format_cb);
 	_gsc_town_map_format_mi = PM_FIND_MENU_ITEM_CB(gsc_town_map_format_cb);
 	_pc_town_map_format_mi = PM_FIND_MENU_ITEM_CB(pc_town_map_format_cb);
@@ -479,7 +515,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 
 	// Configure containers
 
-	select_tile_cb(_tile_buttons[0x00], this);
+	select_tile_cb(_tile_buttons[0x000], this);
 
 	_tilemap_tabs->callback((Fl_Callback *)tilemap_tabs_cb, this);
 
@@ -800,12 +836,38 @@ void Main_Window::update_active_controls() {
 		_reload_tb->deactivate();
 		_unload_tilesets_mi->deactivate();
 	}
-	// TODO: support tile banks 1-3
-	_tileset_bank1_tab->deactivate();
-	_tileset_bank2_tab->deactivate();
-	_tileset_bank3_tab->deactivate();
-	_tileset_tabs->value(_tileset_bank0_tab);
-	if (Config::format() == Tilemap_Format::TILE_ATTR) {
+	if (Config::format() == Tilemap_Format::TEN_BIT) {
+		_tileset_bank1_tab->activate();
+		_tileset_bank2_tab->activate();
+		_tileset_bank3_tab->activate();
+	}
+	else if (Config::format() == Tilemap_Format::TILE_ATTR) {
+		_tileset_bank1_tab->activate();
+		_tileset_bank2_tab->deactivate();
+		_tileset_bank3_tab->deactivate();
+		if (_tileset_tabs->value() == _tileset_bank2_tab || _tileset_tabs->value() == _tileset_bank3_tab) {
+			_tileset_tabs->value(_tileset_bank0_tab);
+			_tileset_tabs->do_callback();
+		}
+	}
+	else {
+		_tileset_bank1_tab->deactivate();
+		_tileset_bank2_tab->deactivate();
+		_tileset_bank3_tab->deactivate();
+		_tileset_tabs->value(_tileset_bank0_tab);
+		_tileset_tabs->do_callback();
+	}
+	if (Config::format() == Tilemap_Format::TEN_BIT) {
+		// TODO: support 16 GBA colors
+		_color->activate();
+		_priority->clear();
+		_priority->deactivate();
+		_obp1->clear();
+		_obp1->deactivate();
+		_tilemap_attributes_tab->activate();
+	}
+	else if (Config::format() == Tilemap_Format::TILE_ATTR) {
+		// TODO: support 8 CGB colors
 		_color->activate();
 		_priority->activate();
 		_obp1->activate();
@@ -814,13 +876,16 @@ void Main_Window::update_active_controls() {
 	else {
 		_color->default_value(0);
 		_color->deactivate();
+		_priority->clear();
 		_priority->deactivate();
+		_obp1->clear();
 		_obp1->deactivate();
 		_tilemap_attributes_tab->deactivate();
 		_tilemap_tabs->value(_tilemap_tiles_tab);
 		_tilemap_tabs->do_callback();
 	}
-	if (Config::format() == Tilemap_Format::XY_FLIP || Config::format() == Tilemap_Format::TILE_ATTR) {
+	if (Config::format() == Tilemap_Format::TILE_ATTR || Config::format() == Tilemap_Format::TEN_BIT ||
+		Config::format() == Tilemap_Format::XY_FLIP) {
 		_x_flip_tb->activate();
 		_y_flip_tb->activate();
 	}
@@ -836,11 +901,11 @@ void Main_Window::update_active_controls() {
 	for (int i = 0; i < n; i++) {
 		_tile_buttons[i]->activate();
 	}
-	for (int i = n; i < NUM_TILES; i++) {
+	for (int i = n; i < MAX_NUM_TILES; i++) {
 		_tile_buttons[i]->deactivate();
 	}
 	if (_selected->id() >= n) {
-		select_tile_cb(_tile_buttons[0x00], this);
+		select_tile_cb(_tile_buttons[0x000], this);
 	}
 }
 
@@ -1114,7 +1179,7 @@ void Main_Window::image_to_tiles() {
 	std::vector<size_t> tileset;
 
 	Tilemap_Format fmt = _image_to_tiles_dialog->format();
-	uint8_t start_id = _image_to_tiles_dialog->start_id();
+	uint16_t start_id = _image_to_tiles_dialog->start_id();
 	bool use_7f = _image_to_tiles_dialog->use_7f();
 	for (size_t i = 0; i < n; i++) {
 		Tile &tile = tiles[i];
@@ -1144,7 +1209,7 @@ void Main_Window::image_to_tiles() {
 			}
 			tileset.push_back(i);
 		}
-		uint8_t id = start_id + (uint8_t)ti;
+		uint16_t id = start_id + (uint16_t)ti;
 		Tile_Tessera *tt = new Tile_Tessera(0, 0, 0, 0, id, x_flip, y_flip);
 		tilemap.push_back(tt);
 	}
@@ -1215,6 +1280,7 @@ void Main_Window::image_to_tiles() {
 	Fl_Menu_Item *format_menu_items[NUM_FORMATS] = {
 		_plain_format_mi,         // PLAIN
 		_sgb_border_format_mi,    // TILE_ATTR
+		_gba_format_mi,           // TEN_BIT
 		_rby_town_map_format_mi,  // RLE_NYBBLES
 		_gsc_town_map_format_mi,  // FF_END
 		_pokegear_card_format_mi, // XY_FLIP
@@ -1670,6 +1736,12 @@ void Main_Window::sgb_border_format_cb(Fl_Menu_ *, Main_Window *mw) {
 	mw->redraw();
 }
 
+void Main_Window::gba_format_cb(Fl_Menu_ *, Main_Window *mw) {
+	Config::format(Tilemap_Format::TEN_BIT);
+	mw->update_active_controls();
+	mw->redraw();
+}
+
 void Main_Window::rby_town_map_format_cb(Fl_Menu_ *, Main_Window *mw) {
 	Config::format(Tilemap_Format::RLE_NYBBLES);
 	mw->update_active_controls();
@@ -1781,18 +1853,27 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 		mw->_y_flip_tb->redraw();
 		mw->_priority->redraw();
 		mw->_obp1->redraw();
-		uint8_t id = tt->id();
+		uint16_t id = tt->id();
 		select_tile_cb(mw->_tile_buttons[id], mw);
 	}
 }
 
 void Main_Window::select_tile_cb(Tile_Button *tb, Main_Window *mw) {
+	if (mw->_selected) {
+		mw->_selected->clear();
+	}
 	tb->setonly();
 	mw->_selected = tb;
 	mw->_current_tile->id(tb->id());
+	int bank = (int)(tb->id() >> 8), offset = (int)(tb->id() & 0xFF);
+	OS_Tab *tileset_tabs[NUM_BANKS] = {
+		mw->_tileset_bank0_tab, mw->_tileset_bank1_tab, mw->_tileset_bank2_tab, mw->_tileset_bank3_tab,
+	};
+	mw->_tileset_tabs->value(tileset_tabs[bank]);
 	char buffer[32];
-	sprintf(buffer, "Tile: $%02X", tb->id());
+	sprintf(buffer, "Tile: $%d:%02X", bank, offset);
 	mw->_tile_heading->copy_label(buffer);
 	mw->_current_tile->redraw();
 	mw->_tile_heading->redraw();
+	mw->_tileset_tabs->redraw();
 }

@@ -108,7 +108,7 @@ static void draw_selection_border(int x, int y) {
 
 std::vector<Tileset> *Tile_State::_tilesets = NULL;
 
-Tile_State::Tile_State(uint8_t id_, bool x_flip_, bool y_flip_, bool priority_, bool obp1_, int color_) : id(id_),
+Tile_State::Tile_State(uint16_t id_, bool x_flip_, bool y_flip_, bool priority_, bool obp1_, int color_) : id(id_),
 	x_flip(x_flip_), y_flip(y_flip_), priority(priority_), obp1(obp1_), color(color_) {}
 
 void Tile_State::draw(int x, int y, bool active, bool selected) {
@@ -123,7 +123,7 @@ void Tile_State::draw(int x, int y, bool active, bool selected) {
 		}
 	}
 	if (!gfx) {
-		uint8_t hi = (id & 0xF0) >> 4, lo = id & 0x0F;
+		uint16_t hi = (id & 0xF0) >> 4, lo = id & 0x0F;
 		char l1 = (char)(hi > 9 ? 'A' + hi - 10 : '0' + hi), l2 = (char)(lo > 9 ? 'A' + lo - 10 : '0' + lo);
 		const char buffer[3] = {l1, l2, '\0'};
 		bool r = Config::rainbow_tiles();
@@ -202,7 +202,7 @@ void Tile_Swatch::draw() {
 	_state.draw(x() + Fl::box_dx(box()), y() + Fl::box_dy(box()), !!active());
 }
 
-Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint8_t id, bool x_flip, bool y_flip,
+Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint16_t id, bool x_flip, bool y_flip,
 	bool priority, bool obp1, int color) :
 	Fl_Box(x, y, TILE_SIZE_2X, TILE_SIZE_2X), _row(row), _col(col), _state(id, x_flip, y_flip, priority, obp1, color) {
 	user_data(NULL);
@@ -254,7 +254,7 @@ int Tile_Tessera::handle(int event) {
 	return Fl_Box::handle(event);
 }
 
-Tile_Button::Tile_Button(int x, int y, uint8_t id) : Fl_Radio_Button(x, y, TILE_SIZE_2X, TILE_SIZE_2X), _state(id) {
+Tile_Button::Tile_Button(int x, int y, uint16_t id) : Fl_Radio_Button(x, y, TILE_SIZE_2X, TILE_SIZE_2X), _state(id) {
 	user_data(NULL);
 	box(FL_NO_BOX);
 	labeltype(FL_NO_LABEL);

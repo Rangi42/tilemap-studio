@@ -31,7 +31,7 @@ private:
 	Fl_Group *_main_group, *_left_group, *_right_group;
 	OS_Tabs *_tileset_tabs, *_tilemap_tabs;
 	OS_Tab *_tileset_bank0_tab, *_tileset_bank1_tab, *_tileset_bank2_tab, *_tileset_bank3_tab;
-	Workpane *_tileset_pane;
+	Workpane *_tileset_bank0_pane, *_tileset_bank1_pane, *_tileset_bank2_pane, *_tileset_bank3_pane;
 	OS_Tab *_tilemap_tiles_tab, *_tilemap_attributes_tab;
 	Workspace *_tilemap_scroll;
 	Toolbar *_status_bar;
@@ -41,8 +41,9 @@ private:
 	Fl_Menu_Item *_classic_theme_mi = NULL, *_aero_theme_mi = NULL, *_metro_theme_mi = NULL, *_aqua_theme_mi = NULL,
 		*_greybird_theme_mi = NULL, *_metal_theme_mi = NULL, *_blue_theme_mi = NULL, *_olive_theme_mi = NULL,
 		*_rose_gold_theme_mi = NULL, *_dark_theme_mi = NULL;
-	Fl_Menu_Item *_plain_format_mi = NULL, *_sgb_border_format_mi = NULL, *_rby_town_map_format_mi = NULL,
-		*_gsc_town_map_format_mi = NULL, *_pc_town_map_format_mi = NULL, *_pokegear_card_format_mi = NULL;
+	Fl_Menu_Item *_plain_format_mi = NULL, *_sgb_border_format_mi = NULL, *_gba_format_mi = NULL,
+		*_rby_town_map_format_mi = NULL, *_gsc_town_map_format_mi = NULL, *_pc_town_map_format_mi = NULL,
+		*_pokegear_card_format_mi = NULL;
 	Fl_Menu_Item *_grid_mi, *_rainbow_tiles_mi = NULL;
 	Toolbar_Button *_new_tb, *_open_tb, *_save_tb, *_print_tb, *_load_tb, *_add_tb, *_reload_tb, *_undo_tb, *_redo_tb;
 	Toolbar_Toggle_Button *_grid_tb, *_rainbow_tiles_tb;
@@ -50,7 +51,7 @@ private:
 	Toolbar_Button *_resize_tb, *_reformat_tb;
 	Toolbar_Button *_image_to_tiles_tb;
 	Toolbar_Toggle_Button *_x_flip_tb, *_y_flip_tb;
-	Tile_Button *_tile_buttons[NUM_TILES];
+	Tile_Button *_tile_buttons[MAX_NUM_TILES];
 	Default_Spinner *_color;
 	OS_Check_Button *_priority, *_obp1;
 	// GUI outputs
@@ -167,6 +168,7 @@ private:
 	// Format menu
 	static void plain_format_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void sgb_border_format_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void gba_format_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void rby_town_map_format_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void gsc_town_map_format_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void pc_town_map_format_cb(Fl_Menu_ *m, Main_Window *mw);

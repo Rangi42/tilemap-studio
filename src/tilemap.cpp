@@ -180,7 +180,7 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 	if (fmt == Tilemap_Format::PLAIN) {
 		for (long i = 0; i < c; i++) {
 			int b = fgetc(file);
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint8_t)b));
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)b));
 		}
 	}
 
@@ -192,7 +192,7 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 				for (Tile_Tessera *tt : tiles) { delete tt; }
 				return (_result = TILEMAP_TOO_LONG_FF);
 			}
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint8_t)b));
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)b));
 		}
 		int b = fgetc(file);
 		if (b != 0xFF) {
@@ -221,7 +221,7 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 				return (_result = TILEMAP_TOO_LONG_FF);
 			}
 			for (int j = 0; j < r; j++) {
-				tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint8_t)v));
+				tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v));
 			}
 		}
 		int b = fgetc(file);
@@ -242,7 +242,7 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 			}
 			int v = (b & 0xF0) >> 4, r = b & 0x0F;
 			for (int j = 0; j < r; j++) {
-				tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint8_t)v));
+				tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v));
 			}
 		}
 		int b = fgetc(file);
@@ -263,7 +263,7 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 			}
 			bool x_flip = !!(b & 0x40), y_flip = !!(b & 0x80);
 			int v = b & 0x3F;
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint8_t)v, x_flip, y_flip));
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip));
 		}
 		int b = fgetc(file);
 		if (b != 0xFF) {
@@ -276,14 +276,33 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 	else if (fmt == Tilemap_Format::TILE_ATTR) {
 		if (c % 2) {
 			fclose(file);
-			return (_result = TILEMAP_TOO_SHORT_FF);
+			return (_result = TILEMAP_TOO_SHORT_ATTRS);
 		}
 		for (long i = 0; i < c; i += 2) {
 			int v = fgetc(file);
 			int a = fgetc(file);
+			if (!!(a & 0x08)) { v |= 0x100; }
 			bool x_flip = !!(a & 0x40), y_flip = !!(a & 0x80), priority = !!(a & 0x20), obp1 = !!(a & 0x10);
+			// TODO: support 8 colors for CGB
 			int color = (a & 0xC) >> 2;
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint8_t)v, x_flip, y_flip, priority, obp1, color));
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip, priority, obp1, color));
+		}
+	}
+
+	else if (fmt == Tilemap_Format::TEN_BIT) {
+		if (c % 2) {
+			fclose(file);
+			return (_result = TILEMAP_TOO_SHORT_ATTRS);
+		}
+		for (long i = 0; i < c; i += 2) {
+			int v = fgetc(file);
+			int a = fgetc(file);
+			v = v | ((a & 0x03) << 8);
+			bool x_flip = !!(a & 0x04), y_flip = !!(a & 0x08);
+			int color = (a & 0xF0) >> 4;
+			// TODO: support 16 colors for GBA
+			color = color & 0x03;
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip, false, false, color));
 		}
 	}
 
@@ -304,10 +323,14 @@ bool Tilemap::can_write_tiles() {
 		if (tt->id() >= m) {
 			return false;
 		}
-		if ((tt->x_flip() || tt->y_flip()) && fmt != Tilemap_Format::XY_FLIP && fmt != Tilemap_Format::TILE_ATTR) {
+		if ((tt->x_flip() || tt->y_flip()) &&
+			fmt != Tilemap_Format::XY_FLIP && fmt != Tilemap_Format::TILE_ATTR && fmt != Tilemap_Format::TEN_BIT) {
 			return false;
 		}
-		if (tt->sgb_color() > -1 && fmt != Tilemap_Format::TILE_ATTR) {
+		if (tt->sgb_color() > -1 && fmt != Tilemap_Format::TILE_ATTR && fmt != Tilemap_Format::TEN_BIT) {
+			return false;
+		}
+		if ((tt->priority() || tt->obp1()) && fmt != Tilemap_Format::TILE_ATTR) {
 			return false;
 		}
 	}
@@ -320,7 +343,7 @@ bool Tilemap::write_tiles(const char *f, std::vector<Tile_Tessera *> &tiles, Til
 
 	if (fmt == Tilemap_Format::PLAIN || fmt == Tilemap_Format::FF_END || fmt == Tilemap_Format::XY_FLIP) {
 		for (Tile_Tessera *tt : tiles) {
-			uint8_t v = tt->id();
+			int v = (int)tt->id();
 			if (tt->x_flip()) { v |= 0x40; }
 			if (tt->y_flip()) { v |= 0x80; }
 			fputc(v, file);
@@ -330,8 +353,8 @@ bool Tilemap::write_tiles(const char *f, std::vector<Tile_Tessera *> &tiles, Til
 		size_t n = tiles.size();
 		for (size_t i = 0; i < n;) {
 			Tile_Tessera *tt = tiles[i++];
-			uint8_t v = tt->id(), r = 1;
-			while (i < n && tiles[i]->id() == v) {
+			int v = (int)tt->id(), r = 1;
+			while (i < n && (int)tiles[i]->id() == v) {
 				i++;
 				if (++r == 0xFF) { break; } // maximum byte
 			}
@@ -343,25 +366,38 @@ bool Tilemap::write_tiles(const char *f, std::vector<Tile_Tessera *> &tiles, Til
 		size_t n = tiles.size();
 		for (size_t i = 0; i < n;) {
 			Tile_Tessera *tt = tiles[i++];
-			uint8_t v = tt->id(), r = 1;
-			while (i < n && tiles[i]->id() == v) {
+			int v = (int)tt->id(), r = 1;
+			while (i < n && (int)tiles[i]->id() == v) {
 				i++;
 				if (++r == 0x0F) { break; } // maximum nybble
 			}
-			uint8_t b = (v << 4) | r;
+			int b = (v << 4) | r;
 			fputc(b, file);
 		}
 	}
 	else if (fmt == Tilemap_Format::TILE_ATTR) {
 		for (Tile_Tessera *tt : tiles) {
-			uint8_t v = tt->id();
+			int v = (int)(tt->id() & 0xFF);
 			fputc(v, file);
-			uint8_t a = 0;
-			if (tt->obp1()) { a |= 0x10; }
+			int a = 0;
+			if (tt->id() & 0x100) { a |= 0x08; }
+			if (tt->obp1())     { a |= 0x10; }
 			if (tt->priority()) { a |= 0x20; }
-			if (tt->x_flip()) { a |= 0x40; }
-			if (tt->y_flip()) { a |= 0x80; }
+			if (tt->x_flip())   { a |= 0x40; }
+			if (tt->y_flip())   { a |= 0x80; }
+			// TODO: support 8 colors for CGB
 			if (tt->sgb_color() > -1) { a |= tt->sgb_color() << 2; }
+			fputc(a, file);
+		}
+	}
+	else if (fmt == Tilemap_Format::TEN_BIT) {
+		for (Tile_Tessera *tt : tiles) {
+			int v = (int)(tt->id() & 0xFF);
+			fputc(v, file);
+			int a = (tt->id() & 0x300) >> 8;
+			if (tt->x_flip())   { a |= 0x04; }
+			if (tt->y_flip())   { a |= 0x08; }
+			if (tt->sgb_color() > -1) { a |= tt->sgb_color() << 4; }
 			fputc(a, file);
 		}
 	}
@@ -429,6 +465,8 @@ const char *Tilemap::error_message(Result result) {
 		return "File continues after $00.";
 	case TILEMAP_TOO_SHORT_RLE:
 		return "File ends before RLE value.";
+	case TILEMAP_TOO_SHORT_ATTRS:
+		return "File ends before attribute value.";
 	case TILEMAP_NULL:
 		return "No file chosen.";
 	default:
