@@ -103,6 +103,7 @@ public:
 	inline void map_editable(bool e) { _map_editable = e; }
 	int handle(int event);
 	void update_status(Tile_Tessera *tt);
+	void edit_tile(Tile_Tessera *tt);
 	void flood_fill(Tile_Tessera *tt);
 	void substitute_tile(Tile_Tessera *tt);
 	void swap_tiles(Tile_Tessera *tt);

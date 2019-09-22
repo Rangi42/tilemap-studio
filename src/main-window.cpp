@@ -939,6 +939,15 @@ void Main_Window::resize_tilemap() {
 	redraw();
 }
 
+void Main_Window::edit_tile(Tile_Tessera *tt) {
+	Tile_State fs = tt->state();
+	Tile_State ts(_selected->id(), x_flip(), y_flip(), priority(), obp1(), sgb_color());
+	if (fs == ts) { return; }
+	tt->state(ts);
+	tt->damage(1);
+	_tilemap.modified(true);
+}
+
 void Main_Window::flood_fill(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
 	Tile_State ts(_selected->id(), x_flip(), y_flip(), priority(), obp1(), sgb_color());
@@ -961,6 +970,8 @@ void Main_Window::flood_fill(Tile_Tessera *tt) {
 		if (r > 0) { queue.push(j-w); } // up
 		if (r < h - 1) { queue.push(j+w); } // down
 	}
+	_tilemap_scroll->redraw();
+	_tilemap.modified(true);
 }
 
 void Main_Window::substitute_tile(Tile_Tessera *tt) {
@@ -973,22 +984,26 @@ void Main_Window::substitute_tile(Tile_Tessera *tt) {
 			ff->state(ts);
 		}
 	}
+	_tilemap_scroll->redraw();
+	_tilemap.modified(true);
 }
 
 void Main_Window::swap_tiles(Tile_Tessera *tt) {
-	Tile_State s1 = tt->state();
-	Tile_State s2(_selected->id(), x_flip(), y_flip(), priority(), obp1(), sgb_color());
-	if (s1 == s2) { return; }
+	Tile_State fs = tt->state();
+	Tile_State ts(_selected->id(), x_flip(), y_flip(), priority(), obp1(), sgb_color());
+	if (fs == ts) { return; }
 	size_t n = _tilemap.size();
 	for (size_t i = 0; i < n; i++) {
 		Tile_Tessera *ff = _tilemap.tile(i);
-		if (ff->state() == s1) {
-			ff->state(s2);
+		if (ff->state() == fs) {
+			ff->state(ts);
 		}
-		else if (ff->state() == s2) {
-			ff->state(s1);
+		else if (ff->state() == ts) {
+			ff->state(fs);
 		}
 	}
+	_tilemap_scroll->redraw();
+	_tilemap.modified(true);
 }
 
 void Main_Window::open_tilemap(const char *filename, size_t width, size_t height) {
@@ -1813,29 +1828,18 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 		if (Fl::event_shift()) {
 			// Shift+left-click to flood fill
 			mw->flood_fill(tt);
-			mw->_tilemap_scroll->redraw();
-			mw->_tilemap.modified(true);
 		}
 		else if (Fl::event_ctrl()) {
 			// Ctrl+left-click to replace
 			mw->substitute_tile(tt);
-			mw->_tilemap_scroll->redraw();
-			mw->_tilemap.modified(true);
 		}
 		else if (Fl::event_alt()) {
 			// Alt+click to swap
 			mw->swap_tiles(tt);
-			mw->_tilemap_scroll->redraw();
-			mw->_tilemap.modified(true);
 		}
 		else {
 			// Left-click/drag to edit
-			tt->id(mw->_selected->id());
-			tt->sgb_color(mw->sgb_color());
-			tt->x_flip(mw->x_flip());
-			tt->y_flip(mw->y_flip());
-			tt->damage(1);
-			mw->_tilemap.modified(true);
+			mw->edit_tile(tt);
 		}
 	}
 	else if (Fl::event_button() == FL_RIGHT_MOUSE) {
