@@ -144,34 +144,31 @@ void Tile_State::draw(int x, int y, bool active, bool selected) {
 	}
 }
 
-// {length, 0xYX...}
-static const int digit_pixels0[] = {10, 0x01, 0x02, 0x10, 0x12, 0x20, 0x22, 0x30, 0x32, 0x40, 0x41};
-static const int digit_pixels1[] = { 8, 0x01, 0x10, 0x11, 0x21, 0x31, 0x40, 0x41, 0x42};
-static const int digit_pixels2[] = { 8, 0x00, 0x01, 0x12, 0x21, 0x30, 0x40, 0x41, 0x42};
-static const int digit_pixels3[] = { 7, 0x00, 0x01, 0x12, 0x21, 0x32, 0x40, 0x41};
-static const int digit_pixels4[] = { 9, 0x00, 0x02, 0x10, 0x12, 0x20, 0x21, 0x22, 0x32, 0x42};
-static const int digit_pixels5[] = { 9, 0x00, 0x01, 0x02, 0x10, 0x20, 0x21, 0x32, 0x40, 0x41};
-static const int digit_pixels6[] = {11, 0x01, 0x02, 0x10, 0x20, 0x21, 0x22, 0x30, 0x32, 0x40, 0x41, 0x42};
-static const int digit_pixels7[] = { 7, 0x00, 0x01, 0x02, 0x12, 0x22, 0x31, 0x41};
-static const int digit_pixels8[] = {13, 0x00, 0x01, 0x02, 0x10, 0x12, 0x20, 0x21, 0x22, 0x30, 0x32, 0x40, 0x41, 0x42};
-static const int digit_pixels9[] = {11, 0x00, 0x01, 0x02, 0x10, 0x12, 0x20, 0x21, 0x22, 0x32, 0x40, 0x41};
-static const int digit_pixelsA[] = {10, 0x01, 0x10, 0x12, 0x20, 0x21, 0x22, 0x30, 0x32, 0x40, 0x42};
-static const int digit_pixelsB[] = {10, 0x00, 0x01, 0x10, 0x12, 0x20, 0x21, 0x30, 0x32, 0x40, 0x41};
-static const int digit_pixelsC[] = { 7, 0x01, 0x02, 0x10, 0x20, 0x30, 0x41, 0x42};
-static const int digit_pixelsD[] = {10, 0x00, 0x01, 0x10, 0x12, 0x20, 0x22, 0x30, 0x32, 0x40, 0x41};
-static const int digit_pixelsE[] = {11, 0x00, 0x01, 0x02, 0x10, 0x20, 0x21, 0x22, 0x30, 0x40, 0x41, 0x42};
-static const int digit_pixelsF[] = { 9, 0x00, 0x01, 0x02, 0x10, 0x20, 0x21, 0x22, 0x30, 0x40};
-static const int *digit_pixels[] = {
-	digit_pixels0, digit_pixels1, digit_pixels2, digit_pixels3, digit_pixels4, digit_pixels5, digit_pixels6, digit_pixels7,
-	digit_pixels8, digit_pixels9, digit_pixelsA, digit_pixelsB, digit_pixelsC, digit_pixelsD, digit_pixelsE, digit_pixelsF,
+// {length*2, X,Y, ...}
+static const int digit_pixels[16][1+13*2] = {
+	{10*2, 1,0, 2,0, 0,1, 2,1, 0,2, 2,2, 0,3, 2,3, 0,4, 1,4},                // 0
+	{ 8*2, 1,0, 0,1, 1,1, 1,2, 1,3, 0,4, 1,4, 2,4},                          // 1
+	{ 8*2, 0,0, 1,0, 2,1, 1,2, 0,3, 0,4, 1,4, 2,4},                          // 2
+	{ 7*2, 0,0, 1,0, 2,1, 1,2, 2,3, 0,4, 1,4},                               // 3
+	{ 9*2, 0,0, 2,0, 0,1, 2,1, 0,2, 1,2, 2,2, 2,3, 2,4},                     // 4
+	{ 9*2, 0,0, 1,0, 2,0, 0,1, 0,2, 1,2, 2,3, 0,4, 1,4},                     // 5
+	{11*2, 1,0, 2,0, 0,1, 0,2, 1,2, 2,2, 0,3, 2,3, 0,4, 1,4, 2,4},           // 6
+	{ 7*2, 0,0, 1,0, 2,0, 2,1, 2,2, 1,3, 1,4},                               // 7
+	{13*2, 0,0, 1,0, 2,0, 0,1, 2,1, 0,2, 1,2, 2,2, 0,3, 2,3, 0,4, 1,4, 2,4}, // 8
+	{11*2, 0,0, 1,0, 2,0, 0,1, 2,1, 0,2, 1,2, 2,2, 2,3, 0,4, 1,4},           // 9
+	{10*2, 1,0, 0,1, 2,1, 0,2, 1,2, 2,2, 0,3, 2,3, 0,4, 2,4},                // A
+	{10*2, 0,0, 1,0, 0,1, 2,1, 0,2, 1,2, 0,3, 2,3, 0,4, 1,4},                // B
+	{ 7*2, 1,0, 2,0, 0,1, 0,2, 0,3, 1,4, 2,4},                               // C
+	{10*2, 0,0, 1,0, 0,1, 2,1, 0,2, 2,2, 0,3, 2,3, 0,4, 1,4},                // D
+	{11*2, 0,0, 1,0, 2,0, 0,1, 0,2, 1,2, 2,2, 0,3, 0,4, 1,4, 2,4},           // E
+	{ 9*2, 0,0, 1,0, 2,0, 0,1, 0,2, 1,2, 2,2, 0,3, 0,4},                     // F
 };
 
 static void print_digit(int x, int y, uchar d) {
 	const int *pixels = digit_pixels[d];
 	int n = pixels[0];
-	for (int i = 1; i <= n; i++) {
-		int c = pixels[i];
-		int dx = c & 0x0F, dy = (c & 0xF0) >> 4;
+	for (int i = 1; i <= n; i += 2) {
+		int dx = pixels[i], dy = pixels[i+1];
 		fl_point(x + dx, y + dy);
 	}
 }
