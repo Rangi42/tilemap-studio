@@ -111,34 +111,34 @@ std::vector<Tileset> *Tile_State::_tilesets = NULL;
 Tile_State::Tile_State(uint16_t id_, bool x_flip_, bool y_flip_, bool priority_, bool obp1_, int color_) : id(id_),
 	x_flip(x_flip_), y_flip(y_flip_), priority(priority_), obp1(obp1_), color(color_) {}
 
-void Tile_State::draw(int x, int y, bool active, bool selected) {
-	int s = OS::is_consolas() ? 11 : 10;
-	bool gfx = false;
+void Tile_State::draw_tile(int x, int y, bool active, bool selected) {
 	if (_tilesets) {
 		for (std::vector<Tileset>::reverse_iterator it = _tilesets->rbegin(); it != _tilesets->rend(); ++it) {
 			if (it->draw_tile(this, x, y, active)) {
-				gfx = true;
-				break;
+				return;
 			}
 		}
 	}
-	if (!gfx) {
-		uint16_t hi = (id & 0xF0) >> 4, lo = id & 0x0F;
-		char l1 = (char)(hi > 9 ? 'A' + hi - 10 : '0' + hi), l2 = (char)(lo > 9 ? 'A' + lo - 10 : '0' + lo);
-		const char buffer[3] = {l1, l2, '\0'};
-		bool r = Config::rainbow_tiles();
-		Fl_Color bg = bg_colors[r ? lo : 0];
-		if (!active) { bg = fl_inactive(bg); }
-		fl_rectf(x, y, TILE_SIZE_2X, TILE_SIZE_2X, bg);
-		fl_font(x_flip || y_flip ? FL_COURIER_ITALIC : FL_COURIER, s);
-		Fl_Color fg = selected ? FL_YELLOW : x_flip ? y_flip ? FL_YELLOW : FL_MAGENTA : y_flip ? FL_CYAN : fg_colors[r ? hi : 0];
-		if (!active) { fg = fl_inactive(fg); }
-		fl_color(fg);
-		fl_draw(buffer, x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_ALIGN_CENTER);
-	}
-	if (Config::attributes() && color > -1) {
+	uint16_t hi = (id & 0xF0) >> 4, lo = id & 0x0F;
+	char l1 = (char)(hi > 9 ? 'A' + hi - 10 : '0' + hi), l2 = (char)(lo > 9 ? 'A' + lo - 10 : '0' + lo);
+	const char buffer[3] = {l1, l2, '\0'};
+	bool r = Config::rainbow_tiles();
+	Fl_Color bg = bg_colors[r ? lo : 0];
+	if (!active) { bg = fl_inactive(bg); }
+	fl_rectf(x, y, TILE_SIZE_2X, TILE_SIZE_2X, bg);
+	int s = OS::is_consolas() ? 11 : 10;
+	fl_font(x_flip || y_flip ? FL_COURIER_ITALIC : FL_COURIER, s);
+	Fl_Color fg = selected ? FL_YELLOW : x_flip ? y_flip ? FL_YELLOW : FL_MAGENTA : y_flip ? FL_CYAN : fg_colors[r ? hi : 0];
+	if (!active) { fg = fl_inactive(fg); }
+	fl_color(fg);
+	fl_draw(buffer, x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_ALIGN_CENTER);
+}
+
+void Tile_State::draw_attributes(int x, int y) {
+	if (color > -1) {
 		sgb_color_images[color].draw(x, y, TILE_SIZE_2X, TILE_SIZE_2X);
 		const char buffer[2] = {(char)('0' + color), '\0'};
+		int s = OS::is_consolas() ? 11 : 10;
 		fl_font(FL_COURIER_BOLD, s);
 		draw_outlined_text(buffer, x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_ALIGN_CENTER, sgb_colors[color]);
 	}
@@ -191,7 +191,7 @@ void Tile_State::print(int x, int y) {
 	print_digit(x+4, y+2, lo);
 }
 
-Tile_Swatch::Tile_Swatch(int x, int y, int w, int h) : Fl_Box(x, y, w, h), _state() {
+Tile_Swatch::Tile_Swatch(int x, int y, int w, int h) : Tile_Thing(), Fl_Box(x, y, w, h), _attributes() {
 	user_data(NULL);
 	box(OS_SPACER_THIN_DOWN_FRAME);
 	labeltype(FL_NO_LABEL);
@@ -199,12 +199,13 @@ Tile_Swatch::Tile_Swatch(int x, int y, int w, int h) : Fl_Box(x, y, w, h), _stat
 
 void Tile_Swatch::draw() {
 	draw_box();
-	_state.draw(x() + Fl::box_dx(box()), y() + Fl::box_dy(box()), !!active());
+	_state.draw(x() + Fl::box_dx(box()), y() + Fl::box_dy(box()), !_attributes, _attributes, !!active());
 }
 
 Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint16_t id, bool x_flip, bool y_flip,
 	bool priority, bool obp1, int color) :
-	Fl_Box(x, y, TILE_SIZE_2X, TILE_SIZE_2X), _row(row), _col(col), _state(id, x_flip, y_flip, priority, obp1, color) {
+	Tile_Thing(id, x_flip, y_flip, priority, obp1, color), Fl_Box(x, y, TILE_SIZE_2X, TILE_SIZE_2X),
+	_row(row), _col(col) {
 	user_data(NULL);
 	box(FL_NO_BOX);
 	labeltype(FL_NO_LABEL);
@@ -212,7 +213,7 @@ Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint16_t id, bo
 }
 
 void Tile_Tessera::draw() {
-	_state.draw(x(), y(), !!active());
+	_state.draw(x(), y(), true, Config::attributes(), !!active());
 	if (Config::grid()) {
 		draw_grid(x(), y());
 	}
@@ -254,7 +255,7 @@ int Tile_Tessera::handle(int event) {
 	return Fl_Box::handle(event);
 }
 
-Tile_Button::Tile_Button(int x, int y, uint16_t id) : Fl_Radio_Button(x, y, TILE_SIZE_2X, TILE_SIZE_2X), _state(id) {
+Tile_Button::Tile_Button(int x, int y, uint16_t id) : Tile_Thing(id), Fl_Radio_Button(x, y, TILE_SIZE_2X, TILE_SIZE_2X) {
 	user_data(NULL);
 	box(FL_NO_BOX);
 	labeltype(FL_NO_LABEL);
@@ -262,7 +263,7 @@ Tile_Button::Tile_Button(int x, int y, uint16_t id) : Fl_Radio_Button(x, y, TILE
 }
 
 void Tile_Button::draw() {
-	_state.draw(x(), y(), !!active(), !!value());
+	_state.draw(x(), y(), true, Config::attributes(), !!active(), !!value());
 	if (Config::grid()) {
 		draw_grid(x(), y());
 	}

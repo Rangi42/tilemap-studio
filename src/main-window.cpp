@@ -201,6 +201,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	gx += _priority->w() + wgt_m;
 	wgt_w = text_width("OBP1", 2) + wgt_h;
 	_obp1 = new OS_Check_Button(gx, gy, wgt_w, wgt_h, "OBP1");
+	gx += _obp1->w() + wgt_m;
+	_current_attributes = new Tile_Swatch(gx+2, gy+2, TILE_SIZE_2X+2, TILE_SIZE_2X+2);
 	_left_group->resizable(NULL);
 	wx += _left_group->w() + win_m; ww -= _left_group->w() + win_m;
 	// Middle spacer
@@ -500,6 +502,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_image_to_tiles_tb->callback((Fl_Callback *)image_to_tiles_cb, this);
 	_image_to_tiles_tb->image(INPUT_ICON);
 
+	_current_tile->attributes(false);
+
 	_x_flip_tb->tooltip("X Flip (Horizontal)");
 	_x_flip_tb->image(X_FLIP_ICON);
 	_x_flip_tb->deimage(X_FLIP_DISABLED_ICON);
@@ -512,6 +516,13 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 
 	_color->default_value(0);
 	_color->range(0, NUM_SGB_COLORS - 1);
+	_color->callback((Fl_Callback *)color_cb, this);
+
+	_priority->callback((Fl_Callback *)priority_cb, this);
+
+	_obp1->callback((Fl_Callback *)obp1_cb, this);
+
+	_current_attributes->attributes(true);
 
 	// Configure containers
 
@@ -865,6 +876,7 @@ void Main_Window::update_active_controls() {
 		_obp1->clear();
 		_obp1->deactivate();
 		_tilemap_attributes_tab->activate();
+		_current_attributes->activate();
 	}
 	else if (Config::format() == Tilemap_Format::TILE_ATTR) {
 		// TODO: support 8 CGB colors
@@ -872,14 +884,19 @@ void Main_Window::update_active_controls() {
 		_priority->activate();
 		_obp1->activate();
 		_tilemap_attributes_tab->activate();
+		_current_attributes->activate();
 	}
 	else {
 		_color->default_value(0);
 		_color->deactivate();
+		_color->do_callback();
 		_priority->clear();
 		_priority->deactivate();
+		_priority->do_callback();
 		_obp1->clear();
 		_obp1->deactivate();
+		_obp1->do_callback();
+		_current_attributes->deactivate();
 		_tilemap_attributes_tab->deactivate();
 		_tilemap_tabs->value(_tilemap_tiles_tab);
 		_tilemap_tabs->do_callback();
@@ -1419,10 +1436,10 @@ void Main_Window::close_cb(Fl_Widget *, Main_Window *mw) {
 	mw->redraw();
 }
 
-void Main_Window::save_cb(Fl_Widget *w, Main_Window *mw) {
+void Main_Window::save_cb(Fl_Widget *, Main_Window *mw) {
 	if (!mw->_tilemap.size()) { return; }
 	if (mw->_tilemap_file.empty()) {
-		save_as_cb(w, mw);
+		save_as_cb(NULL, mw);
 	}
 	else {
 		mw->save_tilemap(false);
@@ -1717,7 +1734,7 @@ void Main_Window::tilemap_width_cb(Fl_Menu_ *, Main_Window *mw) {
 	mw->_tilemap_width_dialog->show(mw);
 	if (mw->_tilemap_width_dialog->canceled()) { return; }
 	mw->_tilemap_width->default_value(mw->_tilemap_width_dialog->tilemap_width());
-	tilemap_width_tb_cb(mw->_tilemap_width, mw);
+	tilemap_width_tb_cb(NULL, mw);
 }
 
 void Main_Window::resize_cb(Fl_Menu_ *, Main_Window *mw) {
@@ -1812,6 +1829,21 @@ void Main_Window::y_flip_cb(Toolbar_Toggle_Button *, Main_Window *mw) {
 	mw->_current_tile->redraw();
 }
 
+void Main_Window::color_cb(OS_Spinner *, Main_Window *mw) {
+	mw->_current_attributes->sgb_color(mw->sgb_color());
+	mw->_current_attributes->redraw();
+}
+
+void Main_Window::priority_cb(OS_Check_Button *, Main_Window *mw) {
+	mw->_current_attributes->priority(mw->priority());
+	mw->_current_attributes->redraw();
+}
+
+void Main_Window::obp1_cb(OS_Check_Button *, Main_Window *mw) {
+	mw->_current_attributes->obp1(mw->obp1());
+	mw->_current_attributes->redraw();
+}
+
 void Main_Window::tilemap_tabs_cb(OS_Tabs *, Main_Window *mw) {
 	Config::attributes(mw->_tilemap_tabs->value() == mw->_tilemap_attributes_tab);
 	mw->redraw();
@@ -1844,17 +1876,20 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 	}
 	else if (Fl::event_button() == FL_RIGHT_MOUSE) {
 		// Right-click to select
-		int color = tt->sgb_color();
-		mw->_color->default_value(color > -1 ? color : 0);
 		mw->_x_flip_tb->value(tt->x_flip());
 		mw->_x_flip_tb->do_callback();
 		mw->_y_flip_tb->value(tt->y_flip());
 		mw->_y_flip_tb->do_callback();
+		int color = tt->sgb_color();
+		mw->_color->default_value(color > -1 ? color : 0);
+		mw->_color->do_callback();
 		mw->_priority->value(tt->priority());
+		mw->_priority->do_callback();
 		mw->_obp1->value(tt->obp1());
-		mw->_color->redraw();
+		mw->_obp1->do_callback();
 		mw->_x_flip_tb->redraw();
 		mw->_y_flip_tb->redraw();
+		mw->_color->redraw();
 		mw->_priority->redraw();
 		mw->_obp1->redraw();
 		uint16_t id = tt->id();
@@ -1874,7 +1909,7 @@ void Main_Window::select_tile_cb(Tile_Button *tb, Main_Window *mw) {
 		mw->_tileset_bank0_tab, mw->_tileset_bank1_tab, mw->_tileset_bank2_tab, mw->_tileset_bank3_tab,
 	};
 	mw->_tileset_tabs->value(tileset_tabs[bank]);
-	char buffer[32];
+	char buffer[32] = {};
 	sprintf(buffer, "Tile: $%d:%02X", bank, offset);
 	mw->_tile_heading->copy_label(buffer);
 	mw->_current_tile->redraw();
