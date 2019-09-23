@@ -975,8 +975,9 @@ void Main_Window::resize_tilemap() {
 void Main_Window::edit_tile(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
 	Tile_State ts(_selected->id(), x_flip(), y_flip(), priority(), obp1(), sgb_color());
-	if (fs == ts) { return; }
-	tt->state(ts);
+	bool a = Config::attributes();
+	if (fs.same(ts, a)) { return; }
+	tt->assign(ts, a);
 	tt->damage(1);
 	_tilemap.modified(true);
 }
@@ -984,7 +985,8 @@ void Main_Window::edit_tile(Tile_Tessera *tt) {
 void Main_Window::flood_fill(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
 	Tile_State ts(_selected->id(), x_flip(), y_flip(), priority(), obp1(), sgb_color());
-	if (fs == ts) { return; }
+	bool a = Config::attributes();
+	if (fs.same(ts, a)) { return; }
 	std::queue<size_t> queue;
 	size_t w = _tilemap.width(), h = _tilemap.height(), n = _tilemap.size();
 	size_t row = tt->row(), col = tt->col();
@@ -995,8 +997,8 @@ void Main_Window::flood_fill(Tile_Tessera *tt) {
 		queue.pop();
 		if (j >= n) { continue; }
 		Tile_Tessera *ff = _tilemap.tile(j);
-		if (ff->state() != fs) { continue; }
-		ff->state(ts); // fill
+		if (!ff->state().same(fs, a)) { continue; }
+		ff->assign(ts, a); // fill
 		size_t r = ff->row(), c = ff->col();
 		if (c > 0) { queue.push(j-1); } // left
 		if (c < w - 1) { queue.push(j+1); } // right
@@ -1010,11 +1012,12 @@ void Main_Window::flood_fill(Tile_Tessera *tt) {
 void Main_Window::substitute_tile(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
 	Tile_State ts(_selected->id(), x_flip(), y_flip(), priority(), obp1(), sgb_color());
+	bool a = Config::attributes();
 	size_t n = _tilemap.size();
 	for (size_t i = 0; i < n; i++) {
 		Tile_Tessera *ff = _tilemap.tile(i);
-		if (ff->state() == fs) {
-			ff->state(ts);
+		if (ff->state().same(fs, a)) {
+			ff->assign(ts, a);
 		}
 	}
 	_tilemap_scroll->redraw();
@@ -1024,15 +1027,16 @@ void Main_Window::substitute_tile(Tile_Tessera *tt) {
 void Main_Window::swap_tiles(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
 	Tile_State ts(_selected->id(), x_flip(), y_flip(), priority(), obp1(), sgb_color());
-	if (fs == ts) { return; }
+	bool a = Config::attributes();
+	if (fs.same(ts, a)) { return; }
 	size_t n = _tilemap.size();
 	for (size_t i = 0; i < n; i++) {
 		Tile_Tessera *ff = _tilemap.tile(i);
-		if (ff->state() == fs) {
-			ff->state(ts);
+		if (ff->state().same(fs, a)) {
+			ff->assign(ts, a);
 		}
-		else if (ff->state() == ts) {
-			ff->state(fs);
+		else if (ff->state().same(ts, a)) {
+			ff->assign(fs, a);
 		}
 	}
 	_tilemap_scroll->redraw();
@@ -1899,24 +1903,28 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 	}
 	else if (Fl::event_button() == FL_RIGHT_MOUSE) {
 		// Right-click to select
-		mw->_x_flip_tb->value(tt->x_flip());
-		mw->_x_flip_tb->do_callback();
-		mw->_y_flip_tb->value(tt->y_flip());
-		mw->_y_flip_tb->do_callback();
-		int color = tt->sgb_color();
-		mw->_color->default_value(color > -1 ? color : 0);
-		mw->_color->do_callback();
-		mw->_priority->value(tt->priority());
-		mw->_priority->do_callback();
-		mw->_obp1->value(tt->obp1());
-		mw->_obp1->do_callback();
-		mw->_x_flip_tb->redraw();
-		mw->_y_flip_tb->redraw();
-		mw->_color->redraw();
-		mw->_priority->redraw();
-		mw->_obp1->redraw();
-		uint16_t id = tt->id();
-		select_tile_cb(mw->_tile_buttons[id], mw);
+		if (Config::attributes()) {
+			int color = tt->sgb_color();
+			mw->_color->default_value(color > -1 ? color : 0);
+			mw->_color->do_callback();
+			mw->_priority->value(tt->priority());
+			mw->_priority->do_callback();
+			mw->_obp1->value(tt->obp1());
+			mw->_obp1->do_callback();
+			mw->_color->redraw();
+			mw->_priority->redraw();
+			mw->_obp1->redraw();
+		}
+		else {
+			mw->_x_flip_tb->value(tt->x_flip());
+			mw->_x_flip_tb->do_callback();
+			mw->_y_flip_tb->value(tt->y_flip());
+			mw->_y_flip_tb->do_callback();
+			mw->_x_flip_tb->redraw();
+			mw->_y_flip_tb->redraw();
+			uint16_t id = tt->id();
+			select_tile_cb(mw->_tile_buttons[id], mw);
+		}
 	}
 }
 

@@ -6,10 +6,15 @@
 #pragma warning(push, 0)
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Radio_Button.H>
+#include <FL/fl_draw.H>
 #pragma warning(pop)
 
 #include "utils.h"
+#include "config.h"
 #include "tileset.h"
+
+#define TILE_SIZE 8
+#define TILE_SIZE_2X (TILE_SIZE * 2)
 
 #define NUM_SGB_COLORS 4
 
@@ -25,19 +30,24 @@ public:
 	bool x_flip, y_flip, priority, obp1;
 	int color;
 public:
-	Tile_State(uint16_t id = 0x000, bool x_flip = false, bool y_flip = false, bool priority = false,
-		bool obp1 = false, int color = -1);
+	inline Tile_State(uint16_t id_ = 0x000, bool x_flip_ = false, bool y_flip_ = false, bool priority_ = false,
+		bool obp1_ = false, int color_ = -1) : id(id_), x_flip(x_flip_), y_flip(y_flip_), priority(priority_),
+		obp1(obp1_), color(color_) {}
+	inline bool same_tiles(const Tile_State &other) const {
+		return id == other.id && x_flip == other.x_flip && y_flip == other.y_flip;
+	}
+	inline bool same_attributes(const Tile_State &other) const {
+		return priority == other.priority && obp1 == other.obp1 && color == other.color;
+	}
+	inline bool same(const Tile_State &other, bool attr) const {
+		return attr ? same_attributes(other) : same_tiles(other);
+	}
 	inline void draw(int x, int y, bool tile, bool attr, bool active, bool selected = false) {
-		if (tile) { draw_tile(x, y, active, selected); } if (attr) { draw_attributes(x, y); }
+		if (tile) { draw_tile(x, y, active, selected); }
+		else { fl_rectf(x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_WHITE); }
+		if (attr) { draw_attributes(x, y); }
 	}
 	void print(int x, int y);
-	inline bool operator==(const Tile_State &other) const {
-		return id == other.id && x_flip == other.x_flip && y_flip == other.y_flip && priority == other.priority &&
-			obp1 == other.obp1 && color == other.color;
-	}
-	inline bool operator!=(const Tile_State &other) const {
-		return !(*this == other);
-	}
 private:
 	void draw_tile(int x, int y, bool active, bool selected);
 	void draw_attributes(int x, int y);
@@ -51,6 +61,15 @@ public:
 		bool obp1_ = false, int color_ = -1) : _state(id_, x_flip_, y_flip_, priority_, obp1_, color_) {}
 	inline Tile_State state(void) const { return _state; }
 	inline void state(Tile_State state) { _state = state; }
+	inline void tile(Tile_State state) {
+		_state.id = state.id; _state.x_flip = state.x_flip; _state.y_flip = state.y_flip;
+	}
+	inline void attributes(Tile_State state) {
+		_state.color = state.color; _state.priority = state.priority; _state.obp1 = state.obp1;
+	}
+	inline void assign(Tile_State state, bool attr) {
+		if (attr) { attributes(state); } else { tile(state); }
+	}
 	inline uint16_t id(void) const { return _state.id; }
 	inline void id(uint16_t id) { _state.id = id; }
 	inline bool x_flip(void) const { return _state.x_flip; }

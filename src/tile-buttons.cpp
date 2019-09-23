@@ -1,13 +1,10 @@
 #pragma warning(push, 0)
 #include <FL/Fl.H>
 #include <FL/Fl_PNG_Image.H>
-#include <FL/fl_draw.H>
 #pragma warning(pop)
 
 #include "themes.h"
-#include "config.h"
 #include "main-window.h"
-#include "tileset.h"
 #include "tile-buttons.h"
 
 static const uchar sgb_color0_png_buffer[96] = {
@@ -107,9 +104,6 @@ static void draw_selection_border(int x, int y) {
 }
 
 std::vector<Tileset> *Tile_State::_tilesets = NULL;
-
-Tile_State::Tile_State(uint16_t id_, bool x_flip_, bool y_flip_, bool priority_, bool obp1_, int color_) : id(id_),
-	x_flip(x_flip_), y_flip(y_flip_), priority(priority_), obp1(obp1_), color(color_) {}
 
 void Tile_State::draw_tile(int x, int y, bool active, bool selected) {
 	if (_tilesets) {

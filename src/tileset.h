@@ -8,9 +8,6 @@
 #include "utils.h"
 #include "tile-buttons.h"
 
-#define TILE_SIZE 8
-#define TILE_SIZE_2X (TILE_SIZE * 2)
-
 #define NUM_HUES 4
 #define BYTES_PER_1BPP_TILE (TILE_SIZE * TILE_SIZE / TILE_SIZE)
 #define BYTES_PER_2BPP_TILE (BYTES_PER_1BPP_TILE * 2)
