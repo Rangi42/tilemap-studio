@@ -1,65 +1,46 @@
 #include "tilemap-format.h"
 
+static const int tileset_sizes[NUM_FORMATS] = {
+	0x100, // PLAIN - 8-bit tile IDs
+	0x200, // GBC_ATTRS - 9-bit tile IDs
+	0x400, // GBA_ATTRS - 10-bit tile IDs
+	0x100, // SGB_BORDER - 8-bit tile IDs
+	0x10,  // RBY_TOWN_MAP - High nybble is reserved for run length
+	0xFF,  // GSC_TOWN_MAP - $FF is reserved for the end marker
+	0x40,  // PC_TOWN_MAP - High two bits are reserved for X/Y flip
+	0xFF,  // POKEGEAR_CARD - $FF is reserved for the end marker
+};
+
 int format_tileset_size(Tilemap_Format fmt) {
-	switch (fmt) {
-	case Tilemap_Format::RLE_NYBBLES:
-		// High nybble is reserved for run length
-		return 0x10;
-	case Tilemap_Format::XY_FLIP:
-		// High two bits are reserved for X/Y flip
-		return 0x40;
-	case Tilemap_Format::FF_END:
-	case Tilemap_Format::RLE_FF_END:
-		// $FF is reserved for the end marker
-		return 0xFF;
-	case Tilemap_Format::PLAIN:
-	default:
-		// 8-bit tile IDs
-		return 0x100;
-	case Tilemap_Format::TILE_ATTR:
-		// 9-bit tile IDs
-		return 0x200;
-	case Tilemap_Format::TEN_BIT:
-		// 10-bit tile IDs
-		return 0x400;
-	}
+	return tileset_sizes[fmt];
 }
+
+static const char *format_names[NUM_FORMATS] = {
+	"Plain tiles",            // PLAIN
+	"GBC tiles + attributes", // GBC_ATTRS
+	"GBA tiles + colors",     // GBA_ATTRS
+	"SGB border",             // SGB_BORDER
+	"RBY Town Map",           // RBY_TOWN_MAP
+	"GSC Town Map",           // GSC_TOWN_MAP
+	"PC Town Map",            // PC_TOWN_MAP
+	"Pok\xc3\xa9gear card",   // POKEGEAR_CARD
+};
 
 const char *format_name(Tilemap_Format fmt) {
-	switch (fmt) {
-	case Tilemap_Format::PLAIN:
-		return "Plain tiles";
-	case Tilemap_Format::TILE_ATTR:
-		return "SGB tiles + attributes";
-	case Tilemap_Format::TEN_BIT:
-		return "GBA tiles + colors";
-	case Tilemap_Format::RLE_NYBBLES:
-		return "RBY Town Map";
-	case Tilemap_Format::FF_END:
-		return "GSC Town Map";
-	case Tilemap_Format::XY_FLIP:
-		return "PC Town Map";
-	case Tilemap_Format::RLE_FF_END:
-		return "Pok\xc3\xa9gear card";
-	default:
-		return "Unknown";
-	}
+	return format_names[fmt];
 }
 
+static const char *format_extensions[NUM_FORMATS] = {
+	".tilemap",     // PLAIN - e.g. pokecrystal/gfx/card_flip/card_flip.tilemap
+	".bin",         // GBC_ATTRS - e.g. pokecrystal/gfx/mobile/*.bin
+	".bin",         // GBA_ATTRS  e.g. {pokeruby|pokeemerald}/graphics/*/*.bin
+	".map",         // SGB_BORDER - e.g. pokered/gfx/{red|blue}/sgbborder.map
+	".rle",         // RBY_TOWN_MAP - e.g. pokered/gfx/town_map.rle
+	".bin",         // GSC_TOWN_MAP - e.g. pokecrystal/gfx/pokegear/*.bin
+	".bin",         // PC_TOWN_MAP - e.g. polishedcrystal/gfx/town_map/*.bin
+	".tilemap.rle", //  - e.g. pokecrystal/gfx/pokegear/*.tilemap.rle
+};
+
 const char *format_extension(Tilemap_Format fmt) {
-	switch (fmt) {
-	case Tilemap_Format::PLAIN:
-		return ".tilemap"; // e.g. pokecrystal/gfx/card_flip/card_flip.tilemap
-	case Tilemap_Format::RLE_NYBBLES:
-		return ".rle"; // e.g. pokered/gfx/town_map.rle
-	case Tilemap_Format::FF_END:
-	case Tilemap_Format::XY_FLIP:
-	case Tilemap_Format::TEN_BIT:
-	default:
-		return ".bin"; // e.g. pokecrystal/gfx/pokegear/*.bin, polishedcrystal/gfx/town_map/*.bin, {pokeruby|pokeemerald}/graphics/*.bin
-	case Tilemap_Format::RLE_FF_END:
-		return ".tilemap.rle"; // e.g. pokecrystal/gfx/pokegear/*.tilemap.bin
-	case Tilemap_Format::TILE_ATTR:
-		return ".map"; // e.g. pokered/gfx/{red|blue}/sgbborder.map
-	}
+	return format_extensions[fmt];
 }

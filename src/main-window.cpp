@@ -147,7 +147,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_tileset_bank1_pane = new Workpane(gx+5, qy+5, gw-10, gw-10);
 	for (int i = 0; i < TILES_PER_BANK; i++) {
 		int tx = ox + (i % TILES_PER_ROW) * TILE_SIZE_2X, ty = oy + (i / TILES_PER_ROW) * TILE_SIZE_2X;
-		int id = i + 0x100;
+		int id = i + TILES_PER_BANK;
 		Tile_Button *tb = new Tile_Button(tx, ty, (uint16_t)id);
 		tb->callback((Fl_Callback *)select_tile_cb, this);
 		_tile_buttons[id] = tb;
@@ -159,7 +159,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_tileset_bank2_pane = new Workpane(gx+5, qy+5, gw-10, gw-10);
 	for (int i = 0; i < TILES_PER_BANK; i++) {
 		int tx = ox + (i % TILES_PER_ROW) * TILE_SIZE_2X, ty = oy + (i / TILES_PER_ROW) * TILE_SIZE_2X;
-		int id = i + 0x200;
+		int id = i + TILES_PER_BANK * 2;
 		Tile_Button *tb = new Tile_Button(tx, ty, (uint16_t)id);
 		tb->callback((Fl_Callback *)select_tile_cb, this);
 		_tile_buttons[id] = tb;
@@ -171,7 +171,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_tileset_bank3_pane = new Workpane(gx+5, qy+5, gw-10, gw-10);
 	for (int i = 0; i < TILES_PER_BANK; i++) {
 		int tx = ox + (i % TILES_PER_ROW) * TILE_SIZE_2X, ty = oy + (i / TILES_PER_ROW) * TILE_SIZE_2X;
-		int id = i + 0x300;
+		int id = i + TILES_PER_BANK * 3;
 		Tile_Button *tb = new Tile_Button(tx, ty, (uint16_t)id);
 		tb->callback((Fl_Callback *)select_tile_cb, this);
 		_tile_buttons[id] = tb;
@@ -366,18 +366,20 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 		OS_SUBMENU("F&ormat"),
 		OS_MENU_ITEM("Plain &tiles", FL_COMMAND + '1', (Fl_Callback *)plain_format_cb, this,
 			FL_MENU_RADIO | (Config::format() == Tilemap_Format::PLAIN ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("&SGB tiles + attributes", FL_COMMAND + '2', (Fl_Callback *)sgb_border_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap_Format::TILE_ATTR ? FL_MENU_VALUE : 0)),
+		OS_MENU_ITEM("GB&C tiles + attributes", FL_COMMAND + '2', (Fl_Callback *)gbc_format_cb, this,
+			FL_MENU_RADIO | (Config::format() == Tilemap_Format::GBC_ATTRS ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("GB&A tiles + colors", FL_COMMAND + '3', (Fl_Callback *)gba_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap_Format::TEN_BIT ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("&RBY Town Map", FL_COMMAND + '4', (Fl_Callback *)rby_town_map_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap_Format::RLE_NYBBLES ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("&GSC Town Map", FL_COMMAND + '5', (Fl_Callback *)gsc_town_map_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap_Format::FF_END ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("&PC Town Map", FL_COMMAND + '6', (Fl_Callback *)pc_town_map_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap_Format::XY_FLIP ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("Pok\xc3\xa9gear &card", FL_COMMAND + '7', (Fl_Callback *)pokegear_card_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap_Format::RLE_FF_END ? FL_MENU_VALUE : 0)),
+			FL_MENU_RADIO | (Config::format() == Tilemap_Format::GBA_COLORS ? FL_MENU_VALUE : 0)),
+		OS_MENU_ITEM("&SGB border", FL_COMMAND + '4', (Fl_Callback *)sgb_border_format_cb, this,
+			FL_MENU_RADIO | (Config::format() == Tilemap_Format::SGB_BORDER ? FL_MENU_VALUE : 0)),
+		OS_MENU_ITEM("&RBY Town Map", FL_COMMAND + '5', (Fl_Callback *)rby_town_map_format_cb, this,
+			FL_MENU_RADIO | (Config::format() == Tilemap_Format::RBY_TOWN_MAP ? FL_MENU_VALUE : 0)),
+		OS_MENU_ITEM("GSC Town &Map", FL_COMMAND + '6', (Fl_Callback *)gsc_town_map_format_cb, this,
+			FL_MENU_RADIO | (Config::format() == Tilemap_Format::GSC_TOWN_MAP ? FL_MENU_VALUE : 0)),
+		OS_MENU_ITEM("&PC Town Map", FL_COMMAND + '7', (Fl_Callback *)pc_town_map_format_cb, this,
+			FL_MENU_RADIO | (Config::format() == Tilemap_Format::PC_TOWN_MAP ? FL_MENU_VALUE : 0)),
+		OS_MENU_ITEM("Pok\xc3\xa9&gear card", FL_COMMAND + '8', (Fl_Callback *)pokegear_card_format_cb, this,
+			FL_MENU_RADIO | (Config::format() == Tilemap_Format::POKEGEAR_CARD ? FL_MENU_VALUE : 0)),
 		{},
 		OS_SUBMENU("&Help"),
 		OS_MENU_ITEM("&Help", FL_F + 1, (Fl_Callback *)help_cb, this, FL_MENU_DIVIDER),
@@ -406,8 +408,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_rose_gold_theme_mi = PM_FIND_MENU_ITEM_CB(rose_gold_theme_cb);
 	_dark_theme_mi = PM_FIND_MENU_ITEM_CB(dark_theme_cb);
 	_plain_format_mi = PM_FIND_MENU_ITEM_CB(plain_format_cb);
-	_sgb_border_format_mi = PM_FIND_MENU_ITEM_CB(sgb_border_format_cb);
+	_gbc_format_mi = PM_FIND_MENU_ITEM_CB(gbc_format_cb);
 	_gba_format_mi = PM_FIND_MENU_ITEM_CB(gba_format_cb);
+	_sgb_border_format_mi = PM_FIND_MENU_ITEM_CB(sgb_border_format_cb);
 	_rby_town_map_format_mi = PM_FIND_MENU_ITEM_CB(rby_town_map_format_cb);
 	_gsc_town_map_format_mi = PM_FIND_MENU_ITEM_CB(gsc_town_map_format_cb);
 	_pc_town_map_format_mi = PM_FIND_MENU_ITEM_CB(pc_town_map_format_cb);
@@ -723,7 +726,7 @@ void Main_Window::update_status(Tile_Tessera *tt) {
 #endif
 	_hover_xy->copy_label(buffer);
 	if (_tilemap.width() == GAME_BOY_WIDTH && _tilemap.height() == GAME_BOY_HEIGHT) {
-		if (Config::format() == Tilemap_Format::FF_END || Config::format() == Tilemap_Format::XY_FLIP) {
+		if (format_has_landmarks(Config::format())) {
 			size_t lx = tt->col() * TILE_SIZE + TILE_SIZE / 2;
 			size_t ly = tt->row() * TILE_SIZE + TILE_SIZE / 2;
 #ifdef __GNUC__
@@ -733,8 +736,8 @@ void Main_Window::update_status(Tile_Tessera *tt) {
 #endif
 			_hover_landmark->copy_label(buffer);
 		}
-		else if (Config::format() == Tilemap_Format::RLE_NYBBLES &&
-			tt->col() >= 2 && tt->col() <= 0xF + 2 && tt->row() >= 1 && tt->row() <= 0xF + 1) {
+		else if (format_has_emaps(Config::format()) && tt->col() >= 2 && tt->col() <= 0xF + 2 &&
+			tt->row() >= 1 && tt->row() <= 0xF + 1) {
 			int lx = (int)tt->col() - 2, ly = (int)tt->row() - 1;
 			sprintf(buffer, "EMAP $%X, $%X", lx, ly);
 			_hover_landmark->copy_label(buffer);
@@ -837,6 +840,7 @@ void Main_Window::update_active_controls() {
 		_reformat_mi->deactivate();
 		_reformat_tb->deactivate();
 	}
+
 	if (!_tilesets.empty()) {
 		_reload_tilesets_mi->activate();
 		_reload_tb->activate();
@@ -847,12 +851,69 @@ void Main_Window::update_active_controls() {
 		_reload_tb->deactivate();
 		_unload_tilesets_mi->deactivate();
 	}
-	if (Config::format() == Tilemap_Format::TEN_BIT) {
+
+	if (format_can_flip(Config::format())) {
+		_x_flip_tb->activate();
+		_y_flip_tb->activate();
+	}
+	else {
+		_x_flip_tb->clear();
+		_x_flip_tb->deactivate();
+		_x_flip_tb->do_callback();
+		_y_flip_tb->clear();
+		_y_flip_tb->deactivate();
+		_y_flip_tb->do_callback();
+	}
+
+	if (format_has_color(Config::format())) {
+		// TODO: support 8 GBC colors and 16 GBA colors
+		_color->activate();
+		_current_attributes->activate();
+		_tilemap_attributes_tab->activate();
+	}
+	else {
+		_color->default_value(0);
+		_color->deactivate();
+		_color->do_callback();
+		_current_attributes->deactivate();
+		_tilemap_attributes_tab->deactivate();
+		_tilemap_tabs->value(_tilemap_tiles_tab);
+		_tilemap_tabs->do_callback();
+	}
+	if (format_has_priority(Config::format())) {
+		_priority->activate();
+	}
+	else {
+		_priority->clear();
+		_priority->deactivate();
+		_priority->do_callback();
+	}
+	if (format_has_obp1(Config::format())) {
+		_obp1->activate();
+	}
+	else {
+		_obp1->clear();
+		_obp1->deactivate();
+		_obp1->do_callback();
+	}
+
+	int n = format_tileset_size(Config::format());
+
+	if (n > TILES_PER_BANK * 3) {
 		_tileset_bank1_tab->activate();
 		_tileset_bank2_tab->activate();
 		_tileset_bank3_tab->activate();
 	}
-	else if (Config::format() == Tilemap_Format::TILE_ATTR) {
+	else if (n > TILES_PER_BANK * 2) {
+		_tileset_bank1_tab->activate();
+		_tileset_bank2_tab->activate();
+		_tileset_bank3_tab->deactivate();
+		if (_tileset_tabs->value() == _tileset_bank3_tab) {
+			_tileset_tabs->value(_tileset_bank0_tab);
+			_tileset_tabs->do_callback();
+		}
+	}
+	else if (n > TILES_PER_BANK) {
 		_tileset_bank1_tab->activate();
 		_tileset_bank2_tab->deactivate();
 		_tileset_bank3_tab->deactivate();
@@ -868,59 +929,14 @@ void Main_Window::update_active_controls() {
 		_tileset_tabs->value(_tileset_bank0_tab);
 		_tileset_tabs->do_callback();
 	}
-	if (Config::format() == Tilemap_Format::TEN_BIT) {
-		// TODO: support 16 GBA colors
-		_color->activate();
-		_priority->clear();
-		_priority->deactivate();
-		_obp1->clear();
-		_obp1->deactivate();
-		_tilemap_attributes_tab->activate();
-		_current_attributes->activate();
-	}
-	else if (Config::format() == Tilemap_Format::TILE_ATTR) {
-		// TODO: support 8 CGB colors
-		_color->activate();
-		_priority->activate();
-		_obp1->activate();
-		_tilemap_attributes_tab->activate();
-		_current_attributes->activate();
-	}
-	else {
-		_color->default_value(0);
-		_color->deactivate();
-		_color->do_callback();
-		_priority->clear();
-		_priority->deactivate();
-		_priority->do_callback();
-		_obp1->clear();
-		_obp1->deactivate();
-		_obp1->do_callback();
-		_current_attributes->deactivate();
-		_tilemap_attributes_tab->deactivate();
-		_tilemap_tabs->value(_tilemap_tiles_tab);
-		_tilemap_tabs->do_callback();
-	}
-	if (Config::format() == Tilemap_Format::TILE_ATTR || Config::format() == Tilemap_Format::TEN_BIT ||
-		Config::format() == Tilemap_Format::XY_FLIP) {
-		_x_flip_tb->activate();
-		_y_flip_tb->activate();
-	}
-	else {
-		_x_flip_tb->clear();
-		_x_flip_tb->deactivate();
-		_x_flip_tb->do_callback();
-		_y_flip_tb->clear();
-		_y_flip_tb->deactivate();
-		_y_flip_tb->do_callback();
-	}
-	int n = format_tileset_size(Config::format());
+
 	for (int i = 0; i < n; i++) {
 		_tile_buttons[i]->activate();
 	}
 	for (int i = n; i < MAX_NUM_TILES; i++) {
 		_tile_buttons[i]->deactivate();
 	}
+
 	if (_selected->id() >= n) {
 		select_tile_cb(_tile_buttons[0x000], this);
 	}
@@ -1311,12 +1327,13 @@ void Main_Window::image_to_tiles() {
 	Config::format(fmt);
 	Fl_Menu_Item *format_menu_items[NUM_FORMATS] = {
 		_plain_format_mi,         // PLAIN
-		_sgb_border_format_mi,    // TILE_ATTR
-		_gba_format_mi,           // TEN_BIT
-		_rby_town_map_format_mi,  // RLE_NYBBLES
-		_gsc_town_map_format_mi,  // FF_END
-		_pokegear_card_format_mi, // XY_FLIP
-		_pc_town_map_format_mi    // RLE_FF_END
+		_gbc_format_mi,           // GBC_ATTRS
+		_gba_format_mi,           // GBA_ATTRS
+		_sgb_border_format_mi,    // SGB_BORDER
+		_rby_town_map_format_mi,  // RBY_TOWN_MAP
+		_gsc_town_map_format_mi,  // GSC_TOWN_MAP
+		_pc_town_map_format_mi,   // PC_TOWN_MAP
+		_pokegear_card_format_mi, // POKEGEAR_CARD
 	};
 	format_menu_items[Config::format()]->setonly();
 	update_active_controls();
@@ -1762,38 +1779,44 @@ void Main_Window::plain_format_cb(Fl_Menu_ *, Main_Window *mw) {
 	mw->redraw();
 }
 
-void Main_Window::sgb_border_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap_Format::TILE_ATTR);
+void Main_Window::gbc_format_cb(Fl_Menu_ *, Main_Window *mw) {
+	Config::format(Tilemap_Format::GBC_ATTRS);
 	mw->update_active_controls();
 	mw->redraw();
 }
 
 void Main_Window::gba_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap_Format::TEN_BIT);
+	Config::format(Tilemap_Format::GBA_COLORS);
+	mw->update_active_controls();
+	mw->redraw();
+}
+
+void Main_Window::sgb_border_format_cb(Fl_Menu_ *, Main_Window *mw) {
+	Config::format(Tilemap_Format::SGB_BORDER);
 	mw->update_active_controls();
 	mw->redraw();
 }
 
 void Main_Window::rby_town_map_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap_Format::RLE_NYBBLES);
+	Config::format(Tilemap_Format::RBY_TOWN_MAP);
 	mw->update_active_controls();
 	mw->redraw();
 }
 
 void Main_Window::gsc_town_map_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap_Format::FF_END);
+	Config::format(Tilemap_Format::GSC_TOWN_MAP);
 	mw->update_active_controls();
 	mw->redraw();
 }
 
 void Main_Window::pc_town_map_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap_Format::XY_FLIP);
+	Config::format(Tilemap_Format::PC_TOWN_MAP);
 	mw->update_active_controls();
 	mw->redraw();
 }
 
 void Main_Window::pokegear_card_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap_Format::RLE_FF_END);
+	Config::format(Tilemap_Format::POKEGEAR_CARD);
 	mw->update_active_controls();
 	mw->redraw();
 }

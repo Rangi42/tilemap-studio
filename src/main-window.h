@@ -41,7 +41,7 @@ private:
 	Fl_Menu_Item *_classic_theme_mi = NULL, *_aero_theme_mi = NULL, *_metro_theme_mi = NULL, *_aqua_theme_mi = NULL,
 		*_greybird_theme_mi = NULL, *_metal_theme_mi = NULL, *_blue_theme_mi = NULL, *_olive_theme_mi = NULL,
 		*_rose_gold_theme_mi = NULL, *_dark_theme_mi = NULL;
-	Fl_Menu_Item *_plain_format_mi = NULL, *_sgb_border_format_mi = NULL, *_gba_format_mi = NULL,
+	Fl_Menu_Item *_plain_format_mi = NULL, *_gbc_format_mi, *_gba_format_mi = NULL, *_sgb_border_format_mi = NULL,
 		*_rby_town_map_format_mi = NULL, *_gsc_town_map_format_mi = NULL, *_pc_town_map_format_mi = NULL,
 		*_pokegear_card_format_mi = NULL;
 	Fl_Menu_Item *_grid_mi, *_rainbow_tiles_mi = NULL;
@@ -168,8 +168,9 @@ private:
 	static void image_to_tiles_cb(Fl_Widget *w, Main_Window *mw);
 	// Format menu
 	static void plain_format_cb(Fl_Menu_ *m, Main_Window *mw);
-	static void sgb_border_format_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void gbc_format_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void gba_format_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void sgb_border_format_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void rby_town_map_format_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void gsc_town_map_format_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void pc_town_map_format_cb(Fl_Menu_ *m, Main_Window *mw);
