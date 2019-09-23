@@ -1248,7 +1248,8 @@ void Main_Window::image_to_tiles() {
 			}
 		}
 		if (ti == nt) {
-			if (nt + (size_t)start_id > 0xFF) {
+			size_t mn = (size_t)format_tileset_size(fmt);
+			if (nt + (size_t)start_id > mn) {
 				for (Tile_Tessera *tt : tilemap) {
 					delete tt;
 				}
