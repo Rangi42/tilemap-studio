@@ -193,8 +193,8 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 			int v = fgetc(file);
 			int a = fgetc(file);
 			bool x_flip = !!(a & 0x40), y_flip = !!(a & 0x80);
-			int color = (a & 0x0C) >> 2;
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip, false, false, color));
+			int palette = (a & 0x0C) >> 2;
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip, false, false, palette));
 		}
 	}
 
@@ -208,14 +208,14 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 			int a = fgetc(file);
 			if (!!(a & 0x08)) { v |= 0x100; }
 			bool x_flip = !!(a & 0x40), y_flip = !!(a & 0x80), priority = !!(a & 0x20), obp1 = !!(a & 0x10);
-			int color = a & 0x07;
-			// TODO: support 8 colors for GBC
-			color = color & 3;
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip, priority, obp1, color));
+			int palette = a & 0x07;
+			// TODO: support 8 palettes for GBC
+			palette = palette & 3;
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip, priority, obp1, palette));
 		}
 	}
 
-	else if (fmt == Tilemap_Format::GBA_COLORS) {
+	else if (fmt == Tilemap_Format::GBA_PALETTES) {
 		if (c % 2) {
 			fclose(file);
 			return (_result = TILEMAP_TOO_SHORT_ATTRS);
@@ -225,10 +225,10 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 			int a = fgetc(file);
 			v = v | ((a & 0x03) << 8);
 			bool x_flip = !!(a & 0x04), y_flip = !!(a & 0x08);
-			int color = (a & 0xF0) >> 4;
-			// TODO: support 16 colors for GBA
-			color = color & 3;
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip, false, false, color));
+			int palette = (a & 0xF0) >> 4;
+			// TODO: support 16 palettes for GBA
+			palette = palette & 3;
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip, false, false, palette));
 		}
 	}
 
@@ -341,7 +341,7 @@ bool Tilemap::can_write_tiles() {
 		if ((tt->x_flip() || tt->y_flip()) && !format_can_flip(fmt)) {
 			return false;
 		}
-		if (tt->sgb_color() > -1 && !format_has_color(fmt)) {
+		if (tt->palette() > -1 && !format_has_palettes(fmt)) {
 			return false;
 		}
 		if ((tt->priority() || tt->obp1()) && !format_has_metadata(fmt)) {
@@ -373,18 +373,18 @@ bool Tilemap::write_tiles(const char *f, std::vector<Tile_Tessera *> &tiles, Til
 			if (tt->priority()) { a |= 0x20; }
 			if (tt->x_flip())   { a |= 0x40; }
 			if (tt->y_flip())   { a |= 0x80; }
-			if (tt->sgb_color() > -1) { a |= tt->sgb_color(); }
+			if (tt->palette() > -1) { a |= tt->palette(); }
 			fputc(a, file);
 		}
 	}
-	else if (fmt == Tilemap_Format::GBA_COLORS) {
+	else if (fmt == Tilemap_Format::GBA_PALETTES) {
 		for (Tile_Tessera *tt : tiles) {
 			int v = (int)(tt->id() & 0xFF);
 			fputc(v, file);
 			int a = (tt->id() & 0x300) >> 8;
 			if (tt->x_flip()) { a |= 0x04; }
 			if (tt->y_flip()) { a |= 0x08; }
-			if (tt->sgb_color() > -1) { a |= tt->sgb_color() << 4; }
+			if (tt->palette() > -1) { a |= tt->palette() << 4; }
 			fputc(a, file);
 		}
 	}
@@ -395,7 +395,7 @@ bool Tilemap::write_tiles(const char *f, std::vector<Tile_Tessera *> &tiles, Til
 			int a = 0x10;
 			if (tt->x_flip()) { a |= 0x40; }
 			if (tt->y_flip()) { a |= 0x80; }
-			if (tt->sgb_color() > -1) { a |= tt->sgb_color() << 2; }
+			if (tt->palette() > -1) { a |= tt->palette() << 2; }
 			fputc(a, file);
 		}
 	}

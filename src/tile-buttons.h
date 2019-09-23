@@ -16,7 +16,7 @@
 #define TILE_SIZE 8
 #define TILE_SIZE_2X (TILE_SIZE * 2)
 
-#define NUM_SGB_COLORS 4
+#define NUM_SGB_PALETTES 4
 
 class Tileset;
 
@@ -28,16 +28,16 @@ public:
 public:
 	uint16_t id;
 	bool x_flip, y_flip, priority, obp1;
-	int color;
+	int palette;
 public:
 	inline Tile_State(uint16_t id_ = 0x000, bool x_flip_ = false, bool y_flip_ = false, bool priority_ = false,
-		bool obp1_ = false, int color_ = -1) : id(id_), x_flip(x_flip_), y_flip(y_flip_), priority(priority_),
-		obp1(obp1_), color(color_) {}
+		bool obp1_ = false, int palette_ = -1) : id(id_), x_flip(x_flip_), y_flip(y_flip_), priority(priority_),
+		obp1(obp1_), palette(palette_) {}
 	inline bool same_tiles(const Tile_State &other) const {
 		return id == other.id && x_flip == other.x_flip && y_flip == other.y_flip;
 	}
 	inline bool same_attributes(const Tile_State &other) const {
-		return priority == other.priority && obp1 == other.obp1 && color == other.color;
+		return priority == other.priority && obp1 == other.obp1 && palette == other.palette;
 	}
 	inline bool same(const Tile_State &other, bool attr) const {
 		return attr ? same_attributes(other) : same_tiles(other);
@@ -58,14 +58,14 @@ protected:
 	Tile_State _state;
 public:
 	inline Tile_Thing(uint16_t id_ = 0x000, bool x_flip_ = false, bool y_flip_ = false, bool priority_ = false,
-		bool obp1_ = false, int color_ = -1) : _state(id_, x_flip_, y_flip_, priority_, obp1_, color_) {}
+		bool obp1_ = false, int palette_ = -1) : _state(id_, x_flip_, y_flip_, priority_, obp1_, palette_) {}
 	inline Tile_State state(void) const { return _state; }
 	inline void state(Tile_State state) { _state = state; }
 	inline void tile(Tile_State state) {
 		_state.id = state.id; _state.x_flip = state.x_flip; _state.y_flip = state.y_flip;
 	}
 	inline void attributes(Tile_State state) {
-		_state.color = state.color; _state.priority = state.priority; _state.obp1 = state.obp1;
+		_state.palette = state.palette; _state.priority = state.priority; _state.obp1 = state.obp1;
 	}
 	inline void assign(Tile_State state, bool attr) {
 		if (attr) { attributes(state); } else { tile(state); }
@@ -80,8 +80,8 @@ public:
 	inline void priority(bool priority) { _state.priority = priority; }
 	inline bool obp1(void) const { return _state.obp1; }
 	inline void obp1(bool obp1) { _state.obp1 = obp1; }
-	inline int sgb_color(void) const { return _state.color; }
-	inline void sgb_color(int color) { _state.color = color; }
+	inline int palette(void) const { return _state.palette; }
+	inline void palette(int palette) { _state.palette = palette; }
 };
 
 class Tile_Swatch : public Tile_Thing, public Fl_Box {
@@ -99,7 +99,7 @@ private:
 	size_t _row, _col;
 public:
 	Tile_Tessera(int x = 0, int y = 0, size_t row = 0, size_t col = 0, uint16_t id = 0x000,
-		bool x_flip = false, bool y_flip = false, bool priority = false, bool obp1 = false, int color = -1);
+		bool x_flip = false, bool y_flip = false, bool priority = false, bool obp1 = false, int palette = -1);
 	inline size_t row(void) const { return _row; }
 	inline size_t col(void) const { return _col; }
 	inline void coords(size_t row, size_t col) { _row = row; _col = col; }

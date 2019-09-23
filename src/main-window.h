@@ -52,7 +52,7 @@ private:
 	Toolbar_Button *_image_to_tiles_tb;
 	Toolbar_Toggle_Button *_x_flip_tb, *_y_flip_tb;
 	Tile_Button *_tile_buttons[MAX_NUM_TILES];
-	Default_Spinner *_color;
+	Default_Spinner *_palette;
 	OS_Check_Button *_priority, *_obp1;
 	// GUI outputs
 	Label *_width_heading, *_tileset_name, *_tilemap_name, *_tile_heading;
@@ -94,7 +94,7 @@ public:
 	inline bool unsaved(void) const { return _tilemap.modified(); }
 	inline bool x_flip(void) const { return _x_flip_tb->active() && !!_x_flip_tb->value(); }
 	inline bool y_flip(void) const { return _y_flip_tb->active() && !!_y_flip_tb->value(); }
-	inline int sgb_color(void) const { return _color->active() ? (int)_color->value() : -1; }
+	inline int palette(void) const { return _palette->active() ? (int)_palette->value() : -1; }
 	inline bool priority(void) const { return _priority->active() && !!_priority->value(); }
 	inline bool obp1(void) const { return _obp1->active() && !!_obp1->value(); }
 	inline const char *modified_filename(void) const {
@@ -184,7 +184,7 @@ private:
 	static void tilemap_width_tb_cb(OS_Spinner *ss, Main_Window *mw);
 	static void x_flip_cb(Toolbar_Toggle_Button *tb, Main_Window *mw);
 	static void y_flip_cb(Toolbar_Toggle_Button *tb, Main_Window *mw);
-	static void color_cb(OS_Spinner *ss, Main_Window *mw);
+	static void palette_cb(OS_Spinner *ss, Main_Window *mw);
 	static void priority_cb(OS_Check_Button *cb, Main_Window *mw);
 	static void obp1_cb(OS_Check_Button *cb, Main_Window *mw);
 	// Tilemap

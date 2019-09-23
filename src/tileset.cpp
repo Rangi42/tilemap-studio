@@ -170,10 +170,7 @@ Tileset::Result Tileset::read_2bpp_lz_graphics(const char *f) {
 
 enum Hue { WHITE, DARK, LIGHT, BLACK };
 
-Fl_Color hue_colors[NUM_HUES] = {
-	fl_rgb_color(0xFF, 0xFF, 0xFF), fl_rgb_color(0x55, 0x55, 0x55),
-	fl_rgb_color(0xAA, 0xAA, 0xAA), fl_rgb_color(0x00, 0x00, 0x00),
-};
+Fl_Color hue_colors[NUM_HUES] = {fl_rgb_color(0xFF), fl_rgb_color(0x55), fl_rgb_color(0xAA), fl_rgb_color(0x00)};
 
 static void convert_1bpp_row(uchar b, Hue *row) {
 	// %ABCD_EFGH -> %A %B %C %D %E %F %G %H

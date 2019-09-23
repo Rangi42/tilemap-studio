@@ -193,9 +193,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	gy += wgt_h + wgt_m + _tileset_bank0_tab->h() + wgt_m;
 	_left_group->begin();
 	wgt_w = MAX(text_width("A", 2), text_width("F", 2)) + wgt_h;
-	int wgt_off = text_width("Color:", 3);
-	_color = new Default_Spinner(gx+wgt_off, gy, wgt_w, wgt_h, "Color:");
-	gx += _color->w() + wgt_off + wgt_m + win_m;
+	int wgt_off = text_width("Palette:", 3);
+	_palette = new Default_Spinner(gx+wgt_off, gy, wgt_w, wgt_h, "Palette:");
+	gx += _palette->w() + wgt_off + wgt_m + win_m;
 	wgt_w = text_width("Priority", 2) + wgt_h;
 	_priority = new OS_Check_Button(gx, gy, wgt_w, wgt_h, "Priority");
 	gx += _priority->w() + wgt_m;
@@ -368,8 +368,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 			FL_MENU_RADIO | (Config::format() == Tilemap_Format::PLAIN ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("GB&C tiles + attributes", FL_COMMAND + '2', (Fl_Callback *)gbc_format_cb, this,
 			FL_MENU_RADIO | (Config::format() == Tilemap_Format::GBC_ATTRS ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("GB&A tiles + colors", FL_COMMAND + '3', (Fl_Callback *)gba_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap_Format::GBA_COLORS ? FL_MENU_VALUE : 0)),
+		OS_MENU_ITEM("GB&A tiles + palettes", FL_COMMAND + '3', (Fl_Callback *)gba_format_cb, this,
+			FL_MENU_RADIO | (Config::format() == Tilemap_Format::GBA_PALETTES ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&SGB border", FL_COMMAND + '4', (Fl_Callback *)sgb_border_format_cb, this,
 			FL_MENU_RADIO | (Config::format() == Tilemap_Format::SGB_BORDER ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&RBY Town Map", FL_COMMAND + '5', (Fl_Callback *)rby_town_map_format_cb, this,
@@ -517,9 +517,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_y_flip_tb->deimage(Y_FLIP_DISABLED_ICON);
 	_y_flip_tb->callback((Fl_Callback *)y_flip_cb, this);
 
-	_color->default_value(0);
-	_color->range(0, NUM_SGB_COLORS - 1);
-	_color->callback((Fl_Callback *)color_cb, this);
+	_palette->default_value(0);
+	_palette->range(0, NUM_SGB_PALETTES - 1);
+	_palette->callback((Fl_Callback *)palette_cb, this);
 
 	_priority->callback((Fl_Callback *)priority_cb, this);
 
@@ -865,16 +865,16 @@ void Main_Window::update_active_controls() {
 		_y_flip_tb->do_callback();
 	}
 
-	if (format_has_color(Config::format())) {
-		// TODO: support 8 GBC colors and 16 GBA colors
-		_color->activate();
+	if (format_has_palettes(Config::format())) {
+		// TODO: support 8 GBC palettes and 16 GBA palettes
+		_palette->activate();
 		_current_attributes->activate();
 		_tilemap_attributes_tab->activate();
 	}
 	else {
-		_color->default_value(0);
-		_color->deactivate();
-		_color->do_callback();
+		_palette->default_value(0);
+		_palette->deactivate();
+		_palette->do_callback();
 		_current_attributes->deactivate();
 		_tilemap_attributes_tab->deactivate();
 		_tilemap_tabs->value(_tilemap_tiles_tab);
@@ -971,7 +971,7 @@ void Main_Window::resize_tilemap() {
 
 void Main_Window::edit_tile(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
-	Tile_State ts(_selected->id(), x_flip(), y_flip(), priority(), obp1(), sgb_color());
+	Tile_State ts(_selected->id(), x_flip(), y_flip(), priority(), obp1(), palette());
 	bool a = Config::attributes();
 	if (fs.same(ts, a)) { return; }
 	tt->assign(ts, a);
@@ -981,7 +981,7 @@ void Main_Window::edit_tile(Tile_Tessera *tt) {
 
 void Main_Window::flood_fill(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
-	Tile_State ts(_selected->id(), x_flip(), y_flip(), priority(), obp1(), sgb_color());
+	Tile_State ts(_selected->id(), x_flip(), y_flip(), priority(), obp1(), palette());
 	bool a = Config::attributes();
 	if (fs.same(ts, a)) { return; }
 	std::queue<size_t> queue;
@@ -1008,7 +1008,7 @@ void Main_Window::flood_fill(Tile_Tessera *tt) {
 
 void Main_Window::substitute_tile(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
-	Tile_State ts(_selected->id(), x_flip(), y_flip(), priority(), obp1(), sgb_color());
+	Tile_State ts(_selected->id(), x_flip(), y_flip(), priority(), obp1(), palette());
 	bool a = Config::attributes();
 	size_t n = _tilemap.size();
 	for (size_t i = 0; i < n; i++) {
@@ -1023,7 +1023,7 @@ void Main_Window::substitute_tile(Tile_Tessera *tt) {
 
 void Main_Window::swap_tiles(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
-	Tile_State ts(_selected->id(), x_flip(), y_flip(), priority(), obp1(), sgb_color());
+	Tile_State ts(_selected->id(), x_flip(), y_flip(), priority(), obp1(), palette());
 	bool a = Config::attributes();
 	if (fs.same(ts, a)) { return; }
 	size_t n = _tilemap.size();
@@ -1330,7 +1330,7 @@ void Main_Window::image_to_tiles() {
 	Fl_Menu_Item *format_menu_items[NUM_FORMATS] = {
 		_plain_format_mi,         // PLAIN
 		_gbc_format_mi,           // GBC_ATTRS
-		_gba_format_mi,           // GBA_ATTRS
+		_gba_format_mi,           // GBA_PALETTES
 		_sgb_border_format_mi,    // SGB_BORDER
 		_rby_town_map_format_mi,  // RBY_TOWN_MAP
 		_gsc_town_map_format_mi,  // GSC_TOWN_MAP
@@ -1788,7 +1788,7 @@ void Main_Window::gbc_format_cb(Fl_Menu_ *, Main_Window *mw) {
 }
 
 void Main_Window::gba_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap_Format::GBA_COLORS);
+	Config::format(Tilemap_Format::GBA_PALETTES);
 	mw->update_active_controls();
 	mw->redraw();
 }
@@ -1854,8 +1854,8 @@ void Main_Window::y_flip_cb(Toolbar_Toggle_Button *, Main_Window *mw) {
 	mw->_current_tile->redraw();
 }
 
-void Main_Window::color_cb(OS_Spinner *, Main_Window *mw) {
-	mw->_current_attributes->sgb_color(mw->sgb_color());
+void Main_Window::palette_cb(OS_Spinner *, Main_Window *mw) {
+	mw->_current_attributes->palette(mw->palette());
 	mw->_current_attributes->redraw();
 }
 
@@ -1902,14 +1902,14 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 	else if (Fl::event_button() == FL_RIGHT_MOUSE) {
 		// Right-click to select
 		if (Config::attributes()) {
-			int color = tt->sgb_color();
-			mw->_color->default_value(color > -1 ? color : 0);
-			mw->_color->do_callback();
+			int palette = tt->palette();
+			mw->_palette->default_value(palette > -1 ? palette : 0);
+			mw->_palette->do_callback();
 			mw->_priority->value(tt->priority());
 			mw->_priority->do_callback();
 			mw->_obp1->value(tt->obp1());
 			mw->_obp1->do_callback();
-			mw->_color->redraw();
+			mw->_palette->redraw();
 			mw->_priority->redraw();
 			mw->_obp1->redraw();
 		}
