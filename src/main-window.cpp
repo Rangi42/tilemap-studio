@@ -880,18 +880,15 @@ void Main_Window::update_active_controls() {
 		_tilemap_tabs->value(_tilemap_tiles_tab);
 		_tilemap_tabs->do_callback();
 	}
-	if (format_has_priority(Config::format())) {
+
+	if (format_has_metadata(Config::format())) {
 		_priority->activate();
+		_obp1->activate();
 	}
 	else {
 		_priority->clear();
 		_priority->deactivate();
 		_priority->do_callback();
-	}
-	if (format_has_obp1(Config::format())) {
-		_obp1->activate();
-	}
-	else {
 		_obp1->clear();
 		_obp1->deactivate();
 		_obp1->do_callback();

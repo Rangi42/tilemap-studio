@@ -22,11 +22,7 @@ inline bool format_has_color(Tilemap_Format fmt) {
 	return fmt == Tilemap_Format::SGB_BORDER || fmt == Tilemap_Format::GBC_ATTRS || fmt == Tilemap_Format::GBA_COLORS;
 }
 
-inline bool format_has_priority(Tilemap_Format fmt) {
-	return fmt == Tilemap_Format::GBC_ATTRS;
-}
-
-inline bool format_has_obp1(Tilemap_Format fmt) {
+inline bool format_has_metadata(Tilemap_Format fmt) {
 	return fmt == Tilemap_Format::GBC_ATTRS;
 }
 

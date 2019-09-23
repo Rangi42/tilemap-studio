@@ -338,14 +338,13 @@ bool Tilemap::can_write_tiles() {
 		if (tt->id() >= m) {
 			return false;
 		}
-		if ((tt->x_flip() || tt->y_flip()) &&
-			fmt != Tilemap_Format::PC_TOWN_MAP && fmt != Tilemap_Format::SGB_BORDER && fmt != Tilemap_Format::GBA_COLORS) {
+		if ((tt->x_flip() || tt->y_flip()) && !format_can_flip(fmt)) {
 			return false;
 		}
-		if (tt->sgb_color() > -1 && fmt != Tilemap_Format::SGB_BORDER && fmt != Tilemap_Format::GBA_COLORS) {
+		if (tt->sgb_color() > -1 && !format_has_color(fmt)) {
 			return false;
 		}
-		if ((tt->priority() || tt->obp1()) && fmt != Tilemap_Format::SGB_BORDER) {
+		if ((tt->priority() || tt->obp1()) && !format_has_metadata(fmt)) {
 			return false;
 		}
 	}

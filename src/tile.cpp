@@ -17,7 +17,7 @@ bool are_identical_tiles(Tile &t1, Tile &t2, Tilemap_Format fmt, bool &x_flip, b
 	}
 	return true;
 not_identical:
-	if (fmt == Tilemap_Format::PC_TOWN_MAP || fmt == Tilemap_Format::SGB_BORDER) {
+	if (format_can_flip(fmt)) {
 		for (int y = 0; y < TILE_SIZE; y++) {
 			for (int x = 0; x < TILE_SIZE; x++) {
 				if (t1[y*TILE_SIZE+x] != t2[y*TILE_SIZE+TILE_SIZE-x-1]) {
