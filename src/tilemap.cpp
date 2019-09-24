@@ -209,8 +209,6 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 			if (!!(a & 0x08)) { v |= 0x100; }
 			bool x_flip = !!(a & 0x40), y_flip = !!(a & 0x80), priority = !!(a & 0x20), obp1 = !!(a & 0x10);
 			int palette = a & 0x07;
-			// TODO: support 8 palettes for GBC
-			palette = palette & 3;
 			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip, priority, obp1, palette));
 		}
 	}
@@ -226,8 +224,6 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 			v = v | ((a & 0x03) << 8);
 			bool x_flip = !!(a & 0x04), y_flip = !!(a & 0x08);
 			int palette = (a & 0xF0) >> 4;
-			// TODO: support 16 palettes for GBA
-			palette = palette & 3;
 			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip, false, false, palette));
 		}
 	}

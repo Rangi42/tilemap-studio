@@ -16,7 +16,7 @@
 #define TILE_SIZE 8
 #define TILE_SIZE_2X (TILE_SIZE * 2)
 
-#define NUM_SGB_PALETTES 4
+#define MAX_NUM_PALETTES 16
 
 class Tileset;
 

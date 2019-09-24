@@ -52,7 +52,7 @@ private:
 	Toolbar_Button *_image_to_tiles_tb;
 	Toolbar_Toggle_Button *_x_flip_tb, *_y_flip_tb;
 	Tile_Button *_tile_buttons[MAX_NUM_TILES];
-	Default_Spinner *_palette;
+	Default_Hex_Spinner *_palette;
 	OS_Check_Button *_priority, *_obp1;
 	// GUI outputs
 	Label *_width_heading, *_tileset_name, *_tilemap_name, *_tile_heading;

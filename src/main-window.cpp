@@ -194,7 +194,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_left_group->begin();
 	wgt_w = MAX(text_width("A", 2), text_width("F", 2)) + wgt_h;
 	int wgt_off = text_width("Palette:", 3);
-	_palette = new Default_Spinner(gx+wgt_off, gy, wgt_w, wgt_h, "Palette:");
+	_palette = new Default_Hex_Spinner(gx+wgt_off, gy, wgt_w, wgt_h, "Palette:");
 	gx += _palette->w() + wgt_off + wgt_m + win_m;
 	wgt_w = text_width("Priority", 2) + wgt_h;
 	_priority = new OS_Check_Button(gx, gy, wgt_w, wgt_h, "Priority");
@@ -518,7 +518,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_y_flip_tb->callback((Fl_Callback *)y_flip_cb, this);
 
 	_palette->default_value(0);
-	_palette->range(0, NUM_SGB_PALETTES - 1);
+	_palette->format("%01X");
+	_palette->range(0, MAX_NUM_PALETTES - 1);
 	_palette->callback((Fl_Callback *)palette_cb, this);
 
 	_priority->callback((Fl_Callback *)priority_cb, this);
@@ -866,8 +867,9 @@ void Main_Window::update_active_controls() {
 	}
 
 	if (format_has_palettes(Config::format())) {
-		// TODO: support 8 GBC palettes and 16 GBA palettes
 		_palette->activate();
+		int p = format_palettes_size(Config::format());
+		_palette->range(0, p - 1);
 		_current_attributes->activate();
 		_tilemap_attributes_tab->activate();
 	}
