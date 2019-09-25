@@ -21,6 +21,7 @@
 #include "redo-disabled.xpm"
 #include "grid.xpm"
 #include "rainbow.xpm"
+#include "bold.xpm"
 #include "input.xpm"
 #include "output.xpm"
 #include "resize.xpm"
@@ -48,6 +49,7 @@ static Fl_Pixmap REDO_ICON(REDO_XPM);
 static Fl_Pixmap REDO_DISABLED_ICON(REDO_DISABLED_XPM);
 static Fl_Pixmap GRID_ICON(GRID_XPM);
 static Fl_Pixmap RAINBOW_ICON(RAINBOW_XPM);
+static Fl_Pixmap BOLD_ICON(BOLD_XPM);
 static Fl_Pixmap INPUT_ICON(INPUT_XPM);
 static Fl_Pixmap OUTPUT_ICON(OUTPUT_XPM);
 static Fl_Pixmap RESIZE_ICON(RESIZE_XPM);

@@ -44,9 +44,9 @@ private:
 	Fl_Menu_Item *_plain_format_mi = NULL, *_gbc_format_mi, *_gba_format_mi = NULL, *_sgb_border_format_mi = NULL,
 		*_rby_town_map_format_mi = NULL, *_gsc_town_map_format_mi = NULL, *_pc_town_map_format_mi = NULL,
 		*_pokegear_card_format_mi = NULL;
-	Fl_Menu_Item *_grid_mi, *_rainbow_tiles_mi = NULL;
+	Fl_Menu_Item *_grid_mi = NULL, *_rainbow_tiles_mi = NULL, *_bold_palettes_mi = NULL;
 	Toolbar_Button *_new_tb, *_open_tb, *_save_tb, *_print_tb, *_load_tb, *_add_tb, *_reload_tb, *_undo_tb, *_redo_tb;
-	Toolbar_Toggle_Button *_grid_tb, *_rainbow_tiles_tb;
+	Toolbar_Toggle_Button *_grid_tb, *_rainbow_tiles_tb, *_bold_palettes_tb;
 	Default_Spinner *_tilemap_width;
 	Toolbar_Button *_resize_tb, *_reformat_tb;
 	Toolbar_Button *_image_to_tiles_tb;
@@ -161,6 +161,7 @@ private:
 	static void dark_theme_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void grid_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void rainbow_tiles_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void bold_palettes_cb(Fl_Menu_ *m, Main_Window *mw);
 	// Tools menu
 	static void tilemap_width_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void resize_cb(Fl_Menu_ *m, Main_Window *mw);
@@ -181,6 +182,7 @@ private:
 	// Toolbar buttons
 	static void grid_tb_cb(Toolbar_Button *tb, Main_Window *mw);
 	static void rainbow_tiles_tb_cb(Toolbar_Button *tb, Main_Window *mw);
+	static void bold_palettes_tb_cb(Toolbar_Button *tb, Main_Window *mw);
 	static void tilemap_width_tb_cb(OS_Spinner *ss, Main_Window *mw);
 	static void x_flip_cb(Toolbar_Toggle_Button *tb, Main_Window *mw);
 	static void y_flip_cb(Toolbar_Toggle_Button *tb, Main_Window *mw);

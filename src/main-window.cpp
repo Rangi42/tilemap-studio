@@ -47,9 +47,11 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	Tilemap_Format format_config = (Tilemap_Format)Preferences::get("format", Config::format());
 	int grid_config = Preferences::get("grid", Config::grid());
 	int rainbow_tiles_config = Preferences::get("rainbow", Config::rainbow_tiles());
+	int bold_palettes_config = Preferences::get("bold", Config::bold_palettes());
 	Config::format(format_config);
 	Config::grid(!!grid_config);
 	Config::rainbow_tiles(!!rainbow_tiles_config);
+	Config::bold_palettes(!!bold_palettes_config);
 
 	for (int i = 0; i < NUM_RECENT; i++) {
 		_recent_tilemaps[i] = Preferences::get_string(Fl_Preferences::Name("recent-map%d", i));
@@ -81,12 +83,13 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
 	_grid_tb = new Toolbar_Toggle_Button(0, 0, 24, 24);
 	_rainbow_tiles_tb = new Toolbar_Toggle_Button(0, 0, 24, 24);
+	_bold_palettes_tb = new Toolbar_Toggle_Button(0, 0, 24, 24);
 	new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
 	int wgt_w = text_width("Width:", 4);
 	_width_heading = new Label(0, 0, wgt_w, 24, "Width:");
 	wgt_w = text_width("999", 2) + 22;
 	_tilemap_width = new Default_Spinner(0, 0, wgt_w, 22);
-	new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
+	new Fl_Box(0, 0, 4, 24);
 	_resize_tb = new Toolbar_Button(0, 0, 24, 24);
 	_reformat_tb = new Toolbar_Button(0, 0, 24, 24);
 	new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
@@ -354,8 +357,10 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 		{},
 		OS_MENU_ITEM("&Grid", FL_COMMAND + 'g', (Fl_Callback *)grid_cb, this,
 			FL_MENU_TOGGLE | (Config::grid() ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("&Rainbow Tiles", FL_COMMAND + 'b', (Fl_Callback *)rainbow_tiles_cb, this,
+		OS_MENU_ITEM("&Rainbow Tiles", FL_COMMAND + 'i', (Fl_Callback *)rainbow_tiles_cb, this,
 			FL_MENU_TOGGLE | (Config::rainbow_tiles() ? FL_MENU_VALUE : 0)),
+		OS_MENU_ITEM("&Bold Palettes", FL_COMMAND + 'b', (Fl_Callback *)bold_palettes_cb, this,
+			FL_MENU_TOGGLE | (Config::bold_palettes() ? FL_MENU_VALUE : 0)),
 		{},
 		OS_SUBMENU("&Tools"),
 		OS_MENU_ITEM("&Width...", FL_COMMAND + 'd', (Fl_Callback *)tilemap_width_cb, this, 0),
@@ -417,6 +422,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_pokegear_card_format_mi = PM_FIND_MENU_ITEM_CB(pokegear_card_format_cb);
 	_grid_mi = PM_FIND_MENU_ITEM_CB(grid_cb);
 	_rainbow_tiles_mi = PM_FIND_MENU_ITEM_CB(rainbow_tiles_cb);
+	_bold_palettes_mi = PM_FIND_MENU_ITEM_CB(bold_palettes_cb);
 	// Conditional menu items
 	_reload_tilesets_mi = PM_FIND_MENU_ITEM_CB(reload_tilesets_cb);
 	_unload_tilesets_mi = PM_FIND_MENU_ITEM_CB(unload_tilesets_cb);
@@ -480,10 +486,15 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_grid_tb->image(GRID_ICON);
 	_grid_tb->value(Config::grid());
 
-	_rainbow_tiles_tb->tooltip("Rainbow Tiles (Ctrl+B)");
+	_rainbow_tiles_tb->tooltip("Rainbow Tiles (Ctrl+I)");
 	_rainbow_tiles_tb->callback((Fl_Callback *)rainbow_tiles_tb_cb, this);
 	_rainbow_tiles_tb->image(RAINBOW_ICON);
 	_rainbow_tiles_tb->value(Config::rainbow_tiles());
+
+	_bold_palettes_tb->tooltip("Bold Palettes (Ctrl+B)");
+	_bold_palettes_tb->callback((Fl_Callback *)bold_palettes_tb_cb, this);
+	_bold_palettes_tb->image(BOLD_ICON);
+	_bold_palettes_tb->value(Config::bold_palettes());
 
 	_width_heading->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
@@ -868,8 +879,13 @@ void Main_Window::update_active_controls() {
 
 	if (format_has_palettes(Config::format())) {
 		_palette->activate();
-		int p = format_palettes_size(Config::format());
-		_palette->range(0, p - 1);
+		int m = format_palettes_size(Config::format()) - 1;
+		_palette->range(0, m);
+		if (_palette->value() > m) {
+			_palette->value(0);
+		}
+		_palette->value(palette());
+		_palette->do_callback();
 		_current_attributes->activate();
 		_tilemap_attributes_tab->activate();
 	}
@@ -1635,7 +1651,7 @@ void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 	Preferences::set("h", mw->h());
 	Preferences::set("grid", Config::grid());
 	Preferences::set("rainbow", Config::rainbow_tiles());
-	Preferences::set("grid", Config::grid());
+	Preferences::set("bold", Config::bold_palettes());
 	Preferences::set("format", Config::format());
 	for (int i = 0; i < NUM_RECENT; i++) {
 		Preferences::set_string(Fl_Preferences::Name("recent-map%d", i), mw->_recent_tilemaps[i]);
@@ -1736,6 +1752,12 @@ void Main_Window::rainbow_tiles_cb(Fl_Menu_ *m, Main_Window *mw) {
 	mw->redraw();
 }
 
+void Main_Window::bold_palettes_cb(Fl_Menu_ *m, Main_Window *mw) {
+	Config::bold_palettes(!!m->mvalue()->value());
+	mw->_bold_palettes_tb->value(Config::bold_palettes());
+	mw->redraw();
+}
+
 void Main_Window::grid_tb_cb(Toolbar_Button *, Main_Window *mw) {
 	Config::grid(!!mw->_grid_tb->value());
 	if (Config::grid()) { mw->_grid_mi->set(); }
@@ -1745,8 +1767,15 @@ void Main_Window::grid_tb_cb(Toolbar_Button *, Main_Window *mw) {
 
 void Main_Window::rainbow_tiles_tb_cb(Toolbar_Button *, Main_Window *mw) {
 	Config::rainbow_tiles(!!mw->_rainbow_tiles_tb->value());
-	if (Config::rainbow_tiles()) { mw->_grid_mi->set(); }
-	else { mw->_grid_mi->clear(); }
+	if (Config::rainbow_tiles()) { mw->_rainbow_tiles_mi->set(); }
+	else { mw->_rainbow_tiles_mi->clear(); }
+	mw->redraw();
+}
+
+void Main_Window::bold_palettes_tb_cb(Toolbar_Button *, Main_Window *mw) {
+	Config::bold_palettes(!!mw->_bold_palettes_tb->value());
+	if (Config::bold_palettes()) { mw->_bold_palettes_mi->set(); }
+	else { mw->_bold_palettes_mi->clear(); }
 	mw->redraw();
 }
 

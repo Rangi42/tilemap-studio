@@ -223,6 +223,9 @@
     <None Include="..\res\reformat-disabled.xpm">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\res\bold.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="tilemap-studio.rc">
