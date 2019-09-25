@@ -240,12 +240,13 @@ Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint16_t id, bo
 }
 
 void Tile_Tessera::draw() {
-	_state.draw(x(), y(), true, Config::attributes(), !!active());
+	int X = x(), Y = y();
+	_state.draw(X, Y, true, Config::attributes(), !!active());
 	if (Config::grid()) {
-		draw_grid(x(), y());
+		draw_grid(X, Y);
 	}
 	if (this == Fl::belowmouse()) {
-		draw_selection_border(x(), y());
+		draw_selection_border(X, Y);
 	}
 }
 
@@ -290,12 +291,13 @@ Tile_Button::Tile_Button(int x, int y, uint16_t id) : Tile_Thing(id), Fl_Radio_B
 }
 
 void Tile_Button::draw() {
-	_state.draw(x(), y(), true, Config::attributes(), !!active(), !!value());
+	int X = x(), Y = y();
+	_state.draw(X, Y, true, Config::attributes(), !!active(), !!value());
 	if (Config::grid()) {
-		draw_grid(x(), y());
+		draw_grid(X, Y);
 	}
 	if (value()) {
-		draw_selection_border(x(), y());
+		draw_selection_border(X, Y);
 	}
 }
 

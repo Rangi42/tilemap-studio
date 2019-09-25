@@ -51,7 +51,7 @@ static const char *format_extensions[NUM_FORMATS] = {
 	".rle",         // RBY_TOWN_MAP - e.g. pokered/gfx/town_map.rle
 	".bin",         // GSC_TOWN_MAP - e.g. pokecrystal/gfx/pokegear/*.bin
 	".bin",         // PC_TOWN_MAP - e.g. polishedcrystal/gfx/town_map/*.bin
-	".tilemap.rle", //  - e.g. pokecrystal/gfx/pokegear/*.tilemap.rle
+	".tilemap.rle", // POKEGEAR_CARD - e.g. pokecrystal/gfx/pokegear/*.tilemap.rle
 };
 
 const char *format_extension(Tilemap_Format fmt) {
