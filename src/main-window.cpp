@@ -194,7 +194,6 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	qx += _x_flip_tb->w();
 	_y_flip_tb = new Toolbar_Toggle_Button(qx, gy, wgt_h, wgt_h);
 	gy += wgt_h + wgt_m + _tileset_bank0_tab->h() + wgt_m;
-	_left_group->begin();
 	wgt_w = MAX(text_width("A", 2), text_width("F", 2)) + wgt_h;
 	int wgt_off = text_width("Palette:", 3);
 	_palette = new Default_Hex_Spinner(gx+wgt_off, gy, wgt_w, wgt_h, "Palette:");
@@ -214,8 +213,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	wx += mid_spacer->w() + win_m; ww -= mid_spacer->w() + win_m;
 	// Right group
 	_right_group = new Fl_Group(wx, wy, ww, wh);
-	_tilemap_name = new Label(wx, wy, ww, wgt_h);
-	wy += _tilemap_name->h() + wgt_m; wh -= _tilemap_name->h() + wgt_m;
+	gx = _right_group->x(); gy = _right_group->y(); gw = _right_group->w();
+	wy += wgt_h + wgt_m; wh -= wgt_h + wgt_m;
 	_tilemap_tabs = new OS_Tabs(wx, wy, ww, wh);
 	wy += tab_h; wh -= tab_h;
 	_tilemap_tiles_tab = new OS_Tab(wx, wy, ww, wh, "Tiles");
@@ -229,6 +228,13 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_tilemap_tiles_tab->resizable(NULL);
 	_tilemap_attributes_tab->resizable(NULL);
 	_tilemap_tabs->resizable(_tilemap_tiles_tab);
+	_right_group->begin();
+	_right_top_group = new Fl_Group(gx, gy, gw, wgt_h+tab_h);
+	wgt_w = 80 - text_width("a:", 2);
+	_tilemap_name = new Label(gx, gy, gw-wgt_w, wgt_h);
+	_alpha = new Default_Slider(gx+gw-wgt_w, gy+tab_h, wgt_w, wgt_h, "\xce\xb1:");
+	_right_top_group->end();
+	_right_top_group->resizable(_tilemap_name);
 	_right_group->resizable(_tilemap_scroll);
 	_main_group->resizable(_right_group);
 	begin();
@@ -538,6 +544,15 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_obp1->callback((Fl_Callback *)obp1_cb, this);
 
 	_current_attributes->attributes(true);
+
+	int default_alpha = Preferences::get("alpha", 4);
+	_alpha->range(1, 9);
+	_alpha->step(1);
+	double alpha_steps = floor((_alpha->maximum() - _alpha->minimum()) / _alpha->step()) + 1;
+	_alpha->slider_size(1.0 / alpha_steps);
+	_alpha->default_value(_alpha->clamp(default_alpha));
+	_alpha->callback((Fl_Callback *)alpha_cb, this);
+	_alpha->do_callback();
 
 	// Configure containers
 
@@ -943,6 +958,13 @@ void Main_Window::update_active_controls() {
 		_tileset_bank3_tab->deactivate();
 		_tileset_tabs->value(_tileset_bank0_tab);
 		_tileset_tabs->do_callback();
+	}
+
+	if (Config::attributes()) {
+		_alpha->show();
+	}
+	else {
+		_alpha->hide();
 	}
 
 	for (int i = 0; i < n; i++) {
@@ -1653,6 +1675,7 @@ void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 	Preferences::set("rainbow", Config::rainbow_tiles());
 	Preferences::set("bold", Config::bold_palettes());
 	Preferences::set("format", Config::format());
+	Preferences::set("alpha", (int)mw->_alpha->value());
 	for (int i = 0; i < NUM_RECENT; i++) {
 		Preferences::set_string(Fl_Preferences::Name("recent-map%d", i), mw->_recent_tilemaps[i]);
 	}
@@ -1900,8 +1923,14 @@ void Main_Window::obp1_cb(OS_Check_Button *, Main_Window *mw) {
 	mw->_current_attributes->redraw();
 }
 
+void Main_Window::alpha_cb(Default_Slider *, Main_Window *mw) {
+	Tile_State::alpha((uchar)(mw->_alpha->value() * (0xFF / 10) + (0xFF / 10)));
+	mw->redraw();
+}
+
 void Main_Window::tilemap_tabs_cb(OS_Tabs *, Main_Window *mw) {
 	Config::attributes(mw->_tilemap_tabs->value() == mw->_tilemap_attributes_tab);
+	mw->update_active_controls();
 	mw->redraw();
 }
 

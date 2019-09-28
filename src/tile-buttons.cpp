@@ -93,9 +93,9 @@ static void draw_selection_border(int x, int y) {
 
 std::vector<Tileset> *Tile_State::_tilesets = NULL;
 
-Fl_PNG_Image *Tile_State::_palette_bgs_image = NULL, *Tile_State::_palette_bold_bgs_image = NULL;
+Fl_PNG_Image *Tile_State::_palette_bgs_image = NULL;
 
-static Fl_PNG_Image *make_palette_bgs_png(uchar alfa) {
+void Tile_State::alpha(uchar alfa) {
 	uchar trns_data[20] = {
 		0x74, 0x52, 0x4e, 0x53,
 		alfa, alfa, alfa, alfa, alfa, alfa, alfa, alfa,
@@ -121,12 +121,8 @@ static Fl_PNG_Image *make_palette_bgs_png(uchar alfa) {
 		0x08, 0x86, 0x0b, 0x7a, 0x6e, 0xc2, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42,
 		0x60, 0x82
 	};
-	return new Fl_PNG_Image(NULL, palette_bgs_png_buffer, sizeof(palette_bgs_png_buffer));
-}
-
-void Tile_State::initialize() {
-	_palette_bgs_image = make_palette_bgs_png(0x50);
-	_palette_bold_bgs_image = make_palette_bgs_png(0xA0);
+	delete _palette_bgs_image;
+	_palette_bgs_image = new Fl_PNG_Image(NULL, palette_bgs_png_buffer, sizeof(palette_bgs_png_buffer));
 }
 
 void Tile_State::draw_tile(int x, int y, bool active, bool selected) {
@@ -154,8 +150,9 @@ void Tile_State::draw_tile(int x, int y, bool active, bool selected) {
 
 void Tile_State::draw_attributes(int x, int y) {
 	if (palette > -1) {
-		Fl_PNG_Image *img = Config::bold_palettes() ? _palette_bold_bgs_image : _palette_bgs_image;
-		img->draw(x, y, TILE_SIZE_2X, TILE_SIZE_2X, TILE_SIZE_2X * palette, 0);
+		if (Config::bold_palettes()) {
+			_palette_bgs_image->draw(x, y, TILE_SIZE_2X, TILE_SIZE_2X, TILE_SIZE_2X * palette, 0);
+		}
 		palette_digits_image.draw(x+1, y+1, 5, 7, 5 * palette, 0);
 	}
 	if (priority) {

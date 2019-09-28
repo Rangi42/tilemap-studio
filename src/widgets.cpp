@@ -252,6 +252,78 @@ int Default_Hex_Spinner::handle(int event) {
 	return Hex_Spinner::handle(event);
 }
 
+OS_Slider::OS_Slider(int x, int y, int w, int h, const char *l) : Fl_Hor_Nice_Slider(x, y, w, h, l) {
+	labelfont(OS_FONT);
+	labelsize(OS_FONT_SIZE);
+	slider(OS_BUTTON_UP_BOX);
+	slider_size(0.0);
+	align(FL_ALIGN_LEFT | FL_ALIGN_CLIP);
+}
+
+int OS_Slider::handle(int event) {
+	if (event == FL_PUSH) {
+		Fl::focus(this);
+	}
+	return Fl_Hor_Nice_Slider::handle(event);
+}
+
+void OS_Slider::draw() {
+	// Based on Fl_Slider::draw()
+	if (damage() & FL_DAMAGE_ALL) { draw_box(box(), active_r() ? color() : fl_inactive(color())); }
+	draw(x()+Fl::box_dx(box()), y()+Fl::box_dy(box()), w()-Fl::box_dw(box()), h()-Fl::box_dh(box()));
+}
+
+void OS_Slider::draw(int X, int Y, int W, int H) {
+	// Based on Fl_Slider::draw(...)
+	double v = 0.5;
+	if (minimum() != maximum()) {
+		v = MAX(0.0, MIN(1.0, (value() - minimum()) / (maximum() - minimum())));
+	}
+	int s = MAX((int)(slider_size() * W + 0.5), H / 2 + 2);
+	int lx = X + (int)(v * (W - s) + 0.5);
+	fl_push_clip(X, Y, W, H);
+	draw_box(box(), active_r() ? color() : fl_inactive(color()));
+	fl_pop_clip();
+	draw_box(OS::current_theme() == OS::METAL ? OS_BUTTON_UP_BOX : OS_SPACER_THIN_DOWN_BOX,
+		X, Y+H/2-2, W, 4, active_r() ? FL_DARK2 : fl_inactive(FL_DARK2));
+	draw_box(slider(), lx, Y, s, H, FL_GRAY);
+	draw_label(lx, Y, s, H);
+	if (Fl::focus() == this) {
+		draw_focus(slider(), lx, Y, s, H);
+	}
+}
+
+Default_Slider::Default_Slider(int x, int y, int w, int h, const char *l) : OS_Slider(x, y, w, h, l),
+	_default_value(0.0) {}
+
+int Default_Slider::handle(int event) {
+	return handle(event, x(), y(), w(), h());
+}
+
+int Default_Slider::handle(int event, int x, int y, int w, int h) {
+	switch (event) {
+	case FL_PUSH:
+		Fl::focus(this);
+		if (Fl::event_button() == FL_MIDDLE_MOUSE) {
+			return 1;
+		}
+		break;
+	case FL_DRAG:
+		if (Fl::event_button() == FL_MIDDLE_MOUSE) {
+			return 0;
+		}
+		break;
+	case FL_RELEASE:
+		if (Fl::event_button() == FL_MIDDLE_MOUSE) {
+			value(_default_value);
+			do_callback();
+			return 1;
+		}
+		break;
+	}
+	return Fl_Hor_Nice_Slider::handle(event, x, y, w, h);
+}
+
 HTML_View::HTML_View(int x, int y, int w, int h, const char *l) : Fl_Help_View(x, y, w, h, l) {
 	box(OS_INPUT_THIN_DOWN_BOX);
 	// TODO: scrollbar_.slider(OS_MINI_BUTTON_UP_BOX);

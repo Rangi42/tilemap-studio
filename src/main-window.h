@@ -28,7 +28,7 @@ private:
 	// GUI containers
 	Fl_Menu_Bar *_menu_bar;
 	Toolbar *_toolbar;
-	Fl_Group *_main_group, *_left_group, *_right_group;
+	Fl_Group *_main_group, *_left_group, *_right_group, *_right_top_group;
 	OS_Tabs *_tileset_tabs, *_tilemap_tabs;
 	OS_Tab *_tileset_bank0_tab, *_tileset_bank1_tab, *_tileset_bank2_tab, *_tileset_bank3_tab;
 	Workpane *_tileset_bank0_pane, *_tileset_bank1_pane, *_tileset_bank2_pane, *_tileset_bank3_pane;
@@ -54,6 +54,7 @@ private:
 	Tile_Button *_tile_buttons[MAX_NUM_TILES];
 	Default_Hex_Spinner *_palette;
 	OS_Check_Button *_priority, *_obp1;
+	Default_Slider *_alpha;
 	// GUI outputs
 	Label *_width_heading, *_tileset_name, *_tilemap_name, *_tile_heading;
 	Tile_Swatch *_current_tile, *_current_attributes;
@@ -189,6 +190,7 @@ private:
 	static void palette_cb(OS_Spinner *ss, Main_Window *mw);
 	static void priority_cb(OS_Check_Button *cb, Main_Window *mw);
 	static void obp1_cb(OS_Check_Button *cb, Main_Window *mw);
+	static void alpha_cb(Default_Slider *ds, Main_Window *mw);
 	// Tilemap
 	static void tilemap_tabs_cb(OS_Tabs *ts, Main_Window *mw);
 	static void change_tile_cb(Tile_Tessera *tt, Main_Window *mw);

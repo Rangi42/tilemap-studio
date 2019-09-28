@@ -25,10 +25,10 @@ class Tileset;
 struct Tile_State {
 private:
 	static std::vector<Tileset> *_tilesets;
-	static Fl_PNG_Image *_palette_bgs_image, *_palette_bold_bgs_image;
+	static Fl_PNG_Image *_palette_bgs_image;
 public:
 	inline static void tilesets(std::vector<Tileset> *ts) { _tilesets = ts; }
-	static void initialize(void);
+	static void alpha(uchar a);
 public:
 	uint16_t id;
 	bool x_flip, y_flip, priority, obp1;

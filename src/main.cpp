@@ -70,8 +70,6 @@ int main(int argc, char **argv) {
 #endif
 	use_theme(theme);
 
-	Tile_State::initialize();
-
 #ifdef _WIN32
 	int x = Preferences::get("x", 48), y = Preferences::get("y", 48 + GetSystemMetrics(SM_CYCAPTION));
 #else
