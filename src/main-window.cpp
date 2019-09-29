@@ -183,7 +183,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_bank3_pane->resizable(NULL);
 	_bank3_tab->end();
 	int pw = PALETTES_PER_ROW * TILE_SIZE_2X + 2, ph = (MAX_NUM_PALETTES / PALETTES_PER_ROW) * TILE_SIZE_2X + 2;
-	_palettes_tab = new OS_Tab(gx, qy, gw, ph+10, " P ");
+	_palettes_tab = new OS_Tab(gx, qy, gw, ph+10, "Pals");
 	_palettes_pane = new Workpane(gx+5, qy+5, pw, ph);
 	for (int i = 0; i < MAX_NUM_PALETTES; i++) {
 		int tx = ox + (i % PALETTES_PER_ROW) * TILE_SIZE_2X, ty = oy + (i / PALETTES_PER_ROW) * TILE_SIZE_2X;
@@ -202,9 +202,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_palettes_tab->end();
 	_left_tabs->resizable(NULL);
 	_left_group->begin();
-	wgt_w = text_width("Tile: $F:FF", 4);
+	wgt_w = MAX(text_width("$F:FF", 3), text_width("$A:AA", 3));
 	int qx = gx + gw - wgt_w - wgt_m * 2 - wgt_h * 3;
-	_tile_heading = new Label(qx, gy, wgt_w, wgt_h, "Tile: $0:00");
+	_tile_heading = new Label(qx, gy, wgt_w, wgt_h, "$0:00");
 	qx += _tile_heading->w() + wgt_m;
 	_current_tile = new Tile_Swatch(qx+2, gy+2, TILE_SIZE_2X+2, TILE_SIZE_2X+2);
 	_current_attributes = new Tile_Swatch(qx+2, gy+2, TILE_SIZE_2X+2, TILE_SIZE_2X+2);
@@ -1949,8 +1949,8 @@ void Main_Window::select_tile_cb(Tile_Button *tb, Main_Window *mw) {
 	int bank = (int)(tb->id() >> 8), offset = (int)(tb->id() & 0xFF);
 	OS_Tab *tileset_tabs[NUM_BANKS] = {mw->_bank0_tab, mw->_bank1_tab, mw->_bank2_tab, mw->_bank3_tab};
 	mw->_left_tabs->value(tileset_tabs[bank]);
-	char buffer[32] = {};
-	sprintf(buffer, "Tile: $%d:%02X", bank, offset);
+	char buffer[16] = {};
+	sprintf(buffer, "$%d:%02X", bank, offset);
 	mw->_tile_heading->copy_label(buffer);
 	mw->_current_tile->redraw();
 	mw->_tile_heading->redraw();
