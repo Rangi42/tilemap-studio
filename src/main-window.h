@@ -40,9 +40,6 @@ private:
 	Fl_Menu_Item *_classic_theme_mi = NULL, *_aero_theme_mi = NULL, *_metro_theme_mi = NULL, *_aqua_theme_mi = NULL,
 		*_greybird_theme_mi = NULL, *_metal_theme_mi = NULL, *_blue_theme_mi = NULL, *_olive_theme_mi = NULL,
 		*_rose_gold_theme_mi = NULL, *_dark_theme_mi = NULL;
-	Fl_Menu_Item *_plain_format_mi = NULL, *_gbc_format_mi, *_gba_format_mi = NULL, *_sgb_border_format_mi = NULL,
-		*_rby_town_map_format_mi = NULL, *_gsc_town_map_format_mi = NULL, *_pc_town_map_format_mi = NULL,
-		*_pokegear_card_format_mi = NULL;
 	Fl_Menu_Item *_grid_mi = NULL, *_rainbow_tiles_mi = NULL, *_bold_palettes_mi = NULL;
 	Toolbar_Button *_new_tb, *_open_tb, *_save_tb, *_print_tb, *_load_tb, *_add_tb, *_reload_tb, *_undo_tb, *_redo_tb;
 	Toolbar_Toggle_Button *_grid_tb, *_rainbow_tiles_tb, *_bold_palettes_tb;
@@ -65,6 +62,7 @@ private:
 	// Dialogs
 	Fl_Native_File_Chooser *_tilemap_open_chooser, *_tilemap_save_chooser, *_tileset_load_chooser, *_png_chooser;
 	Modal_Dialog *_error_dialog, *_warning_dialog, *_success_dialog, *_unsaved_dialog, *_about_dialog;
+	Tilemap_Options_Dialog *_tilemap_options_dialog;
 	New_Tilemap_Dialog *_new_tilemap_dialog;
 	Tilemap_Width_Dialog *_tilemap_width_dialog;
 	Resize_Dialog *_resize_dialog;
@@ -168,15 +166,6 @@ private:
 	static void resize_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void reformat_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void image_to_tiles_cb(Fl_Widget *w, Main_Window *mw);
-	// Format menu
-	static void plain_format_cb(Fl_Menu_ *m, Main_Window *mw);
-	static void gbc_format_cb(Fl_Menu_ *m, Main_Window *mw);
-	static void gba_format_cb(Fl_Menu_ *m, Main_Window *mw);
-	static void sgb_border_format_cb(Fl_Menu_ *m, Main_Window *mw);
-	static void rby_town_map_format_cb(Fl_Menu_ *m, Main_Window *mw);
-	static void gsc_town_map_format_cb(Fl_Menu_ *m, Main_Window *mw);
-	static void pc_town_map_format_cb(Fl_Menu_ *m, Main_Window *mw);
-	static void pokegear_card_format_cb(Fl_Menu_ *m, Main_Window *mw);
 	// Help menu
 	static void help_cb(Fl_Widget *w, Main_Window *mw);
 	static void about_cb(Fl_Widget *w, Main_Window *mw);

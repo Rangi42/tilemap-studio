@@ -92,22 +92,68 @@ void Option_Dialog::cancel_cb(Fl_Widget *, Option_Dialog *od) {
 	od->_dialog->hide();
 }
 
-New_Tilemap_Dialog::New_Tilemap_Dialog(const char *t) : Option_Dialog(194, t), _tilemap_width(NULL), _tilemap_height(NULL) {}
+Tilemap_Options_Dialog::Tilemap_Options_Dialog(const char *t) : Option_Dialog(260, t), _tilemap_header(NULL), _format(NULL) {}
+
+Tilemap_Options_Dialog::~Tilemap_Options_Dialog() {
+	delete _tilemap_header;
+	delete _format;
+}
+
+void Tilemap_Options_Dialog::use_tilemap(const char *filename) {
+	initialize();
+	const char *name = fl_filename_name(filename);
+	char buffer[FL_PATH_MAX] = {};
+	strcpy(buffer, name);
+	strcat(buffer, ":");
+	_tilemap_header->copy_label(buffer);
+}
+
+void Tilemap_Options_Dialog::initialize_content() {
+	// Populate content group
+	_tilemap_header = new Label(0, 0, 0, 0);
+	_format = new Dropdown(0, 0, 0, 0, "Format:");
+	// Initialize content group's children
+	for (int i = 0; i < NUM_FORMATS; i++) {
+		_format->add(format_name((Tilemap_Format)i));
+	}
+}
+
+int Tilemap_Options_Dialog::refresh_content(int ww, int dy) {
+	int wgt_h = 22, win_m = 10, wgt_m = 4;
+	int ch = wgt_h + wgt_m + wgt_h;
+	_content->resize(win_m, dy, ww, ch);
+
+	_tilemap_header->resize(win_m, dy, ww, wgt_h);
+	dy += wgt_h + wgt_m;
+	int wgt_off = win_m + text_width(_format->label(), 2);
+	int wgt_w = ww - wgt_off + win_m;
+	_format->resize(wgt_off, dy, wgt_w, wgt_h);
+
+	return ch;
+}
+
+New_Tilemap_Dialog::New_Tilemap_Dialog(const char *t) : Option_Dialog(260, t), _tilemap_width(NULL), _tilemap_height(NULL),
+	_format(NULL) {}
 
 New_Tilemap_Dialog::~New_Tilemap_Dialog() {
 	delete _tilemap_width;
 	delete _tilemap_height;
+	delete _format;
 }
 
 void New_Tilemap_Dialog::initialize_content() {
 	// Populate content group
 	_tilemap_width = new OS_Spinner(0, 0, 0, 0, "Width:");
 	_tilemap_height = new OS_Spinner(0, 0, 0, 0, "Height:");
+	_format = new Dropdown(0, 0, 0, 0, "Format:");
 	// Initialize content group's children
 	_tilemap_width->align(FL_ALIGN_LEFT);
 	_tilemap_width->range(1, 999);
 	_tilemap_height->align(FL_ALIGN_LEFT);
 	_tilemap_height->range(1, 9999);
+	for (int i = 0; i < NUM_FORMATS; i++) {
+		_format->add(format_name((Tilemap_Format)i));
+	}
 }
 
 int New_Tilemap_Dialog::refresh_content(int ww, int dy) {
@@ -115,11 +161,14 @@ int New_Tilemap_Dialog::refresh_content(int ww, int dy) {
 	int ch = wgt_h + wgt_m + wgt_h;
 	_content->resize(win_m, dy, ww, ch);
 
-	int wgt_off = win_m + MAX(text_width(_tilemap_width->label(), 2), text_width(_tilemap_height->label(), 2));
+	int wgt_off = win_m + MAX(text_width(_tilemap_width->label(), 2), text_width(_format->label(), 2));
 	int wgt_w = text_width("999", 2) + wgt_h;
 	_tilemap_width->resize(wgt_off, dy, wgt_w, wgt_h);
+	int wgt_off2 = _tilemap_width->x() + _tilemap_width->w() + win_m + text_width("Height:", 2);
+	_tilemap_height->resize(wgt_off2, dy, wgt_w, wgt_h);
 	dy += wgt_h + wgt_m;
-	_tilemap_height->resize(wgt_off, dy, wgt_w, wgt_h);
+	wgt_w = ww - wgt_off + win_m;
+	_format->resize(wgt_off, dy, wgt_w, wgt_h);
 
 	return ch;
 }

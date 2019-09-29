@@ -3,6 +3,14 @@
 
 #define NUM_FORMATS 8
 
+#define GAME_BOY_WIDTH 20
+#define GAME_BOY_HEIGHT 18
+
+#define GAME_BOY_ADVANCE_WIDTH 30
+#define GAME_BOY_ADVANCE_HEIGHT 20
+
+#define GAME_BOY_VRAM_SIZE 32
+
 enum Tilemap_Format { PLAIN, GBC_ATTRS, GBA_PALETTES, SGB_BORDER, RBY_TOWN_MAP, GSC_TOWN_MAP, PC_TOWN_MAP, POKEGEAR_CARD };
 
 inline bool format_has_landmarks(Tilemap_Format fmt) {
@@ -30,5 +38,7 @@ int format_tileset_size(Tilemap_Format fmt);
 int format_palettes_size(Tilemap_Format fmt);
 const char *format_name(Tilemap_Format fmt);
 const char *format_extension(Tilemap_Format fmt);
+
+Tilemap_Format guess_format(const char *filename);
 
 #endif

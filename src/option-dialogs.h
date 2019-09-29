@@ -45,9 +45,25 @@ private:
 	static void cancel_cb(Fl_Widget *, Option_Dialog *od);
 };
 
+class Tilemap_Options_Dialog : public Option_Dialog {
+private:
+	Label *_tilemap_header;
+	Dropdown *_format;
+public:
+	Tilemap_Options_Dialog(const char *t);
+	~Tilemap_Options_Dialog();
+	inline Tilemap_Format format(void) const { return (Tilemap_Format)_format->value(); }
+	inline void format(Tilemap_Format fmt) { initialize(); _format->value((int)fmt); }
+	void use_tilemap(const char *filename);
+protected:
+	void initialize_content(void);
+	int refresh_content(int ww, int dy);
+};
+
 class New_Tilemap_Dialog : public Option_Dialog {
 private:
 	OS_Spinner *_tilemap_width, *_tilemap_height;
+	Dropdown *_format;
 public:
 	New_Tilemap_Dialog(const char *t);
 	~New_Tilemap_Dialog();
@@ -55,6 +71,8 @@ public:
 	inline void tilemap_width(size_t n) { initialize(); _tilemap_width->value((double)n); }
 	inline size_t tilemap_height(void) const { return (size_t)_tilemap_height->value(); }
 	inline void tilemap_height(size_t n) { initialize(); _tilemap_height->value((double)n); }
+	inline Tilemap_Format format(void) const { return (Tilemap_Format)_format->value(); }
+	inline void format(Tilemap_Format fmt) { initialize(); _format->value((int)fmt); }
 protected:
 	void initialize_content(void);
 	int refresh_content(int ww, int dy);
@@ -141,7 +159,7 @@ public:
 	inline const char *tilemap_filename(void) const { return _tilemap_filename.c_str(); }
 	inline const char *tileset_filename(void) const { return _tileset_filename.c_str(); }
 	inline Tilemap_Format format(void) const { return (Tilemap_Format)_format->value(); }
-	inline void format(Tilemap_Format f) { initialize(); _format->value((int)f); }
+	inline void format(Tilemap_Format fmt) { initialize(); _format->value((int)fmt); }
 	inline uint16_t start_id(void) const { return (uint16_t)_start_id->value(); }
 	inline void start_id(uint16_t n) { initialize(); _start_id->value(n); }
 	inline bool use_7f(void) const { return !!_use_7f->value(); }

@@ -1,4 +1,10 @@
+#pragma warning(push, 0)
+#include <FL/filename.H>
+#pragma warning(pop)
+
 #include "tilemap-format.h"
+#include "config.h"
+#include "utils.h"
 
 static const int tileset_sizes[NUM_FORMATS] = {
 	0x100, // PLAIN - 8-bit tile IDs
@@ -56,4 +62,41 @@ static const char *format_extensions[NUM_FORMATS] = {
 
 const char *format_extension(Tilemap_Format fmt) {
 	return format_extensions[fmt];
+}
+
+Tilemap_Format guess_format(const char *filename) {
+	size_t fs = file_size(filename);
+	const char *basename = fl_filename_name(filename);
+	fprintf(stderr, "%s\n", basename);
+	std::string s(basename);
+	if (starts_with(s, "sgb") && fs == GAME_BOY_ADVANCE_WIDTH * GAME_BOY_ADVANCE_HEIGHT * 2) {
+		// e.g. pokered/gfx/{red|blue}/sgbborder.map
+		// e.g. pokecrystal/gfx/sgb/sgb_border.bin
+		return Tilemap_Format::SGB_BORDER;
+	}
+	if (ends_with(s, ".rle")) {
+		// e.g. pokered/gfx/town_map.rle
+		return Tilemap_Format::RBY_TOWN_MAP;
+	}
+	if (s == "johto.bin" || s == "kanto.bin") {
+		// e.g. pokecrystal/gfx/pokegear/*.bin
+		return Tilemap_Format::GSC_TOWN_MAP;
+	}
+	if (ends_with(s, ".tilemap.rle")) {
+		// e.g. pokecrystal/gfx/pokegear/*.tilemap.rle
+		return Tilemap_Format::POKEGEAR_CARD;
+	}
+	if (fs % 2) {
+		return Tilemap_Format::PLAIN;
+	}
+	if (fs == GAME_BOY_WIDTH * GAME_BOY_HEIGHT * 2 ||
+		(fs >= GAME_BOY_VRAM_SIZE * GAME_BOY_HEIGHT * 2 && fs < GAME_BOY_VRAM_SIZE * GAME_BOY_ADVANCE_HEIGHT * 2)) {
+		return Tilemap_Format::GBC_ATTRS;
+	}
+	if (fs == GAME_BOY_ADVANCE_WIDTH * GAME_BOY_ADVANCE_HEIGHT * 2 ||
+		fs == GAME_BOY_VRAM_SIZE * GAME_BOY_ADVANCE_HEIGHT * 2 ||
+		fs > GAME_BOY_VRAM_SIZE * GAME_BOY_VRAM_SIZE * 2) {
+		return Tilemap_Format::GBA_PALETTES;
+	}
+	return Config::format();
 }

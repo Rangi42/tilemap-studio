@@ -11,9 +11,6 @@
 
 #define MAX_HISTORY_SIZE 100
 
-#define GAME_BOY_WIDTH 20
-#define GAME_BOY_HEIGHT 18
-
 class Tilemap {
 protected:
 	struct Tilemap_State {
@@ -57,7 +54,6 @@ public:
 	bool can_write_tiles(void);
 	inline bool write_tiles(const char *f) { return write_tiles(f, _tiles, Config::format()); }
 	Fl_RGB_Image *print_tilemap(void) const;
-private:
 	void guess_width(void);
 public:
 	static bool write_tiles(const char *f, std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt);

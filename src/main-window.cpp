@@ -242,6 +242,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_success_dialog = new Modal_Dialog(this, "Success", Modal_Dialog::SUCCESS_ICON);
 	_unsaved_dialog = new Modal_Dialog(this, "Warning", Modal_Dialog::WARNING_ICON, true);
 	_about_dialog = new Modal_Dialog(this, "About " PROGRAM_NAME, Modal_Dialog::APP_ICON);
+	_tilemap_options_dialog = new Tilemap_Options_Dialog("Tilemap Options");
 	_new_tilemap_dialog = new New_Tilemap_Dialog("New Tilemap");
 	_tilemap_width_dialog = new Tilemap_Width_Dialog("Tilemap Width");
 	_resize_dialog = new Resize_Dialog("Resize Tilemap");
@@ -368,24 +369,6 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 		OS_MENU_ITEM("Re&format...", FL_COMMAND + 'f', (Fl_Callback *)reformat_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&Image to Tiles...", FL_COMMAND + 'i', (Fl_Callback *)image_to_tiles_cb, this, 0),
 		{},
-		OS_SUBMENU("F&ormat"),
-		OS_MENU_ITEM("Plain &tiles", FL_COMMAND + '1', (Fl_Callback *)plain_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap_Format::PLAIN ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("GB&C tiles + attributes", FL_COMMAND + '2', (Fl_Callback *)gbc_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap_Format::GBC_ATTRS ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("GB&A tiles + palettes", FL_COMMAND + '3', (Fl_Callback *)gba_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap_Format::GBA_PALETTES ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("&SGB border", FL_COMMAND + '4', (Fl_Callback *)sgb_border_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap_Format::SGB_BORDER ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("&RBY Town Map", FL_COMMAND + '5', (Fl_Callback *)rby_town_map_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap_Format::RBY_TOWN_MAP ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("GSC Town &Map", FL_COMMAND + '6', (Fl_Callback *)gsc_town_map_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap_Format::GSC_TOWN_MAP ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("&PC Town Map", FL_COMMAND + '7', (Fl_Callback *)pc_town_map_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap_Format::PC_TOWN_MAP ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("Pok\xc3\xa9&gear card", FL_COMMAND + '8', (Fl_Callback *)pokegear_card_format_cb, this,
-			FL_MENU_RADIO | (Config::format() == Tilemap_Format::POKEGEAR_CARD ? FL_MENU_VALUE : 0)),
-		{},
 		OS_SUBMENU("&Help"),
 		OS_MENU_ITEM("&Help", FL_F + 1, (Fl_Callback *)help_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&About", FL_COMMAND + '/', (Fl_Callback *)about_cb, this, 0),
@@ -412,14 +395,6 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_olive_theme_mi = PM_FIND_MENU_ITEM_CB(olive_theme_cb);
 	_rose_gold_theme_mi = PM_FIND_MENU_ITEM_CB(rose_gold_theme_cb);
 	_dark_theme_mi = PM_FIND_MENU_ITEM_CB(dark_theme_cb);
-	_plain_format_mi = PM_FIND_MENU_ITEM_CB(plain_format_cb);
-	_gbc_format_mi = PM_FIND_MENU_ITEM_CB(gbc_format_cb);
-	_gba_format_mi = PM_FIND_MENU_ITEM_CB(gba_format_cb);
-	_sgb_border_format_mi = PM_FIND_MENU_ITEM_CB(sgb_border_format_cb);
-	_rby_town_map_format_mi = PM_FIND_MENU_ITEM_CB(rby_town_map_format_cb);
-	_gsc_town_map_format_mi = PM_FIND_MENU_ITEM_CB(gsc_town_map_format_cb);
-	_pc_town_map_format_mi = PM_FIND_MENU_ITEM_CB(pc_town_map_format_cb);
-	_pokegear_card_format_mi = PM_FIND_MENU_ITEM_CB(pokegear_card_format_cb);
 	_grid_mi = PM_FIND_MENU_ITEM_CB(grid_cb);
 	_rainbow_tiles_mi = PM_FIND_MENU_ITEM_CB(rainbow_tiles_cb);
 	_bold_palettes_mi = PM_FIND_MENU_ITEM_CB(bold_palettes_cb);
@@ -1090,6 +1065,14 @@ void Main_Window::swap_tiles(Tile_Tessera *tt) {
 }
 
 void Main_Window::open_tilemap(const char *filename, size_t width, size_t height) {
+	if (filename) {
+		_tilemap_options_dialog->use_tilemap(filename);
+		_tilemap_options_dialog->format(guess_format(filename));
+		_tilemap_options_dialog->show(this);
+		if (_tilemap_options_dialog->canceled()) { return; }
+	}
+
+	_tilemap.modified(false);
 	close_cb(NULL, this);
 
 	const char *basename;
@@ -1097,6 +1080,8 @@ void Main_Window::open_tilemap(const char *filename, size_t width, size_t height
 	if (filename) {
 		_tilemap_file = filename;
 		basename = fl_filename_name(filename);
+
+		Config::format(_tilemap_options_dialog->format());
 
 		Tilemap::Result r = _tilemap.read_tiles(filename);
 		if (r) {
@@ -1107,10 +1092,19 @@ void Main_Window::open_tilemap(const char *filename, size_t width, size_t height
 			_error_dialog->show(this);
 			return;
 		}
+
+		if (width) {
+			_tilemap.width(width);
+		}
+		else {
+			_tilemap.guess_width();
+		}
 	}
 	else {
 		_tilemap_file = "";
 		basename = NEW_TILEMAP_NAME;
+
+		Config::format(_new_tilemap_dialog->format());
 
 		_tilemap.new_tiles(width, height);
 	}
@@ -1246,7 +1240,7 @@ void Main_Window::image_to_tiles() {
 	const char *image_basename = fl_filename_name(image_filename);
 
 	Fl_RGB_Image *img = NULL;
-	if (ends_with(image_filename, ".bmp") || ends_with(image_filename, ".BMP")) {
+	if (ends_with(image_basename, ".bmp") || ends_with(image_basename, ".BMP")) {
 		img = new Fl_BMP_Image(image_filename);
 	}
 	else {
@@ -1376,17 +1370,6 @@ void Main_Window::image_to_tiles() {
 	_success_dialog->show(this);
 
 	Config::format(fmt);
-	Fl_Menu_Item *format_menu_items[NUM_FORMATS] = {
-		_plain_format_mi,         // PLAIN
-		_gbc_format_mi,           // GBC_ATTRS
-		_gba_format_mi,           // GBA_PALETTES
-		_sgb_border_format_mi,    // SGB_BORDER
-		_rby_town_map_format_mi,  // RBY_TOWN_MAP
-		_gsc_town_map_format_mi,  // GSC_TOWN_MAP
-		_pc_town_map_format_mi,   // PC_TOWN_MAP
-		_pokegear_card_format_mi, // POKEGEAR_CARD
-	};
-	format_menu_items[Config::format()]->setonly();
 	update_active_controls();
 	redraw();
 
@@ -1419,6 +1402,7 @@ void Main_Window::new_cb(Fl_Widget *, Main_Window *mw) {
 		if (mw->_unsaved_dialog->canceled()) { return; }
 	}
 
+	mw->_new_tilemap_dialog->format(Config::format());
 	mw->_new_tilemap_dialog->show(mw);
 	if (mw->_new_tilemap_dialog->canceled()) { return; }
 
@@ -1449,7 +1433,6 @@ void Main_Window::open_cb(Fl_Widget *, Main_Window *mw) {
 		return;
 	}
 
-	mw->_tilemap.modified(false);
 	mw->open_tilemap(filename);
 }
 
@@ -1680,10 +1663,10 @@ void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 	Preferences::set("y", mw->y());
 	Preferences::set("w", mw->w());
 	Preferences::set("h", mw->h());
+	Preferences::set("format", Config::format());
 	Preferences::set("grid", Config::grid());
 	Preferences::set("rainbow", Config::rainbow_tiles());
 	Preferences::set("bold", Config::bold_palettes());
-	Preferences::set("format", Config::format());
 	Preferences::set("alpha", (int)mw->_transparency->value());
 	for (int i = 0; i < NUM_RECENT; i++) {
 		Preferences::set_string(Fl_Preferences::Name("recent-map%d", i), mw->_recent_tilemaps[i]);
@@ -1836,54 +1819,6 @@ void Main_Window::image_to_tiles_cb(Fl_Widget *, Main_Window *mw) {
 	mw->_image_to_tiles_dialog->show(mw);
 	if (mw->_image_to_tiles_dialog->canceled()) { return; }
 	mw->image_to_tiles();
-}
-
-void Main_Window::plain_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap_Format::PLAIN);
-	mw->update_active_controls();
-	mw->redraw();
-}
-
-void Main_Window::gbc_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap_Format::GBC_ATTRS);
-	mw->update_active_controls();
-	mw->redraw();
-}
-
-void Main_Window::gba_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap_Format::GBA_PALETTES);
-	mw->update_active_controls();
-	mw->redraw();
-}
-
-void Main_Window::sgb_border_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap_Format::SGB_BORDER);
-	mw->update_active_controls();
-	mw->redraw();
-}
-
-void Main_Window::rby_town_map_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap_Format::RBY_TOWN_MAP);
-	mw->update_active_controls();
-	mw->redraw();
-}
-
-void Main_Window::gsc_town_map_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap_Format::GSC_TOWN_MAP);
-	mw->update_active_controls();
-	mw->redraw();
-}
-
-void Main_Window::pc_town_map_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap_Format::PC_TOWN_MAP);
-	mw->update_active_controls();
-	mw->redraw();
-}
-
-void Main_Window::pokegear_card_format_cb(Fl_Menu_ *, Main_Window *mw) {
-	Config::format(Tilemap_Format::POKEGEAR_CARD);
-	mw->update_active_controls();
-	mw->redraw();
 }
 
 void Main_Window::help_cb(Fl_Widget *, Main_Window *mw) {

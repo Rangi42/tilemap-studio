@@ -11,7 +11,7 @@ private:
 	static bool _attributes;
 public:
 	inline static Tilemap_Format format(void) { return _format; }
-	inline static void format(Tilemap_Format f) { _format = f; }
+	inline static void format(Tilemap_Format fmt) { _format = fmt; }
 	inline static bool grid(void) { return _grid; }
 	inline static void grid(bool g) { _grid = g; }
 	inline static bool rainbow_tiles(void) { return _rainbow_tiles; }

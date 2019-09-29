@@ -454,9 +454,11 @@ void Tilemap::guess_width() {
 	else if (n % GAME_BOY_HEIGHT == 0 && n / GAME_BOY_HEIGHT <= GAME_BOY_WIDTH) {
 		_width = n / GAME_BOY_HEIGHT;
 	}
-	else if (n % 32 == 0) {
-		// Game Boy VRAM width
-		_width = 32;
+	else if (n % GAME_BOY_ADVANCE_WIDTH == 0 && n / GAME_BOY_ADVANCE_WIDTH <= GAME_BOY_ADVANCE_HEIGHT) {
+		_width = GAME_BOY_ADVANCE_WIDTH;
+	}
+	else if (n % GAME_BOY_VRAM_SIZE == 0) {
+		_width = GAME_BOY_VRAM_SIZE;
 	}
 	else if (n % (GAME_BOY_HEIGHT - 6) == 0 && n / (GAME_BOY_HEIGHT - 6) <= GAME_BOY_WIDTH) {
 		// Game Boy screen height minus textbox height
