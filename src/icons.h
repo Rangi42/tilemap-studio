@@ -32,6 +32,10 @@
 #include "x-flip-disabled.xpm"
 #include "y-flip.xpm"
 #include "y-flip-disabled.xpm"
+#include "priority.xpm"
+#include "priority-disabled.xpm"
+#include "obp1.xpm"
+#include "obp1-disabled.xpm"
 
 static Fl_Pixmap NEW_ICON(NEW_XPM);
 static Fl_Pixmap OPEN_ICON(OPEN_XPM);
@@ -60,5 +64,9 @@ static Fl_Pixmap X_FLIP_ICON(X_FLIP_XPM);
 static Fl_Pixmap X_FLIP_DISABLED_ICON(X_FLIP_DISABLED_XPM);
 static Fl_Pixmap Y_FLIP_ICON(Y_FLIP_XPM);
 static Fl_Pixmap Y_FLIP_DISABLED_ICON(Y_FLIP_DISABLED_XPM);
+static Fl_Pixmap PRIORITY_ICON(PRIORITY_XPM);
+static Fl_Pixmap PRIORITY_DISABLED_ICON(PRIORITY_DISABLED_XPM);
+static Fl_Pixmap OBP1_ICON(OBP1_XPM);
+static Fl_Pixmap OBP1_DISABLED_ICON(OBP1_DISABLED_XPM);
 
 #endif

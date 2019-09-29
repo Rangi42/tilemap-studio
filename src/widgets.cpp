@@ -419,8 +419,8 @@ int OS_Tabs::handle(int event) {
 	Fl_Widget *o;
 	switch (event) {
 	case FL_PUSH:
-		// Assume a tab height of 20 since tab_height() is inaccessible
-		if (Fl::event_y() > y() + 20) {
+		// Assume a tab height of OS_TAB_HEIGHT since tab_height() is inaccessible
+		if (Fl::event_y() > y() + OS_TAB_HEIGHT) {
 			return Fl_Group::handle(event);
 		}
 		// fallthrough

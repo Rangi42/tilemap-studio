@@ -28,11 +28,10 @@ private:
 	// GUI containers
 	Fl_Menu_Bar *_menu_bar;
 	Toolbar *_toolbar;
-	Fl_Group *_main_group, *_left_group, *_right_group, *_right_top_group;
-	OS_Tabs *_tileset_tabs, *_tilemap_tabs;
-	OS_Tab *_tileset_bank0_tab, *_tileset_bank1_tab, *_tileset_bank2_tab, *_tileset_bank3_tab;
-	Workpane *_tileset_bank0_pane, *_tileset_bank1_pane, *_tileset_bank2_pane, *_tileset_bank3_pane;
-	OS_Tab *_tilemap_tiles_tab, *_tilemap_attributes_tab;
+	Fl_Group *_main_group, *_left_group, *_right_group;
+	OS_Tabs *_left_tabs;
+	OS_Tab *_bank0_tab, *_bank1_tab, *_bank2_tab, *_bank3_tab, *_palettes_tab;
+	Workpane *_bank0_pane, *_bank1_pane, *_bank2_pane, *_bank3_pane, *_palettes_pane;
 	Workspace *_tilemap_scroll;
 	Toolbar *_status_bar;
 	// GUI inputs
@@ -50,11 +49,10 @@ private:
 	Default_Spinner *_tilemap_width;
 	Toolbar_Button *_resize_tb, *_reformat_tb;
 	Toolbar_Button *_image_to_tiles_tb;
-	Toolbar_Toggle_Button *_x_flip_tb, *_y_flip_tb;
+	Toolbar_Toggle_Button *_x_flip_tb, *_y_flip_tb, *_priority_tb, *_obp1_tb;
 	Tile_Button *_tile_buttons[MAX_NUM_TILES];
-	Default_Hex_Spinner *_palette;
-	OS_Check_Button *_priority, *_obp1;
-	Default_Slider *_alpha;
+	Palette_Button *_palette_buttons[MAX_NUM_PALETTES];
+	Default_Slider *_transparency;
 	// GUI outputs
 	Label *_width_heading, *_tileset_name, *_tilemap_name, *_tile_heading;
 	Tile_Swatch *_current_tile, *_current_attributes;
@@ -79,7 +77,8 @@ private:
 	std::string _recent_tilemaps[NUM_RECENT], _recent_tilesets[NUM_RECENT];
 	Tilemap _tilemap;
 	std::vector<Tileset> _tilesets;
-	Tile_Button *_selected = NULL;
+	Tile_Button *_selected_tile = NULL;
+	Palette_Button *_selected_palette = NULL;
 	// Work properties
 	bool _map_editable = false;
 	// Window size cache
@@ -93,11 +92,12 @@ public:
 	~Main_Window();
 	void show(void);
 	inline bool unsaved(void) const { return _tilemap.modified(); }
+	inline uint16_t tile_id(void) const { return _selected_tile ? _selected_tile->id() : 0x000; }
 	inline bool x_flip(void) const { return _x_flip_tb->active() && !!_x_flip_tb->value(); }
 	inline bool y_flip(void) const { return _y_flip_tb->active() && !!_y_flip_tb->value(); }
-	inline int palette(void) const { return _palette->active() ? (int)_palette->value() : -1; }
-	inline bool priority(void) const { return _priority->active() && !!_priority->value(); }
-	inline bool obp1(void) const { return _obp1->active() && !!_obp1->value(); }
+	inline int palette(void) const { return _selected_palette && Config::attributes() ? (int)_selected_palette->palette() : -1; }
+	inline bool priority(void) const { return _priority_tb->visible() && !!_priority_tb->value(); }
+	inline bool obp1(void) const { return _obp1_tb->visible() && !!_obp1_tb->value(); }
 	inline const char *modified_filename(void) const {
 		return unsaved() ? _tilemap_file.empty() ? NEW_TILEMAP_NAME : fl_filename_name(_tilemap_file.c_str()) : "";
 	}
@@ -187,15 +187,15 @@ private:
 	static void tilemap_width_tb_cb(OS_Spinner *ss, Main_Window *mw);
 	static void x_flip_cb(Toolbar_Toggle_Button *tb, Main_Window *mw);
 	static void y_flip_cb(Toolbar_Toggle_Button *tb, Main_Window *mw);
-	static void palette_cb(OS_Spinner *ss, Main_Window *mw);
 	static void priority_cb(OS_Check_Button *cb, Main_Window *mw);
 	static void obp1_cb(OS_Check_Button *cb, Main_Window *mw);
-	static void alpha_cb(Default_Slider *ds, Main_Window *mw);
-	// Tilemap
-	static void tilemap_tabs_cb(OS_Tabs *ts, Main_Window *mw);
-	static void change_tile_cb(Tile_Tessera *tt, Main_Window *mw);
+	static void transparency_cb(Default_Slider *ds, Main_Window *mw);
 	// Tileset
+	static void change_tab_cb(OS_Tabs *ts, Main_Window *mw);
 	static void select_tile_cb(Tile_Button *tb, Main_Window *mw);
+	static void select_palette_cb(Palette_Button *pb, Main_Window *mw);
+	// Tilemap
+	static void change_tile_cb(Tile_Tessera *tt, Main_Window *mw);
 };
 
 #endif

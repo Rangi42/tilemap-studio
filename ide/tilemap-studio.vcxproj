@@ -154,10 +154,14 @@
     <None Include="..\res\input.xpm" />
     <None Include="..\res\load.xpm" />
     <None Include="..\res\new.xpm" />
+    <None Include="..\res\obp1-disabled.xpm" />
+    <None Include="..\res\obp1.xpm" />
     <None Include="..\res\open.xpm" />
     <None Include="..\res\output.xpm" />
     <None Include="..\res\print-disabled.xpm" />
     <None Include="..\res\print.xpm" />
+    <None Include="..\res\priority-disabled.xpm" />
+    <None Include="..\res\priority.xpm" />
     <None Include="..\res\rainbow.xpm" />
     <None Include="..\res\redo-disabled.xpm" />
     <None Include="..\res\redo.xpm" />

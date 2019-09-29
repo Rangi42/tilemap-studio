@@ -18,6 +18,7 @@
 #define TILE_SIZE 8
 #define TILE_SIZE_2X (TILE_SIZE * 2)
 
+#define PALETTES_PER_ROW 8
 #define MAX_NUM_PALETTES 16
 
 class Tileset;
@@ -46,15 +47,15 @@ public:
 	inline bool same(const Tile_State &other, bool attr) const {
 		return attr ? same_attributes(other) : same_tiles(other);
 	}
-	inline void draw(int x, int y, bool tile, bool attr, bool active, bool selected = false) {
+	inline void draw(int x, int y, bool tile, bool attr, bool bold, bool active, bool selected) {
 		if (tile) { draw_tile(x, y, active, selected); }
 		else { fl_rectf(x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_WHITE); }
-		if (attr) { draw_attributes(x, y); }
+		if (attr) { draw_attributes(x, y, bold, active); }
 	}
 	void print(int x, int y);
 private:
 	void draw_tile(int x, int y, bool active, bool selected);
-	void draw_attributes(int x, int y);
+	void draw_attributes(int x, int y, bool bold, bool active);
 };
 
 class Tile_Thing {
@@ -113,10 +114,15 @@ public:
 };
 
 class Tile_Button : public Tile_Thing, public Fl_Radio_Button {
-private:
-	size_t _row, _col;
 public:
 	Tile_Button(int x, int y, uint16_t id = 0x000);
+	void draw(void);
+	int handle(int event);
+};
+
+class Palette_Button : public Tile_Thing, public Fl_Radio_Button {
+public:
+	Palette_Button(int x, int y, int p = -1);
 	void draw(void);
 	int handle(int event);
 };

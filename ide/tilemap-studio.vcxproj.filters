@@ -226,6 +226,18 @@
     <None Include="..\res\bold.xpm">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\res\obp1.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\obp1-disabled.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\priority.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\priority-disabled.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="tilemap-studio.rc">

@@ -148,9 +148,12 @@ void Tile_State::draw_tile(int x, int y, bool active, bool selected) {
 	fl_draw(buffer, x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_ALIGN_CENTER);
 }
 
-void Tile_State::draw_attributes(int x, int y) {
-	if (palette > -1) {
-		if (Config::bold_palettes()) {
+void Tile_State::draw_attributes(int x, int y, bool bold, bool active) {
+	if (!active) {
+		fl_rectf(x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_INACTIVE_COLOR);
+	}
+	else if (palette > -1) {
+		if (bold) {
 			_palette_bgs_image->draw(x, y, TILE_SIZE_2X, TILE_SIZE_2X, TILE_SIZE_2X * palette, 0);
 		}
 		palette_digits_image.draw(x+1, y+1, 5, 7, 5 * palette, 0);
@@ -218,7 +221,8 @@ Tile_Swatch::Tile_Swatch(int x, int y, int w, int h) : Tile_Thing(), Fl_Box(x, y
 
 void Tile_Swatch::draw() {
 	draw_box();
-	_state.draw(x() + Fl::box_dx(box()), y() + Fl::box_dy(box()), !_attributes, _attributes, !!active());
+	_state.draw(x() + Fl::box_dx(box()), y() + Fl::box_dy(box()),
+		!_attributes, _attributes, Config::bold_palettes(), !!active(), false);
 }
 
 Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint16_t id, bool x_flip, bool y_flip,
@@ -233,7 +237,7 @@ Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint16_t id, bo
 
 void Tile_Tessera::draw() {
 	int X = x(), Y = y();
-	_state.draw(X, Y, true, Config::attributes(), !!active());
+	_state.draw(X, Y, true, Config::attributes(), Config::bold_palettes(), !!active(), false);
 	if (Config::grid()) {
 		draw_grid(X, Y);
 	}
@@ -284,7 +288,7 @@ Tile_Button::Tile_Button(int x, int y, uint16_t id) : Tile_Thing(id), Fl_Radio_B
 
 void Tile_Button::draw() {
 	int X = x(), Y = y();
-	_state.draw(X, Y, true, Config::attributes(), !!active(), !!value());
+	_state.draw(X, Y, true, Config::attributes(), Config::bold_palettes(), !!active(), !!value());
 	if (Config::grid()) {
 		draw_grid(X, Y);
 	}
@@ -294,6 +298,30 @@ void Tile_Button::draw() {
 }
 
 int Tile_Button::handle(int event) {
+	// Don't interfere with dragging onto the parent Droppable|Workpane
+	return event == FL_ENTER || event == FL_LEAVE || event == FL_DRAG ? 0 : Fl_Radio_Button::handle(event);
+}
+
+Palette_Button::Palette_Button(int x, int y, int p) : Tile_Thing(0x000, false, false, false, false, p),
+	Fl_Radio_Button(x, y, TILE_SIZE_2X, TILE_SIZE_2X) {
+	user_data(NULL);
+	box(FL_NO_BOX);
+	labeltype(FL_NO_LABEL);
+	when(FL_WHEN_RELEASE);
+}
+
+void Palette_Button::draw() {
+	int X = x(), Y = y();
+	_state.draw(X, Y, false, true, true, !!active(), !!value());
+	if (Config::grid()) {
+		draw_grid(X, Y);
+	}
+	if (value()) {
+		draw_selection_border(X, Y);
+	}
+}
+
+int Palette_Button::handle(int event) {
 	// Don't interfere with dragging onto the parent Droppable|Workpane
 	return event == FL_ENTER || event == FL_LEAVE || event == FL_DRAG ? 0 : Fl_Radio_Button::handle(event);
 }
