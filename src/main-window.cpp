@@ -1005,7 +1005,7 @@ void Main_Window::reformat_tilemap() {
 
 	if (!_reformat_dialog->force() && !_tilemap.can_format_as(fmt)) {
 		std::string msg = "Cannot reformat ";
-		msg = msg + basename + " \nas " + format_name(Config::format()) + "!";
+		msg = msg + basename + " \nas " + format_name(fmt) + "!";
 		_error_dialog->message(msg);
 		_error_dialog->show(this);
 		return;
@@ -1013,6 +1013,8 @@ void Main_Window::reformat_tilemap() {
 
 	Config::format(fmt);
 	_tilemap.modified(true);
+
+	update_tilemap_metadata();
 	update_active_controls();
 	redraw();
 
