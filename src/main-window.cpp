@@ -112,7 +112,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	}
 	_tilemap_format = new Status_Bar_Field(0, 0, wgt_w, 21, "");
 	new Spacer(0, 0, 2, 21);
-	_hover_id = new Status_Bar_Field(0, 0, text_width("ID: $99", 8), 21, "");
+	_hover_id = new Status_Bar_Field(0, 0, text_width("ID: $A:AA", 8), 21, "");
 	new Spacer(0, 0, 2, 21);
 	_hover_xy = new Status_Bar_Field(0, 0, text_width("X/Y (1999, 1999)", 8), 21, "");
 	new Spacer(0, 0, 2, 21);
@@ -719,7 +719,8 @@ void Main_Window::update_status(Tile_Tessera *tt) {
 		_status_bar->redraw();
 		return;
 	}
-	sprintf(buffer, "ID: $%02X", tt->id());
+	int bank = (int)(tt->id() >> 8), offset = (int)(tt->id() & 0xFF);
+	sprintf(buffer, "ID: $%d:%02X", bank, offset);
 	_hover_id->copy_label(buffer);
 #ifdef __GNUC__
 	sprintf(buffer, "X/Y (%zu, %zu)", tt->col(), tt->row());
