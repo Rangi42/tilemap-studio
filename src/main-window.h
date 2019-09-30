@@ -66,6 +66,7 @@ private:
 	New_Tilemap_Dialog *_new_tilemap_dialog;
 	Tilemap_Width_Dialog *_tilemap_width_dialog;
 	Resize_Dialog *_resize_dialog;
+	Reformat_Dialog *_reformat_dialog;
 	Add_Tileset_Dialog *_add_tileset_dialog;
 	Image_To_Tiles_Dialog *_image_to_tiles_dialog;
 	Help_Window *_help_window;
@@ -122,6 +123,7 @@ private:
 	void update_active_controls(void);
 	void refresh_theme(void);
 	void resize_tilemap(void);
+	void reformat_tilemap(void);
 	bool save_tilemap(bool force);
 	void image_to_tiles(void);
 private:

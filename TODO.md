@@ -2,7 +2,6 @@
 
 ## Features
 
-* **Reformat:** Convert between tilemap formats
 * **.tileset files:** Read and export lists of images with start+offset+length values
 * **.attrmap files:** Open paired tilemap and attrmap files, supporting all attribute bytes
 * **"Grosser Block":** Select MxN tiles at once for placement

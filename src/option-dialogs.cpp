@@ -92,7 +92,7 @@ void Option_Dialog::cancel_cb(Fl_Widget *, Option_Dialog *od) {
 	od->_dialog->hide();
 }
 
-Tilemap_Options_Dialog::Tilemap_Options_Dialog(const char *t) : Option_Dialog(260, t), _tilemap_header(NULL), _format(NULL) {}
+Tilemap_Options_Dialog::Tilemap_Options_Dialog(const char *t) : Option_Dialog(280, t), _tilemap_header(NULL), _format(NULL) {}
 
 Tilemap_Options_Dialog::~Tilemap_Options_Dialog() {
 	delete _tilemap_header;
@@ -132,7 +132,7 @@ int Tilemap_Options_Dialog::refresh_content(int ww, int dy) {
 	return ch;
 }
 
-New_Tilemap_Dialog::New_Tilemap_Dialog(const char *t) : Option_Dialog(260, t), _tilemap_width(NULL), _tilemap_height(NULL),
+New_Tilemap_Dialog::New_Tilemap_Dialog(const char *t) : Option_Dialog(280, t), _tilemap_width(NULL), _tilemap_height(NULL),
 	_format(NULL) {}
 
 New_Tilemap_Dialog::~New_Tilemap_Dialog() {
@@ -279,6 +279,51 @@ void Resize_Dialog::anchor_button_cb(Anchor_Button *ab, Resize_Dialog *rd) {
 	rd->anchor_label(x,     y + 1, "@2>"); // bottom
 	rd->anchor_label(x + 1, y + 1, "@3>"); // bottom-right
 	rd->_dialog->redraw();
+}
+
+Reformat_Dialog::Reformat_Dialog(const char *t) : Option_Dialog(280, t), _format_header(NULL), _format(NULL), _force(NULL) {}
+
+Reformat_Dialog::~Reformat_Dialog() {
+	delete _format_header;
+	delete _format;
+	delete _force;
+}
+
+void Reformat_Dialog::use_tilemap(const char *) {
+	initialize();
+	const char *name = format_name(Config::format());
+	char buffer[256] = {};
+	strcpy(buffer, "Convert from ");
+	strcpy(buffer, name);
+	strcat(buffer, " to:");
+	_format_header->copy_label(buffer);
+}
+
+void Reformat_Dialog::initialize_content() {
+	// Populate content group
+	_format_header = new Label(0, 0, 0, 0);
+	_format = new Dropdown(0, 0, 0, 0, "Format:");
+	_force = new OS_Check_Button(0, 0, 0, 0, "Force (discards unformattable data)");
+	// Initialize content group's children
+	for (int i = 0; i < NUM_FORMATS; i++) {
+		_format->add(format_name((Tilemap_Format)i));
+	}
+}
+
+int Reformat_Dialog::refresh_content(int ww, int dy) {
+	int wgt_h = 22, win_m = 10, wgt_m = 4;
+	int ch = (wgt_h + wgt_m) * 2 + wgt_h;
+	_content->resize(win_m, dy, ww, ch);
+
+	_format_header->resize(win_m, dy, ww, wgt_h);
+	dy += wgt_h + wgt_m;
+	int wgt_off = win_m + text_width(_format->label(), 2);
+	int wgt_w = ww - wgt_off + win_m;
+	_format->resize(wgt_off, dy, wgt_w, wgt_h);
+	dy += wgt_h + wgt_m;
+	_force->resize(win_m, dy, ww, wgt_h);
+
+	return ch;
 }
 
 Tilemap_Width_Dialog::Tilemap_Width_Dialog(const char *t) : Option_Dialog(194, t), _tilemap_width(NULL) {}

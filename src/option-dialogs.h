@@ -109,6 +109,23 @@ private:
 	static void anchor_button_cb(Anchor_Button *ab, Resize_Dialog *rd);
 };
 
+class Reformat_Dialog : public Option_Dialog {
+private:
+	Label *_format_header;
+	Dropdown *_format;
+	OS_Check_Button *_force;
+public:
+	Reformat_Dialog(const char *t);
+	~Reformat_Dialog();
+	inline Tilemap_Format format(void) const { return (Tilemap_Format)_format->value(); }
+	inline void format(Tilemap_Format fmt) { initialize(); _format->value((int)fmt); }
+	inline bool force(void) const { return !!_force->value(); }
+	void use_tilemap(const char *filename);
+protected:
+	void initialize_content(void);
+	int refresh_content(int ww, int dy);
+};
+
 class Tilemap_Width_Dialog : public Option_Dialog {
 private:
 	OS_Spinner *_tilemap_width;

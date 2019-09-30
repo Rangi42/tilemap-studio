@@ -327,17 +327,17 @@ Tilemap::Result Tilemap::read_tiles(const char *f) {
 	return (_result = TILEMAP_OK);
 }
 
-bool Tilemap::can_write_tiles() {
-	Tilemap_Format fmt = Config::format();
-	int m = format_tileset_size(fmt);
+bool Tilemap::can_format_as(Tilemap_Format fmt) {
+	int n = format_tileset_size(fmt);
+	int m = format_palettes_size(fmt);
 	for (Tile_Tessera *tt : _tiles) {
-		if (tt->id() >= m) {
+		if (tt->id() >= n) {
+			return false;
+		}
+		if (tt->palette() > m) {
 			return false;
 		}
 		if ((tt->x_flip() || tt->y_flip()) && !format_can_flip(fmt)) {
-			return false;
-		}
-		if (tt->palette() > -1 && !format_has_palettes(fmt)) {
 			return false;
 		}
 		if ((tt->priority() || tt->obp1()) && !format_has_metadata(fmt)) {

@@ -51,7 +51,7 @@ public:
 	void redo(void);
 	void new_tiles(size_t w, size_t h);
 	Result read_tiles(const char *f);
-	bool can_write_tiles(void);
+	bool can_format_as(Tilemap_Format fmt);
 	inline bool write_tiles(const char *f) { return write_tiles(f, _tiles, Config::format()); }
 	Fl_RGB_Image *print_tilemap(void) const;
 	void guess_width(void);
