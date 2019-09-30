@@ -6,8 +6,11 @@
 #define GAME_BOY_WIDTH 20
 #define GAME_BOY_HEIGHT 18
 
-#define GAME_BOY_ADVANCE_WIDTH 30
-#define GAME_BOY_ADVANCE_HEIGHT 20
+#define SGB_WIDTH 32
+#define SGB_HEIGHT 28
+
+#define GBA_WIDTH 30
+#define GBA_HEIGHT 20
 
 #define GAME_BOY_VRAM_SIZE 32
 

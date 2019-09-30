@@ -68,7 +68,8 @@ Tilemap_Format guess_format(const char *filename) {
 	size_t fs = file_size(filename);
 	const char *basename = fl_filename_name(filename);
 	std::string s(basename);
-	if (starts_with(s, "sgb") && fs == GAME_BOY_ADVANCE_WIDTH * GAME_BOY_ADVANCE_HEIGHT * 2) {
+	if (starts_with(s, "sgb") || fs == SGB_WIDTH * SGB_HEIGHT * 2 ||
+		fs == SGB_WIDTH * SGB_HEIGHT * 2 - GAME_BOY_WIDTH * GAME_BOY_HEIGHT * 2) {
 		// e.g. pokered/gfx/{red|blue}/sgbborder.map
 		// e.g. pokecrystal/gfx/sgb/sgb_border.bin
 		return Tilemap_Format::SGB_BORDER;
@@ -88,13 +89,11 @@ Tilemap_Format guess_format(const char *filename) {
 	if (fs % 2) {
 		return Tilemap_Format::PLAIN;
 	}
-	if (fs == GAME_BOY_ADVANCE_WIDTH * GAME_BOY_ADVANCE_HEIGHT * 2 ||
-		fs == GAME_BOY_VRAM_SIZE * GAME_BOY_ADVANCE_HEIGHT * 2 ||
+	if (fs == GBA_WIDTH * GBA_HEIGHT * 2 || fs == GAME_BOY_VRAM_SIZE * GBA_HEIGHT * 2 ||
 		fs > GAME_BOY_VRAM_SIZE * GAME_BOY_VRAM_SIZE * 2) {
 		return Tilemap_Format::GBA_PALETTES;
 	}
-	if (fs >= GAME_BOY_WIDTH * GAME_BOY_HEIGHT * 2 &&
-		fs < GAME_BOY_VRAM_SIZE * GAME_BOY_ADVANCE_HEIGHT * 2) {
+	if (fs >= GAME_BOY_WIDTH * GAME_BOY_HEIGHT * 2 && fs < GAME_BOY_VRAM_SIZE * GBA_HEIGHT * 2) {
 		return Tilemap_Format::GBC_ATTRS;
 	}
 	return Config::format();
