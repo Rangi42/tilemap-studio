@@ -294,7 +294,7 @@ void Reformat_Dialog::use_tilemap(const char *) {
 	const char *name = format_name(Config::format());
 	char buffer[256] = {};
 	strcpy(buffer, "Convert from ");
-	strcpy(buffer, name);
+	strcat(buffer, name);
 	strcat(buffer, " to:");
 	_format_header->copy_label(buffer);
 }
