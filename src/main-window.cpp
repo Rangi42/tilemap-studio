@@ -288,7 +288,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	// Configure menu bar items
 	Fl_Menu_Item menu_items[] = {
 		// label, shortcut, callback, data, flags
-		OS_SUBMENU("&File"),
+		OS_SUBMENU("Tile&map"),
 		OS_MENU_ITEM("&New", FL_COMMAND + 'n', (Fl_Callback *)new_cb, this, 0),
 		OS_MENU_ITEM("&Open...", FL_COMMAND + 'o', (Fl_Callback *)open_cb, this, 0),
 		OS_MENU_ITEM("Open &Recent", 0, NULL, NULL, FL_SUBMENU),
@@ -308,10 +308,13 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 		OS_MENU_ITEM("&Close", FL_COMMAND + 'w', (Fl_Callback *)close_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&Save", FL_COMMAND + 's', (Fl_Callback *)save_cb, this, 0),
 		OS_MENU_ITEM("Save &As...", FL_COMMAND + 'S', (Fl_Callback *)save_as_cb, this, FL_MENU_DIVIDER),
-		OS_MENU_ITEM("Load &Tileset...", FL_COMMAND + 't', (Fl_Callback *)load_tileset_cb, this, 0),
-		OS_MENU_ITEM("A&dd Tileset...", FL_COMMAND + 'a', (Fl_Callback *)add_tileset_cb, this, 0),
-		OS_MENU_ITEM("Re&load Tilesets", FL_COMMAND + 'r', (Fl_Callback *)reload_tilesets_cb, this, 0),
-		OS_MENU_ITEM("Load R&ecent", 0, NULL, NULL, FL_SUBMENU),
+		OS_MENU_ITEM("&Print...", FL_COMMAND + 'p', (Fl_Callback *)print_cb, this, 0),
+		{},
+		OS_SUBMENU("Tile&set"),
+		OS_MENU_ITEM("&Load...", FL_COMMAND + 't', (Fl_Callback *)load_tileset_cb, this, 0),
+		OS_MENU_ITEM("&Add...", FL_COMMAND + 'a', (Fl_Callback *)add_tileset_cb, this, 0),
+		OS_MENU_ITEM("R&eload", FL_COMMAND + 'r', (Fl_Callback *)reload_tilesets_cb, this, 0),
+		OS_MENU_ITEM("Load &Recent", 0, NULL, NULL, FL_SUBMENU),
 		// NUM_RECENT items with callback load_recent_tileset_cb
 		OS_NULL_MENU_ITEM(FL_ALT + FL_SHIFT + '1', (Fl_Callback *)load_recent_tileset_cb, this, 0),
 		OS_NULL_MENU_ITEM(FL_ALT + FL_SHIFT + '2', (Fl_Callback *)load_recent_tileset_cb, this, 0),
@@ -325,9 +328,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 		OS_NULL_MENU_ITEM(FL_ALT + FL_SHIFT + '0', (Fl_Callback *)load_recent_tileset_cb, this, 0),
 		OS_MENU_ITEM("Clear &Recent", 0, (Fl_Callback *)clear_recent_tilesets_cb, this, 0),
 		{},
-		OS_MENU_ITEM("&Unload Tilesets", FL_COMMAND + 'W', (Fl_Callback *)unload_tilesets_cb, this, FL_MENU_DIVIDER),
-		OS_MENU_ITEM("&Print...", FL_COMMAND + 'p', (Fl_Callback *)print_cb, this, FL_MENU_DIVIDER),
-		OS_MENU_ITEM("E&xit", FL_ALT + FL_F + 4, (Fl_Callback *)exit_cb, this, 0),
+		OS_MENU_ITEM("&Unload", FL_COMMAND + 'W', (Fl_Callback *)unload_tilesets_cb, this, 0),
 		{},
 		OS_SUBMENU("&Edit"),
 		OS_MENU_ITEM("&Undo", FL_COMMAND + 'z', (Fl_Callback *)undo_cb, this, 0),
@@ -399,12 +400,12 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_rainbow_tiles_mi = PM_FIND_MENU_ITEM_CB(rainbow_tiles_cb);
 	_bold_palettes_mi = PM_FIND_MENU_ITEM_CB(bold_palettes_cb);
 	// Conditional menu items
-	_reload_tilesets_mi = PM_FIND_MENU_ITEM_CB(reload_tilesets_cb);
-	_unload_tilesets_mi = PM_FIND_MENU_ITEM_CB(unload_tilesets_cb);
 	_close_mi = PM_FIND_MENU_ITEM_CB(close_cb);
 	_save_mi = PM_FIND_MENU_ITEM_CB(save_cb);
 	_save_as_mi = PM_FIND_MENU_ITEM_CB(save_as_cb);
 	_print_mi = PM_FIND_MENU_ITEM_CB(print_cb);
+	_reload_tilesets_mi = PM_FIND_MENU_ITEM_CB(reload_tilesets_cb);
+	_unload_tilesets_mi = PM_FIND_MENU_ITEM_CB(unload_tilesets_cb);
 	_undo_mi = PM_FIND_MENU_ITEM_CB(undo_cb);
 	_redo_mi = PM_FIND_MENU_ITEM_CB(redo_cb);
 	_tilemap_width_mi = PM_FIND_MENU_ITEM_CB(tilemap_width_cb);
@@ -414,21 +415,21 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 
 	// Configure toolbar buttons
 
-	_new_tb->tooltip("New... (Ctrl+N)");
+	_new_tb->tooltip("New Tilemap... (Ctrl+N)");
 	_new_tb->callback((Fl_Callback *)new_cb, this);
 	_new_tb->image(NEW_ICON);
 	_new_tb->take_focus();
 
-	_open_tb->tooltip("Open... (Ctrl+O)");
+	_open_tb->tooltip("Open Tilemap... (Ctrl+O)");
 	_open_tb->callback((Fl_Callback *)open_cb, this);
 	_open_tb->image(OPEN_ICON);
 
-	_save_tb->tooltip("Save (Ctrl+S)");
+	_save_tb->tooltip("Save Tilemap (Ctrl+S)");
 	_save_tb->callback((Fl_Callback *)save_cb, this);
 	_save_tb->image(SAVE_ICON);
 	_save_tb->deimage(SAVE_DISABLED_ICON);
 
-	_print_tb->tooltip("Print (Ctrl+P)");
+	_print_tb->tooltip("Print Tilemap (Ctrl+P)");
 	_print_tb->callback((Fl_Callback *)print_cb, this);
 	_print_tb->image(PRINT_ICON);
 	_print_tb->deimage(PRINT_DISABLED_ICON);

@@ -55,8 +55,8 @@ private:
 	Tile_Swatch *_current_tile, *_current_attributes;
 	Status_Bar_Field *_tilemap_dimensions, *_tilemap_format, *_hover_id, *_hover_xy, *_hover_landmark;
 	// Conditional menu items
-	Fl_Menu_Item *_reload_tilesets_mi = NULL, *_unload_tilesets_mi = NULL, *_close_mi = NULL, *_save_mi = NULL,
-		*_save_as_mi = NULL, *_print_mi = NULL;
+	Fl_Menu_Item *_close_mi = NULL, *_save_mi = NULL, *_save_as_mi = NULL, *_print_mi = NULL;
+	Fl_Menu_Item *_reload_tilesets_mi = NULL, *_unload_tilesets_mi = NULL;
 	Fl_Menu_Item *_undo_mi = NULL, *_redo_mi = NULL;
 	Fl_Menu_Item *_tilemap_width_mi = NULL, *_resize_mi = NULL, *_reformat_mi = NULL;
 	// Dialogs
@@ -128,7 +128,9 @@ private:
 	// Drag-and-drop
 	static void drag_and_drop_tilemap_cb(DnD_Receiver *dndr, Main_Window *mw);
 	static void drag_and_drop_tileset_cb(DnD_Receiver *dndr, Main_Window *mw);
-	// File menu
+	// Window
+	static void exit_cb(Fl_Widget *w, Main_Window *mw);
+	// Tilemap menu
 	static void new_cb(Fl_Widget *w, Main_Window *mw);
 	static void open_cb(Fl_Widget *w, Main_Window *mw);
 	static void open_recent_tilemap_cb(Fl_Menu_ *m, Main_Window *mw);
@@ -136,14 +138,14 @@ private:
 	static void close_cb(Fl_Widget *w, Main_Window *mw);
 	static void save_cb(Fl_Widget *w, Main_Window *mw);
 	static void save_as_cb(Fl_Widget *w, Main_Window *mw);
+	static void print_cb(Fl_Widget *w, Main_Window *mw);
+	// Tileset menu
 	static void load_tileset_cb(Fl_Widget *w, Main_Window *mw);
 	static void add_tileset_cb(Fl_Widget *w, Main_Window *mw);
 	static void reload_tilesets_cb(Fl_Widget *w, Main_Window *mw);
 	static void load_recent_tileset_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void clear_recent_tilesets_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void unload_tilesets_cb(Fl_Widget *w, Main_Window *mw);
-	static void print_cb(Fl_Widget *w, Main_Window *mw);
-	static void exit_cb(Fl_Widget *w, Main_Window *mw);
 	// Edit menu
 	static void undo_cb(Fl_Widget *w, Main_Window *mw);
 	static void redo_cb(Fl_Widget *w, Main_Window *mw);

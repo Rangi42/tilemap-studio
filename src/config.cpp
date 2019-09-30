@@ -3,5 +3,5 @@
 Tilemap_Format Config::_format = Tilemap_Format::PLAIN;
 bool Config::_grid = false;
 bool Config::_rainbow_tiles = false;
-bool Config::_bold_palettes = false;
+bool Config::_bold_palettes = true;
 bool Config::_attributes = false;
