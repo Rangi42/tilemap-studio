@@ -148,9 +148,9 @@ void New_Tilemap_Dialog::initialize_content() {
 	_format = new Dropdown(0, 0, 0, 0, "Format:");
 	// Initialize content group's children
 	_tilemap_width->align(FL_ALIGN_LEFT);
-	_tilemap_width->range(1, 999);
+	_tilemap_width->range(1, 1024);
 	_tilemap_height->align(FL_ALIGN_LEFT);
-	_tilemap_height->range(1, 9999);
+	_tilemap_height->range(1, 1024);
 	for (int i = 0; i < NUM_FORMATS; i++) {
 		_format->add(format_name((Tilemap_Format)i));
 	}
@@ -162,7 +162,7 @@ int New_Tilemap_Dialog::refresh_content(int ww, int dy) {
 	_content->resize(win_m, dy, ww, ch);
 
 	int wgt_off = win_m + MAX(text_width(_tilemap_width->label(), 2), text_width(_format->label(), 2));
-	int wgt_w = text_width("999", 2) + wgt_h;
+	int wgt_w = text_width("1999", 2) + wgt_h;
 	_tilemap_width->resize(wgt_off, dy, wgt_w, wgt_h);
 	int wgt_off2 = _tilemap_width->x() + _tilemap_width->w() + win_m + text_width("Height:", 2);
 	_tilemap_height->resize(wgt_off2, dy, wgt_w, wgt_h);
@@ -232,7 +232,7 @@ void Resize_Dialog::initialize_content() {
 	}
 	// Initialize content group's children
 	_tilemap_width->align(FL_ALIGN_LEFT);
-	_tilemap_width->range(1, 999);
+	_tilemap_width->range(1, 1024);
 	_tilemap_height->align(FL_ALIGN_LEFT);
 	_tilemap_height->range(1, 9999);
 	anchor(Preferences::get("resize-anchor", 4));
@@ -245,7 +245,7 @@ int Resize_Dialog::refresh_content(int ww, int dy) {
 
 	int wgt_off = win_m + MAX(text_width(_tilemap_width->label(), 2), text_width(_tilemap_height->label(), 2));
 
-	wgt_w = text_width("999", 2) + wgt_h;
+	wgt_w = text_width("1999", 2) + wgt_h;
 	_tilemap_width->resize(wgt_off, dy, wgt_w, wgt_h);
 	_tilemap_height->resize(wgt_off, _tilemap_width->y() + _tilemap_width->h() + wgt_m, wgt_w, wgt_h);
 	wgt_off += wgt_w + 20;
@@ -337,7 +337,7 @@ void Tilemap_Width_Dialog::initialize_content() {
 	_tilemap_width = new OS_Spinner(0, 0, 0, 0, "Width:");
 	// Initialize content group's children
 	_tilemap_width->align(FL_ALIGN_LEFT);
-	_tilemap_width->range(1, 999);
+	_tilemap_width->range(1, 1024);
 }
 
 int Tilemap_Width_Dialog::refresh_content(int ww, int dy) {
@@ -345,7 +345,7 @@ int Tilemap_Width_Dialog::refresh_content(int ww, int dy) {
 	_content->resize(win_m, dy, ww, wgt_h);
 
 	int wgt_off = win_m + text_width(_tilemap_width->label(), 2);
-	int wgt_w = text_width("999", 2) + wgt_h;
+	int wgt_w = text_width("1999", 2) + wgt_h;
 	_tilemap_width->resize(wgt_off, dy, wgt_w, wgt_h);
 
 	return wgt_h;
@@ -400,7 +400,7 @@ int Add_Tileset_Dialog::refresh_content(int ww, int dy) {
 	_start_id->resize(wgt_off, dy, wgt_w, wgt_h);
 	dy += wgt_h + wgt_m;
 	wgt_off = win_m + text_width(_offset->label(), 3);
-	wgt_w = text_width("999", 2) + wgt_h;
+	wgt_w = text_width("1999", 2) + wgt_h;
 	_offset->resize(wgt_off, dy, wgt_w, wgt_h);
 	wgt_off = _offset->x() + _offset->w() + win_m + text_width(_length->label(), 3);
 	_length->resize(wgt_off, dy, wgt_w, wgt_h);

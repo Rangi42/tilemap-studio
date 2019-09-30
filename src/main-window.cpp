@@ -87,7 +87,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
 	int wgt_w = text_width("Width:", 4);
 	_width_heading = new Label(0, 0, wgt_w, 24, "Width:");
-	wgt_w = text_width("999", 2) + 22;
+	wgt_w = text_width("1999", 2) + 22;
 	_tilemap_width = new Default_Spinner(0, 0, wgt_w, 22);
 	new Fl_Box(0, 0, 4, 24);
 	_resize_tb = new Toolbar_Button(0, 0, 24, 24);
@@ -102,7 +102,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	// Initialize status bar
 	_status_bar = new Toolbar(wx, h-23, ww, 23);
 	wh -= _status_bar->h();
-	_tilemap_dimensions = new Status_Bar_Field(0, 0, text_width("Tilemap: 999 x 999", 8), 21, "");
+	_tilemap_dimensions = new Status_Bar_Field(0, 0, text_width("Tilemap: 1999 x 1999", 8), 21, "");
 	new Spacer(0, 0, 2, 21);
 	wgt_w = 21;
 	for (int i = 0; i < NUM_FORMATS; i++) {
@@ -114,9 +114,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	new Spacer(0, 0, 2, 21);
 	_hover_id = new Status_Bar_Field(0, 0, text_width("ID: $99", 8), 21, "");
 	new Spacer(0, 0, 2, 21);
-	_hover_xy = new Status_Bar_Field(0, 0, text_width("X/Y (999, 999)", 8), 21, "");
+	_hover_xy = new Status_Bar_Field(0, 0, text_width("X/Y (1999, 1999)", 8), 21, "");
 	new Spacer(0, 0, 2, 21);
-	_hover_landmark = new Status_Bar_Field(0, 0, text_width("Landmark (999, 999)", 8), 21, "");
+	_hover_landmark = new Status_Bar_Field(0, 0, text_width("Landmark (99, 99)", 8), 21, "");
 	_status_bar->end();
 	begin();
 
@@ -476,7 +476,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_width_heading->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
 	_tilemap_width->default_value(GAME_BOY_WIDTH);
-	_tilemap_width->range(1, 999);
+	_tilemap_width->range(1, 1024);
 	_tilemap_width->callback((Fl_Callback *)tilemap_width_tb_cb, this);
 
 	_resize_tb->tooltip("Resize... (Ctrl+E)");
