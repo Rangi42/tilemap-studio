@@ -474,7 +474,7 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_image_chooser->title("Read Image");
 	_image_chooser->filter("Image Files\t*.{png,bmp}\n");
 	_tilemap_chooser->title("Write Tilemap");
-	_tilemap_chooser->filter("Tilemap Files\t*.{tilemap,rle,bin,map,kmp}\n");
+	_tilemap_chooser->filter("Tilemap Files\t*.{tilemap,rle,bin,map,raw,kmp}\n");
 	_tilemap_chooser->options(Fl_Native_File_Chooser::Option::SAVEAS_CONFIRM);
 	_tileset_chooser->title("Write Tileset");
 	_tileset_chooser->filter("PNG Files\t*.png\n");

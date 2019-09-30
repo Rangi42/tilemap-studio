@@ -537,10 +537,10 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	// Configure dialogs
 
 	_tilemap_open_chooser->title("Open Tilemap");
-	_tilemap_open_chooser->filter("Tilemap Files\t*.{tilemap,rle,bin,map,kmp}\n");
+	_tilemap_open_chooser->filter("Tilemap Files\t*.{tilemap,rle,bin,map,raw,kmp}\n");
 
 	_tilemap_save_chooser->title("Save Tilemap");
-	_tilemap_save_chooser->filter("Tilemap Files\t*.{tilemap,rle,bin,map,kmp}\n");
+	_tilemap_save_chooser->filter("Tilemap Files\t*.{tilemap,rle,bin,map,raw,kmp}\n");
 	_tilemap_save_chooser->preset_file("NewTilemap.tilemap");
 	_tilemap_save_chooser->options(Fl_Native_File_Chooser::Option::SAVEAS_CONFIRM);
 

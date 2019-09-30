@@ -78,7 +78,8 @@ Tilemap_Format guess_format(const char *filename) {
 		// e.g. pokered/gfx/town_map.rle
 		return Tilemap_Format::RBY_TOWN_MAP;
 	}
-	if (s == "johto.bin" || s == "kanto.bin") {
+	if (ends_with(s, ".kmp") || s == "johto.bin" || s == "kanto.bin" ||
+		fs == GAME_BOY_WIDTH * GAME_BOY_HEIGHT + 1) {
 		// e.g. pokecrystal/gfx/pokegear/*.bin
 		return Tilemap_Format::GSC_TOWN_MAP;
 	}
