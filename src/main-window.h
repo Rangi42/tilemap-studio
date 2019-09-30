@@ -30,8 +30,9 @@ private:
 	Toolbar *_toolbar;
 	Fl_Group *_main_group, *_left_group, *_right_group;
 	OS_Tabs *_left_tabs;
-	OS_Tab *_bank0_tab, *_bank1_tab, *_bank2_tab, *_bank3_tab, *_palettes_tab;
-	Workpane *_bank0_pane, *_bank1_pane, *_bank2_pane, *_bank3_pane, *_palettes_pane;
+	OS_Tab *_tiles_tab, *_palettes_tab;
+	Workspace *_tiles_scroll;
+	Workpane *_palettes_pane;
 	Workspace *_tilemap_scroll;
 	Toolbar *_status_bar;
 	// GUI inputs

@@ -126,64 +126,29 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	wx += win_m; ww -= win_m * 2;
 	wy += win_m; wh -= win_m * 2;
 	// Left group
-	_left_group = new Fl_Group(wx, wy, 268, wh);
+	_left_group = new Fl_Group(wx, wy, 283, wh);
 	int gx = _left_group->x(), gy = _left_group->y(), gw = _left_group->w(), gh = _left_group->h();
 	_tileset_name = new Label(gx, gy, gw, wgt_h);
 	gy += _tileset_name->h(); gh -= _tileset_name->h();
-	int qy = gy + wgt_m + wgt_h - tab_h;
-	_left_tabs = new OS_Tabs(gx, qy, gw, gw+tab_h);
-	qy += tab_h;
-	_bank0_tab = new OS_Tab(gx, qy, gw, gw, " 0 ");
-	_bank0_pane = new Workpane(gx+5, qy+5, gw-10, gw-10);
-	int ox = _bank0_pane->x() + Fl::box_dx(_bank0_pane->box());
-	int oy = _bank0_pane->y() + Fl::box_dy(_bank0_pane->box());
-	for (int i = 0; i < TILES_PER_BANK; i++) {
+	int qy = gy + wgt_m + wgt_h - tab_h, qh = gw + tab_h - Fl::scrollbar_size();
+	_left_tabs = new OS_Tabs(gx, qy, gw, qh);
+	qy += tab_h; qh -= tab_h;
+	_tiles_tab = new OS_Tab(gx, qy, gw, qh, "Tiles");
+	_tiles_scroll = new Workspace(gx+5, qy+5, gw-10, qh-10);
+	int ox = _tiles_scroll->x() + Fl::box_dx(_tiles_scroll->box());
+	int oy = _tiles_scroll->y() + Fl::box_dy(_tiles_scroll->box());
+	for (int i = 0; i < MAX_NUM_TILES; i++) {
 		int tx = ox + (i % TILES_PER_ROW) * TILE_SIZE_2X, ty = oy + (i / TILES_PER_ROW) * TILE_SIZE_2X;
 		Tile_Button *tb = new Tile_Button(tx, ty, (uint16_t)i);
 		tb->callback((Fl_Callback *)select_tile_cb, this);
 		_tile_buttons[i] = tb;
 	}
-	_bank0_pane->end();
-	_bank0_pane->resizable(NULL);
+	_tiles_scroll->end();
+	_tiles_scroll->type(Fl_Scroll::VERTICAL_ALWAYS);
+	_tiles_scroll->resizable(NULL);
 	_left_tabs->begin();
-	_bank1_tab = new OS_Tab(gx, qy, gw, gw, " 1 ");
-	_bank1_pane = new Workpane(gx+5, qy+5, gw-10, gw-10);
-	for (int i = 0; i < TILES_PER_BANK; i++) {
-		int tx = ox + (i % TILES_PER_ROW) * TILE_SIZE_2X, ty = oy + (i / TILES_PER_ROW) * TILE_SIZE_2X;
-		int id = i + TILES_PER_BANK;
-		Tile_Button *tb = new Tile_Button(tx, ty, (uint16_t)id);
-		tb->callback((Fl_Callback *)select_tile_cb, this);
-		_tile_buttons[id] = tb;
-	}
-	_bank1_pane->end();
-	_bank1_pane->resizable(NULL);
-	_bank1_tab->end();
-	_bank2_tab = new OS_Tab(gx, qy, gw, gw, " 2 ");
-	_bank2_pane = new Workpane(gx+5, qy+5, gw-10, gw-10);
-	for (int i = 0; i < TILES_PER_BANK; i++) {
-		int tx = ox + (i % TILES_PER_ROW) * TILE_SIZE_2X, ty = oy + (i / TILES_PER_ROW) * TILE_SIZE_2X;
-		int id = i + TILES_PER_BANK * 2;
-		Tile_Button *tb = new Tile_Button(tx, ty, (uint16_t)id);
-		tb->callback((Fl_Callback *)select_tile_cb, this);
-		_tile_buttons[id] = tb;
-	}
-	_bank2_pane->end();
-	_bank2_pane->resizable(NULL);
-	_bank2_tab->end();
-	_bank3_tab = new OS_Tab(gx, qy, gw, gw, " 3 ");
-	_bank3_pane = new Workpane(gx+5, qy+5, gw-10, gw-10);
-	for (int i = 0; i < TILES_PER_BANK; i++) {
-		int tx = ox + (i % TILES_PER_ROW) * TILE_SIZE_2X, ty = oy + (i / TILES_PER_ROW) * TILE_SIZE_2X;
-		int id = i + TILES_PER_BANK * 3;
-		Tile_Button *tb = new Tile_Button(tx, ty, (uint16_t)id);
-		tb->callback((Fl_Callback *)select_tile_cb, this);
-		_tile_buttons[id] = tb;
-	}
-	_bank3_pane->end();
-	_bank3_pane->resizable(NULL);
-	_bank3_tab->end();
 	int pw = PALETTES_PER_ROW * TILE_SIZE_2X + 2, ph = (MAX_NUM_PALETTES / PALETTES_PER_ROW) * TILE_SIZE_2X + 2;
-	_palettes_tab = new OS_Tab(gx, qy, gw, ph+10, "Pals");
+	_palettes_tab = new OS_Tab(gx, qy, gw, ph+10, "Palettes");
 	_palettes_pane = new Workpane(gx+5, qy+5, pw, ph);
 	for (int i = 0; i < MAX_NUM_PALETTES; i++) {
 		int tx = ox + (i % PALETTES_PER_ROW) * TILE_SIZE_2X, ty = oy + (i / PALETTES_PER_ROW) * TILE_SIZE_2X;
@@ -202,9 +167,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_palettes_tab->end();
 	_left_tabs->resizable(NULL);
 	_left_group->begin();
-	wgt_w = MAX(text_width("$F:FF", 3), text_width("$A:AA", 3));
+	wgt_w = MAX(text_width("Tile: $F:FF", 3), text_width("Tile: $A:AA", 3));
 	int qx = gx + gw - wgt_w - wgt_m * 2 - wgt_h * 3;
-	_tile_heading = new Label(qx, gy, wgt_w, wgt_h, "$0:00");
+	_tile_heading = new Label(qx, gy, wgt_w, wgt_h, "Tile: $0:00");
 	qx += _tile_heading->w() + wgt_m;
 	_current_tile = new Tile_Swatch(qx+2, gy+2, TILE_SIZE_2X+2, TILE_SIZE_2X+2);
 	_current_attributes = new Tile_Swatch(qx+2, gy+2, TILE_SIZE_2X+2, TILE_SIZE_2X+2);
@@ -260,7 +225,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_tileset_dnd_receiver->user_data(this);
 
 	// Configure window
-	size_range(632, 406);
+	size_range(647, 406);
 	resizable(_main_group);
 	callback((Fl_Callback *)exit_cb, this);
 	xclass(PROGRAM_NAME);
@@ -276,10 +241,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 
 	// Configure workspaces
 	_tilemap_scroll->dnd_receiver(_tilemap_dnd_receiver);
-	_bank0_pane->dnd_receiver(_tileset_dnd_receiver);
-	_bank1_pane->dnd_receiver(_tileset_dnd_receiver);
-	_bank2_pane->dnd_receiver(_tileset_dnd_receiver);
-	_bank3_pane->dnd_receiver(_tileset_dnd_receiver);
+	_tiles_scroll->dnd_receiver(_tileset_dnd_receiver);
 	_palettes_pane->dnd_receiver(_tileset_dnd_receiver);
 
 	// Configure menu bar
@@ -882,58 +844,29 @@ void Main_Window::update_active_controls() {
 	}
 
 	int n = format_tileset_size(Config::format());
-
-	if (n > TILES_PER_BANK * 3) {
-		_bank1_tab->activate();
-		_bank2_tab->activate();
-		_bank3_tab->activate();
+	while (_tiles_scroll->children()) {
+		_tiles_scroll->remove(0);
 	}
-	else if (n > TILES_PER_BANK * 2) {
-		_bank1_tab->activate();
-		_bank2_tab->activate();
-		_bank3_tab->deactivate();
-		if (_left_tabs->value() == _bank3_tab) {
-			_left_tabs->value(_bank0_tab);
-			_left_tabs->do_callback();
-		}
-	}
-	else if (n > TILES_PER_BANK) {
-		_bank1_tab->activate();
-		_bank2_tab->deactivate();
-		_bank3_tab->deactivate();
-		if (_left_tabs->value() == _bank2_tab || _left_tabs->value() == _bank3_tab) {
-			_left_tabs->value(_bank0_tab);
-			_left_tabs->do_callback();
-		}
-	}
-	else {
-		_bank1_tab->deactivate();
-		_bank2_tab->deactivate();
-		_bank3_tab->deactivate();
-		if (_left_tabs->value() == _bank1_tab || _left_tabs->value() == _bank2_tab || _left_tabs->value() == _bank3_tab) {
-			_left_tabs->value(_bank0_tab);
-			_left_tabs->do_callback();
-		}
-	}
-
 	for (int i = 0; i < n; i++) {
-		_tile_buttons[i]->activate();
+		_tiles_scroll->add(_tile_buttons[i]);
 	}
-	for (int i = n; i < MAX_NUM_TILES; i++) {
-		_tile_buttons[i]->deactivate();
-	}
+	_tiles_scroll->add(_tiles_scroll->scrollbar);
+	_tiles_scroll->add(_tiles_scroll->hscrollbar);
+	_tiles_scroll->init_sizes();
+	_tiles_scroll->contents(TILE_SIZE_2X * TILES_PER_ROW, TILE_SIZE_2X * ((n + TILES_PER_ROW - 1) / TILES_PER_ROW));
 	if (!Config::attributes() && _selected_tile->id() >= n) {
 		select_tile_cb(_tile_buttons[0x000], this);
+		_tiles_scroll->scroll_to(0, 0);
 	}
 
 	if (format_has_palettes(Config::format())) {
 		_palettes_tab->activate();
 		int m = format_palettes_size(Config::format());
-		for (int i = 0; i < m; i++) {
-			_palette_buttons[i]->activate();
+		for (int i = 0; i < MAX_NUM_PALETTES; i++) {
+			_palettes_pane->remove(0);
 		}
-		for (int i = m; i < MAX_NUM_PALETTES; i++) {
-			_palette_buttons[i]->deactivate();
+		for (int i = 0; i < m; i++) {
+			_palettes_pane->add(_palette_buttons[i]);
 		}
 		if (Config::attributes() && _selected_palette->palette() >= m) {
 			select_palette_cb(_palette_buttons[0], this);
@@ -942,7 +875,7 @@ void Main_Window::update_active_controls() {
 	else {
 		_palettes_tab->deactivate();
 		if (_left_tabs->value() == _palettes_tab) {
-			_left_tabs->value(_bank0_tab);
+			_left_tabs->value(_tiles_tab);
 			_left_tabs->do_callback();
 		}
 	}
@@ -1015,6 +948,8 @@ void Main_Window::reformat_tilemap() {
 	Config::format(fmt);
 	_tilemap.limit_to_format(fmt);
 	_tilemap.modified(true);
+
+	_tiles_scroll->scroll_to(0, 0);
 
 	update_tilemap_metadata();
 	update_active_controls();
@@ -1911,12 +1846,18 @@ void Main_Window::select_tile_cb(Tile_Button *tb, Main_Window *mw) {
 	tb->setonly();
 	mw->_selected_tile = tb;
 	mw->_current_tile->id(tb->id());
-	int bank = (int)(tb->id() >> 8), offset = (int)(tb->id() & 0xFF);
-	OS_Tab *tileset_tabs[NUM_BANKS] = {mw->_bank0_tab, mw->_bank1_tab, mw->_bank2_tab, mw->_bank3_tab};
-	mw->_left_tabs->value(tileset_tabs[bank]);
 	char buffer[16] = {};
-	sprintf(buffer, "$%d:%02X", bank, offset);
+	int index = (int)tb->id();
+	int bank = index >> 8, offset = index & 0xFF;
+	sprintf(buffer, "Tile: $%d:%02X", bank, offset);
 	mw->_tile_heading->copy_label(buffer);
+	int ds = TILE_SIZE_2X * (index / TILES_PER_ROW);
+	if (ds >= mw->_tiles_scroll->yposition() + mw->_tiles_scroll->h() - TILE_SIZE_2X / 2) {
+		mw->_tiles_scroll->scroll_to(0, ds + TILE_SIZE_2X - mw->_tiles_scroll->h() + Fl::box_dh(mw->_tiles_scroll->box()));
+	}
+	else if (ds + TILE_SIZE_2X <= mw->_tiles_scroll->yposition() + TILE_SIZE_2X / 2) {
+		mw->_tiles_scroll->scroll_to(0, ds);
+	}
 	mw->_current_tile->redraw();
 	mw->_tile_heading->redraw();
 	mw->_left_tabs->redraw();
