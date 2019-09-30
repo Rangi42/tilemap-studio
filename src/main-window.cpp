@@ -1013,6 +1013,7 @@ void Main_Window::reformat_tilemap() {
 	}
 
 	Config::format(fmt);
+	_tilemap.limit_to_format(fmt);
 	_tilemap.modified(true);
 
 	update_tilemap_metadata();
