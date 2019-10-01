@@ -90,9 +90,9 @@ static void draw_highlight(int x, int y) {
 	fl_rect(x+1, y+1, TILE_SIZE_2X-2, TILE_SIZE_2X-2, FL_YELLOW);
 }
 
-static void draw_selection_border(int x, int y) {
+static void draw_selection_border(int x, int y, bool highlighted = false) {
 	fl_rect(x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_BLACK);
-	fl_rect(x+1, y+1, TILE_SIZE_2X-2, TILE_SIZE_2X-2, FL_WHITE);
+	fl_rect(x+1, y+1, TILE_SIZE_2X-2, TILE_SIZE_2X-2, highlighted ? FL_YELLOW : FL_WHITE);
 	fl_rect(x+2, y+2, TILE_SIZE_2X-4, TILE_SIZE_2X-4, FL_BLACK);
 }
 
@@ -250,7 +250,7 @@ void Tile_Tessera::draw() {
 		draw_highlight(X, Y);
 	}
 	if (this == Fl::belowmouse()) {
-		draw_selection_border(X, Y);
+		draw_selection_border(X, Y, _state.highlighted());
 	}
 }
 
@@ -291,7 +291,7 @@ Tile_Button::Tile_Button(int x, int y, uint16_t id) : Tile_Thing(id), Fl_Radio_B
 	user_data(NULL);
 	box(FL_NO_BOX);
 	labeltype(FL_NO_LABEL);
-	when(FL_WHEN_RELEASE_ALWAYS);
+	when(FL_WHEN_RELEASE);
 }
 
 void Tile_Button::draw() {
@@ -304,13 +304,25 @@ void Tile_Button::draw() {
 		draw_highlight(X, Y);
 	}
 	if (value()) {
-		draw_selection_border(X, Y);
+		draw_selection_border(X, Y, _state.highlighted());
 	}
 }
 
 int Tile_Button::handle(int event) {
-	// Don't interfere with dragging onto the parent Droppable|Workpane
-	return event == FL_ENTER || event == FL_LEAVE || event == FL_DRAG ? 0 : Fl_Radio_Button::handle(event);
+	switch (event) {
+	case FL_ENTER:
+	case FL_LEAVE:
+	case FL_DRAG:
+		// Don't interfere with dragging onto the parent Droppable|Workpane
+		return 0;
+	case FL_PUSH:
+		// Don't change the value on right-click
+		if (Fl::event_button() == FL_RIGHT_MOUSE) {
+			do_callback();
+			return 1;
+		}
+	}
+	return Fl_Radio_Button::handle(event);
 }
 
 Palette_Button::Palette_Button(int x, int y, int p) : Tile_Thing(0x000, false, false, false, false, p),
