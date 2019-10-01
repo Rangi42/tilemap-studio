@@ -169,7 +169,7 @@ protected:
 	int handle(int event);
 };
 
-class OS_Tab : public Fl_Group {
+class OS_Tab : public Bounded_Group {
 public:
 	OS_Tab(int x, int y, int w, int h, const char *l = NULL);
 };

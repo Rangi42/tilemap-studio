@@ -470,7 +470,7 @@ int OS_Tabs::handle(int event) {
 	return Fl_Tabs::handle(event);
 }
 
-OS_Tab::OS_Tab(int x, int y, int w, int h, const char *l) : Fl_Group(x, y, w, h, l) {
+OS_Tab::OS_Tab(int x, int y, int w, int h, const char *l) : Bounded_Group(x, y, w, h, l) {
 	labelfont(OS_FONT);
 	labelsize(OS_FONT_SIZE);
 	resizable(NULL);

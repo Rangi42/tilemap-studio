@@ -166,6 +166,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	int aw = gw - 10 - _palettes_pane->w() - wgt_m;
 	_transparency = new Default_Slider(ax+wgt_off, ay, aw-wgt_off, wgt_h, "Trans:");
 	_palettes_tab->end();
+	_palettes_tab->resizable(NULL);
 	_left_tabs->resizable(_tiles_tab);
 	_left_group->begin();
 	wgt_w = MAX(text_width("Tile: $F:FF", 3), text_width("Tile: $A:AA", 3));
@@ -500,6 +501,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	select_palette_cb(_palette_buttons[0], this);
 
 	_left_tabs->callback((Fl_Callback *)change_tab_cb, this);
+
+	_palettes_tab->size_range(_palettes_tab->w(), _palettes_tab->h(), _palettes_tab->w(), _palettes_tab->h());
 
 	_top_group->size_range(_top_group->w(), _top_group->h(), _top_group->w(), _top_group->h());
 
@@ -860,7 +863,7 @@ void Main_Window::update_active_controls() {
 	_tiles_scroll->add(_tiles_scroll->scrollbar);
 	_tiles_scroll->add(_tiles_scroll->hscrollbar);
 	_tiles_scroll->init_sizes();
-	int tw = TILE_SIZE_2X * TILES_PER_ROW, max_th = TILE_SIZE_2X * ((n + TILES_PER_ROW - 1) / TILES_PER_ROW);
+	int tw = TILES_PER_ROW * TILE_SIZE_2X, max_th = ((n + TILES_PER_ROW - 1) / TILES_PER_ROW) * TILE_SIZE_2X;
 	_tiles_scroll->contents(tw, max_th);
 	if (!Config::attributes() && _selected_tile->id() >= n) {
 		select_tile_cb(_tile_buttons[0x000], this);
@@ -868,7 +871,7 @@ void Main_Window::update_active_controls() {
 	}
 
 	_left_group->init_sizes();
-	int min_th = TILE_SIZE_2X * 2;
+	int min_th = (MAX_NUM_PALETTES / PALETTES_PER_ROW) * TILE_SIZE_2X;
 	if (Config::attributes()) {
 		max_th = min_th;
 	}
@@ -1871,7 +1874,7 @@ void Main_Window::select_tile_cb(Tile_Button *tb, Main_Window *mw) {
 	int bank = index >> 8, offset = index & 0xFF;
 	sprintf(buffer, "Tile: $%d:%02X", bank, offset);
 	mw->_tile_heading->copy_label(buffer);
-	int ds = TILE_SIZE_2X * (index / TILES_PER_ROW);
+	int ds = (index / TILES_PER_ROW) * TILE_SIZE_2X;
 	if (ds >= mw->_tiles_scroll->yposition() + mw->_tiles_scroll->h() - TILE_SIZE_2X / 2) {
 		mw->_tiles_scroll->scroll_to(0, ds + TILE_SIZE_2X - mw->_tiles_scroll->h() + Fl::box_dh(mw->_tiles_scroll->box()));
 	}
