@@ -127,6 +127,9 @@ private:
 	void resize_tilemap(void);
 	void reformat_tilemap(void);
 	bool save_tilemap(bool force);
+	void select_tile(uint16_t id);
+	void highlight_tile(uint16_t id);
+	void select_palette(int palette);
 	void image_to_tiles(void);
 private:
 	// Drag-and-drop

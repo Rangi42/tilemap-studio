@@ -411,7 +411,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_add_tb->callback((Fl_Callback *)add_tileset_cb, this);
 	_add_tb->image(ADD_ICON);
 
-	_reload_tb->tooltip("Reload Tilesets... (Ctrl+R)");
+	_reload_tb->tooltip("Reload Tilesets (Ctrl+R)");
 	_reload_tb->callback((Fl_Callback *)reload_tilesets_cb, this);
 	_reload_tb->image(RELOAD_ICON);
 	_reload_tb->deimage(RELOAD_DISABLED_ICON);
@@ -497,8 +497,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 
 	// Configure containers
 
-	select_tile_cb(_tile_buttons[0x000], this);
-	select_palette_cb(_palette_buttons[0], this);
+	select_tile(0x000);
+	select_palette(0);
 
 	_left_tabs->callback((Fl_Callback *)change_tab_cb, this);
 
@@ -866,7 +866,7 @@ void Main_Window::update_active_controls() {
 	int tw = TILES_PER_ROW * TILE_SIZE_2X, max_th = ((n + TILES_PER_ROW - 1) / TILES_PER_ROW) * TILE_SIZE_2X;
 	_tiles_scroll->contents(tw, max_th);
 	if (!Config::attributes() && _selected_tile->id() >= n) {
-		select_tile_cb(_tile_buttons[0x000], this);
+		select_tile(0x000);
 		_tiles_scroll->scroll_to(0, 0);
 	}
 
@@ -892,7 +892,7 @@ void Main_Window::update_active_controls() {
 			_palettes_pane->add(_palette_buttons[i]);
 		}
 		if (Config::attributes() && _selected_palette->palette() >= m) {
-			select_palette_cb(_palette_buttons[0], this);
+			select_palette(0);
 		}
 	}
 	else {
@@ -1216,6 +1216,51 @@ void Main_Window::load_recent_tileset(int n) {
 
 	const char *filename = _recent_tilesets[n].c_str();
 	load_tileset(filename);
+}
+
+void Main_Window::select_tile(uint16_t id) {
+	if (_selected_tile) {
+		_selected_tile->clear();
+	}
+	_selected_tile = _tile_buttons[id];
+	_selected_tile->setonly();
+	_current_tile->id(id);
+
+	char buffer[16] = {};
+	int index = (int)id;
+	int bank = index >> 8, offset = index & 0xFF;
+	sprintf(buffer, "Tile: $%d:%02X", bank, offset);
+	_tile_heading->copy_label(buffer);
+
+	int ds = (index / TILES_PER_ROW) * TILE_SIZE_2X;
+	if (ds >= _tiles_scroll->yposition() + _tiles_scroll->h() - TILE_SIZE_2X / 2) {
+		_tiles_scroll->scroll_to(0, ds + TILE_SIZE_2X - _tiles_scroll->h() + Fl::box_dh(_tiles_scroll->box()));
+	}
+	else if (ds + TILE_SIZE_2X <= _tiles_scroll->yposition() + TILE_SIZE_2X / 2) {
+		_tiles_scroll->scroll_to(0, ds);
+	}
+
+	_current_tile->redraw();
+	_tile_heading->redraw();
+	_tiles_tab->redraw();
+}
+
+void Main_Window::highlight_tile(uint16_t id) {
+	Config::highlight_id(Config::highlight_id() != id ? id : (uint16_t)-1);
+	_tilemap_scroll->redraw();
+	_tiles_tab->redraw();
+}
+
+void Main_Window::select_palette(int palette) {
+	if (_selected_palette) {
+		_selected_palette->clear();
+	}
+	_selected_palette = _palette_buttons[palette];
+	_selected_palette->setonly();
+	_current_attributes->palette(palette);
+
+	_current_attributes->redraw();
+	_palettes_tab->redraw();
 }
 
 void Main_Window::image_to_tiles() {
@@ -1863,38 +1908,21 @@ void Main_Window::change_tab_cb(OS_Tabs *, Main_Window *mw) {
 }
 
 void Main_Window::select_tile_cb(Tile_Button *tb, Main_Window *mw) {
-	if (mw->_selected_tile) {
-		mw->_selected_tile->clear();
+	if (Fl::event_button() == FL_LEFT_MOUSE) {
+		// Left-click to select
+		mw->select_tile(tb->id());
 	}
-	tb->setonly();
-	mw->_selected_tile = tb;
-	mw->_current_tile->id(tb->id());
-	char buffer[16] = {};
-	int index = (int)tb->id();
-	int bank = index >> 8, offset = index & 0xFF;
-	sprintf(buffer, "Tile: $%d:%02X", bank, offset);
-	mw->_tile_heading->copy_label(buffer);
-	int ds = (index / TILES_PER_ROW) * TILE_SIZE_2X;
-	if (ds >= mw->_tiles_scroll->yposition() + mw->_tiles_scroll->h() - TILE_SIZE_2X / 2) {
-		mw->_tiles_scroll->scroll_to(0, ds + TILE_SIZE_2X - mw->_tiles_scroll->h() + Fl::box_dh(mw->_tiles_scroll->box()));
+	else if (Fl::event_button() == FL_RIGHT_MOUSE) {
+		// Right-click to highlight
+		mw->highlight_tile(tb->id());
 	}
-	else if (ds + TILE_SIZE_2X <= mw->_tiles_scroll->yposition() + TILE_SIZE_2X / 2) {
-		mw->_tiles_scroll->scroll_to(0, ds);
-	}
-	mw->_current_tile->redraw();
-	mw->_tile_heading->redraw();
-	mw->_left_tabs->redraw();
 }
 
 void Main_Window::select_palette_cb(Palette_Button *pb, Main_Window *mw) {
-	if (mw->_selected_palette) {
-		mw->_selected_palette->clear();
+	if (Fl::event_button() == FL_LEFT_MOUSE) {
+		// Left-click to select
+		mw->select_palette(pb->palette());
 	}
-	pb->setonly();
-	mw->_selected_palette = pb;
-	mw->_current_attributes->palette(pb->palette());
-	mw->_current_attributes->redraw();
-	mw->_palettes_tab->redraw();
 }
 
 void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
@@ -1931,8 +1959,7 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 			mw->_obp1_tb->do_callback();
 			mw->_priority_tb->redraw();
 			mw->_obp1_tb->redraw();
-			int palette = tt->palette();
-			select_palette_cb(mw->_palette_buttons[palette], mw);
+			mw->select_palette(tt->palette());
 		}
 		else {
 			mw->_x_flip_tb->value(tt->x_flip());
@@ -1941,8 +1968,7 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 			mw->_y_flip_tb->do_callback();
 			mw->_x_flip_tb->redraw();
 			mw->_y_flip_tb->redraw();
-			uint16_t id = tt->id();
-			select_tile_cb(mw->_tile_buttons[id], mw);
+			mw->select_tile(tt->id());
 		}
 	}
 }

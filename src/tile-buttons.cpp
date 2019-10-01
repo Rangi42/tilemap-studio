@@ -85,6 +85,11 @@ static void draw_grid(int x, int y) {
 	}
 }
 
+static void draw_highlight(int x, int y) {
+	fl_rect(x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_DARK_YELLOW);
+	fl_rect(x+1, y+1, TILE_SIZE_2X-2, TILE_SIZE_2X-2, FL_YELLOW);
+}
+
 static void draw_selection_border(int x, int y) {
 	fl_rect(x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_BLACK);
 	fl_rect(x+1, y+1, TILE_SIZE_2X-2, TILE_SIZE_2X-2, FL_WHITE);
@@ -241,6 +246,9 @@ void Tile_Tessera::draw() {
 	if (Config::grid()) {
 		draw_grid(X, Y);
 	}
+	if (_state.highlighted()) {
+		draw_highlight(X, Y);
+	}
 	if (this == Fl::belowmouse()) {
 		draw_selection_border(X, Y);
 	}
@@ -283,7 +291,7 @@ Tile_Button::Tile_Button(int x, int y, uint16_t id) : Tile_Thing(id), Fl_Radio_B
 	user_data(NULL);
 	box(FL_NO_BOX);
 	labeltype(FL_NO_LABEL);
-	when(FL_WHEN_RELEASE);
+	when(FL_WHEN_RELEASE_ALWAYS);
 }
 
 void Tile_Button::draw() {
@@ -291,6 +299,9 @@ void Tile_Button::draw() {
 	_state.draw(X, Y, true, Config::attributes(), Config::bold_palettes(), !!active(), !!value());
 	if (Config::grid()) {
 		draw_grid(X, Y);
+	}
+	if (_state.highlighted()) {
+		draw_highlight(X, Y);
 	}
 	if (value()) {
 		draw_selection_border(X, Y);

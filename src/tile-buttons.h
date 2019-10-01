@@ -47,6 +47,7 @@ public:
 	inline bool same(const Tile_State &other, bool attr) const {
 		return attr ? same_attributes(other) : same_tiles(other);
 	}
+	inline bool highlighted(void) const { return id == Config::highlight_id(); }
 	inline void draw(int x, int y, bool tile, bool attr, bool bold, bool active, bool selected) {
 		if (tile) { draw_tile(x, y, active, selected); }
 		else { fl_rectf(x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_WHITE); }
