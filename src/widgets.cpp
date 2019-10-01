@@ -407,11 +407,28 @@ void Dropdown::draw() {
 	draw_label();
 }
 
-OS_Tabs::OS_Tabs(int x, int y, int w, int h, const char *l) : Fl_Tabs(x, y, w, h, l) {
+void Bounded_Size::bound_size(int &w, int &h) const {
+	if (_min_w > 0) { w = MAX(_min_w, w); }
+	if (_max_w > 0) { w = MIN(_max_w, w); }
+	if (_min_h > 0) { h = MAX(_min_h, h); }
+	if (_max_h > 0) { h = MIN(_max_h, h); }
+}
+
+void Bounded_Group::resize(int x, int y, int w, int h) {
+	bound_size(w, h);
+	Fl_Group::resize(x, y, w, h);
+}
+
+OS_Tabs::OS_Tabs(int x, int y, int w, int h, const char *l) : Fl_Tabs(x, y, w, h, l), Bounded_Size() {
 	labelfont(OS_FONT);
 	labelsize(OS_FONT_SIZE);
 	box(OS_TABS_BOX);
 	selection_color(OS_TAB_COLOR);
+}
+
+void OS_Tabs::resize(int x, int y, int w, int h) {
+	bound_size(w, h);
+	Fl_Tabs::resize(x, y, w, h);
 }
 
 int OS_Tabs::handle(int event) {

@@ -129,12 +129,12 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_left_group = new Fl_Group(wx, wy, 283, wh);
 	int gx = _left_group->x(), gy = _left_group->y(), gw = _left_group->w(), gh = _left_group->h();
 	_tileset_name = new Label(gx, gy, gw, wgt_h);
-	gy += _tileset_name->h(); gh -= _tileset_name->h();
-	int qy = gy + wgt_m + wgt_h - tab_h, qh = gw + tab_h - Fl::scrollbar_size();
-	_left_tabs = new OS_Tabs(gx, qy, gw, qh);
-	qy += tab_h; qh -= tab_h;
-	_tiles_tab = new OS_Tab(gx, qy, gw, qh, "Tiles");
-	_tiles_scroll = new Workspace(gx+5, qy+5, gw-10, qh-10);
+	gy += _tileset_name->h(); gh -= _tileset_name->h() + wgt_m + wgt_h - tab_h;
+	int qy = gy + wgt_m + wgt_h - tab_h;
+	_left_tabs = new OS_Tabs(gx, qy, gw, gh);
+	qy += tab_h; gh -= tab_h;
+	_tiles_tab = new OS_Tab(gx, qy, gw, gh, "Tiles");
+	_tiles_scroll = new Workspace(gx+5, qy+5, gw-10, gh-10);
 	int ox = _tiles_scroll->x() + Fl::box_dx(_tiles_scroll->box());
 	int oy = _tiles_scroll->y() + Fl::box_dy(_tiles_scroll->box());
 	for (int i = 0; i < MAX_NUM_TILES; i++) {
@@ -146,6 +146,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_tiles_scroll->end();
 	_tiles_scroll->type(Fl_Scroll::VERTICAL_ALWAYS);
 	_tiles_scroll->resizable(NULL);
+	_tiles_tab->resizable(_tiles_scroll);
 	_left_tabs->begin();
 	int pw = PALETTES_PER_ROW * TILE_SIZE_2X + 2, ph = (MAX_NUM_PALETTES / PALETTES_PER_ROW) * TILE_SIZE_2X + 2;
 	_palettes_tab = new OS_Tab(gx, qy, gw, ph+10, "Palettes");
@@ -165,10 +166,12 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	int aw = gw - 10 - _palettes_pane->w() - wgt_m;
 	_transparency = new Default_Slider(ax+wgt_off, ay, aw-wgt_off, wgt_h, "Trans:");
 	_palettes_tab->end();
-	_left_tabs->resizable(NULL);
+	_left_tabs->resizable(_tiles_tab);
 	_left_group->begin();
 	wgt_w = MAX(text_width("Tile: $F:FF", 3), text_width("Tile: $A:AA", 3));
-	int qx = gx + gw - wgt_w - wgt_m * 2 - wgt_h * 3;
+	int qw = wgt_w + wgt_m * 2 + wgt_h * 3;
+	int qx = gx + gw - qw;
+	_top_group = new Bounded_Group(qx, gy, qw, wgt_h);
 	_tile_heading = new Label(qx, gy, wgt_w, wgt_h, "Tile: $0:00");
 	qx += _tile_heading->w() + wgt_m;
 	_current_tile = new Tile_Swatch(qx+2, gy+2, TILE_SIZE_2X+2, TILE_SIZE_2X+2);
@@ -179,7 +182,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	qx += _x_flip_tb->w();
 	_y_flip_tb = new Toolbar_Toggle_Button(qx, gy, wgt_h, wgt_h);
 	_obp1_tb = new Toolbar_Toggle_Button(qx, gy, wgt_h, wgt_h);
-	_left_group->resizable(NULL);
+	_top_group->end();
+	_top_group->resizable(NULL);
+	_left_group->resizable(_left_tabs);
 	wx += _left_group->w() + win_m; ww -= _left_group->w() + win_m;
 	// Middle spacer
 	_main_group->begin();
@@ -495,6 +500,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	select_palette_cb(_palette_buttons[0], this);
 
 	_left_tabs->callback((Fl_Callback *)change_tab_cb, this);
+
+	_top_group->size_range(_top_group->w(), _top_group->h(), _top_group->w(), _top_group->h());
 
 	// Configure dialogs
 
@@ -853,11 +860,24 @@ void Main_Window::update_active_controls() {
 	_tiles_scroll->add(_tiles_scroll->scrollbar);
 	_tiles_scroll->add(_tiles_scroll->hscrollbar);
 	_tiles_scroll->init_sizes();
-	_tiles_scroll->contents(TILE_SIZE_2X * TILES_PER_ROW, TILE_SIZE_2X * ((n + TILES_PER_ROW - 1) / TILES_PER_ROW));
+	int tw = TILE_SIZE_2X * TILES_PER_ROW, max_th = TILE_SIZE_2X * ((n + TILES_PER_ROW - 1) / TILES_PER_ROW);
+	_tiles_scroll->contents(tw, max_th);
 	if (!Config::attributes() && _selected_tile->id() >= n) {
 		select_tile_cb(_tile_buttons[0x000], this);
 		_tiles_scroll->scroll_to(0, 0);
 	}
+
+	_left_group->init_sizes();
+	int min_th = TILE_SIZE_2X * 2;
+	if (Config::attributes()) {
+		max_th = min_th;
+	}
+	else {
+		min_th = tw;
+	}
+	int tdw = 12 + Fl::scrollbar_size(), tdh = 12 + OS_TAB_HEIGHT;
+	_left_tabs->size_range(tw + tdw, min_th + tdh, tw + tdw, max_th + tdh);
+	_left_tabs->resize(_left_tabs->x(), _left_tabs->y(), _left_tabs->w(), _tilemap_scroll->h());
 
 	if (format_has_palettes(Config::format())) {
 		_palettes_tab->activate();
@@ -1439,6 +1459,7 @@ void Main_Window::close_cb(Fl_Widget *, Main_Window *mw) {
 	mw->_tilemap_scroll->clear();
 	mw->_tilemap_scroll->scroll_to(0, 0);
 	mw->_tilemap_scroll->contents(0, 0);
+	mw->_tiles_scroll->scroll_to(0, 0);
 	mw->init_sizes();
 	mw->_tilemap_file.clear();
 	mw->update_tilemap_metadata();
@@ -1834,7 +1855,6 @@ void Main_Window::transparency_cb(Default_Slider *, Main_Window *mw) {
 
 void Main_Window::change_tab_cb(OS_Tabs *, Main_Window *mw) {
 	Config::attributes(mw->_left_tabs->value() == mw->_palettes_tab);
-	mw->_left_tabs->size(mw->_left_tabs->w(), mw->_left_tabs->value()->h() + OS_TAB_HEIGHT);
 	mw->update_active_controls();
 	mw->redraw();
 }

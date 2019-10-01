@@ -144,9 +144,27 @@ public:
 	void draw(void);
 };
 
-class OS_Tabs : public Fl_Tabs {
+class Bounded_Size {
+private:
+	int _min_w, _min_h, _max_w, _max_h;
+public:
+	inline Bounded_Size(void) : _min_w(), _min_h(), _max_w(), _max_h() {}
+	inline void size_range(int min_w, int min_h, int max_w, int max_h) {
+		_min_w = min_w; _min_h = min_h; _max_w = max_w; _max_h = max_h;
+	}
+	void bound_size(int &w, int &h) const;
+};
+
+class Bounded_Group : public Fl_Group, public Bounded_Size {
+public:
+	inline Bounded_Group(int x, int y, int w, int h, const char *l = NULL) : Fl_Group(x, y, w, h, l), Bounded_Size() {}
+	void resize(int x, int y, int w, int h);
+};
+
+class OS_Tabs : public Fl_Tabs, public Bounded_Size {
 public:
 	OS_Tabs(int x, int y, int w, int h, const char *l = NULL);
+	void resize(int x, int y, int w, int h);
 protected:
 	int handle(int event);
 };

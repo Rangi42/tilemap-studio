@@ -29,6 +29,7 @@ private:
 	Fl_Menu_Bar *_menu_bar;
 	Toolbar *_toolbar;
 	Fl_Group *_main_group, *_left_group, *_right_group;
+	Bounded_Group *_top_group;
 	OS_Tabs *_left_tabs;
 	OS_Tab *_tiles_tab, *_palettes_tab;
 	Workspace *_tiles_scroll;
