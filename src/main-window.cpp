@@ -116,7 +116,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	new Spacer(0, 0, 2, 21);
 	_hover_xy = new Status_Bar_Field(0, 0, text_width("X/Y (1999, 1999)", 8), 21, "");
 	new Spacer(0, 0, 2, 21);
-	_hover_landmark = new Status_Bar_Field(0, 0, text_width("Landmark (99, 99)", 8), 21, "");
+	_hover_landmark = new Status_Bar_Field(0, 0, text_width("Landmark (199, 199)", 8), 21, "");
 	_status_bar->end();
 	begin();
 
