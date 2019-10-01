@@ -242,7 +242,7 @@ Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint16_t id, bo
 
 void Tile_Tessera::draw() {
 	int X = x(), Y = y();
-	_state.draw(X, Y, true, Config::attributes(), Config::bold_palettes(), !!active(), false);
+	_state.draw(X, Y, true, Config::show_attributes(), Config::bold_palettes(), !!active(), false);
 	if (Config::grid()) {
 		draw_grid(X, Y);
 	}
@@ -296,7 +296,7 @@ Tile_Button::Tile_Button(int x, int y, uint16_t id) : Tile_Thing(id), Fl_Radio_B
 
 void Tile_Button::draw() {
 	int X = x(), Y = y();
-	_state.draw(X, Y, true, Config::attributes(), Config::bold_palettes(), !!active(), !!value());
+	_state.draw(X, Y, true, Config::show_attributes(), Config::bold_palettes(), !!active(), !!value());
 	if (Config::grid()) {
 		draw_grid(X, Y);
 	}

@@ -96,7 +96,7 @@ public:
 	inline uint16_t tile_id(void) const { return _selected_tile ? _selected_tile->id() : 0x000; }
 	inline bool x_flip(void) const { return _x_flip_tb->active() && !!_x_flip_tb->value(); }
 	inline bool y_flip(void) const { return _y_flip_tb->active() && !!_y_flip_tb->value(); }
-	inline int palette(void) const { return _selected_palette && Config::attributes() ? (int)_selected_palette->palette() : -1; }
+	inline int palette(void) const { return _selected_palette && Config::show_attributes() ? (int)_selected_palette->palette() : -1; }
 	inline bool priority(void) const { return _priority_tb->visible() && !!_priority_tb->value(); }
 	inline bool obp1(void) const { return _obp1_tb->visible() && !!_obp1_tb->value(); }
 	inline const char *modified_filename(void) const {

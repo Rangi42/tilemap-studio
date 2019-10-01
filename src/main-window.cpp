@@ -865,14 +865,14 @@ void Main_Window::update_active_controls() {
 	_tiles_scroll->init_sizes();
 	int tw = TILES_PER_ROW * TILE_SIZE_2X, max_th = ((n + TILES_PER_ROW - 1) / TILES_PER_ROW) * TILE_SIZE_2X;
 	_tiles_scroll->contents(tw, max_th);
-	if (!Config::attributes() && _selected_tile->id() >= n) {
+	if (!Config::show_attributes() && _selected_tile->id() >= n) {
 		select_tile(0x000);
 		_tiles_scroll->scroll_to(0, 0);
 	}
 
 	_left_group->init_sizes();
 	int min_th = (MAX_NUM_PALETTES / PALETTES_PER_ROW) * TILE_SIZE_2X;
-	if (Config::attributes()) {
+	if (Config::show_attributes()) {
 		max_th = min_th;
 	}
 	else {
@@ -891,7 +891,7 @@ void Main_Window::update_active_controls() {
 		for (int i = 0; i < m; i++) {
 			_palettes_pane->add(_palette_buttons[i]);
 		}
-		if (Config::attributes() && _selected_palette->palette() >= m) {
+		if (Config::show_attributes() && _selected_palette->palette() >= m) {
 			select_palette(0);
 		}
 	}
@@ -903,7 +903,7 @@ void Main_Window::update_active_controls() {
 		}
 	}
 
-	if (Config::attributes()) {
+	if (Config::show_attributes()) {
 		_tile_heading->hide();
 		_current_tile->hide();
 		_x_flip_tb->hide();
@@ -987,7 +987,7 @@ void Main_Window::reformat_tilemap() {
 void Main_Window::edit_tile(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
 	Tile_State ts(tile_id(), x_flip(), y_flip(), priority(), obp1(), palette());
-	bool a = Config::attributes();
+	bool a = Config::show_attributes();
 	if (fs.same(ts, a)) { return; }
 	tt->assign(ts, a);
 	tt->damage(1);
@@ -997,7 +997,7 @@ void Main_Window::edit_tile(Tile_Tessera *tt) {
 void Main_Window::flood_fill(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
 	Tile_State ts(tile_id(), x_flip(), y_flip(), priority(), obp1(), palette());
-	bool a = Config::attributes();
+	bool a = Config::show_attributes();
 	if (fs.same(ts, a)) { return; }
 	std::queue<size_t> queue;
 	size_t w = _tilemap.width(), h = _tilemap.height(), n = _tilemap.size();
@@ -1024,7 +1024,7 @@ void Main_Window::flood_fill(Tile_Tessera *tt) {
 void Main_Window::substitute_tile(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
 	Tile_State ts(tile_id(), x_flip(), y_flip(), priority(), obp1(), palette());
-	bool a = Config::attributes();
+	bool a = Config::show_attributes();
 	size_t n = _tilemap.size();
 	for (size_t i = 0; i < n; i++) {
 		Tile_Tessera *ff = _tilemap.tile(i);
@@ -1039,7 +1039,7 @@ void Main_Window::substitute_tile(Tile_Tessera *tt) {
 void Main_Window::swap_tiles(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
 	Tile_State ts(tile_id(), x_flip(), y_flip(), priority(), obp1(), palette());
-	bool a = Config::attributes();
+	bool a = Config::show_attributes();
 	if (fs.same(ts, a)) { return; }
 	size_t n = _tilemap.size();
 	for (size_t i = 0; i < n; i++) {
@@ -1902,7 +1902,7 @@ void Main_Window::transparency_cb(Default_Slider *, Main_Window *mw) {
 }
 
 void Main_Window::change_tab_cb(OS_Tabs *, Main_Window *mw) {
-	Config::attributes(mw->_left_tabs->value() == mw->_palettes_tab);
+	Config::show_attributes(mw->_left_tabs->value() == mw->_palettes_tab);
 	mw->update_active_controls();
 	mw->redraw();
 }
@@ -1952,7 +1952,7 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 	}
 	else if (Fl::event_button() == FL_RIGHT_MOUSE) {
 		// Right-click to select
-		if (Config::attributes()) {
+		if (Config::show_attributes()) {
 			mw->_priority_tb->value(tt->priority());
 			mw->_priority_tb->do_callback();
 			mw->_obp1_tb->value(tt->obp1());
