@@ -354,7 +354,7 @@ void Tilemap::limit_to_format(Tilemap_Format fmt) {
 		if (tt->id() >= n) {
 			tt->id((uint16_t)(n - 1));
 		}
-		if (tt->palette() == -1 && m > -1) {
+		if (tt->palette() == -1 && m > 0) {
 			tt->palette(0);
 		}
 		else if (tt->palette() >= m) {
