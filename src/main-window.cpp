@@ -890,8 +890,8 @@ void Main_Window::update_active_controls() {
 	}
 	int tdw = 12 + Fl::scrollbar_size(), tdh = 12 + OS_TAB_HEIGHT;
 	_left_tabs->size_range(tw + tdw, min_th + tdh, tw + tdw, max_th + tdh);
-	int tdx = _left_tabs->x() - _tilemap_scroll->x();
-	_left_tabs->resize(_left_tabs->x(), _left_tabs->y(), _left_tabs->w(), _tilemap_scroll->h() + tdx);
+	int tdy = _tilemap_scroll->y() - _left_tabs->y();
+	_left_tabs->resize(_left_tabs->x(), _left_tabs->y(), _left_tabs->w(), _tilemap_scroll->h() + tdy);
 
 	if (format_has_palettes(Config::format())) {
 		_palettes_tab->activate();
