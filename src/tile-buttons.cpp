@@ -4,6 +4,17 @@
 #include "main-window.h"
 #include "tile-buttons.h"
 
+static const Fl_Color palette_colors[MAX_NUM_PALETTES] = {
+	fl_rgb_color(0xA0, 0xB0, 0xC0), fl_rgb_color(0xE6, 0x19, 0x4B),
+	fl_rgb_color(0x8A, 0xE8, 0x17), fl_rgb_color(0x2B, 0x95, 0xFF),
+	fl_rgb_color(0xFF, 0xE1, 0x19), fl_rgb_color(0xF5, 0x82, 0x31),
+	fl_rgb_color(0x43, 0xF2, 0xF2), fl_rgb_color(0xDF, 0x32, 0xEF),
+	fl_rgb_color(0x50, 0x60, 0x70), fl_rgb_color(0x8C, 0x0B, 0x00),
+	fl_rgb_color(0x18, 0xB2, 0x2A), fl_rgb_color(0x43, 0x00, 0xCC),
+	fl_rgb_color(0xFF, 0x77, 0xA8), fl_rgb_color(0x9A, 0x63, 0x24),
+	fl_rgb_color(0x46, 0x99, 0x90), fl_rgb_color(0x7A, 0x1A, 0x5D)
+};
+
 static const uchar palette_digits_png_buffer[305] = {
 	0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
 	0x00, 0x00, 0x00, 0x50, 0x00, 0x00, 0x00, 0x07, 0x04, 0x03, 0x00, 0x00, 0x00, 0x6d, 0xb4, 0xd7,
@@ -55,13 +66,25 @@ static const uchar obp1_png_buffer[116] = {
 
 static Fl_PNG_Image obp1_image(NULL, obp1_png_buffer, sizeof(obp1_png_buffer));
 
-static const Fl_Color bg_colors[16] = {
+static const uchar swatch_backdrop_png_buffer[103] = {
+	0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+	0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x10, 0x02, 0x03, 0x00, 0x00, 0x00, 0x62, 0x9d, 0x17,
+	0xf2, 0x00, 0x00, 0x00, 0x0c, 0x50, 0x4c, 0x54, 0x45, 0x00, 0x00, 0x00, 0x55, 0x55, 0x55, 0xaa,
+	0xaa, 0xaa, 0xff, 0xff, 0xff, 0xc1, 0x7f, 0x62, 0xd1, 0x00, 0x00, 0x00, 0x16, 0x49, 0x44, 0x41,
+	0x54, 0x78, 0x5e, 0x63, 0xf8, 0xbf, 0xea, 0xff, 0x2a, 0x74, 0x22, 0x14, 0x08, 0xd1, 0x08, 0x62,
+	0xd5, 0x01, 0x00, 0xd5, 0x6b, 0x1f, 0xe1, 0x2c, 0xfd, 0xb0, 0x6a, 0x00, 0x00, 0x00, 0x00, 0x49,
+	0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
+};
+
+static Fl_PNG_Image swatch_backdrop_image(NULL, swatch_backdrop_png_buffer, sizeof(swatch_backdrop_png_buffer));
+
+static const Fl_Color rainbow_bg_colors[16] = {
 	fl_rgb_color(0x12, 0x34, 0x56), fl_rgb_color(0x12, 0x1B, 0x56), fl_rgb_color(0x23, 0x12, 0x56), fl_rgb_color(0x3C, 0x12, 0x56),
 	fl_rgb_color(0x56, 0x12, 0x56), fl_rgb_color(0x56, 0x12, 0x3D), fl_rgb_color(0x56, 0x12, 0x23), fl_rgb_color(0x56, 0x1A, 0x12),
 	fl_rgb_color(0x56, 0x34, 0x12), fl_rgb_color(0x56, 0x4D, 0x12), fl_rgb_color(0x45, 0x56, 0x12), fl_rgb_color(0x2C, 0x56, 0x12),
 	fl_rgb_color(0x12, 0x56, 0x12), fl_rgb_color(0x12, 0x56, 0x2B), fl_rgb_color(0x12, 0x56, 0x45), fl_rgb_color(0x12, 0x4E, 0x56),
 };
-static const Fl_Color fg_colors[16] = {
+static const Fl_Color rainbow_fg_colors[16] = {
 	fl_rgb_color(0xAB, 0xCD, 0xEF), fl_rgb_color(0xAB, 0xB4, 0xEF), fl_rgb_color(0xBC, 0xAB, 0xEF), fl_rgb_color(0xD5, 0xAB, 0xEF),
 	fl_rgb_color(0xEF, 0xAB, 0xEF), fl_rgb_color(0xEF, 0xAB, 0xD6), fl_rgb_color(0xEF, 0xAB, 0xBC), fl_rgb_color(0xEF, 0xB3, 0xAB),
 	fl_rgb_color(0xEF, 0xCD, 0xAB), fl_rgb_color(0xEF, 0xE6, 0xAB), fl_rgb_color(0xDE, 0xEF, 0xAB), fl_rgb_color(0xC5, 0xEF, 0xAB),
@@ -142,24 +165,27 @@ void Tile_State::draw_tile(int x, int y, bool active, bool selected) {
 	char l1 = (char)(hi > 9 ? 'A' + hi - 10 : '0' + hi), l2 = (char)(lo > 9 ? 'A' + lo - 10 : '0' + lo);
 	const char buffer[3] = {l1, l2, '\0'};
 	bool r = Config::rainbow_tiles();
-	Fl_Color bg = bg_colors[r ? lo : 0];
+	Fl_Color bg = rainbow_bg_colors[r ? lo : 0];
 	if (!active) { bg = fl_inactive(bg); }
 	fl_rectf(x, y, TILE_SIZE_2X, TILE_SIZE_2X, bg);
 	int s = OS::is_consolas() ? 11 : 10;
 	fl_font(x_flip || y_flip ? FL_COURIER_ITALIC : FL_COURIER, s);
-	Fl_Color fg = selected ? FL_YELLOW : x_flip ? y_flip ? FL_YELLOW : FL_MAGENTA : y_flip ? FL_CYAN : fg_colors[r ? hi : 0];
+	Fl_Color fg = selected ? FL_YELLOW : x_flip ? y_flip ? FL_YELLOW : FL_MAGENTA : y_flip ? FL_CYAN : rainbow_fg_colors[r ? hi : 0];
 	if (!active) { fg = fl_inactive(fg); }
 	fl_color(fg);
 	fl_draw(buffer, x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_ALIGN_CENTER);
 }
 
-void Tile_State::draw_attributes(int x, int y, bool bold, bool active) {
+void Tile_State::draw_attributes(int x, int y, int style, bool active) {
 	if (!active) {
 		fl_rectf(x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_INACTIVE_COLOR);
 	}
 	else if (palette > -1) {
-		if (bold) {
+		if (style > 0) {
 			_palette_bgs_image->draw(x, y, TILE_SIZE_2X, TILE_SIZE_2X, TILE_SIZE_2X * palette, 0);
+		}
+		else if (style < 0) {
+			fl_rectf(x, y, TILE_SIZE_2X, TILE_SIZE_2X, palette_colors[palette]);
 		}
 		palette_digits_image.draw(x+1, y+1, 5, 7, 5 * palette, 0);
 	}
@@ -210,9 +236,9 @@ void Tile_State::print(int x, int y) {
 	}
 	char hi = (char)((id & 0xF0) >> 4), lo = (char)(id & 0x0F);
 	bool r = Config::rainbow_tiles();
-	Fl_Color bg = bg_colors[r ? lo : 0];
+	Fl_Color bg = rainbow_bg_colors[r ? lo : 0];
 	fl_rectf(x, y, TILE_SIZE, TILE_SIZE, bg);
-	Fl_Color fg = x_flip ? y_flip ? FL_YELLOW : FL_MAGENTA : y_flip ? FL_CYAN : fg_colors[r ? hi : 0];
+	Fl_Color fg = x_flip ? y_flip ? FL_YELLOW : FL_MAGENTA : y_flip ? FL_CYAN : rainbow_fg_colors[r ? hi : 0];
 	fl_color(fg);
 	print_digit(x, y+1, hi);
 	print_digit(x+4, y+2, lo);
@@ -226,8 +252,9 @@ Tile_Swatch::Tile_Swatch(int x, int y, int w, int h) : Tile_Thing(), Fl_Box(x, y
 
 void Tile_Swatch::draw() {
 	draw_box();
-	_state.draw(x() + Fl::box_dx(box()), y() + Fl::box_dy(box()),
-		!_attributes, _attributes, Config::bold_palettes(), !!active(), false);
+	int ox = x() + Fl::box_dx(box()), oy = y() + Fl::box_dy(box());
+	swatch_backdrop_image.draw(ox, oy);
+	_state.draw(ox, oy, !_attributes, _attributes, (int)Config::bold_palettes(), !!active(), false);
 }
 
 Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint16_t id, bool x_flip, bool y_flip,
@@ -242,7 +269,7 @@ Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint16_t id, bo
 
 void Tile_Tessera::draw() {
 	int X = x(), Y = y();
-	_state.draw(X, Y, true, Config::show_attributes(), Config::bold_palettes(), !!active(), false);
+	_state.draw(X, Y, true, Config::show_attributes(), (int)Config::bold_palettes(), !!active(), false);
 	if (Config::grid()) {
 		draw_grid(X, Y);
 	}
@@ -296,7 +323,7 @@ Tile_Button::Tile_Button(int x, int y, uint16_t id) : Tile_Thing(id), Fl_Radio_B
 
 void Tile_Button::draw() {
 	int X = x(), Y = y();
-	_state.draw(X, Y, true, Config::show_attributes(), Config::bold_palettes(), !!active(), !!value());
+	_state.draw(X, Y, true, Config::show_attributes(), (int)Config::bold_palettes(), !!active(), !!value());
 	if (Config::grid()) {
 		draw_grid(X, Y);
 	}
@@ -335,7 +362,7 @@ Palette_Button::Palette_Button(int x, int y, int p) : Tile_Thing(0x000, false, f
 
 void Palette_Button::draw() {
 	int X = x(), Y = y();
-	_state.draw(X, Y, false, true, true, !!active(), !!value());
+	_state.draw(X, Y, false, true, -1, !!active(), !!value());
 	if (Config::grid()) {
 		draw_grid(X, Y);
 	}

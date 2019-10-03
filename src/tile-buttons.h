@@ -48,15 +48,15 @@ public:
 		return attr ? same_attributes(other) : same_tiles(other);
 	}
 	inline bool highlighted(void) const { return id == Config::highlight_id(); }
-	inline void draw(int x, int y, bool tile, bool attr, bool bold, bool active, bool selected) {
+	inline void draw(int x, int y, bool tile, bool attr, int style, bool active, bool selected) {
 		if (tile) { draw_tile(x, y, active, selected); }
-		else { fl_rectf(x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_WHITE); }
-		if (attr) { draw_attributes(x, y, bold, active); }
+		else if (!attr) { fl_rectf(x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_WHITE); }
+		if (attr) { draw_attributes(x, y, style, active); }
 	}
 	void print(int x, int y);
 private:
 	void draw_tile(int x, int y, bool active, bool selected);
-	void draw_attributes(int x, int y, bool bold, bool active);
+	void draw_attributes(int x, int y, int style, bool active);
 };
 
 class Tile_Thing {
