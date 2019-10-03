@@ -20,7 +20,8 @@ protected:
 	};
 public:
 	enum Result { TILEMAP_OK, TILEMAP_BAD_FILE, TILEMAP_EMPTY, TILEMAP_TOO_SHORT_FF, TILEMAP_TOO_LONG_FF,
-		TILEMAP_TOO_SHORT_00, TILEMAP_TOO_LONG_00, TILEMAP_TOO_SHORT_RLE, TILEMAP_TOO_SHORT_ATTRS, TILEMAP_NULL };
+		TILEMAP_TOO_SHORT_00, TILEMAP_TOO_LONG_00, TILEMAP_TOO_SHORT_RLE, TILEMAP_TOO_SHORT_ATTRS, TILEMAP_NULL,
+		ATTRMAP_BAD_FILE, ATTRMAP_TOO_SHORT, ATTRMAP_TOO_LONG };
 private:
 	std::vector<Tile_Tessera *> _tiles;
 	size_t _width;
@@ -50,14 +51,14 @@ public:
 	void undo(void);
 	void redo(void);
 	void new_tiles(size_t w, size_t h);
-	Result read_tiles(const char *f);
+	Result read_tiles(const char *tf, const char *af);
 	bool can_format_as(Tilemap_Format fmt);
 	void limit_to_format(Tilemap_Format fmt);
-	inline bool write_tiles(const char *f) { return write_tiles(f, _tiles, Config::format()); }
+	inline bool write_tiles(const char *tf, const char *af) { return write_tiles(tf, af, _tiles, Config::format()); }
 	Fl_RGB_Image *print_tilemap(void) const;
 	void guess_width(void);
 public:
-	static bool write_tiles(const char *f, std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt);
+	static bool write_tiles(const char *tf, const char *af, std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt);
 	static const char *error_message(Result result);
 };
 

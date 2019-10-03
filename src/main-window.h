@@ -73,7 +73,7 @@ private:
 	Image_To_Tiles_Dialog *_image_to_tiles_dialog;
 	Help_Window *_help_window;
 	// Data
-	std::string _tilemap_file;
+	std::string _tilemap_file, _attrmap_file;
 	std::vector<std::string> _tileset_files;
 	std::string _recent_tilemaps[NUM_RECENT], _recent_tilesets[NUM_RECENT];
 	Tilemap _tilemap;

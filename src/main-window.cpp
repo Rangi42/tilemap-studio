@@ -38,8 +38,8 @@
 #endif
 
 Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_Window(x, y, w, h, PROGRAM_NAME),
-	_tile_buttons(), _tilemap_file(), _tileset_files(), _recent_tilemaps(), _recent_tilesets(), _tilemap(), _tilesets(),
-	_wx(x), _wy(y), _ww(w), _wh(h) {
+	_tile_buttons(), _tilemap_file(), _attrmap_file(), _tileset_files(), _recent_tilemaps(), _recent_tilesets(),
+	_tilemap(), _tilesets(), _wx(x), _wy(y), _ww(w), _wh(h) {
 
 	Tile_State::tilesets(&_tilesets);
 
@@ -337,7 +337,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 		OS_MENU_ITEM("&Width...", FL_COMMAND + 'd', (Fl_Callback *)tilemap_width_cb, this, 0),
 		OS_MENU_ITEM("Re&size...", FL_COMMAND + 'e', (Fl_Callback *)resize_cb, this, 0),
 		OS_MENU_ITEM("Re&format...", FL_COMMAND + 'f', (Fl_Callback *)reformat_cb, this, FL_MENU_DIVIDER),
-		OS_MENU_ITEM("&Image to Tiles...", FL_COMMAND + 'i', (Fl_Callback *)image_to_tiles_cb, this, 0),
+		OS_MENU_ITEM("&Image to Tiles...", FL_COMMAND + 'x', (Fl_Callback *)image_to_tiles_cb, this, 0),
 		{},
 		OS_SUBMENU("&Help"),
 		OS_MENU_ITEM("&Help", FL_F + 1, (Fl_Callback *)help_cb, this, FL_MENU_DIVIDER),
@@ -457,7 +457,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_reformat_tb->image(REFORMAT_ICON);
 	_reformat_tb->deimage(REFORMAT_DISABLED_ICON);
 
-	_image_to_tiles_tb->tooltip("Image to Tiles... (Ctrl+I)");
+	_image_to_tiles_tb->tooltip("Image to Tiles... (Ctrl+X)");
 	_image_to_tiles_tb->callback((Fl_Callback *)image_to_tiles_cb, this);
 	_image_to_tiles_tb->image(INPUT_ICON);
 
@@ -733,13 +733,23 @@ void Main_Window::update_tilemap_metadata() {
 		}
 		else {
 			const char *basename = fl_filename_name(_tilemap_file.c_str());
-			_tilemap_name->label(basename);
+			if (_attrmap_file.size()) {
+				char buffer[FL_PATH_MAX] = {};
+				strcpy(buffer, basename);
+				strcat(buffer, " / ");
+				basename = fl_filename_name(_attrmap_file.c_str());
+				strcat(buffer, basename);
+				_tilemap_name->copy_label(buffer);
+			}
+			else {
+				_tilemap_name->label(basename);
+			}
 		}
 		const char *name = format_name(Config::format());
 		_tilemap_format->label(name);
 	}
 	else {
-		_tilemap_name->label("No file selected");
+		_tilemap_name->label(NO_FILE_SELECTED_LABEL);
 		_tilemap_format->label("");
 	}
 }
@@ -762,7 +772,7 @@ void Main_Window::update_tileset_metadata() {
 		}
 	}
 	else {
-		_tileset_name->label("No files selected");
+		_tileset_name->label(NO_FILES_SELECTED_LABEL);
 	}
 }
 
@@ -880,7 +890,8 @@ void Main_Window::update_active_controls() {
 	}
 	int tdw = 12 + Fl::scrollbar_size(), tdh = 12 + OS_TAB_HEIGHT;
 	_left_tabs->size_range(tw + tdw, min_th + tdh, tw + tdw, max_th + tdh);
-	_left_tabs->resize(_left_tabs->x(), _left_tabs->y(), _left_tabs->w(), _tilemap_scroll->h());
+	int tdx = _left_tabs->x() - _tilemap_scroll->x();
+	_left_tabs->resize(_left_tabs->x(), _left_tabs->y(), _left_tabs->w(), _tilemap_scroll->h() + tdx);
 
 	if (format_has_palettes(Config::format())) {
 		_palettes_tab->activate();
@@ -1058,7 +1069,6 @@ void Main_Window::swap_tiles(Tile_Tessera *tt) {
 void Main_Window::open_tilemap(const char *filename, size_t width, size_t height) {
 	if (filename) {
 		_tilemap_options_dialog->use_tilemap(filename);
-		_tilemap_options_dialog->format(guess_format(filename));
 		_tilemap_options_dialog->show(this);
 		if (_tilemap_options_dialog->canceled()) { return; }
 	}
@@ -1069,16 +1079,21 @@ void Main_Window::open_tilemap(const char *filename, size_t width, size_t height
 	const char *basename;
 
 	if (filename) {
+		const char *attrmap_filename = _tilemap_options_dialog->attrmap_filename();
+
 		_tilemap_file = filename;
+		_attrmap_file = attrmap_filename ? attrmap_filename : "";
 		basename = fl_filename_name(filename);
+		const char *attrmap_basename = fl_filename_name(attrmap_filename);
 
 		Config::format(_tilemap_options_dialog->format());
 
-		Tilemap::Result r = _tilemap.read_tiles(filename);
+		Tilemap::Result r = _tilemap.read_tiles(filename, attrmap_filename);
 		if (r) {
 			_tilemap.clear();
 			std::string msg = "Error reading ";
-			msg = msg + basename + "!\n\n" + Tilemap::error_message(r);
+			msg = msg + (r >= Tilemap::ATTRMAP_BAD_FILE ? attrmap_basename : basename);
+			msg = msg + "!\n\n" + Tilemap::error_message(r);
 			_error_dialog->message(msg);
 			_error_dialog->show(this);
 			return;
@@ -1093,6 +1108,7 @@ void Main_Window::open_tilemap(const char *filename, size_t width, size_t height
 	}
 	else {
 		_tilemap_file = "";
+		_attrmap_file = "";
 		basename = NEW_TILEMAP_NAME;
 
 		Config::format(_new_tilemap_dialog->format());
@@ -1146,10 +1162,11 @@ void Main_Window::open_recent_tilemap(int n) {
 
 bool Main_Window::save_tilemap(bool force) {
 	const char *filename = _tilemap_file.c_str();
+	const char *attrmap_filename = _attrmap_file.c_str();
 	const char *basename = fl_filename_name(filename);
 
 	if (_tilemap.modified() || force) {
-		if (!_tilemap.write_tiles(filename)) {
+		if (!_tilemap.write_tiles(filename, attrmap_filename)) {
 			std::string msg = "Could not write to ";
 			msg = msg + basename + "!";
 			_error_dialog->message(msg);
@@ -1337,7 +1354,10 @@ void Main_Window::image_to_tiles() {
 
 	const char *tilemap_filename = _image_to_tiles_dialog->tilemap_filename();
 	const char *tilemap_basename = fl_filename_name(tilemap_filename);
-	if (!Tilemap::write_tiles(tilemap_filename, tilemap, fmt)) {
+	char attrmap_filename[FL_PATH_MAX] = {};
+	strcpy(attrmap_filename, tilemap_filename);
+	fl_filename_setext(attrmap_filename, sizeof(attrmap_filename), ATTRMAP_EXT);
+	if (!Tilemap::write_tiles(tilemap_filename, attrmap_filename, tilemap, fmt)) {
 		for (Tile_Tessera *tt : tilemap) {
 			delete tt;
 		}
@@ -1510,6 +1530,7 @@ void Main_Window::close_cb(Fl_Widget *, Main_Window *mw) {
 	mw->_tiles_scroll->scroll_to(0, 0);
 	mw->init_sizes();
 	mw->_tilemap_file.clear();
+	mw->_attrmap_file.clear();
 	mw->update_tilemap_metadata();
 	mw->update_status(NULL);
 	mw->update_active_controls();
@@ -1841,7 +1862,6 @@ void Main_Window::resize_cb(Fl_Menu_ *, Main_Window *mw) {
 
 void Main_Window::reformat_cb(Fl_Menu_ *, Main_Window *mw) {
 	if (!mw->_tilemap.size()) { return; }
-	mw->_reformat_dialog->use_tilemap(mw->_tilemap_file.c_str());
 	mw->_reformat_dialog->format(Config::format());
 	mw->_reformat_dialog->show(mw);
 	if (mw->_reformat_dialog->canceled()) { return; }

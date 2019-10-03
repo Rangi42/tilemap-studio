@@ -7,6 +7,7 @@
 
 #include "new.xpm"
 #include "open.xpm"
+#include "open-disabled.xpm"
 #include "save.xpm"
 #include "save-disabled.xpm"
 #include "print.xpm"
@@ -39,6 +40,7 @@
 
 static Fl_Pixmap NEW_ICON(NEW_XPM);
 static Fl_Pixmap OPEN_ICON(OPEN_XPM);
+static Fl_Pixmap OPEN_DISABLED_ICON(OPEN_DISABLED_XPM);
 static Fl_Pixmap SAVE_ICON(SAVE_XPM);
 static Fl_Pixmap SAVE_DISABLED_ICON(SAVE_DISABLED_XPM);
 static Fl_Pixmap PRINT_ICON(PRINT_XPM);

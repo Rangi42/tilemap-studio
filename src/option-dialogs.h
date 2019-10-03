@@ -17,6 +17,9 @@
 
 #define NEW_TILEMAP_NAME "New Tilemap"
 
+#define NO_FILE_SELECTED_LABEL "No file selected"
+#define NO_FILES_SELECTED_LABEL "No file(s) selected"
+
 class Option_Dialog {
 protected:
 	int _width;
@@ -49,15 +52,24 @@ class Tilemap_Options_Dialog : public Option_Dialog {
 private:
 	Label *_tilemap_header;
 	Dropdown *_format;
+	Label *_attrmap_heading;
+	Toolbar_Button *_attrmap;
+	Label_Button *_attrmap_name;
+	Fl_Native_File_Chooser *_attrmap_chooser;
+	std::string _attrmap_filename;
 public:
 	Tilemap_Options_Dialog(const char *t);
 	~Tilemap_Options_Dialog();
 	inline Tilemap_Format format(void) const { return (Tilemap_Format)_format->value(); }
 	inline void format(Tilemap_Format fmt) { initialize(); _format->value((int)fmt); }
+	inline const char *attrmap_filename(void) const { return _attrmap_filename.c_str(); }
 	void use_tilemap(const char *filename);
 protected:
 	void initialize_content(void);
 	int refresh_content(int ww, int dy);
+private:
+	static void format_cb(Dropdown *d, Tilemap_Options_Dialog *tod);
+	static void attrmap_cb(Fl_Widget *w, Tilemap_Options_Dialog *tod);
 };
 
 class New_Tilemap_Dialog : public Option_Dialog {
@@ -118,9 +130,8 @@ public:
 	Reformat_Dialog(const char *t);
 	~Reformat_Dialog();
 	inline Tilemap_Format format(void) const { return (Tilemap_Format)_format->value(); }
-	inline void format(Tilemap_Format fmt) { initialize(); _format->value((int)fmt); }
+	void format(Tilemap_Format fmt);
 	inline bool force(void) const { return !!_force->value(); }
-	void use_tilemap(const char *filename);
 protected:
 	void initialize_content(void);
 	int refresh_content(int ww, int dy);
@@ -184,7 +195,6 @@ private:
 	void update_ok_button(void);
 protected:
 	void initialize_content(void);
-	void refresh(void);
 	int refresh_content(int ww, int dy);
 private:
 	static void image_cb(Fl_Widget *w, Image_To_Tiles_Dialog *itd);

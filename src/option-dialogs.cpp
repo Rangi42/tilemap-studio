@@ -92,11 +92,17 @@ void Option_Dialog::cancel_cb(Fl_Widget *, Option_Dialog *od) {
 	od->_dialog->hide();
 }
 
-Tilemap_Options_Dialog::Tilemap_Options_Dialog(const char *t) : Option_Dialog(280, t), _tilemap_header(NULL), _format(NULL) {}
+Tilemap_Options_Dialog::Tilemap_Options_Dialog(const char *t) : Option_Dialog(280, t), _tilemap_header(NULL),
+	_format(NULL), _attrmap_heading(NULL), _attrmap(NULL), _attrmap_name(NULL), _attrmap_chooser(NULL),
+	_attrmap_filename() {}
 
 Tilemap_Options_Dialog::~Tilemap_Options_Dialog() {
 	delete _tilemap_header;
 	delete _format;
+	delete _attrmap_heading;
+	delete _attrmap;
+	delete _attrmap_name;
+	delete _attrmap_chooser;
 }
 
 void Tilemap_Options_Dialog::use_tilemap(const char *filename) {
@@ -106,21 +112,51 @@ void Tilemap_Options_Dialog::use_tilemap(const char *filename) {
 	strcpy(buffer, name);
 	strcat(buffer, ":");
 	_tilemap_header->copy_label(buffer);
+
+	format(guess_format(filename));
+	if (format() == Tilemap_Format::GBC_ATTRMAP) {
+		strcpy(buffer, filename);
+		fl_filename_setext(buffer, sizeof(buffer), ".attrmap");
+		_attrmap_filename = buffer;
+		_attrmap_heading->activate();
+		_attrmap->activate();
+		_attrmap_name->activate();
+		const char *basename = fl_filename_name(buffer);
+		_attrmap_name->copy_label(basename);
+	}
+	else {
+		_attrmap_filename.clear();
+		_attrmap_heading->deactivate();
+		_attrmap->deactivate();
+		_attrmap_name->deactivate();
+		_attrmap_name->copy_label(NO_FILE_SELECTED_LABEL);
+	}
 }
 
 void Tilemap_Options_Dialog::initialize_content() {
 	// Populate content group
 	_tilemap_header = new Label(0, 0, 0, 0);
 	_format = new Dropdown(0, 0, 0, 0, "Format:");
+	_attrmap_heading = new Label(0, 0, 0, 0, "Attrmap:");
+	_attrmap = new Toolbar_Button(0, 0, 0, 0);
+	_attrmap_name = new Label_Button(0, 0, 0, 0, NO_FILE_SELECTED_LABEL);
+	_attrmap_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
 	// Initialize content group's children
 	for (int i = 0; i < NUM_FORMATS; i++) {
 		_format->add(format_name((Tilemap_Format)i));
 	}
+	_format->callback((Fl_Callback *)format_cb, this);
+	_attrmap->callback((Fl_Callback *)attrmap_cb, this);
+	_attrmap->image(OPEN_ICON);
+	_attrmap->deimage(OPEN_DISABLED_ICON);
+	_attrmap_name->callback((Fl_Callback *)attrmap_cb, this);
+	_attrmap_chooser->title("Open Attrmap");
+	_attrmap_chooser->filter("Attrmap Files\t*.attrmap\n");
 }
 
 int Tilemap_Options_Dialog::refresh_content(int ww, int dy) {
 	int wgt_h = 22, win_m = 10, wgt_m = 4;
-	int ch = wgt_h + wgt_m + wgt_h;
+	int ch = (wgt_h + wgt_m) * 2 + wgt_h;
 	_content->resize(win_m, dy, ww, ch);
 
 	_tilemap_header->resize(win_m, dy, ww, wgt_h);
@@ -128,8 +164,57 @@ int Tilemap_Options_Dialog::refresh_content(int ww, int dy) {
 	int wgt_off = win_m + text_width(_format->label(), 2);
 	int wgt_w = ww - wgt_off + win_m;
 	_format->resize(wgt_off, dy, wgt_w, wgt_h);
+	dy += wgt_h + wgt_m;
+	wgt_w = text_width(_attrmap_heading->label(), 4);
+	wgt_off = win_m;
+	_attrmap_heading->resize(wgt_off, dy, wgt_w, wgt_h);
+	wgt_off += _attrmap_heading->w();
+	_attrmap->resize(wgt_off, dy, wgt_h, wgt_h);
+	wgt_off += _attrmap->w();
+	_attrmap_name->resize(wgt_off, dy, ww-wgt_w-wgt_h, wgt_h);
 
 	return ch;
+}
+
+void Tilemap_Options_Dialog::format_cb(Dropdown *, Tilemap_Options_Dialog *tod) {
+	if (tod->format() == Tilemap_Format::GBC_ATTRMAP) {
+		tod->_attrmap_heading->activate();
+		tod->_attrmap->activate();
+		tod->_attrmap_name->activate();
+		const char *filename = tod->_attrmap_chooser->filename();
+		if (filename && strlen(filename)) {
+			const char *basename = fl_filename_name(filename);
+			tod->_attrmap_filename = filename;
+			tod->_attrmap_name->copy_label(basename);
+		}
+		else {
+			tod->_attrmap_filename.clear();
+			tod->_attrmap_name->copy_label(NO_FILE_SELECTED_LABEL);
+		}
+	}
+	else {
+		tod->_attrmap_filename.clear();
+		tod->_attrmap_heading->deactivate();
+		tod->_attrmap->deactivate();
+		tod->_attrmap_name->deactivate();
+		tod->_attrmap_name->copy_label(NO_FILE_SELECTED_LABEL);
+	}
+	tod->_dialog->redraw();
+}
+
+void Tilemap_Options_Dialog::attrmap_cb(Fl_Widget *, Tilemap_Options_Dialog *tod) {
+	int status = tod->_attrmap_chooser->show();
+	if (status == 1) {
+		tod->_attrmap_filename.clear();
+		tod->_attrmap_name->label(NO_FILE_SELECTED_LABEL);
+	}
+	else {
+		const char *filename = tod->_attrmap_chooser->filename();
+		const char *basename = fl_filename_name(filename);
+		tod->_attrmap_filename = filename;
+		tod->_attrmap_name->copy_label(basename);
+	}
+	tod->_dialog->redraw();
 }
 
 New_Tilemap_Dialog::New_Tilemap_Dialog(const char *t) : Option_Dialog(280, t), _tilemap_width(NULL), _tilemap_height(NULL),
@@ -289,11 +374,12 @@ Reformat_Dialog::~Reformat_Dialog() {
 	delete _force;
 }
 
-void Reformat_Dialog::use_tilemap(const char *) {
+void Reformat_Dialog::format(Tilemap_Format fmt) {
 	initialize();
-	const char *name = format_name(Config::format());
+	_format->value((int)fmt);
+	const char *name = format_name(fmt);
 	char buffer[256] = {};
-	strcpy(buffer, "Convert from ");
+	strcpy(buffer, "Convert ");
 	strcat(buffer, name);
 	strcat(buffer, " to:");
 	_format_header->copy_label(buffer);
@@ -411,7 +497,7 @@ int Add_Tileset_Dialog::refresh_content(int ww, int dy) {
 Image_To_Tiles_Dialog::Image_To_Tiles_Dialog(const char *t) : Option_Dialog(320, t), _image_heading(NULL),
 	_tilemap_heading(NULL), _tileset_heading(NULL), _image(NULL), _tilemap(NULL), _tileset(NULL), _image_name(NULL),
 	_tilemap_name(NULL), _tileset_name(NULL), _format(NULL), _start_id(NULL), _use_7f(NULL), _image_chooser(NULL),
-	_tilemap_chooser(NULL), _tileset_chooser(NULL) {}
+	_tilemap_chooser(NULL), _tileset_chooser(NULL), _image_filename(), _tilemap_filename(), _tileset_filename() {}
 
 Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
 	delete _image_heading;
@@ -448,12 +534,12 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_image = new Toolbar_Button(0, 0, 0, 0);
 	_tilemap = new Toolbar_Button(0, 0, 0, 0);
 	_tileset = new Toolbar_Button(0, 0, 0, 0);
-	_image_name = new Label_Button(0, 0, 0, 0, "No file selected");
-	_tilemap_name = new Label_Button(0, 0, 0, 0, "No file selected");
-	_tileset_name = new Label_Button(0, 0, 0, 0, "No file selected");
+	_image_name = new Label_Button(0, 0, 0, 0, NO_FILE_SELECTED_LABEL);
+	_tilemap_name = new Label_Button(0, 0, 0, 0, NO_FILE_SELECTED_LABEL);
+	_tileset_name = new Label_Button(0, 0, 0, 0, NO_FILE_SELECTED_LABEL);
 	_format = new Dropdown(0, 0, 0, 0, "Format:");
 	_start_id = new Default_Hex_Spinner(0, 0, 0, 0, "Start at ID:");
-	_use_7f = new OS_Check_Button(0, 0, 0, 0, "Use $7F for Blank Spaces");
+	_use_7f = new OS_Check_Button(0, 0, 0, 0, "Use $0:7F for Blank Spaces");
 	_image_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
 	_tilemap_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	_tileset_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
@@ -529,9 +615,9 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	_image_filename.clear();
 	_tilemap_filename.clear();
 	_tileset_filename.clear();
-	_image_name->label("No file selected");
-	_tilemap_name->label("No file selected");
-	_tileset_name->label("No file selected");
+	_image_name->label(NO_FILE_SELECTED_LABEL);
+	_tilemap_name->label(NO_FILE_SELECTED_LABEL);
+	_tileset_name->label(NO_FILE_SELECTED_LABEL);
 	_ok_button->deactivate();
 
 	return ch;
@@ -541,7 +627,7 @@ void Image_To_Tiles_Dialog::image_cb(Fl_Widget *, Image_To_Tiles_Dialog *itd) {
 	int status = itd->_image_chooser->show();
 	if (status == 1) {
 		itd->_image_filename.clear();
-		itd->_image_name->label("No file selected");
+		itd->_image_name->label(NO_FILE_SELECTED_LABEL);
 	}
 	else {
 		const char *filename = itd->_image_chooser->filename();
@@ -557,7 +643,7 @@ void Image_To_Tiles_Dialog::tilemap_cb(Fl_Widget *, Image_To_Tiles_Dialog *itd) 
 	int status = itd->_tilemap_chooser->show();
 	if (status == 1) {
 		itd->_tilemap_filename.clear();
-		itd->_tilemap_name->label("No file selected");
+		itd->_tilemap_name->label(NO_FILE_SELECTED_LABEL);
 	}
 	else {
 		char filename[FL_PATH_MAX] = {};
@@ -575,7 +661,7 @@ void Image_To_Tiles_Dialog::tileset_cb(Fl_Widget *, Image_To_Tiles_Dialog *itd) 
 	int status = itd->_tileset_chooser->show();
 	if (status == 1) {
 		itd->_tileset_filename.clear();
-		itd->_tileset_name->label("No file selected");
+		itd->_tileset_name->label(NO_FILE_SELECTED_LABEL);
 	}
 	else {
 		char filename[FL_PATH_MAX] = {};
