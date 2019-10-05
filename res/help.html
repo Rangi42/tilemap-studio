@@ -5,47 +5,52 @@ R"(<html>
 <body>
 <h1>)" PROGRAM_NAME R"(</h1>
 <p>Copyright © )" CURRENT_YEAR " " PROGRAM_AUTHOR R"(</p>
-<p>A tilemap editor for <a href="https://github.com/pret/pokecrystal">pokecrystal</a> and <a href="https://github.com/pret/pokered">pokered</a>.</p>
-<p>Inspired by <a href="https://hax.iimarckus.org/topic/97/">GSC Town Map Editor</a> and <a href="https://i.imgur.com/70jDfdM.png">Karteneditor</a>, but implemented with C++ and <a href="http://www.fltk.org/">FLTK</a>, and with support for tilemaps beyond the Town Map.</p>
+<p>A tilemap editor for Game Boy, Color, and Advance projects, with particular support for the <a href="https://github.com/pret">pret</a> Pokémon disassemblies like <a href="https://github.com/pret/pokered">pokered</a>, <a href="https://github.com/pret/pokecrystal">pokecrystal</a>, and <a href="https://github.com/pret/pokeemerald">pokeemerald</a>.</p>
+<p>Originally meant as a Pokémon Town Map editor inspired by <a href="https://hax.iimarckus.org/topic/97/">GSC Town Map Editor</a> and <a href="https://i.imgur.com/70jDfdM.png">Karteneditor</a>. Later expanded to a multi-platform tilemap editor inspired by <a href="https://github.com/erandis-vol/Tilemap-Creator">Tilemap Creator</a>, <a href="https://www.pokecommunity.com/showthread.php?t=149454">NTME</a>, and <a href="https://www.pokecommunity.com/showthread.php?t=306104">NTME+</a>.
+<p>Implemented with C++ and <a href="http://www.fltk.org/">FLTK</a>. Uses some <a href="https://p.yusukekamiyamane.com/">Fugue</a> icons by Yusuke Kamiyamane.</p>
 <p>Source code is available at <a href="https://github.com/Rangi42/tilemap-studio">https://github.com/Rangi42/tilemap-studio</a>.</p>
 <hr>
-<p>)" PROGRAM_NAME R"( displays and edits tilemap files. (There's no standard extension for those; some are .tilemap, .bin, .map, .rle, or others.) It supports all the standard ways to open a file:</p>
+<p>)" PROGRAM_NAME R"( displays and edits tilemap files. (There's no standard extension for those; some are .tilemap, .map, .bin, .raw, or others.) It supports all the standard ways to open a file:</p>
 <ul>
 <li><b>Initial:</b> Double-click a .tilemap file in File Explorer. (Run install.bat to associate .tilemap files with )" PROGRAM_NAME R"(.)</li>
-<li><b>Menu bar:</b> Run )" PROGRAM_EXE R"( and select the File&nbsp;→&nbsp;Open… menu item.</li>
+<li><b>Menu bar:</b> Run )" PROGRAM_EXE R"( and select the Tilemap&nbsp;→&nbsp;Open… menu item.</li>
 <li><b>Toolbar:</b> Run )" PROGRAM_EXE R"( and click the Open toolbar button.</li>
 <li><b>Keyboard:</b> Run )" PROGRAM_EXE R"( and press Ctrl+O.</li>
 <li><b>File Explorer:</b> Drag a .tilemap file onto )" PROGRAM_EXE R"(.</li>
-<li><b>GUI:</b> Drag a .tilemap file onto the tilemap canvas of an open )" PROGRAM_NAME R"( window. You can also drag a tileset image file onto the tileset palette to load its graphics.</li>
+<li><b>GUI:</b> Drag a .tilemap file onto the tilemap canvas (right) of an open )" PROGRAM_NAME R"( window. You can also drag a tileset image file onto the tileset array (left) to load its graphics.</li>
 <li><b>Command Prompt:</b> Pass the .tilemap filename (and optionally a tileset filename too) as an argument to )" PROGRAM_EXE R"(:<br><font size="2"><kbd>)" PROGRAM_EXE "&nbsp;pokecrystal" DIR_SEP "gfx" DIR_SEP "pokegear" DIR_SEP "johto.bin&nbsp;pokecrystal" DIR_SEP "gfx" DIR_SEP "pokegear" DIR_SEP R"(town_map.png</kbd></font></li>
 </ul>
-<p>Be sure to set the right format (via the Format toolbar dropdown, or the Options&nbsp;→&nbsp;Format menu) before opening a tilemap. The available formats are:</p>
+<p>When a tilemap is opened, it asks for the format. The available formats are:</p>
 <ul>
-<li><b>Plain tiles:</b> Each byte is a tile ID, top to bottom, left to right. A byte goes from $00 (0) to $FF (255), so there are 256 possible tiles.</li>
-<li><b>Tiles + attributes:</b> Each pair of bytes encodes a tile ID and an attribute byte. The only supported attribute bits are X/Y flip and four colors. Meant for the SGB borders in pokered: gfx)" DIR_SEP "red" DIR_SEP "sgbborder.map and gfx" DIR_SEP "blue" DIR_SEP R"(sgbborder.map. Also applies to some other tilemaps in pokecrystal.</li>
+<li><b>Plain tiles:</b> Each byte is a tile ID, top to bottom, left to right. A byte has eight bits and goes from $00 (0) to $FF (255), so there are 256 possible tiles.</li>
+<li><b>GBC tiles + attributes:</b> Bytes come in pairs: a tile ID and an attribute byte. The bits of the attribute byte encode the tile bank (effectively allowing 9-bit tile IDs, or 512 possible tiles), a choice of eight palettes, X/Y flip, priority, and OAM1. (More on what those mean later.)</li>
+<li><b>GBC tilemap + attrmap:</b> The tilemap file itself just has plain tile IDs, but a corresponding attrmap file has the attribute bytes.</li>
+<li><b>GBA tiles + palettes:</b> Bytes come in pairs, encoding 10-bit tile IDs (so up to 1,024 possible tiles), a choice of 16 palettes, and X/Y flip.</li>
+<li><b>SGB border:</b> Bytes come in pairs: a tile ID and an attribute byte. The only supported attribute bits are a choice of four palettes and X/Y flip. Meant for the SGB borders in pokered: gfx)" DIR_SEP "red" DIR_SEP "sgbborder.map and gfx" DIR_SEP "blue" DIR_SEP R"(sgbborder.map.</li>
 <li><b>RBY Town Map:</b> A sequence of bytes that each encode a tile ID in their high nybble and a run length in their low nybble, ended by a $00 byte. For example, $46 encodes a sequence of six tiles with ID $04. Only 16 tile IDs can be represented, $00 to $0F. Meant for the Town Map tilemap in pokered: gfx)" DIR_SEP R"(town_map.rle.</li>
 <li><b>GSC Town Map:</b> A sequence of tile IDs ended by an $FF byte (so $FF is not a valid tile ID). Meant for the Town Map tilemaps in pokecrystal: gfx)" DIR_SEP "pokegear" DIR_SEP R"(johto.bin and kanto.bin.</li>
 <li><b>PC Town Map:</b> A sequence of bytes that each encode a tile ID in their low six bits and X/Y flip attributes in their high two bits, ended by an $FF byte. Only 64 tile IDs can be represented, $00 to $3F. Meant for the Town Map tilemaps in <a href="https://github.com/Rangi42/polishedcrystal">Polished Crystal</a>: gfx)" DIR_SEP "town_map" DIR_SEP R"(*.bin.</li>
 <li><b>Pok&eacute;gear card:</b> A sequence of tile IDs and run lengths, ended by an $FF byte (so $FF is not a valid tile ID). For example, $F0 $0D encodes a sequence of 13 tiles with ID $F0. Meant for the Pok&eacute;gear card tilemaps in pokecrystal: gfx)" DIR_SEP "pokegear" DIR_SEP R"(*.tilemap.rle.</li>
 </ul>
 <hr>
-<p>Most functions are available via the menu bar, the toolbars, or shortcut keys.</p>
-<p>The tilemap canvas (on the left) and tileset palette (on the right) use the mouse:</p>
+<p>Most functions are available via the menu bar, the toolbar, or shortcut keys.</p>
+<p>The tilemap canvas (on the right) and tileset array (on the left) use the mouse:</p>
 <ul>
-<li>Left-click a tile in the tileset palette to select it.</li>
+<li>Left-click a tile in the tileset array to select it.</li>
 <li>Left-click or drag in the tilemap canvas to place the selected tile.</li>
-<li>Right-click to select a tile from the tilemap.</li>
-<li>Middle-click and drag to scroll the tilemap.</li>
+<li>Right-click a tile in the tileset array to highlight every use of it in the tilemap. Right-click it again to un-highlight.</li>
+<li>Right-click a tile in the tilemap canvas to select it in the tileset.</li>
+<li>Middle-click and drag to scroll the tileset or tilemap.</li>
 <li>Hold Shift and left-click a group of tiles to flood-fill it with the selected type.</li>
 <li>Hold Ctrl and left-click a tile to replace every tile of that type with the selected type.</li>
 <li>Hold Alt and left-click a tile to swap every tile of that type and every tile of the selected type.</li>
 </ul>
 <hr>
-<p>Usually a tilemap only uses one tileset image, which starts from tile $00. For these you can just use the Load Tileset function (Ctrl+L or the toolbar's tileset button with a blue arrow). For example, pokered's gfx)" DIR_SEP "town_map.rle uses gfx" DIR_SEP R"(town_map.png.</p>
-<p>Sometimes a .png tileset has redundant tiles that get eliminated when you <kbd>make</kbd> the ROM. In those cases, just load the built .1bpp or .2bpp tileset instead. Compresses .lz files are also supported.</p>
+<p>Usually a tilemap only uses one tileset image, which starts from tile $0:00. For these you can just use the Load Tileset function (Ctrl+T or the toolbar's tileset button with a blue arrow). For example, pokered's gfx)" DIR_SEP "town_map.rle uses gfx" DIR_SEP R"(town_map.png.</p>
+<p>Sometimes a .png tileset has redundant tiles that get eliminated when you <kbd>make</kbd> the ROM. In those cases, just load the built .1bpp or .2bpp tileset instead. Compressed .lz files are also supported.</p>
 <p>Some tilemaps may also use more than one tileset. For example, pokecrystal's gfx)" DIR_SEP "pokegear" DIR_SEP "radio.tilemap.rle uses tiles from gfx" DIR_SEP "pokegear" DIR_SEP "town_map.png, gfx" DIR_SEP "pokegear" DIR_SEP "pokegear.png, and gfx" DIR_SEP "font" DIR_SEP R"(font_extra.png. For these you can use the Add Tileset function (Ctrl+A or the toolbar's tileset button with a green plus sign). This lets you load another tileset in addition to any you've already loaded, and can configure how it gets loaded:</p>
 <ul>
-<li><b>Start at ID:</b> Which tile ID to begin at, instead of $00.</li>
+<li><b>Start at ID:</b> Which tile ID to begin at, instead of $0:00.</li>
 <li><b>Offset:</b> Skip this many tiles from the beginning of the image.</li>
 <li><b>Length:</b> Load only this many tiles from the image; 0 means to load all of them.</li>
 </ul>
@@ -56,12 +61,15 @@ R"(<html>
 	call Get1bpp_2</pre></code>
 <p>To copy its effect, you would add gfx)" DIR_SEP "battle" DIR_SEP R"(hp_exp_bar_border.png with the start ID $76, offset 3, and length 2.</p>
 <hr>
-<p>)" PROGRAM_NAME R"( is mainly for editing tilemaps using tilesets that already exist, but it can also create a tilemap and tileset from a screenshot with the Image to Tiles function (Ctrl+I or the toolbar's brown picture button). For example, if you want to display a custom full-screen picture, you might draw a 160x144-pixel (20x18-tile) mockup. You can then create a tilemap and tileset from that mockup, as long as it doesn't need too many unique tiles. (The tileset will not have duplicate tiles.)</p>
+<p>The general-purpose GBC, GBA, and SGB formats all support palettes. Each tile in the tilemap has a corresponding palette ID. When you choose the Palettes tab instead of the Tiles tab, these can be viewed and edited similarly to the tiles.</p>
+<p>The palette colors are arbitrary; there is no support for using or editing the actual colors displayed in-game. For some projects, the tileset image will already have the right colors; for others, it will be monochrome. You may want to make a colored-in copy of your tileset to help design tilemaps, like the example)" DIR_SEP "pokecrystal" DIR_SEP R"(town_map_pokegear.png image.</p>
+<hr>
+<p>)" PROGRAM_NAME R"( is mainly for editing tilemaps using tilesets that already exist, but it can also create a tilemap and tileset from a screenshot with the Image to Tiles function (Ctrl+X or the toolbar's brown picture button). For example, if you want to display a custom full-screen picture, you might draw a 160x144-pixel (20x18-tile) mockup. You can then create a tilemap and tileset from that mockup, as long as it doesn't need too many unique tiles. Duplicate tiles will not be included in the tileset; this takes X/Y flipped tiles into account if the chosen format supports it.</p>
 <p>This is similar to features already provided by <a href="https://github.com/rednex/rgbds">rgbgfx</a>, <a href="https://github.com/Optiroc/SuperFamiconv">superfamiconv</a>, <a href="https://www.coranac.com/man/grit/html/grit.htm">grit</a>/<a href="https://www.coranac.com/man/grit/html/wingrit.htm">WinGrit</a>, <a href="https://www.smwcentral.net/?p=section&a=details&id=6523">SnexGFX</a>, and other utilities; but Image to Tiles is oriented toward pokered and pokecrystal projects. It has options specific for their conventions:</p>
 <ul>
-<li><b>Format:</b> Create the tilemap in any supported format, not just a sequence of plain tile IDs. Formats that support X/Y flip (PC Town Map or SGB border) will take advantage of that when eliminating duplicate tiles for the tileset.</li>
-<li><b>Start at ID:</b> Start at a tile ID besides $00, if you plan to load the tileset somewhere else.</li>
-<li><b>Use $7F for Blank Spaces:</b> Tile $7F is commonly available as the space character, so solid white tiles can be encoded as that ID.</li>
+<li><b>Format:</b> Create the tilemap in any supported format, not just a sequence of plain tile IDs.</li>
+<li><b>Start at ID:</b> Start at a tile ID besides $0:00, if you plan to load the tileset somewhere else.</li>
+<li><b>Use $0:7F for Blank Spaces:</b> Tile $0:7F is commonly available as the space character, so solid white tiles can be encoded as that ID.</li>
 </ul>
 </body>
 </html>)"
