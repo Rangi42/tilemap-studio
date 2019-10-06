@@ -160,6 +160,11 @@ void Tilemap::new_tiles(size_t w, size_t h) {
 	for (size_t i = 0; i < n; i++) {
 		_tiles.emplace_back(new Tile_Tessera());
 	}
+	if (format_has_palettes(Config::format())) {
+		for (size_t i = 0; i < n; i++) {
+			_tiles[i]->palette(0);
+		}
+	}
 	_width = w;
 	_modified = true;
 }
