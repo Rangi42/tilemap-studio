@@ -10,6 +10,6 @@ Follow the steps in [INSTALL.md](INSTALL.md) to install the release copy of Tile
 
 The [example/](example/) directory contains different formats of tilemaps and tileset graphics. In particular, [pokecrystal/town_map_pokegear.png](example/pokecrystal/town_map_pokegear.png) is a colored-in combination of tileset graphics from [pokecrystal](https://github.com/pret/pokecrystal), useful for viewing any Town Map in a project based on it.
 
-More information is at the [Skeetendo Forums](https://hax.iimarckus.org/topic/7691/). If you have questions or comments, please go there.
+More information is at the [Skeetendo Forums](https://hax.iimarckus.org/topic/7691/) or [PokéCommunity](https://www.pokecommunity.com/showthread.php?p=10075626). If you have questions or comments, please go there.
 
 ![Screenshot](screenshot.png)
