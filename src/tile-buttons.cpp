@@ -153,6 +153,8 @@ void Tile_State::alpha(uchar alfa) {
 	_palette_bgs_image = new Fl_PNG_Image(NULL, palette_bgs_png_buffer, sizeof(palette_bgs_png_buffer));
 }
 
+static Fl_Font tile_fonts[4] = {FL_COURIER, FL_COURIER_ITALIC, FL_COURIER_BOLD, FL_COURIER_BOLD_ITALIC};
+
 void Tile_State::draw_tile(int x, int y, bool active, bool selected) {
 	if (_tilesets) {
 		for (std::vector<Tileset>::reverse_iterator it = _tilesets->rbegin(); it != _tilesets->rend(); ++it) {
@@ -161,7 +163,7 @@ void Tile_State::draw_tile(int x, int y, bool active, bool selected) {
 			}
 		}
 	}
-	uint16_t hi = (id & 0xF0) >> 4, lo = id & 0x0F;
+	uint16_t hi = (id & 0xF0) >> 4, lo = id & 0x0F, bank = (id & 0x300) >> 8;
 	char l1 = (char)(hi > 9 ? 'A' + hi - 10 : '0' + hi), l2 = (char)(lo > 9 ? 'A' + lo - 10 : '0' + lo);
 	const char buffer[3] = {l1, l2, '\0'};
 	bool r = Config::rainbow_tiles();
@@ -169,7 +171,7 @@ void Tile_State::draw_tile(int x, int y, bool active, bool selected) {
 	if (!active) { bg = fl_inactive(bg); }
 	fl_rectf(x, y, TILE_SIZE_2X, TILE_SIZE_2X, bg);
 	int s = OS::is_consolas() ? 11 : 10;
-	fl_font(x_flip || y_flip ? FL_COURIER_ITALIC : FL_COURIER, s);
+	fl_font(tile_fonts[bank], s);
 	Fl_Color fg = selected ? FL_YELLOW : x_flip ? y_flip ? FL_YELLOW : FL_MAGENTA : y_flip ? FL_CYAN : rainbow_fg_colors[r ? hi : 0];
 	if (!active) { fg = fl_inactive(fg); }
 	fl_color(fg);

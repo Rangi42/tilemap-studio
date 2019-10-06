@@ -66,6 +66,10 @@
 	} while (0)
 #endif
 
+#ifndef _countof
+#define _countof(a) (sizeof(a) / sizeof(a[0]))
+#endif
+
 typedef uint8_t size8_t;
 typedef uint16_t size16_t;
 typedef uint32_t size32_t;
