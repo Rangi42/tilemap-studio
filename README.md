@@ -4,11 +4,11 @@ A tilemap editor for Game Boy, Color, and Advance projects. Specifically meant t
 
 Inspired by tools like [Tilemap Creator](https://github.com/erandis-vol/Tilemap-Creator), [NTME](https://www.pokecommunity.com/showthread.php?t=149454), [GSC Town Map Editor](https://hax.iimarckus.org/topic/97/) and [Karteneditor](https://i.imgur.com/70jDfdM.png), but implemented with C++ and [FLTK](http://www.fltk.org/), and with support for multi-platform tilemaps as well as Pokémon-specific formats.
 
-Latest release: [**1.1.1**](https://github.com/Rangi42/tilemap-studio/releases/tag/v1.1.1)
+Latest release: [**2.0.0**](https://github.com/Rangi42/tilemap-studio/releases/tag/v2.0.0)
 
 Follow the steps in [INSTALL.md](INSTALL.md) to install the release copy of Tilemap Studio, or the longer instructions to build it yourself from source.
 
-The [example/](example/) directory contains different kinds of tilemaps and tileset graphics. **pokered/town_map.rle** is an RBY Town Map; **pokecrystal/\*.bin** are GSC Town Maps; **polishedcrystal/\*.bin** are PC Town Maps; **pokecrystal/\*.tilemap.rle** are Pokégear cards; **polishedcrystal/sgb_border.map** is tiles + attributes; and **prism/*.bin** are plain tiles.
+The [example/](example/) directory contains different formats of tilemaps and tileset graphics. In particular, [pokecrystal/town_map_pokegear.png](example/pokecrystal/town_map_pokegear.png) is a colored-in combination of tileset graphics from [pokecrystal](https://github.com/pret/pokecrystal), useful for viewing any Town Map in a project based on it.
 
 More information is at the [Skeetendo Forums](https://hax.iimarckus.org/topic/7691/). If you have questions or comments, please go there.
 
