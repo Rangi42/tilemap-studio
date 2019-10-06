@@ -97,6 +97,7 @@ Tileset::Result Tileset::read_tiles(const char *f) {
 	if (ends_with(s, ".bmp") || ends_with(s, ".BMP")) { return read_bmp_graphics(f); }
 	if (ends_with(s, ".1bpp") || ends_with(s, ".1BPP")) { return read_1bpp_graphics(f); }
 	if (ends_with(s, ".2bpp") || ends_with(s, ".2BPP")) { return read_2bpp_graphics(f); }
+	if (ends_with(s, ".4bpp") || ends_with(s, ".4BPP")) { return read_4bpp_graphics(f); }
 	if (ends_with(s, ".1bpp.lz") || ends_with(s, ".1BPP.LZ")) { return read_1bpp_lz_graphics(f); }
 	if (ends_with(s, ".2bpp.lz") || ends_with(s, ".2BPP.LZ")) { return read_2bpp_lz_graphics(f); }
 	return (_result = TILESET_BAD_EXT);
@@ -146,6 +147,23 @@ Tileset::Result Tileset::read_2bpp_graphics(const char *f) {
 	return parse_2bpp_data(n, data);
 }
 
+Tileset::Result Tileset::read_4bpp_graphics(const char *f) {
+	FILE *file = fl_fopen(f, "rb");
+	if (!file) { return (_result = TILESET_BAD_FILE); }
+
+	fseek(file, 0, SEEK_END);
+	long n = ftell(file);
+	rewind(file);
+	if (n % BYTES_PER_4BPP_TILE) { fclose(file); return (_result = TILESET_BAD_DIMS); }
+
+	uchar *data = new uchar[n];
+	size_t r = fread(data, 1, n, file);
+	fclose(file);
+	if (r != (size_t)n) { delete [] data; return (_result = TILESET_BAD_FILE); }
+
+	return parse_4bpp_data(n, data);
+}
+
 static Tileset::Result decompress_lz_data(const char *f, uchar *data, size_t lim, size_t &len);
 
 Tileset::Result Tileset::read_1bpp_lz_graphics(const char *f) {
@@ -170,7 +188,7 @@ Tileset::Result Tileset::read_2bpp_lz_graphics(const char *f) {
 
 enum Hue { WHITE, DARK, LIGHT, BLACK };
 
-Fl_Color hue_colors[NUM_HUES] = {fl_rgb_color(0xFF), fl_rgb_color(0x55), fl_rgb_color(0xAA), fl_rgb_color(0x00)};
+static Fl_Color hue_colors[NUM_HUES] = {fl_rgb_color(0xFF), fl_rgb_color(0x55), fl_rgb_color(0xAA), fl_rgb_color(0x00)};
 
 static void convert_1bpp_row(uchar b, Hue *row) {
 	// %ABCD_EFGH -> %A %B %C %D %E %F %G %H
@@ -241,6 +259,46 @@ Tileset::Result Tileset::parse_2bpp_data(size_t n, uchar *data) {
 				Hue hue = row[k];
 				fl_color(hue_colors[hue]);
 				fl_point(k, (int)(i * TILE_SIZE + j));
+			}
+		}
+	}
+
+	Fl_RGB_Image *img = surface->image();
+	delete surface;
+	Fl_Display_Device::display_device()->set_current();
+
+	delete [] data;
+	return postprocess_graphics(img);
+}
+
+static Fl_Color bpp4_colors[16] = {
+	fl_rgb_color(0xFF), fl_rgb_color(0xEE), fl_rgb_color(0xDD), fl_rgb_color(0xCC),
+	fl_rgb_color(0xBB), fl_rgb_color(0xAA), fl_rgb_color(0x99), fl_rgb_color(0x88),
+	fl_rgb_color(0x77), fl_rgb_color(0x66), fl_rgb_color(0x55), fl_rgb_color(0x44),
+	fl_rgb_color(0x33), fl_rgb_color(0x22), fl_rgb_color(0x11), fl_rgb_color(0x00)
+};
+
+Tileset::Result Tileset::parse_4bpp_data(size_t n, uchar *data) {
+	n /= BYTES_PER_4BPP_TILE;
+	_num_tiles = n;
+
+	int limit = (int)_num_tiles - _offset;
+	if (_length > 0) { limit = MIN(limit, _length + _offset); }
+	if (_start_id + limit > MAX_NUM_TILES) { delete [] data; return (_result = TILESET_TOO_LARGE); }
+
+	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)n * TILE_SIZE);
+	surface->set_current();
+
+	for (size_t i = 0; i < _num_tiles; i++) {
+		for (size_t j = 0; j < TILE_SIZE; j++) {
+			int py = (int)(i * TILE_SIZE + j);
+			for (int k = 0; k < TILE_SIZE / 2; k++) {
+				uchar b = data[i * BYTES_PER_4BPP_TILE + j * TILE_SIZE / 2 + k];
+				uchar hi = (uchar)((b & 0xF0) >> 4), lo = (uchar)(b & 0x0F);
+				fl_color(bpp4_colors[lo]);
+				fl_point(k * 2, py);
+				fl_color(bpp4_colors[hi]);
+				fl_point(k * 2 + 1, py);
 			}
 		}
 	}
