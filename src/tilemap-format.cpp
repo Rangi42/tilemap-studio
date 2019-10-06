@@ -1,3 +1,5 @@
+#include <cstring>
+
 #pragma warning(push, 0)
 #include <FL/filename.H>
 #pragma warning(pop)
