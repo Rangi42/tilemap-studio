@@ -123,7 +123,6 @@ private:
 	void update_tilemap_metadata(void);
 	void update_tileset_metadata(void);
 	void update_active_controls(void);
-	void refresh_theme(void);
 	void resize_tilemap(void);
 	void reformat_tilemap(void);
 	bool save_tilemap(bool force);

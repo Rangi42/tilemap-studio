@@ -11,7 +11,7 @@
 #include "tile-buttons.h"
 #include "config.h"
 
-Tileset::Tileset(int start_id, int offset, int length) : _image(NULL), _inactive_image(NULL), _num_tiles(0),
+Tileset::Tileset(int start_id, int offset, int length) : _image(NULL), _num_tiles(0),
 	_start_id(start_id), _offset(offset), _length(length), _result(TILESET_NULL) {}
 
 Tileset::~Tileset() {}
@@ -19,8 +19,6 @@ Tileset::~Tileset() {}
 void Tileset::clear() {
 	delete _image;
 	_image = NULL;
-	delete _inactive_image;
-	_inactive_image = NULL;
 	_num_tiles = 0;
 	_start_id = 0x000;
 	_offset = 0;
@@ -28,35 +26,27 @@ void Tileset::clear() {
 	_result = TILESET_NULL;
 }
 
-bool Tileset::refresh_inactive_image() {
-	if (!_image || _image->fail()) { return false; }
-	Fl_RGB_Image *img = (Fl_RGB_Image *)_image->copy();
-	if (!img || img->fail()) { return false; }
-	img->color_average(FL_GRAY, 0.33f);
-	delete _inactive_image;
-	_inactive_image = img;
-	return true;
-}
-
 bool Tileset::draw_tile(const Tile_State *ts, int x, int y, bool active) const {
 	int index = (int)ts->id - _start_id + _offset;
 	int limit = (int)_num_tiles;
 	if (_length > 0) { limit = MIN(limit, _length + _offset); }
-	if (index < _offset || index >= limit) { return false; }
+	if (index < _offset || index >= limit || !_image) { return false; }
 
-	Fl_RGB_Image *img = active ? _image : _inactive_image;
-	if (!img) { return false; }
-
-	int wt = img->w() / TILE_SIZE_2X;
-	int tx = index % wt * TILE_SIZE_2X, ty = index / wt * TILE_SIZE_2X;
-	if (!ts->x_flip && !ts->y_flip) {
-		img->draw(x, y, TILE_SIZE_2X, TILE_SIZE_2X, tx, ty);
+	if (!active) {
+		fl_rectf(x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_INACTIVE_COLOR);
 		return true;
 	}
 
-	const uchar *data = (const uchar *)img->data()[0];
-	int d = img->d(), ld = img->ld();
-	if (!ld) { ld = img->w() * d; }
+	int wt = _image->w() / TILE_SIZE_2X;
+	int tx = index % wt * TILE_SIZE_2X, ty = index / wt * TILE_SIZE_2X;
+	if (!ts->x_flip && !ts->y_flip) {
+		_image->draw(x, y, TILE_SIZE_2X, TILE_SIZE_2X, tx, ty);
+		return true;
+	}
+
+	const uchar *data = (const uchar *)_image->data()[0];
+	int d = _image->d(), ld = _image->ld();
+	if (!ld) { ld = _image->w() * d; }
 	data += ty * ld + tx * d + (ts->y_flip ? ts->x_flip ? ld + d : ld : ts->x_flip ? d : 0) * (TILE_SIZE_2X - 1);
 	int td = ts->x_flip ? -d : d;
 	int tld = ts->y_flip ? -ld : ld;
@@ -316,11 +306,6 @@ Tileset::Result Tileset::postprocess_graphics(Fl_RGB_Image *img) {
 
 	_image = (Fl_RGB_Image *)img->copy(img->w() * 2, img->h() * 2);
 	if (!_image || _image->fail()) { return (_result = TILESET_BAD_FILE); }
-
-	if (!refresh_inactive_image()) {
-		clear();
-		return (_result = TILESET_BAD_FILE);
-	}
 
 	int w = _image->w(), h = _image->h();
 	if (w % TILE_SIZE_2X || h % TILE_SIZE_2X) { return (_result = TILESET_BAD_DIMS); }
