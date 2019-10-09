@@ -177,7 +177,8 @@ private:
 	Label_Button *_image_name, *_tilemap_name, *_tileset_name;
 	Dropdown *_format;
 	Default_Hex_Spinner *_start_id;
-	OS_Check_Button *_use_7f;
+	OS_Check_Button *_use_space;
+	Default_Hex_Spinner *_space_id;
 	Fl_Native_File_Chooser *_image_chooser, *_tilemap_chooser, *_tileset_chooser;
 	std::string _image_filename, _tilemap_filename, _tileset_filename;
 public:
@@ -190,7 +191,8 @@ public:
 	inline void format(Tilemap_Format fmt) { initialize(); _format->value((int)fmt); }
 	inline uint16_t start_id(void) const { return (uint16_t)_start_id->value(); }
 	inline void start_id(uint16_t n) { initialize(); _start_id->value(n); }
-	inline bool use_7f(void) const { return !!_use_7f->value(); }
+	inline bool use_space(void) const { return !!_use_space->value(); }
+	inline uint16_t space_id(void) const { return (uint16_t)_space_id->value(); }
 private:
 	void update_ok_button(void);
 protected:
@@ -200,6 +202,7 @@ private:
 	static void image_cb(Fl_Widget *w, Image_To_Tiles_Dialog *itd);
 	static void tilemap_cb(Fl_Widget *w, Image_To_Tiles_Dialog *itd);
 	static void tileset_cb(Fl_Widget *w, Image_To_Tiles_Dialog *itd);
+	static void use_space_cb(OS_Check_Button *cb, Image_To_Tiles_Dialog *itd);
 };
 
 #endif

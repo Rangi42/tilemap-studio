@@ -10,7 +10,6 @@
 
 #define NUM_TILE_PIXELS (TILE_SIZE * TILE_SIZE)
 
-#define SPACE_TILE_ID 0x07F
 #define SPACE_COLOR 0xFFFFFF00 // white
 
 typedef Fl_Color Tile[NUM_TILE_PIXELS];

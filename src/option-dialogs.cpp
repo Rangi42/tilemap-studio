@@ -11,6 +11,7 @@
 #include "widgets.h"
 #include "utils.h"
 #include "option-dialogs.h"
+#include "tileset.h"
 #include "config.h"
 #include "icons.h"
 
@@ -232,9 +233,7 @@ void New_Tilemap_Dialog::initialize_content() {
 	_tilemap_height = new OS_Spinner(0, 0, 0, 0, "Height:");
 	_format = new Dropdown(0, 0, 0, 0, "Format:");
 	// Initialize content group's children
-	_tilemap_width->align(FL_ALIGN_LEFT);
 	_tilemap_width->range(1, 1024);
-	_tilemap_height->align(FL_ALIGN_LEFT);
 	_tilemap_height->range(1, 1024);
 	for (int i = 0; i < NUM_FORMATS; i++) {
 		_format->add(format_name((Tilemap_Format)i));
@@ -247,7 +246,7 @@ int New_Tilemap_Dialog::refresh_content(int ww, int dy) {
 	_content->resize(win_m, dy, ww, ch);
 
 	int wgt_off = win_m + MAX(text_width(_tilemap_width->label(), 2), text_width(_format->label(), 2));
-	int wgt_w = text_width("1999", 2) + wgt_h;
+	int wgt_w = text_width("9999", 2) + wgt_h / 2 + 4;
 	_tilemap_width->resize(wgt_off, dy, wgt_w, wgt_h);
 	int wgt_off2 = _tilemap_width->x() + _tilemap_width->w() + win_m + text_width("Height:", 2);
 	_tilemap_height->resize(wgt_off2, dy, wgt_w, wgt_h);
@@ -316,9 +315,7 @@ void Resize_Dialog::initialize_content() {
 		_anchor_buttons[i] = ab;
 	}
 	// Initialize content group's children
-	_tilemap_width->align(FL_ALIGN_LEFT);
 	_tilemap_width->range(1, 1024);
-	_tilemap_height->align(FL_ALIGN_LEFT);
 	_tilemap_height->range(1, 9999);
 	anchor(Preferences::get("resize-anchor", 4));
 }
@@ -330,7 +327,7 @@ int Resize_Dialog::refresh_content(int ww, int dy) {
 
 	int wgt_off = win_m + MAX(text_width(_tilemap_width->label(), 2), text_width(_tilemap_height->label(), 2));
 
-	wgt_w = text_width("1999", 2) + wgt_h;
+	wgt_w = text_width("9999", 2) + wgt_h / 2 + 4;
 	_tilemap_width->resize(wgt_off, dy, wgt_w, wgt_h);
 	_tilemap_height->resize(wgt_off, _tilemap_width->y() + _tilemap_width->h() + wgt_m, wgt_w, wgt_h);
 	wgt_off += wgt_w + 20;
@@ -431,7 +428,7 @@ int Tilemap_Width_Dialog::refresh_content(int ww, int dy) {
 	_content->resize(win_m, dy, ww, wgt_h);
 
 	int wgt_off = win_m + text_width(_tilemap_width->label(), 2);
-	int wgt_w = text_width("1999", 2) + wgt_h;
+	int wgt_w = text_width("9999", 2) + wgt_h / 2 + 4;
 	_tilemap_width->resize(wgt_off, dy, wgt_w, wgt_h);
 
 	return wgt_h;
@@ -463,14 +460,14 @@ void Add_Tileset_Dialog::initialize_content() {
 	_offset = new Default_Spinner(0, 0, 0, 0, "Offset:");
 	_length = new Default_Spinner(0, 0, 0, 0, "Length:");
 	// Initialize content group's children
-	_start_id->align(FL_ALIGN_LEFT);
-	_start_id->range(0x00, 0xFF);
+	_start_id->format("%03X");
+	_start_id->range(0x00, MAX_NUM_TILES-1);
 	_start_id->default_value(0x00);
 	_offset->align(FL_ALIGN_LEFT);
-	_offset->range(0, 255);
+	_offset->range(0, 1024);
 	_offset->default_value(0);
 	_length->align(FL_ALIGN_LEFT);
-	_length->range(0, 256);
+	_length->range(0, 1024);
 	_length->default_value(0);
 }
 
@@ -482,11 +479,11 @@ int Add_Tileset_Dialog::refresh_content(int ww, int dy) {
 	_tileset_header->resize(win_m, dy, ww, wgt_h);
 	dy += wgt_h + wgt_m;
 	int wgt_off = win_m + text_width(_start_id->label(), 3);
-	int wgt_w = MAX(text_width("AA", 2), text_width("FF", 2)) + wgt_h;
+	int wgt_w = MAX(text_width("AAA", 2), text_width("FFF", 2)) + wgt_h / 2 + 4;
 	_start_id->resize(wgt_off, dy, wgt_w, wgt_h);
 	dy += wgt_h + wgt_m;
 	wgt_off = win_m + text_width(_offset->label(), 3);
-	wgt_w = text_width("1999", 2) + wgt_h;
+	wgt_w = text_width("9999", 2) + wgt_h / 2 + 4;
 	_offset->resize(wgt_off, dy, wgt_w, wgt_h);
 	wgt_off = _offset->x() + _offset->w() + win_m + text_width(_length->label(), 3);
 	_length->resize(wgt_off, dy, wgt_w, wgt_h);
@@ -494,10 +491,11 @@ int Add_Tileset_Dialog::refresh_content(int ww, int dy) {
 	return ch;
 }
 
-Image_To_Tiles_Dialog::Image_To_Tiles_Dialog(const char *t) : Option_Dialog(320, t), _image_heading(NULL),
+Image_To_Tiles_Dialog::Image_To_Tiles_Dialog(const char *t) : Option_Dialog(340, t), _image_heading(NULL),
 	_tilemap_heading(NULL), _tileset_heading(NULL), _image(NULL), _tilemap(NULL), _tileset(NULL), _image_name(NULL),
-	_tilemap_name(NULL), _tileset_name(NULL), _format(NULL), _start_id(NULL), _use_7f(NULL), _image_chooser(NULL),
-	_tilemap_chooser(NULL), _tileset_chooser(NULL), _image_filename(), _tilemap_filename(), _tileset_filename() {}
+	_tilemap_name(NULL), _tileset_name(NULL), _format(NULL), _start_id(NULL), _use_space(NULL), _space_id(NULL),
+	_image_chooser(NULL), _tilemap_chooser(NULL), _tileset_chooser(NULL), _image_filename(), _tilemap_filename(),
+	_tileset_filename() {}
 
 Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
 	delete _image_heading;
@@ -511,7 +509,8 @@ Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
 	delete _tileset_name;
 	delete _format;
 	delete _start_id;
-	delete _use_7f;
+	delete _use_space;
+	delete _space_id;
 	delete _image_chooser;
 	delete _tilemap_chooser;
 	delete _tileset_chooser;
@@ -539,7 +538,8 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_tileset_name = new Label_Button(0, 0, 0, 0, NO_FILE_SELECTED_LABEL);
 	_format = new Dropdown(0, 0, 0, 0, "Format:");
 	_start_id = new Default_Hex_Spinner(0, 0, 0, 0, "Start at ID:");
-	_use_7f = new OS_Check_Button(0, 0, 0, 0, "Use $0:7F for Blank Spaces");
+	_use_space = new OS_Check_Button(0, 0, 0, 0, "Use Blank Space ID:");
+	_space_id = new Default_Hex_Spinner(0, 0, 0, 0);
 	_image_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
 	_tilemap_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	_tileset_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
@@ -556,7 +556,13 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	for (int i = 0; i < NUM_FORMATS; i++) {
 		_format->add(format_name((Tilemap_Format)i));
 	}
-	_start_id->default_value(0x00);
+	_start_id->format("%03X");
+	_start_id->range(0x000, MAX_NUM_TILES-1);
+	_start_id->default_value(0x000);
+	_use_space->callback((Fl_Callback *)use_space_cb, this);
+	_space_id->format("%03X");
+	_space_id->range(0x000, MAX_NUM_TILES-1);
+	_space_id->default_value(0x07F);
 	_image_chooser->title("Read Image");
 	_image_chooser->filter("Image Files\t*.{png,bmp}\n");
 	_tilemap_chooser->title("Write Tilemap");
@@ -605,12 +611,15 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	_format->resize(wgt_off, dy, wgt_w, wgt_h);
 	dy += wgt_h + wgt_m;
 
-	wgt_w = MAX(text_width("AA", 2), text_width("FF", 2)) + wgt_h;
+	wgt_w = MAX(text_width("AAA", 2), text_width("FFF", 2)) + wgt_h / 2 + 4;
 	wgt_off = win_m + text_width(_start_id->label(), 3);
 	_start_id->resize(wgt_off, dy, wgt_w, wgt_h);
-	wgt_w = text_width(_use_7f->label(), 3) + wgt_h;
+	wgt_w = text_width(_use_space->label(), 3) + wgt_h;
 	wgt_off += _start_id->w() + win_m;
-	_use_7f->resize(wgt_off, dy, wgt_w, wgt_h);
+	_use_space->resize(wgt_off, dy, wgt_w, wgt_h);
+	wgt_off += _use_space->w();
+	wgt_w = MAX(text_width("AAA", 2), text_width("FFF", 2)) + wgt_h / 2 + 4;
+	_space_id->resize(wgt_off, dy, wgt_w, wgt_h);
 
 	_image_filename.clear();
 	_tilemap_filename.clear();
@@ -619,6 +628,8 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	_tilemap_name->label(NO_FILE_SELECTED_LABEL);
 	_tileset_name->label(NO_FILE_SELECTED_LABEL);
 	_ok_button->deactivate();
+
+	use_space_cb(_use_space, this);
 
 	return ch;
 }
@@ -672,4 +683,14 @@ void Image_To_Tiles_Dialog::tileset_cb(Fl_Widget *, Image_To_Tiles_Dialog *itd) 
 	}
 	itd->update_ok_button();
 	itd->_dialog->redraw();
+}
+
+void Image_To_Tiles_Dialog::use_space_cb(OS_Check_Button *, Image_To_Tiles_Dialog *itd) {
+	if (itd->use_space()) {
+		itd->_space_id->activate();
+	}
+	else {
+		itd->_space_id->deactivate();
+	}
+	itd->_space_id->redraw();
 }
