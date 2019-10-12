@@ -177,11 +177,12 @@ private:
 	Label_Button *_image_name, *_tileset_name;
 	Dropdown *_format;
 	Label *_output_names;
+	OS_Check_Button *_palette;
 	Default_Hex_Spinner *_start_id;
 	OS_Check_Button *_use_space;
 	Default_Hex_Spinner *_space_id;
 	Fl_Native_File_Chooser *_image_chooser, *_tileset_chooser;
-	std::string _image_filename, _tileset_filename, _tilemap_filename, _attrmap_filename;
+	std::string _image_filename, _tileset_filename, _tilemap_filename, _attrmap_filename, _palette_filename;
 public:
 	Image_To_Tiles_Dialog(const char *t);
 	~Image_To_Tiles_Dialog();
@@ -189,8 +190,10 @@ public:
 	inline const char *tileset_filename(void) const { return _tileset_filename.c_str(); }
 	inline const char *tilemap_filename(void) const { return _tilemap_filename.c_str(); }
 	inline const char *attrmap_filename(void) const { return _attrmap_filename.c_str(); }
+	inline const char *palette_filename(void) const { return _palette_filename.c_str(); }
 	inline Tilemap_Format format(void) const { return (Tilemap_Format)_format->value(); }
 	inline void format(Tilemap_Format fmt) { initialize(); _format->value((int)fmt); }
+	inline bool palette(void) const { return !!_palette->value(); }
 	inline uint16_t start_id(void) const { return (uint16_t)_start_id->value(); }
 	inline void start_id(uint16_t n) { initialize(); _start_id->value(n); }
 	inline bool use_space(void) const { return !!_use_space->value(); }

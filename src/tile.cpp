@@ -1,6 +1,6 @@
 #include "tile.h"
 
-bool is_blank_tile(Tile &tile) {
+bool is_blank_tile(const Tile &tile) {
 	for (int i = 0; i < NUM_TILE_PIXELS; i++) {
 		if (tile[i] != SPACE_COLOR) {
 			return false;
@@ -9,7 +9,7 @@ bool is_blank_tile(Tile &tile) {
 	return true;
 }
 
-bool are_identical_tiles(Tile &t1, Tile &t2, Tilemap_Format fmt, bool &x_flip, bool &y_flip) {
+bool are_identical_tiles(const Tile &t1, const Tile &t2, Tilemap_Format fmt, bool &x_flip, bool &y_flip) {
 	for (int i = 0; i < NUM_TILE_PIXELS; i++) {
 		if (t1[i] != t2[i]) {
 			goto not_identical;

@@ -13,6 +13,7 @@
 #define GAME_BOY_VRAM_SIZE 32
 
 #define ATTRMAP_EXT ".attrmap"
+#define PALETTE_EXT ".pal"
 
 #define NUM_FORMATS 9
 
