@@ -104,12 +104,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	wh -= _status_bar->h();
 	_tilemap_dimensions = new Status_Bar_Field(0, 0, text_width("Tilemap: 9999 x 9999", 8), 21, "");
 	new Spacer(0, 0, 2, 21);
-	wgt_w = 21;
-	for (int i = 0; i < NUM_FORMATS; i++) {
-		const char *l = format_name((Tilemap_Format)i);
-		int lw = text_width(l, 8);
-		if (lw > wgt_w) { wgt_w = lw; }
-	}
+	wgt_w = format_max_name_width() + 4;
 	_tilemap_format = new Status_Bar_Field(0, 0, wgt_w, 21, "");
 	new Spacer(0, 0, 2, 21);
 	_hover_id = new Status_Bar_Field(0, 0, text_width("ID: $A:AA", 8), 21, "");
@@ -1346,11 +1341,16 @@ void Main_Window::image_to_tiles() {
 		tilemap.push_back(tt);
 	}
 
-	const char *tilemap_filename = _image_to_tiles_dialog->tilemap_filename();
-	const char *tilemap_basename = fl_filename_name(tilemap_filename);
+	const char *tileset_filename = _image_to_tiles_dialog->tileset_filename();
+	const char *tileset_basename = fl_filename_name(tileset_filename);
+	char tilemap_filename[FL_PATH_MAX] = {};
 	char attrmap_filename[FL_PATH_MAX] = {};
-	strcpy(attrmap_filename, tilemap_filename);
+	strcpy(tilemap_filename, tileset_filename);
+	fl_filename_setext(tilemap_filename, sizeof(tilemap_filename), format_extension(fmt));
+	strcpy(attrmap_filename, tileset_filename);
 	fl_filename_setext(attrmap_filename, sizeof(attrmap_filename), ATTRMAP_EXT);
+	const char *tilemap_basename = fl_filename_name(tilemap_filename);
+
 	if (!Tilemap::write_tiles(tilemap_filename, attrmap_filename, tilemap, fmt)) {
 		for (Tile_Tessera *tt : tilemap) {
 			delete tt;
@@ -1368,8 +1368,6 @@ void Main_Window::image_to_tiles() {
 		delete tt;
 	}
 
-	const char *tileset_filename = _image_to_tiles_dialog->tileset_filename();
-	const char *tileset_basename = fl_filename_name(tileset_filename);
 	int nt = (int)tileset.size();
 	int tw = MIN(nt, 16);
 	int th = (nt + tw - 1) / tw;

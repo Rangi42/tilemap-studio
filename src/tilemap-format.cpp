@@ -54,6 +54,15 @@ const char *format_name(Tilemap_Format fmt) {
 	return format_names[fmt];
 }
 
+int format_max_name_width() {
+	int mw = 0;
+	for (int i = 0; i < NUM_FORMATS; i++) {
+		int fw = text_width(format_names[i], 6);
+		if (fw > mw) { mw = fw; }
+	}
+	return mw;
+}
+
 static const char *format_extensions[NUM_FORMATS] = {
 	".tilemap",     // PLAIN - e.g. pokecrystal/gfx/card_flip/card_flip.tilemap
 	".bin",         // GBC_ATTRS - e.g. pokecrystal/gfx/mobile/*.bin

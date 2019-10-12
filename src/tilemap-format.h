@@ -45,6 +45,7 @@ int format_tileset_size(Tilemap_Format fmt);
 int format_palettes_size(Tilemap_Format fmt);
 const char *format_name(Tilemap_Format fmt);
 const char *format_extension(Tilemap_Format fmt);
+int format_max_name_width(void);
 
 Tilemap_Format guess_format(const char *filename);
 

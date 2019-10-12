@@ -172,21 +172,23 @@ protected:
 
 class Image_To_Tiles_Dialog : public Option_Dialog {
 private:
-	Label *_image_heading, *_tilemap_heading, *_tileset_heading;
-	Toolbar_Button *_image, *_tilemap, *_tileset;
-	Label_Button *_image_name, *_tilemap_name, *_tileset_name;
+	Label *_image_heading, *_tileset_heading;
+	Toolbar_Button *_image, *_tileset;
+	Label_Button *_image_name, *_tileset_name;
 	Dropdown *_format;
+	Label *_output_names;
 	Default_Hex_Spinner *_start_id;
 	OS_Check_Button *_use_space;
 	Default_Hex_Spinner *_space_id;
-	Fl_Native_File_Chooser *_image_chooser, *_tilemap_chooser, *_tileset_chooser;
-	std::string _image_filename, _tilemap_filename, _tileset_filename;
+	Fl_Native_File_Chooser *_image_chooser, *_tileset_chooser;
+	std::string _image_filename, _tileset_filename, _tilemap_filename, _attrmap_filename;
 public:
 	Image_To_Tiles_Dialog(const char *t);
 	~Image_To_Tiles_Dialog();
 	inline const char *image_filename(void) const { return _image_filename.c_str(); }
-	inline const char *tilemap_filename(void) const { return _tilemap_filename.c_str(); }
 	inline const char *tileset_filename(void) const { return _tileset_filename.c_str(); }
+	inline const char *tilemap_filename(void) const { return _tilemap_filename.c_str(); }
+	inline const char *attrmap_filename(void) const { return _attrmap_filename.c_str(); }
 	inline Tilemap_Format format(void) const { return (Tilemap_Format)_format->value(); }
 	inline void format(Tilemap_Format fmt) { initialize(); _format->value((int)fmt); }
 	inline uint16_t start_id(void) const { return (uint16_t)_start_id->value(); }
@@ -194,14 +196,16 @@ public:
 	inline bool use_space(void) const { return !!_use_space->value(); }
 	inline uint16_t space_id(void) const { return (uint16_t)_space_id->value(); }
 private:
+	void update_image_name(void);
+	void update_output_names(void);
 	void update_ok_button(void);
 protected:
 	void initialize_content(void);
 	int refresh_content(int ww, int dy);
 private:
 	static void image_cb(Fl_Widget *w, Image_To_Tiles_Dialog *itd);
-	static void tilemap_cb(Fl_Widget *w, Image_To_Tiles_Dialog *itd);
 	static void tileset_cb(Fl_Widget *w, Image_To_Tiles_Dialog *itd);
+	static void format_cb(Dropdown *dd, Image_To_Tiles_Dialog *itd);
 	static void use_space_cb(OS_Check_Button *cb, Image_To_Tiles_Dialog *itd);
 };
 
