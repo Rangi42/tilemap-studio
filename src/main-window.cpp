@@ -1342,13 +1342,9 @@ void Main_Window::image_to_tiles() {
 	}
 
 	const char *tileset_filename = _image_to_tiles_dialog->tileset_filename();
+	const char *tilemap_filename = _image_to_tiles_dialog->tilemap_filename();
+	const char *attrmap_filename = _image_to_tiles_dialog->attrmap_filename();
 	const char *tileset_basename = fl_filename_name(tileset_filename);
-	char tilemap_filename[FL_PATH_MAX] = {};
-	char attrmap_filename[FL_PATH_MAX] = {};
-	strcpy(tilemap_filename, tileset_filename);
-	fl_filename_setext(tilemap_filename, sizeof(tilemap_filename), format_extension(fmt));
-	strcpy(attrmap_filename, tileset_filename);
-	fl_filename_setext(attrmap_filename, sizeof(attrmap_filename), ATTRMAP_EXT);
 	const char *tilemap_basename = fl_filename_name(tilemap_filename);
 
 	if (!Tilemap::write_tiles(tilemap_filename, attrmap_filename, tilemap, fmt)) {
