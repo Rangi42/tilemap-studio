@@ -130,6 +130,7 @@ static bool write_palette(const char *f, const std::vector<std::vector<Fl_Color>
 			}
 		}
 	}
+	fclose(file);
 	return true;
 }
 
