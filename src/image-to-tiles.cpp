@@ -20,13 +20,13 @@
 
 typedef std::set<Fl_Color> Color_Set;
 
-static bool build_tilemap(const Tile *tiles, size_t n,
+static bool build_tilemap(const Tile *tiles, size_t n, std::vector<int> tile_palettes,
 	std::vector<Tile_Tessera *> &tilemap, std::vector<size_t> &tileset,
 	Tilemap_Format fmt, uint16_t start_id, bool use_space, uint16_t space_id) {
 	for (size_t i = 0; i < n; i++) {
 		const Tile &tile = tiles[i];
 		if (use_space && is_blank_tile(tile)) {
-			tilemap.push_back(new Tile_Tessera(0, 0, 0, 0, space_id));
+			tilemap.push_back(new Tile_Tessera(0, 0, 0, 0, space_id, false, false, false, false, tile_palettes[i]));
 			continue;
 		}
 		size_t ti = 0, nt = tileset.size();
@@ -45,7 +45,7 @@ static bool build_tilemap(const Tile *tiles, size_t n,
 			tileset.push_back(i);
 		}
 		uint16_t id = start_id + (uint16_t)ti;
-		Tile_Tessera *tt = new Tile_Tessera(0, 0, 0, 0, id, x_flip, y_flip);
+		Tile_Tessera *tt = new Tile_Tessera(0, 0, 0, 0, id, x_flip, y_flip, false, false, tile_palettes[i]);
 		tilemap.push_back(tt);
 	}
 	return true;
@@ -77,6 +77,12 @@ static Fl_RGB_Image *draw_tileset(const Tile *tiles, std::vector<size_t> &tilese
 	Fl_Display_Device::display_device()->set_current();
 
 	return img;
+}
+
+static double luminance(Fl_Color c) {
+	uchar r, g, b;
+	Fl::get_color(c, r, g, b);
+	return 0.299 * (double)r + 0.587 * (double)g + 0.114 * (double)b;
 }
 
 void Main_Window::image_to_tiles() {
@@ -119,9 +125,11 @@ void Main_Window::image_to_tiles() {
 	// Build the palette
 
 	Tilemap_Format fmt = _image_to_tiles_dialog->format();
-	bool make_palette = _image_to_tiles_dialog->palette();
+	bool has_palettes = format_has_palettes(fmt);
 
-	if (make_palette) {
+	std::vector<int> tile_palettes(n, has_palettes ? 0 : -1);
+
+	if (has_palettes && _image_to_tiles_dialog->palette()) {
 		// Algorithm ported from superfamiconv
 		// <https://github.com/Optiroc/SuperFamiconv>
 
@@ -158,14 +166,14 @@ void Main_Window::image_to_tiles() {
 
 		// Remove duplicate color sets
 		std::vector<Color_Set> cs_uniq(cs_tiles.size());
-		auto cs_uniq_last = std::copy_if(cs_tiles.begin(), cs_tiles.end(), cs_uniq.begin(), [&](Color_Set &s) {
+		auto cs_uniq_last = std::copy_if(cs_tiles.begin(), cs_tiles.end(), cs_uniq.begin(), [&](const Color_Set &s) {
 			return std::find(cs_uniq.begin(), cs_uniq.end(), s) == cs_uniq.end();
 		});
 		cs_uniq.resize(std::distance(cs_uniq.begin(), cs_uniq_last));
 
 		// Remove color sets that are proper subsets of other color sets
 		std::vector<Color_Set> cs_full(cs_uniq.size());
-		auto cs_full_last = std::copy_if(cs_uniq.begin(), cs_uniq.end(), cs_full.begin(), [&](Color_Set &s) {
+		auto cs_full_last = std::copy_if(cs_uniq.begin(), cs_uniq.end(), cs_full.begin(), [&](const Color_Set &s) {
 			for (Color_Set &c : cs_uniq) {
 				if (s != c && std::includes(c.begin(), c.end(), s.begin(), s.end())) {
 					return false;
@@ -174,11 +182,6 @@ void Main_Window::image_to_tiles() {
 			return true;
 		});
 		cs_full.resize(std::distance(cs_full.begin(), cs_full_last));
-
-		// Sort color sets from fewest to most colors
-		std::sort(cs_full.begin(), cs_full.end(), [](Color_Set &a, Color_Set &b) {
-			return a.size() < b.size();
-		});
 
 		// Combine color sets as long as they fit within the color limit
 		std::vector<Color_Set> cs_opt;
@@ -212,11 +215,40 @@ void Main_Window::image_to_tiles() {
 		}
 
 		// Sort color sets from most to fewest colors
-		std::sort(cs_opt.begin(), cs_opt.end(), [](Color_Set &a, Color_Set &b) {
+		std::stable_sort(cs_opt.begin(), cs_opt.end(), [](const Color_Set &a, const Color_Set &b) {
 			return a.size() > b.size();
 		});
 
-		// TODO: Use the optimized palette
+		// Sort palettes from brightest darkest color, padded with black
+		std::vector<std::vector<Fl_Color>> palettes;
+		for (Color_Set &s : cs_opt) {
+			std::vector<Fl_Color> palette(s.begin(), s.end());
+			std::sort(palette.begin(), palette.end(), [](Fl_Color a, Fl_Color b) {
+				return luminance(a) > luminance(b);
+			});
+			for (size_t i = palette.size(); i < max_colors; i++) {
+				palette.push_back(FL_BLACK);
+			}
+			palettes.push_back(palette);
+		}
+
+		size_t np = palettes.size();
+
+		// Associate tiles with palettes
+		for (size_t i = 0; i < n; i++) {
+			int pal = 0;
+			const Color_Set &s = cs_tiles[i];
+			for (size_t j = 0; j < np; j++) {
+				const Color_Set &c = cs_opt[j];
+				if (std::includes(c.begin(), c.end(), s.begin(), s.end())) {
+					pal = (int)j;
+					break;
+				}
+			}
+			tile_palettes[i] = pal;
+		}
+
+		// TODO: Write the palette colors to a .pal file
 	}
 
 	// Build the tilemap and tileset
@@ -227,7 +259,7 @@ void Main_Window::image_to_tiles() {
 	uint16_t start_id = _image_to_tiles_dialog->start_id();
 	bool use_space = _image_to_tiles_dialog->use_space();
 	uint16_t space_id = _image_to_tiles_dialog->space_id();
-	if (!build_tilemap(tiles, n, tilemap, tileset, fmt, start_id, use_space, space_id)) {
+	if (!build_tilemap(tiles, n, tile_palettes, tilemap, tileset, fmt, start_id, use_space, space_id)) {
 		for (Tile_Tessera *tt : tilemap) {
 			delete tt;
 		}
@@ -268,6 +300,7 @@ void Main_Window::image_to_tiles() {
 
 	// Create the tileset file
 
+	// TODO: Draw monochrome tiles if palettes were generated
 	Fl_RGB_Image *timg = draw_tileset(tiles, tileset);
 	Image::Result result = Image::write_image(tileset_filename, timg);
 	delete timg;
