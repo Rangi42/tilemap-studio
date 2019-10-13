@@ -42,6 +42,10 @@ inline bool format_has_metadata(Tilemap_Format fmt) {
 	return fmt == Tilemap_Format::GBC_ATTRS || fmt == Tilemap_Format::GBC_ATTRMAP;
 }
 
+inline bool format_uses_jasc(Tilemap_Format fmt) {
+	return fmt == Tilemap_Format::GBA_PALETTES;
+}
+
 int format_tileset_size(Tilemap_Format fmt);
 int format_palettes_size(Tilemap_Format fmt);
 int format_palette_size(Tilemap_Format fmt);

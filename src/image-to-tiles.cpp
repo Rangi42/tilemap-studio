@@ -51,7 +51,7 @@ static bool build_tilemap(const Tile *tiles, size_t n, std::vector<int> tile_pal
 	return true;
 }
 
-static Fl_RGB_Image *draw_tileset(const Tile *tiles, std::vector<size_t> &tileset) {
+static Fl_RGB_Image *print_tileset(const Tile *tiles, std::vector<size_t> &tileset) {
 	int nt = (int)tileset.size();
 	int tw = MIN(nt, TILES_PER_ROW);
 	int th = (nt + tw - 1) / tw;
@@ -77,6 +77,34 @@ static Fl_RGB_Image *draw_tileset(const Tile *tiles, std::vector<size_t> &tilese
 	Fl_Display_Device::display_device()->set_current();
 
 	return img;
+}
+
+static bool write_palette(const char *f, const std::vector<std::vector<Fl_Color>> &palettes, bool jasc) {
+	FILE *file = fl_fopen(f, "w");
+	if (!file) { return false; }
+	if (jasc) {
+		fputs("JASC-PAL\n0100\n", file);
+		fprintf(file, "%d\n", (int)palettes.size());
+		for (const std::vector<Fl_Color> &palette : palettes) {
+			for (Fl_Color c : palette) {
+				uchar r, g, b;
+				Fl::get_color(c, r, g, b);
+				fprintf(file, "%d %d %d\n", (int)r, (int)g, (int)b);
+			}
+		}
+	}
+	else {
+		int p = 0;
+		for (const std::vector<Fl_Color> &palette : palettes) {
+			fprintf(file, "; palette %d\n", p++);
+			for (Fl_Color c : palette) {
+				uchar r, g, b;
+				Fl::get_color(c, r, g, b);
+				fprintf(file, "\tRGB %02d, %02d, %02d\n", (int)(r / 8), (int)(g / 8), (int)(b / 8));
+			}
+		}
+	}
+	return true;
 }
 
 static double luminance(Fl_Color c) {
@@ -200,17 +228,6 @@ void Main_Window::image_to_tiles() {
 			}
 		}
 
-		// Check that the palettes fit within the palette limit
-		if (cs_opt.size() > max_palettes) {
-			delete [] tiles;
-			std::string msg = "Could not convert ";
-			msg = msg + image_basename + "!\n\nThe tiles need more than " +
-				std::to_string(max_palettes) + " palettes.";
-			_error_dialog->message(msg);
-			_error_dialog->show(this);
-			return;
-		}
-
 		// Sort color sets from most to fewest colors
 		std::stable_sort(cs_opt.begin(), cs_opt.end(), [](const Color_Set &a, const Color_Set &b) {
 			return a.size() > b.size();
@@ -229,7 +246,30 @@ void Main_Window::image_to_tiles() {
 			palettes.push_back(palette);
 		}
 
+		// Create the palette file
+		const char *palette_filename = _image_to_tiles_dialog->palette_filename();
+		const char *palette_basename = fl_filename_name(palette_filename);
+		if (!write_palette(palette_filename, palettes, format_uses_jasc(fmt))) {
+			delete [] tiles;
+			std::string msg = "Could not write to ";
+			msg = msg + palette_basename + "!";
+			_error_dialog->message(msg);
+			_error_dialog->show(this);
+			return;
+		}
+
+		// Check that the palettes fit within the palette limit
 		size_t np = palettes.size();
+		if (np > max_palettes) {
+			delete [] tiles;
+			std::string msg = "Could not convert ";
+			msg = msg + image_basename + "!\n\nThe tiles need more than " +
+				std::to_string(max_palettes) + " palettes.\n\nAll " +
+				std::to_string(np) + " palettes were written to " + palette_basename + ".";
+			_error_dialog->message(msg);
+			_error_dialog->show(this);
+			return;
+		}
 
 		// Associate tiles with palettes
 		for (size_t i = 0; i < n; i++) {
@@ -244,8 +284,6 @@ void Main_Window::image_to_tiles() {
 			}
 			tile_palettes[i] = pal;
 		}
-
-		// TODO: Write the palette colors to a .pal file
 	}
 
 	// Build the tilemap and tileset
@@ -298,7 +336,7 @@ void Main_Window::image_to_tiles() {
 	// Create the tileset file
 
 	// TODO: Draw monochrome tiles if palettes were generated
-	Fl_RGB_Image *timg = draw_tileset(tiles, tileset);
+	Fl_RGB_Image *timg = print_tileset(tiles, tileset);
 	Image::Result result = Image::write_image(tileset_filename, timg);
 	delete timg;
 	if (result) {
