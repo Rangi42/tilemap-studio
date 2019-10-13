@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <map>
 #include <algorithm>
 
 #pragma warning(push, 0)
@@ -51,10 +52,29 @@ static bool build_tilemap(const Tile *tiles, size_t n, std::vector<int> tile_pal
 	return true;
 }
 
-static Fl_RGB_Image *print_tileset(const Tile *tiles, std::vector<size_t> &tileset) {
+static Fl_Color indexed_colors[16] = {
+	fl_rgb_color(0xFF), fl_rgb_color(0xEE), fl_rgb_color(0xDD), fl_rgb_color(0xCC),
+	fl_rgb_color(0xBB), fl_rgb_color(0xAA), fl_rgb_color(0x99), fl_rgb_color(0x88),
+	fl_rgb_color(0x77), fl_rgb_color(0x66), fl_rgb_color(0x55), fl_rgb_color(0x44),
+	fl_rgb_color(0x33), fl_rgb_color(0x22), fl_rgb_color(0x11), fl_rgb_color(0x00)
+};
+
+static Fl_RGB_Image *print_tileset(const Tile *tiles, std::vector<size_t> &tileset,
+	const std::vector<std::vector<Fl_Color>> &palettes, const std::vector<int> &tile_palettes, size_t nc) {
 	int nt = (int)tileset.size();
 	int tw = MIN(nt, TILES_PER_ROW);
 	int th = (nt + tw - 1) / tw;
+
+	size_t np = tile_palettes.size();
+	std::vector<std::map<Fl_Color, size_t>> reverse_palettes;
+	for (const std::vector<Fl_Color> &palette : palettes) {
+		std::map<Fl_Color, size_t> reverse_palette;
+		for (size_t i = 0; i < nc; i++) {
+			reverse_palette.emplace(palette[i], i);
+		}
+		reverse_palettes.push_back(reverse_palette);
+	}
+	size_t dp = (_countof(indexed_colors) - 1) / (nc - 1);
 
 	Fl_Image_Surface *surface = new Fl_Image_Surface(tw * TILE_SIZE, th * TILE_SIZE);
 	surface->set_current();
@@ -63,10 +83,16 @@ static Fl_RGB_Image *print_tileset(const Tile *tiles, std::vector<size_t> &tiles
 	for (int i = 0; i < nt; i++) {
 		size_t ti = tileset[i];
 		const Tile &tile = tiles[ti];
+		int p = ti < np ? tile_palettes[ti] : -1;
 		int x = i % tw, y = i / tw;
 		for (int ty = 0; ty < TILE_SIZE; ty++) {
 			for (int tx = 0; tx < TILE_SIZE; tx++) {
-				fl_color(tile[ty * TILE_SIZE + tx]);
+				Fl_Color c = tile[ty * TILE_SIZE + tx];
+				if (p > -1) {
+					size_t pi = reverse_palettes[p][c];
+					c = indexed_colors[pi * dp];
+				}
+				fl_color(c);
 				fl_point(x * TILE_SIZE + tx, y * TILE_SIZE + ty);
 			}
 		}
@@ -153,16 +179,17 @@ void Main_Window::image_to_tiles() {
 	// Build the palette
 
 	Tilemap_Format fmt = _image_to_tiles_dialog->format();
-	bool has_palettes = format_has_palettes(fmt);
+	bool make_palette = _image_to_tiles_dialog->palette() && format_has_palettes(fmt);
 
-	std::vector<int> tile_palettes(n, has_palettes ? 0 : -1);
+	std::vector<std::vector<Fl_Color>> palettes;
+	std::vector<int> tile_palettes(n, make_palette ? 0 : -1);
+	size_t max_colors = (size_t)format_palette_size(fmt);
 
-	if (has_palettes && _image_to_tiles_dialog->palette()) {
+	if (make_palette) {
 		// Algorithm ported from superfamiconv
 		// <https://github.com/Optiroc/SuperFamiconv>
 
 		size_t max_palettes = (size_t)format_palettes_size(fmt);
-		size_t max_colors = (size_t)format_palette_size(fmt);
 
 		// Get the color set of each tile
 		std::vector<Color_Set> cs_tiles;
@@ -234,7 +261,6 @@ void Main_Window::image_to_tiles() {
 		});
 
 		// Sort each palette from brightest to darkest color, padded with black
-		std::vector<std::vector<Fl_Color>> palettes;
 		for (Color_Set &s : cs_opt) {
 			std::vector<Fl_Color> palette(s.begin(), s.end());
 			std::sort(palette.begin(), palette.end(), [](Fl_Color a, Fl_Color b) {
@@ -335,8 +361,7 @@ void Main_Window::image_to_tiles() {
 
 	// Create the tileset file
 
-	// TODO: Draw monochrome tiles if palettes were generated
-	Fl_RGB_Image *timg = print_tileset(tiles, tileset);
+	Fl_RGB_Image *timg = print_tileset(tiles, tileset, palettes, tile_palettes, max_colors);
 	Image::Result result = Image::write_image(tileset_filename, timg);
 	delete timg;
 	if (result) {
