@@ -5,6 +5,7 @@
 #include <FL/Fl_Pixmap.H>
 #pragma warning(pop)
 
+#include "blank.xpm"
 #include "new.xpm"
 #include "open.xpm"
 #include "open-disabled.xpm"
@@ -38,6 +39,7 @@
 #include "obp1.xpm"
 #include "obp1-disabled.xpm"
 
+static Fl_Pixmap BLANK_ICON(BLANK_XPM);
 static Fl_Pixmap NEW_ICON(NEW_XPM);
 static Fl_Pixmap OPEN_ICON(OPEN_XPM);
 static Fl_Pixmap OPEN_DISABLED_ICON(OPEN_DISABLED_XPM);

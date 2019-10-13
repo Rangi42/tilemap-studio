@@ -9,6 +9,7 @@
 #include <FL/Fl_Menu_Bar.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Toggle_Button.H>
+#include <FL/Fl_Multi_Label.H>
 #pragma warning(pop)
 
 #include "version.h"
@@ -374,6 +375,22 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_reformat_mi = PM_FIND_MENU_ITEM_CB(reformat_cb);
 #undef PM_FIND_MENU_ITEM_CB
 
+	for (int i = 0, md = 0; i < _menu_bar->size(); i++) {
+		Fl_Menu_Item *mi = (Fl_Menu_Item *)&_menu_bar->menu()[i];
+		if (md > 0 && mi && mi->label() && !mi->checkbox() && !mi->radio()) {
+			Fl_Pixmap *icon = &BLANK_ICON;
+			Fl_Multi_Label *ml = new Fl_Multi_Label();
+			ml->typea = _FL_IMAGE_LABEL;
+			ml->labela = (const char *)icon;
+			ml->typeb = FL_NORMAL_LABEL;
+			ml->labelb = mi->text;
+			mi->image(icon);
+			ml->label(mi);
+		}
+		if (mi->submenu()) { md++; }
+		else if (!mi->label()) { md--; }
+	}
+
 	// Configure toolbar buttons
 
 	_new_tb->tooltip("New Tilemap... (Ctrl+N)");
@@ -614,13 +631,21 @@ void Main_Window::store_recent_tilemap() {
 void Main_Window::update_recent_tilemaps() {
 	int last = -1;
 	for (int i = 0; i < NUM_RECENT; i++) {
+		Fl_Multi_Label *ml = (Fl_Multi_Label *)_recent_tilemap_mis[i]->label();
+		if (ml->labelb[0]) {
+			delete ml->labelb;
+			ml->labelb = "";
+		}
 		if (_recent_tilemaps[i].empty()) {
-			_recent_tilemap_mis[i]->label("");
 			_recent_tilemap_mis[i]->hide();
 		}
 		else {
 			const char *basename = fl_filename_name(_recent_tilemaps[i].c_str());
-			_recent_tilemap_mis[i]->label(basename);
+			char *label = new char[FL_PATH_MAX]();
+			strcpy(label, OS_MENU_ITEM_PREFIX);
+			strcat(label, basename);
+			strcat(label, OS_MENU_ITEM_SUFFIX);
+			ml->labelb = label;
 			_recent_tilemap_mis[i]->show();
 			last = i;
 		}
@@ -645,13 +670,21 @@ void Main_Window::store_recent_tileset() {
 void Main_Window::update_recent_tilesets() {
 	int last = -1;
 	for (int i = 0; i < NUM_RECENT; i++) {
+		Fl_Multi_Label *ml = (Fl_Multi_Label *)_recent_tileset_mis[i]->label();
+		if (ml->labelb && ml->labelb[0]) {
+			delete ml->labelb;
+			ml->labelb = "";
+		}
 		if (_recent_tilesets[i].empty()) {
-			_recent_tileset_mis[i]->label("");
 			_recent_tileset_mis[i]->hide();
 		}
 		else {
 			const char *basename = fl_filename_name(_recent_tilesets[i].c_str());
-			_recent_tileset_mis[i]->label(basename);
+			char *label = new char[FL_PATH_MAX]();
+			strcpy(label, OS_MENU_ITEM_PREFIX);
+			strcat(label, basename);
+			strcat(label, OS_MENU_ITEM_SUFFIX);
+			ml->labelb = label;
 			_recent_tileset_mis[i]->show();
 			last = i;
 		}
