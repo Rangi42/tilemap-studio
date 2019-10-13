@@ -12,10 +12,12 @@
 
 #define SPACE_COLOR 0xFFFFFF00 // white
 
+#define CRGB5(c) (uchar)(((c) & 0xF8) | (((c) & 0xF8) >> 4))
+
 typedef Fl_Color Tile[NUM_TILE_PIXELS];
 
 bool is_blank_tile(const Tile &tile);
 bool are_identical_tiles(const Tile &t1, const Tile &t2, Tilemap_Format fmt, bool &x_flip, bool &y_flip);
-Tile *get_image_tiles(Fl_RGB_Image *img, size_t &n);
+Tile *get_image_tiles(Fl_RGB_Image *img, size_t &n, size_t &iw);
 
 #endif

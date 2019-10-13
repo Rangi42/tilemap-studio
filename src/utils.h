@@ -44,6 +44,9 @@
 #define DIR_SEP "/"
 #endif
 
+#define STRINGIFY(x) _STRINGIFY_HELPER(x)
+#define _STRINGIFY_HELPER(x) #x
+
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 

@@ -44,6 +44,7 @@ inline bool format_has_metadata(Tilemap_Format fmt) {
 
 int format_tileset_size(Tilemap_Format fmt);
 int format_palettes_size(Tilemap_Format fmt);
+int format_palette_size(Tilemap_Format fmt);
 const char *format_name(Tilemap_Format fmt);
 const char *format_extension(Tilemap_Format fmt);
 int format_max_name_width(void);

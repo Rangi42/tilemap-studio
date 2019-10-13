@@ -1,6 +1,7 @@
-#include <cstdlib>
-#include <cwctype>
-#include <utility>
+#include <string>
+#include <vector>
+#include <set>
+#include <algorithm>
 
 #pragma warning(push, 0)
 #include <FL/Fl.H>
@@ -16,6 +17,8 @@
 #include "tileset.h"
 #include "tile.h"
 #include "main-window.h"
+
+typedef std::set<Fl_Color> Color_Set;
 
 static bool build_tilemap(const Tile *tiles, size_t n,
 	std::vector<Tile_Tessera *> &tilemap, std::vector<size_t> &tileset,
@@ -100,16 +103,120 @@ void Main_Window::image_to_tiles() {
 
 	// Read the input image tiles
 
-	size_t n = 0;
-	Tile *tiles = get_image_tiles(img, n);
+	size_t n = 0, w = 0;
+	Tile *tiles = get_image_tiles(img, n, w);
 	delete img;
 	if (!tiles || !n) {
 		delete [] tiles;
 		std::string msg = "Could not convert ";
-		msg = msg + image_basename + "!\n\nImage dimensions do not fit the tile grid.";
+		msg = msg + image_basename + "!\n\nImage dimensions do not fit the "
+			STRINGIFY(TILE_SIZE) "x" STRINGIFY(TILE_SIZE) " tile grid.";
 		_error_dialog->message(msg);
 		_error_dialog->show(this);
 		return;
+	}
+
+	// Build the palette
+
+	Tilemap_Format fmt = _image_to_tiles_dialog->format();
+	bool make_palette = _image_to_tiles_dialog->palette();
+
+	if (make_palette) {
+		// Algorithm ported from superfamiconv
+		// <https://github.com/Optiroc/SuperFamiconv>
+
+		size_t max_palettes = (size_t)format_palettes_size(fmt);
+		size_t max_colors = (size_t)format_palette_size(fmt);
+
+		// Get the color set of each tile
+		std::vector<Color_Set> cs_tiles;
+		size_t qi = 0;
+		for (; qi < n; qi++) {
+			const Tile &tile = tiles[qi];
+			Color_Set s;
+			for (int j = 0; j < NUM_TILE_PIXELS; j++) {
+				s.insert(tile[j]);
+			}
+			if (s.size() > max_colors) {
+				break;
+			}
+			cs_tiles.push_back(s);
+		}
+
+		// Check that all color sets fit within the color limit
+		if (qi < n) {
+			size_t qx = qi % w, qy = qi / w;
+			delete [] tiles;
+			std::string msg = "Could not convert ";
+			msg = msg + image_basename + "!\n\nThe tile at (" +
+				std::to_string(qx) + ", " + std::to_string(qy) +
+				") has more than " + std::to_string(max_colors) + " colors.";
+			_error_dialog->message(msg);
+			_error_dialog->show(this);
+			return;
+		}
+
+		// Remove duplicate color sets
+		std::vector<Color_Set> cs_uniq(cs_tiles.size());
+		auto cs_uniq_last = std::copy_if(cs_tiles.begin(), cs_tiles.end(), cs_uniq.begin(), [&](Color_Set &s) {
+			return std::find(cs_uniq.begin(), cs_uniq.end(), s) == cs_uniq.end();
+		});
+		cs_uniq.resize(std::distance(cs_uniq.begin(), cs_uniq_last));
+
+		// Remove color sets that are proper subsets of other color sets
+		std::vector<Color_Set> cs_full(cs_uniq.size());
+		auto cs_full_last = std::copy_if(cs_uniq.begin(), cs_uniq.end(), cs_full.begin(), [&](Color_Set &s) {
+			for (Color_Set &c : cs_uniq) {
+				if (s != c && std::includes(c.begin(), c.end(), s.begin(), s.end())) {
+					return false;
+				}
+			}
+			return true;
+		});
+		cs_full.resize(std::distance(cs_full.begin(), cs_full_last));
+
+		// Sort color sets from fewest to most colors
+		std::sort(cs_full.begin(), cs_full.end(), [](Color_Set &a, Color_Set &b) {
+			return a.size() < b.size();
+		});
+
+		// Combine color sets as long as they fit within the color limit
+		std::vector<Color_Set> cs_opt;
+		for (Color_Set &s : cs_full) {
+			int best_i = -1, i = 0;
+			for (Color_Set &c : cs_opt) {
+				Color_Set d;
+				std::set_difference(s.begin(), s.end(), c.begin(), c.end(), std::inserter(d, d.begin()));
+				if (c.size() + d.size() <= max_colors) {
+					best_i = i;
+				}
+				++i;
+			}
+			if (best_i == -1) {
+				cs_opt.push_back(s);
+			}
+			else {
+				cs_opt[best_i].insert(s.begin(), s.end());
+			}
+		}
+
+		// Check that the palettes fit within the palette limit
+		if (cs_opt.size() > max_palettes) {
+			delete [] tiles;
+			std::string msg = "Could not convert ";
+			msg = msg + image_basename + "!\n\nThe tiles need more than " +
+				std::to_string(max_palettes) + " palettes.";
+			_error_dialog->message(msg);
+			_error_dialog->show(this);
+			return;
+		}
+
+		// Sort color sets from most to fewest colors
+		std::sort(cs_opt.begin(), cs_opt.end(), [](Color_Set &a, Color_Set &b) {
+			return a.size() > b.size();
+		});
+
+		// TODO: Use the optimized palette
 	}
 
 	// Build the tilemap and tileset
@@ -117,7 +224,6 @@ void Main_Window::image_to_tiles() {
 	std::vector<Tile_Tessera *> tilemap;
 	std::vector<size_t> tileset;
 
-	Tilemap_Format fmt = _image_to_tiles_dialog->format();
 	uint16_t start_id = _image_to_tiles_dialog->start_id();
 	bool use_space = _image_to_tiles_dialog->use_space();
 	uint16_t space_id = _image_to_tiles_dialog->space_id();
