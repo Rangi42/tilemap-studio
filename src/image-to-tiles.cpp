@@ -174,12 +174,9 @@ void Main_Window::image_to_tiles() {
 		// Remove color sets that are proper subsets of other color sets
 		std::vector<Color_Set> cs_full(cs_uniq.size());
 		auto cs_full_last = std::copy_if(cs_uniq.begin(), cs_uniq.end(), cs_full.begin(), [&](const Color_Set &s) {
-			for (Color_Set &c : cs_uniq) {
-				if (s != c && std::includes(c.begin(), c.end(), s.begin(), s.end())) {
-					return false;
-				}
-			}
-			return true;
+			return !std::any_of(cs_uniq.begin(), cs_uniq.end(), [&](const Color_Set &c) {
+				return s != c && std::includes(c.begin(), c.end(), s.begin(), s.end());
+			});
 		});
 		cs_full.resize(std::distance(cs_full.begin(), cs_full_last));
 
@@ -219,7 +216,7 @@ void Main_Window::image_to_tiles() {
 			return a.size() > b.size();
 		});
 
-		// Sort palettes from brightest darkest color, padded with black
+		// Sort each palette from brightest to darkest color, padded with black
 		std::vector<std::vector<Fl_Color>> palettes;
 		for (Color_Set &s : cs_opt) {
 			std::vector<Fl_Color> palette(s.begin(), s.end());
