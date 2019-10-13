@@ -105,12 +105,12 @@ static Fl_RGB_Image *print_tileset(const Tile *tiles, std::vector<size_t> &tiles
 	return img;
 }
 
-static bool write_palette(const char *f, const std::vector<std::vector<Fl_Color>> &palettes, bool jasc) {
+static bool write_palette(const char *f, const std::vector<std::vector<Fl_Color>> &palettes, bool jasc, size_t nc) {
 	FILE *file = fl_fopen(f, "w");
 	if (!file) { return false; }
 	if (jasc) {
 		fputs("JASC-PAL\n0100\n", file);
-		fprintf(file, "%d\n", (int)palettes.size());
+		fprintf(file, "%d\n", (int)(palettes.size() * nc));
 		for (const std::vector<Fl_Color> &palette : palettes) {
 			for (Fl_Color c : palette) {
 				uchar r, g, b;
@@ -276,7 +276,7 @@ void Main_Window::image_to_tiles() {
 		// Create the palette file
 		const char *palette_filename = _image_to_tiles_dialog->palette_filename();
 		const char *palette_basename = fl_filename_name(palette_filename);
-		if (!write_palette(palette_filename, palettes, format_uses_jasc(fmt))) {
+		if (!write_palette(palette_filename, palettes, format_uses_jasc(fmt), max_colors)) {
 			delete [] tiles;
 			std::string msg = "Could not write to ";
 			msg = msg + palette_basename + "!";
