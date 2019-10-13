@@ -4,7 +4,7 @@
 
 * **"Großer Block":** Select MxN tiles at once for placement, from the tileset or tilemap
 * **Zoom:** Zoom the tilemap, and possibly the tileset
-* **Palettes:** Create a .pal file when converting an image to to tiles
+* **Palettes:** Combine .pal files with .\*bpp files for accurate tileset rendering
 * **Auto-Load Tileset:** Guess the associated tileset for a tilemap
 * **.tileset files:** Read and export lists of images with start+offset+length values
 * Make the blank space tile ID configurable
