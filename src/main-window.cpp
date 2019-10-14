@@ -347,33 +347,33 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 		_recent_tilemap_mis[i] = const_cast<Fl_Menu_Item *>(&_menu_bar->menu()[first_recent_tilemap_i + i]);
 		_recent_tileset_mis[i] = const_cast<Fl_Menu_Item *>(&_menu_bar->menu()[first_recent_tileset_i + i]);
 	}
-#define PM_FIND_MENU_ITEM_CB(c) (const_cast<Fl_Menu_Item *>(_menu_bar->find_item((Fl_Callback *)(c))))
-	_classic_theme_mi = PM_FIND_MENU_ITEM_CB(classic_theme_cb);
-	_aero_theme_mi = PM_FIND_MENU_ITEM_CB(aero_theme_cb);
-	_metro_theme_mi = PM_FIND_MENU_ITEM_CB(metro_theme_cb);
-	_aqua_theme_mi = PM_FIND_MENU_ITEM_CB(aqua_theme_cb);
-	_greybird_theme_mi = PM_FIND_MENU_ITEM_CB(greybird_theme_cb);
-	_metal_theme_mi = PM_FIND_MENU_ITEM_CB(metal_theme_cb);
-	_blue_theme_mi = PM_FIND_MENU_ITEM_CB(blue_theme_cb);
-	_olive_theme_mi = PM_FIND_MENU_ITEM_CB(olive_theme_cb);
-	_rose_gold_theme_mi = PM_FIND_MENU_ITEM_CB(rose_gold_theme_cb);
-	_dark_theme_mi = PM_FIND_MENU_ITEM_CB(dark_theme_cb);
-	_grid_mi = PM_FIND_MENU_ITEM_CB(grid_cb);
-	_rainbow_tiles_mi = PM_FIND_MENU_ITEM_CB(rainbow_tiles_cb);
-	_bold_palettes_mi = PM_FIND_MENU_ITEM_CB(bold_palettes_cb);
+#define TS_FIND_MENU_ITEM_CB(c) (const_cast<Fl_Menu_Item *>(_menu_bar->find_item((Fl_Callback *)(c))))
+	_classic_theme_mi = TS_FIND_MENU_ITEM_CB(classic_theme_cb);
+	_aero_theme_mi = TS_FIND_MENU_ITEM_CB(aero_theme_cb);
+	_metro_theme_mi = TS_FIND_MENU_ITEM_CB(metro_theme_cb);
+	_aqua_theme_mi = TS_FIND_MENU_ITEM_CB(aqua_theme_cb);
+	_greybird_theme_mi = TS_FIND_MENU_ITEM_CB(greybird_theme_cb);
+	_metal_theme_mi = TS_FIND_MENU_ITEM_CB(metal_theme_cb);
+	_blue_theme_mi = TS_FIND_MENU_ITEM_CB(blue_theme_cb);
+	_olive_theme_mi = TS_FIND_MENU_ITEM_CB(olive_theme_cb);
+	_rose_gold_theme_mi = TS_FIND_MENU_ITEM_CB(rose_gold_theme_cb);
+	_dark_theme_mi = TS_FIND_MENU_ITEM_CB(dark_theme_cb);
+	_grid_mi = TS_FIND_MENU_ITEM_CB(grid_cb);
+	_rainbow_tiles_mi = TS_FIND_MENU_ITEM_CB(rainbow_tiles_cb);
+	_bold_palettes_mi = TS_FIND_MENU_ITEM_CB(bold_palettes_cb);
 	// Conditional menu items
-	_close_mi = PM_FIND_MENU_ITEM_CB(close_cb);
-	_save_mi = PM_FIND_MENU_ITEM_CB(save_cb);
-	_save_as_mi = PM_FIND_MENU_ITEM_CB(save_as_cb);
-	_print_mi = PM_FIND_MENU_ITEM_CB(print_cb);
-	_reload_tilesets_mi = PM_FIND_MENU_ITEM_CB(reload_tilesets_cb);
-	_unload_tilesets_mi = PM_FIND_MENU_ITEM_CB(unload_tilesets_cb);
-	_undo_mi = PM_FIND_MENU_ITEM_CB(undo_cb);
-	_redo_mi = PM_FIND_MENU_ITEM_CB(redo_cb);
-	_tilemap_width_mi = PM_FIND_MENU_ITEM_CB(tilemap_width_cb);
-	_resize_mi = PM_FIND_MENU_ITEM_CB(resize_cb);
-	_reformat_mi = PM_FIND_MENU_ITEM_CB(reformat_cb);
-#undef PM_FIND_MENU_ITEM_CB
+	_close_mi = TS_FIND_MENU_ITEM_CB(close_cb);
+	_save_mi = TS_FIND_MENU_ITEM_CB(save_cb);
+	_save_as_mi = TS_FIND_MENU_ITEM_CB(save_as_cb);
+	_print_mi = TS_FIND_MENU_ITEM_CB(print_cb);
+	_reload_tilesets_mi = TS_FIND_MENU_ITEM_CB(reload_tilesets_cb);
+	_unload_tilesets_mi = TS_FIND_MENU_ITEM_CB(unload_tilesets_cb);
+	_undo_mi = TS_FIND_MENU_ITEM_CB(undo_cb);
+	_redo_mi = TS_FIND_MENU_ITEM_CB(redo_cb);
+	_tilemap_width_mi = TS_FIND_MENU_ITEM_CB(tilemap_width_cb);
+	_resize_mi = TS_FIND_MENU_ITEM_CB(resize_cb);
+	_reformat_mi = TS_FIND_MENU_ITEM_CB(reformat_cb);
+#undef TS_FIND_MENU_ITEM_CB
 
 	for (int i = 0, md = 0; i < _menu_bar->size(); i++) {
 		Fl_Menu_Item *mi = (Fl_Menu_Item *)&_menu_bar->menu()[i];
@@ -825,6 +825,7 @@ void Main_Window::update_active_controls() {
 			_redo_mi->deactivate();
 			_redo_tb->deactivate();
 		}
+		_tilemap_width_mi->activate();
 		_width_heading->activate();
 		_tilemap_width->activate();
 		_resize_mi->activate();
@@ -843,6 +844,7 @@ void Main_Window::update_active_controls() {
 		_undo_tb->deactivate();
 		_redo_mi->deactivate();
 		_redo_tb->deactivate();
+		_tilemap_width_mi->deactivate();
 		_width_heading->deactivate();
 		_tilemap_width->deactivate();
 		_resize_mi->deactivate();
