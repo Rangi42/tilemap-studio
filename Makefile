@@ -71,7 +71,7 @@ install: release
 	mkdir -p $(DESTDIR)$(PREFIX)/share/applications
 	echo "[Desktop Entry]" > $(DESKTOP)
 	echo "Name=Tilemap Studio" >> $(DESKTOP)
-	echo "Comment=Edit pokered and pokecrystal tilemaps" >> $(DESKTOP)
+	echo "Comment=Edit Game Boy, Color, and Advance tilemaps" >> $(DESKTOP)
 	echo "Icon=$(PREFIX)/share/pixmaps/tilemapstudio48.xpm" >> $(DESKTOP)
 	echo "Exec=$(PREFIX)/bin/$(tilemapstudio)" >> $(DESKTOP)
 	echo "Type=Application" >> $(DESKTOP)
