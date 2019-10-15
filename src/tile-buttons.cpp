@@ -371,7 +371,7 @@ void Tile_Button::draw() {
 		draw_highlight(X, Y);
 	}
 	if (value()) {
-		draw_selection_border(X, Y, _state.highlighted());
+		draw_selection_border(X, Y, DEFAULT_ZOOM, _state.highlighted());
 	}
 }
 
