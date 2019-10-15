@@ -39,8 +39,8 @@ public:
 	inline int length(void) const { return _length; }
 	inline Result result(void) const { return _result; }
 	void clear(void);
-	bool draw_tile(const Tile_State *ts, int x, int y, bool active) const;
-	bool print_tile(const Tile_State *ts, int x, int y) const;
+	bool draw_tile(const Tile_State *ts, int x, int y, int z, bool active) const;
+	bool print_tile(const Tile_State *ts, int x, int y, bool active) const;
 	Result read_tiles(const char *f);
 private:
 	Result read_png_graphics(const char *f);

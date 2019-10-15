@@ -16,7 +16,7 @@
 #include "tileset.h"
 
 #define TILE_SIZE 8
-#define TILE_SIZE_2X (TILE_SIZE * 2)
+#define TILE_SIZE_2X (TILE_SIZE * DEFAULT_ZOOM)
 
 #define PALETTES_PER_ROW 8
 #define MAX_NUM_PALETTES 16
@@ -48,15 +48,11 @@ public:
 		return attr ? same_attributes(other) : same_tiles(other);
 	}
 	inline bool highlighted(void) const { return id == Config::highlight_id(); }
-	inline void draw(int x, int y, bool tile, bool attr, int style, bool active, bool selected) {
-		if (tile) { draw_tile(x, y, active, selected); }
-		else if (!attr) { fl_rectf(x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_WHITE); }
-		if (attr) { draw_attributes(x, y, style, active); }
-	}
-	void print(int x, int y);
+	void draw(int x, int y, int z, bool tile, bool attr, int style, bool active, bool selected);
+	void print(int x, int y, bool active, bool selected);
 private:
-	void draw_tile(int x, int y, bool active, bool selected);
-	void draw_attributes(int x, int y, int style, bool active);
+	void draw_tile(int x, int y, int z, bool active, bool selected);
+	void draw_attributes(int x, int y, int z, int style, bool active);
 };
 
 class Tile_Thing {
@@ -109,7 +105,7 @@ public:
 	inline size_t row(void) const { return _row; }
 	inline size_t col(void) const { return _col; }
 	inline void coords(size_t row, size_t col) { _row = row; _col = col; }
-	inline void print(int dx, int dy) { _state.print(dx, dy); }
+	inline void print(int dx, int dy, bool active, bool selected) { _state.print(dx, dy, active, selected); }
 	void draw(void);
 	int handle(int event);
 };

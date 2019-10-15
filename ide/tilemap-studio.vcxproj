@@ -183,6 +183,10 @@
     <None Include="..\res\x-flip.xpm" />
     <None Include="..\res\y-flip-disabled.xpm" />
     <None Include="..\res\y-flip.xpm" />
+    <None Include="..\res\zoom-in-disabled.xpm" />
+    <None Include="..\res\zoom-in.xpm" />
+    <None Include="..\res\zoom-out-disabled.xpm" />
+    <None Include="..\res\zoom-out.xpm" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="tilemap-studio.rc" />

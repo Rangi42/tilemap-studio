@@ -43,10 +43,12 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 
 	// Get global configs
 	Tilemap_Format format_config = (Tilemap_Format)Preferences::get("format", Config::format());
+	int zoom_config = Preferences::get("zoom", Config::zoom());
 	int grid_config = Preferences::get("grid", Config::grid());
 	int rainbow_tiles_config = Preferences::get("rainbow", Config::rainbow_tiles());
 	int bold_palettes_config = Preferences::get("bold", Config::bold_palettes());
 	Config::format(format_config);
+	Config::zoom(zoom_config);
 	Config::grid(!!grid_config);
 	Config::rainbow_tiles(!!rainbow_tiles_config);
 	Config::bold_palettes(!!bold_palettes_config);
@@ -79,6 +81,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_undo_tb = new Toolbar_Button(0, 0, 24, 24);
 	_redo_tb = new Toolbar_Button(0, 0, 24, 24);
 	new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
+	_zoom_out_tb = new Toolbar_Button(0, 0, 24, 24);
+	_zoom_in_tb = new Toolbar_Button(0, 0, 24, 24);
+	new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
 	_grid_tb = new Toolbar_Toggle_Button(0, 0, 24, 24);
 	_rainbow_tiles_tb = new Toolbar_Toggle_Button(0, 0, 24, 24);
 	_bold_palettes_tb = new Toolbar_Toggle_Button(0, 0, 24, 24);
@@ -100,16 +105,17 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	// Initialize status bar
 	_status_bar = new Toolbar(wx, h-23, ww, 23);
 	wh -= _status_bar->h();
-	_tilemap_dimensions = new Status_Bar_Field(0, 0, text_width("Tilemap: 9999 x 9999", 8), 21, "");
+	_zoom_level = new Status_Bar_Field(0, 0, text_width("Zoom: 10x", 4), 21, "Zoom: 2x");
 	new Spacer(0, 0, 2, 21);
-	wgt_w = format_max_name_width() + 4;
-	_tilemap_format = new Status_Bar_Field(0, 0, wgt_w, 21, "");
+	_tilemap_dimensions = new Status_Bar_Field(0, 0, text_width("Tilemap: 9999 x 9999", 4), 21, "");
 	new Spacer(0, 0, 2, 21);
-	_hover_id = new Status_Bar_Field(0, 0, text_width("ID: $A:AA", 8), 21, "");
+	_tilemap_format = new Status_Bar_Field(0, 0, format_max_name_width() + 4, 21, "");
 	new Spacer(0, 0, 2, 21);
-	_hover_xy = new Status_Bar_Field(0, 0, text_width("X/Y (9999, 9999)", 8), 21, "");
+	_hover_id = new Status_Bar_Field(0, 0, text_width("ID: $A:AA", 4), 21, "");
 	new Spacer(0, 0, 2, 21);
-	_hover_landmark = new Status_Bar_Field(0, 0, text_width("Landmark (199, 199)", 8), 21, "");
+	_hover_xy = new Status_Bar_Field(0, 0, text_width("X/Y (9999, 9999)", 4), 21, "");
+	new Spacer(0, 0, 2, 21);
+	_hover_landmark = new Status_Bar_Field(0, 0, text_width("Landmark (199, 199)", 4), 21, "");
 	_status_bar->end();
 	begin();
 
@@ -319,6 +325,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 		OS_MENU_ITEM("&Dark", 0, (Fl_Callback *)dark_theme_cb, this,
 			FL_MENU_RADIO | (OS::current_theme() == OS::DARK ? FL_MENU_VALUE : 0)),
 		{},
+		OS_MENU_ITEM("Zoom &In", FL_COMMAND + '=', (Fl_Callback *)zoom_in_cb, this, 0),
+		OS_MENU_ITEM("Zoom &Out", FL_COMMAND + '-', (Fl_Callback *)zoom_out_cb, this, 0),
+		OS_MENU_ITEM("&Zoom Reset", FL_COMMAND + '0', (Fl_Callback *)zoom_reset_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&Grid", FL_COMMAND + 'g', (Fl_Callback *)grid_cb, this,
 			FL_MENU_TOGGLE | (Config::grid() ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&Rainbow Tiles", FL_COMMAND + 'i', (Fl_Callback *)rainbow_tiles_cb, this,
@@ -370,6 +379,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_unload_tilesets_mi = TS_FIND_MENU_ITEM_CB(unload_tilesets_cb);
 	_undo_mi = TS_FIND_MENU_ITEM_CB(undo_cb);
 	_redo_mi = TS_FIND_MENU_ITEM_CB(redo_cb);
+	_zoom_in_mi = TS_FIND_MENU_ITEM_CB(zoom_in_cb);
+	_zoom_out_mi = TS_FIND_MENU_ITEM_CB(zoom_out_cb);
 	_tilemap_width_mi = TS_FIND_MENU_ITEM_CB(tilemap_width_cb);
 	_resize_mi = TS_FIND_MENU_ITEM_CB(resize_cb);
 	_reformat_mi = TS_FIND_MENU_ITEM_CB(reformat_cb);
@@ -434,6 +445,16 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_redo_tb->callback((Fl_Callback *)redo_cb, this);
 	_redo_tb->image(REDO_ICON);
 	_redo_tb->deimage(REDO_DISABLED_ICON);
+
+	_zoom_in_tb->tooltip("Zoom In (Ctrl+=)");
+	_zoom_in_tb->callback((Fl_Callback *)zoom_in_cb, this);
+	_zoom_in_tb->image(ZOOM_IN_ICON);
+	_zoom_in_tb->deimage(ZOOM_IN_DISABLED_ICON);
+
+	_zoom_out_tb->tooltip("Zoom Out (Ctrl+-)");
+	_zoom_out_tb->callback((Fl_Callback *)zoom_out_cb, this);
+	_zoom_out_tb->image(ZOOM_OUT_ICON);
+	_zoom_out_tb->deimage(ZOOM_OUT_DISABLED_ICON);
 
 	_grid_tb->tooltip("Grid (Ctrl+G)");
 	_grid_tb->callback((Fl_Callback *)grid_tb_cb, this);
@@ -557,6 +578,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 #include "help.html" // a C++11 raw string literal
 		);
 
+	update_zoom();
 	update_recent_tilemaps();
 	update_recent_tilesets();
 	update_tilemap_metadata();
@@ -691,6 +713,29 @@ void Main_Window::update_recent_tilesets() {
 		_recent_tileset_mis[i]->flags &= ~FL_MENU_DIVIDER;
 	}
 	_recent_tileset_mis[last]->flags |= FL_MENU_DIVIDER;
+}
+
+void Main_Window::update_zoom() {
+	char buffer[64] = {};
+	sprintf(buffer, "Zoom: %dx", Config::zoom());
+	_zoom_level->copy_label(buffer);
+	if (Config::zoom() <= MIN_ZOOM) {
+		_zoom_out_mi->deactivate();
+		_zoom_out_tb->deactivate();
+	}
+	else {
+		_zoom_out_mi->activate();
+		_zoom_out_tb->activate();
+	}
+	if (Config::zoom() >= MAX_ZOOM) {
+		_zoom_in_mi->deactivate();
+		_zoom_in_tb->deactivate();
+	}
+	else {
+		_zoom_in_mi->activate();
+		_zoom_in_tb->activate();
+	}
+	tilemap_width_tb_cb(NULL, this);
 }
 
 void Main_Window::update_status(Tile_Tessera *tt) {
@@ -1588,6 +1633,7 @@ void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 	Preferences::set("w", mw->w());
 	Preferences::set("h", mw->h());
 	Preferences::set("format", Config::format());
+	Preferences::set("zoom", Config::zoom());
 	Preferences::set("grid", Config::grid());
 	Preferences::set("rainbow", Config::rainbow_tiles());
 	Preferences::set("bold", Config::bold_palettes());
@@ -1679,6 +1725,28 @@ void Main_Window::dark_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	mw->redraw();
 }
 
+void Main_Window::zoom_in_cb(Fl_Widget *, Main_Window *mw) {
+	if (Config::zoom() < MAX_ZOOM) {
+		Config::zoom(Config::zoom() + 1);
+	}
+	mw->update_zoom();
+	mw->redraw();
+}
+
+void Main_Window::zoom_out_cb(Fl_Widget *, Main_Window *mw) {
+	if (Config::zoom() > MIN_ZOOM) {
+		Config::zoom(Config::zoom() - 1);
+	}
+	mw->update_zoom();
+	mw->redraw();
+}
+
+void Main_Window::zoom_reset_cb(Fl_Widget *, Main_Window *mw) {
+	Config::zoom(DEFAULT_ZOOM);
+	mw->update_zoom();
+	mw->redraw();
+}
+
 void Main_Window::grid_cb(Fl_Menu_ *m, Main_Window *mw) {
 	Config::grid(!!m->mvalue()->value());
 	mw->_grid_tb->value(Config::grid());
@@ -1763,7 +1831,9 @@ void Main_Window::tilemap_width_tb_cb(OS_Spinner *, Main_Window *mw) {
 	int sx = mw->_tilemap_scroll->x() + Fl::box_dx(mw->_tilemap_scroll->box());
 	int sy = mw->_tilemap_scroll->y() + Fl::box_dy(mw->_tilemap_scroll->box());
 	mw->_tilemap_scroll->init_sizes();
-	mw->_tilemap_scroll->contents((int)(mw->_tilemap.width() * TILE_SIZE_2X), (int)(mw->_tilemap.height() * TILE_SIZE_2X));
+	int cw = (int)mw->_tilemap.width() * TILE_SIZE * Config::zoom();
+	int ch = (int)mw->_tilemap.height() * TILE_SIZE * Config::zoom();
+	mw->_tilemap_scroll->contents(cw, ch);
 	mw->_tilemap_scroll->scroll_to(0, 0);
 	mw->_tilemap.reposition_tiles(sx, sy);
 	mw->_tilemap_scroll->redraw();

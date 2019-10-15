@@ -4,15 +4,22 @@
 #include "utils.h"
 #include "tilemap-format.h"
 
+#define MIN_ZOOM 1
+#define MAX_ZOOM 10
+#define DEFAULT_ZOOM 2
+
 class Config {
 private:
 	static Tilemap_Format _format;
+	static int _zoom;
 	static bool _grid, _rainbow_tiles, _bold_palettes;
 	static uint16_t _highlight_id;
 	static bool _show_attributes;
 public:
 	inline static Tilemap_Format format(void) { return _format; }
 	inline static void format(Tilemap_Format fmt) { _format = fmt; }
+	inline static int zoom(void) { return _zoom; }
+	inline static void zoom(int z) { _zoom = z; }
 	inline static bool grid(void) { return _grid; }
 	inline static void grid(bool g) { _grid = g; }
 	inline static bool rainbow_tiles(void) { return _rainbow_tiles; }

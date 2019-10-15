@@ -244,6 +244,18 @@
     <None Include="..\res\blank.xpm">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\res\zoom-in.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\zoom-in-disabled.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\zoom-out.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\zoom-out-disabled.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="tilemap-studio.rc">

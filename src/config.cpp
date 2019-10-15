@@ -1,6 +1,7 @@
 #include "config.h"
 
 Tilemap_Format Config::_format = Tilemap_Format::PLAIN;
+int Config::_zoom = 2;
 bool Config::_grid = false;
 bool Config::_rainbow_tiles = false;
 bool Config::_bold_palettes = true;

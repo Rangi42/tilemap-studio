@@ -99,9 +99,10 @@ void Tilemap::clear() {
 }
 
 void Tilemap::reposition_tiles(int x, int y) {
+	int s = TILE_SIZE * Config::zoom();
 	for (Tile_Tessera *tt : _tiles) {
-		int tx = x + (int)tt->col() * TILE_SIZE_2X, ty = y + (int)tt->row() * TILE_SIZE_2X;
-		tt->position(tx, ty);
+		int tx = x + (int)tt->col() * s, ty = y + (int)tt->row() * s;
+		tt->resize(tx, ty, s, s);
 	}
 }
 
@@ -514,7 +515,7 @@ Fl_RGB_Image *Tilemap::print_tilemap() const {
 	surface->set_current();
 	for (Tile_Tessera *tt : _tiles) {
 		int dx = (int)tt->col() * TILE_SIZE, dy = (int)tt->row() * TILE_SIZE;
-		tt->print(dx, dy);
+		tt->print(dx, dy, true, false);
 	}
 	Fl_RGB_Image *img = surface->image();
 	delete surface;

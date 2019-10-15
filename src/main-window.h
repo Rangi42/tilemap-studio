@@ -43,7 +43,8 @@ private:
 		*_greybird_theme_mi = NULL, *_metal_theme_mi = NULL, *_blue_theme_mi = NULL, *_olive_theme_mi = NULL,
 		*_rose_gold_theme_mi = NULL, *_dark_theme_mi = NULL;
 	Fl_Menu_Item *_grid_mi = NULL, *_rainbow_tiles_mi = NULL, *_bold_palettes_mi = NULL;
-	Toolbar_Button *_new_tb, *_open_tb, *_save_tb, *_print_tb, *_load_tb, *_add_tb, *_reload_tb, *_undo_tb, *_redo_tb;
+	Toolbar_Button *_new_tb, *_open_tb, *_save_tb, *_print_tb, *_load_tb, *_add_tb, *_reload_tb, *_undo_tb, *_redo_tb,
+		*_zoom_in_tb, *_zoom_out_tb;
 	Toolbar_Toggle_Button *_grid_tb, *_rainbow_tiles_tb, *_bold_palettes_tb;
 	Default_Spinner *_tilemap_width;
 	Toolbar_Button *_resize_tb, *_reformat_tb;
@@ -55,11 +56,12 @@ private:
 	// GUI outputs
 	Label *_width_heading, *_tileset_name, *_tilemap_name, *_tile_heading;
 	Tile_Swatch *_current_tile, *_current_attributes;
-	Status_Bar_Field *_tilemap_dimensions, *_tilemap_format, *_hover_id, *_hover_xy, *_hover_landmark;
+	Status_Bar_Field *_tilemap_dimensions, *_tilemap_format, *_zoom_level, *_hover_id, *_hover_xy, *_hover_landmark;
 	// Conditional menu items
 	Fl_Menu_Item *_close_mi = NULL, *_save_mi = NULL, *_save_as_mi = NULL, *_print_mi = NULL;
 	Fl_Menu_Item *_reload_tilesets_mi = NULL, *_unload_tilesets_mi = NULL;
 	Fl_Menu_Item *_undo_mi = NULL, *_redo_mi = NULL;
+	Fl_Menu_Item *_zoom_in_mi = NULL, *_zoom_out_mi = NULL;
 	Fl_Menu_Item *_tilemap_width_mi = NULL, *_resize_mi = NULL, *_reformat_mi = NULL;
 	// Dialogs
 	Fl_Native_File_Chooser *_tilemap_open_chooser, *_tilemap_save_chooser, *_tileset_load_chooser, *_png_chooser;
@@ -104,6 +106,7 @@ public:
 	}
 	inline void map_editable(bool e) { _map_editable = e; }
 	int handle(int event);
+	void update_zoom(void);
 	void update_status(Tile_Tessera *tt);
 	void edit_tile(Tile_Tessera *tt);
 	void flood_fill(Tile_Tessera *tt);
@@ -166,6 +169,9 @@ private:
 	static void olive_theme_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void rose_gold_theme_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void dark_theme_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void zoom_in_cb(Fl_Widget *w, Main_Window *mw);
+	static void zoom_out_cb(Fl_Widget *w, Main_Window *mw);
+	static void zoom_reset_cb(Fl_Widget *w, Main_Window *mw);
 	static void grid_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void rainbow_tiles_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void bold_palettes_cb(Fl_Menu_ *m, Main_Window *mw);

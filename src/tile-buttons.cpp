@@ -91,32 +91,42 @@ static const Fl_Color rainbow_fg_colors[16] = {
 	fl_rgb_color(0xAB, 0xEF, 0xAB), fl_rgb_color(0xAB, 0xEF, 0xC4), fl_rgb_color(0xAB, 0xEF, 0xDE), fl_rgb_color(0xAB, 0xE7, 0xEF),
 };
 
-static void draw_grid(int x, int y) {
+static void draw_grid(int x, int y, int z = DEFAULT_ZOOM) {
+	int s = TILE_SIZE * z;
 	fl_color(fl_rgb_color(0x40));
-	for (int i = 1; i < TILE_SIZE_2X; i += 4) {
-		fl_point(x+i, y+TILE_SIZE_2X-1);
-		fl_point(x+i+1, y+TILE_SIZE_2X-1);
-		fl_point(x+TILE_SIZE_2X-1, y+i);
-		fl_point(x+TILE_SIZE_2X-1, y+i+1);
+	for (int i = 1; i < s; i += 4) {
+		fl_point(x+i, y+s-1);
+		fl_point(x+i+1, y+s-1);
+		fl_point(x+s-1, y+i);
+		fl_point(x+s-1, y+i+1);
 	}
-	fl_color(fl_rgb_color(0xC0));
-	for (int i = 0; i < TILE_SIZE_2X; i += 4) {
-		fl_point(x+i, y+TILE_SIZE_2X-1);
-		fl_point(x+i+3, y+TILE_SIZE_2X-1);
-		fl_point(x+TILE_SIZE_2X-1, y+i);
-		fl_point(x+TILE_SIZE_2X-1, y+i+3);
+	fl_color(fl_rgb_color(0xD0));
+	for (int i = 0; i < s; i += 4) {
+		fl_point(x+i, y+s-1);
+		fl_point(x+i+3, y+s-1);
+		fl_point(x+s-1, y+i);
+		fl_point(x+s-1, y+i+3);
 	}
 }
 
-static void draw_highlight(int x, int y) {
-	fl_rect(x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_DARK_YELLOW);
-	fl_rect(x+1, y+1, TILE_SIZE_2X-2, TILE_SIZE_2X-2, FL_YELLOW);
+static void draw_highlight(int x, int y, int z = DEFAULT_ZOOM) {
+	int s = TILE_SIZE * z;
+	fl_rect(x, y, s, s, FL_DARK_YELLOW);
+	fl_rect(x+1, y+1, s-2, s-2, FL_YELLOW);
 }
 
-static void draw_selection_border(int x, int y, bool highlighted = false) {
-	fl_rect(x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_BLACK);
-	fl_rect(x+1, y+1, TILE_SIZE_2X-2, TILE_SIZE_2X-2, highlighted ? FL_YELLOW : FL_WHITE);
-	fl_rect(x+2, y+2, TILE_SIZE_2X-4, TILE_SIZE_2X-4, FL_BLACK);
+static void draw_selection_border(int x, int y, int z = DEFAULT_ZOOM, bool highlighted = false) {
+	int s = TILE_SIZE * z;
+	Fl_Color c = highlighted ? FL_YELLOW : FL_WHITE;
+	fl_rect(x, y, s, s, FL_BLACK);
+	fl_rect(x+1, y+1, s-2, s-2, c);
+	if (z > 5) {
+		fl_rect(x+2, y+2, s-4, s-4, c);
+		fl_rect(x+3, y+3, s-6, s-6, FL_BLACK);
+	}
+	else {
+		fl_rect(x+2, y+2, s-4, s-4, FL_BLACK);
+	}
 }
 
 std::vector<Tileset> *Tile_State::_tilesets = NULL;
@@ -133,21 +143,29 @@ void Tile_State::alpha(uchar alfa) {
 	trns_crc = crc32(trns_crc, trns_data, sizeof(trns_data));
 	uchar crc1 = (uchar)((trns_crc & 0xFF000000UL) >> 24), crc2 = (uchar)((trns_crc & 0xFF0000UL) >> 16),
 		crc3 = (uchar)((trns_crc & 0xFF00UL) >> 8), crc4 = (uchar)(trns_crc & 0xFFUL);
-	const uchar palette_bgs_png_buffer[210] = {
+	const uchar palette_bgs_png_buffer[347] = {
 		0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
-		0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x10, 0x04, 0x03, 0x00, 0x00, 0x00, 0x0b, 0xfd, 0xbc,
-		0x7a, 0x00, 0x00, 0x00, 0x30, 0x50, 0x4c, 0x54, 0x45, 0x18, 0xb2, 0x2a, 0x2b, 0x95, 0xff, 0x43,
+		0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00, 0x50, 0x04, 0x03, 0x00, 0x00, 0x00, 0xb4, 0x7c, 0xc5,
+		0x94, 0x00, 0x00, 0x00, 0x30, 0x50, 0x4c, 0x54, 0x45, 0x18, 0xb2, 0x2a, 0x2b, 0x95, 0xff, 0x43,
 		0x00, 0xcc, 0x43, 0xf2, 0xf2, 0x46, 0x99, 0x90, 0x50, 0x60, 0x70, 0x7a, 0x1a, 0x5d, 0x8a, 0xe8,
 		0x17, 0x8c, 0x0b, 0x00, 0x9a, 0x63, 0x24, 0xa0, 0xb0, 0xc0, 0xdf, 0x32, 0xef, 0xe6, 0x19, 0x4b,
 		0xf5, 0x82, 0x31, 0xff, 0x77, 0xa8, 0xff, 0xe1, 0x19, 0xbc, 0xc9, 0x5c, 0x8d, 0x00, 0x00, 0x00,
 		0x10, 0x74, 0x52, 0x4e, 0x53, alfa, alfa, alfa, alfa, alfa, alfa, alfa, alfa, alfa, alfa, alfa,
-		alfa, alfa, alfa, alfa, alfa, crc1, crc2, crc3, crc4, 0x00, 0x00, 0x00, 0x41, 0x49, 0x44, 0x41,
-		0x54, 0x48, 0x89, 0x63, 0x5c, 0xc5, 0x00, 0x01, 0x4a, 0x50, 0x7a, 0x35, 0x94, 0x9e, 0x05, 0xa5,
-		0xdf, 0x41, 0xe9, 0x7b, 0x50, 0x3a, 0x0c, 0x4a, 0x77, 0xa0, 0xa9, 0x33, 0x86, 0xd2, 0x15, 0x68,
-		0xe6, 0x9d, 0x41, 0x33, 0x77, 0x35, 0x9a, 0x3c, 0x13, 0xc3, 0x00, 0x83, 0x51, 0x07, 0x8c, 0x3a,
-		0x60, 0xd4, 0x01, 0xa3, 0x0e, 0x18, 0x75, 0xc0, 0xa8, 0x03, 0x46, 0x1d, 0x00, 0x00, 0x5f, 0xa8,
-		0x08, 0x86, 0x0b, 0x7a, 0x6e, 0xc2, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42,
-		0x60, 0x82
+		alfa, alfa, alfa, alfa, alfa, crc1, crc2, crc3, crc4, 0x00, 0x00, 0x00, 0xca, 0x49, 0x44, 0x41,
+		0x54, 0x78, 0xda, 0xed, 0xd2, 0x51, 0x0d, 0x82, 0x00, 0x00, 0x40, 0x41, 0x46, 0x03, 0x2a, 0x50,
+		0xc1, 0x0a, 0x56, 0xa0, 0x02, 0x15, 0xa8, 0x40, 0x05, 0x2a, 0x58, 0xc1, 0x0a, 0x54, 0xb0, 0x02,
+		0x15, 0xb4, 0xc2, 0xfb, 0x63, 0x73, 0x77, 0x19, 0x6e, 0x7c, 0x45, 0x67, 0xb4, 0x45, 0x53, 0xf4,
+		0x8d, 0x3e, 0xd1, 0x23, 0x7a, 0x47, 0x4b, 0xb4, 0x47, 0x43, 0x34, 0x47, 0x57, 0x74, 0x44, 0xcf,
+		0x68, 0x8d, 0xc6, 0x01, 0x6e, 0x24, 0x20, 0x02, 0x22, 0x20, 0x08, 0x88, 0x80, 0x20, 0x20, 0x02,
+		0x82, 0x80, 0x08, 0x08, 0x02, 0x22, 0x20, 0x08, 0x88, 0x80, 0x20, 0x20, 0x02, 0x82, 0x80, 0x08,
+		0x08, 0x02, 0x22, 0x20, 0x08, 0x88, 0x80, 0x20, 0x20, 0x02, 0x82, 0x80, 0x08, 0x08, 0x02, 0x22,
+		0x20, 0x08, 0x88, 0x80, 0x20, 0x20, 0x02, 0x82, 0x80, 0x08, 0x88, 0x80, 0x20, 0x20, 0x02, 0x82,
+		0x80, 0x08, 0x08, 0x02, 0x22, 0x20, 0x08, 0x88, 0x80, 0x20, 0x20, 0x02, 0x82, 0x80, 0x08, 0x08,
+		0x02, 0x22, 0x20, 0x08, 0x88, 0x80, 0x20, 0x20, 0x02, 0x82, 0x80, 0x08, 0x08, 0x02, 0x22, 0x20,
+		0x08, 0x88, 0x80, 0x20, 0x20, 0x02, 0x82, 0x80, 0x08, 0x08, 0x02, 0x22, 0x20, 0x08, 0x88, 0x80,
+		0x08, 0x08, 0x02, 0x22, 0x20, 0x08, 0x88, 0x80, 0x20, 0x20, 0x02, 0x82, 0x80, 0x08, 0x08, 0x02,
+		0x22, 0x20, 0x08, 0xc8, 0x3f, 0xf9, 0x01, 0xf4, 0x34, 0x3f, 0x70, 0x2b, 0xad, 0x13, 0x5a, 0x00,
+		0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
 	};
 	delete _palette_bgs_image;
 	_palette_bgs_image = new Fl_PNG_Image(NULL, palette_bgs_png_buffer, sizeof(palette_bgs_png_buffer));
@@ -155,10 +173,14 @@ void Tile_State::alpha(uchar alfa) {
 
 static Fl_Font tile_fonts[4] = {FL_COURIER, FL_COURIER_ITALIC, FL_COURIER_BOLD, FL_COURIER_BOLD_ITALIC};
 
-void Tile_State::draw_tile(int x, int y, bool active, bool selected) {
+void Tile_State::draw_tile(int x, int y, int z, bool active, bool selected) {
+	if (z == 1) {
+		print(x, y, active, selected);
+		return;
+	}
 	if (_tilesets) {
 		for (std::vector<Tileset>::reverse_iterator it = _tilesets->rbegin(); it != _tilesets->rend(); ++it) {
-			if (it->draw_tile(this, x, y, active)) {
+			if (it->draw_tile(this, x, y, z, active)) {
 				return;
 			}
 		}
@@ -168,34 +190,37 @@ void Tile_State::draw_tile(int x, int y, bool active, bool selected) {
 	const char buffer[3] = {l1, l2, '\0'};
 	bool r = Config::rainbow_tiles();
 	Fl_Color bg = rainbow_bg_colors[r ? lo : 0];
-	if (!active) { bg = fl_inactive(bg); }
-	fl_rectf(x, y, TILE_SIZE_2X, TILE_SIZE_2X, bg);
-	int s = OS::is_consolas() ? 11 : 10;
-	fl_font(tile_fonts[bank], s);
+	int s = TILE_SIZE * z;
+	fl_rectf(x, y, s, s, bg);
+	int f = (OS::is_consolas() ? 11 : 10) + z * 2 - 4;
+	fl_font(tile_fonts[bank], f);
 	Fl_Color fg = selected ? FL_YELLOW : x_flip ? y_flip ? FL_YELLOW : FL_MAGENTA : y_flip ? FL_CYAN : rainbow_fg_colors[r ? hi : 0];
-	if (!active) { fg = fl_inactive(fg); }
 	fl_color(fg);
-	fl_draw(buffer, x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_ALIGN_CENTER);
+	fl_draw(buffer, x, y, s, s, FL_ALIGN_CENTER);
 }
 
-void Tile_State::draw_attributes(int x, int y, int style, bool active) {
+void Tile_State::draw_attributes(int x, int y, int z, int style, bool active) {
+	int s = TILE_SIZE * z;
 	if (!active) {
-		fl_rectf(x, y, TILE_SIZE_2X, TILE_SIZE_2X, FL_INACTIVE_COLOR);
+		fl_rectf(x, y, s, s, FL_INACTIVE_COLOR);
 	}
 	else if (palette > -1) {
 		if (style > 0) {
-			_palette_bgs_image->draw(x, y, TILE_SIZE_2X, TILE_SIZE_2X, TILE_SIZE_2X * palette, 0);
+			_palette_bgs_image->draw(x, y, s, s, TILE_SIZE * MAX_ZOOM * palette, 0);
 		}
 		else if (style < 0) {
-			fl_rectf(x, y, TILE_SIZE_2X, TILE_SIZE_2X, palette_colors[palette]);
+			fl_rectf(x, y, s, s, palette_colors[palette]);
 		}
-		palette_digits_image.draw(x+1, y+1, 5, 7, 5 * palette, 0);
+		int dy = z > 1 || !Config::grid();
+		palette_digits_image.draw(x+1, y+dy, 5, 7, 5 * palette, 0);
 	}
-	if (priority) {
-		priority_image.draw(x+8, y+8);
-	}
-	if (obp1) {
-		obp1_image.draw(x+8, y+1);
+	if (z > 1) {
+		if (priority) {
+			priority_image.draw(x+8, y+8);
+		}
+		if (obp1) {
+			obp1_image.draw(x+8, y+1);
+		}
 	}
 }
 
@@ -228,10 +253,23 @@ static void print_digit(int x, int y, uchar d) {
 	}
 }
 
-void Tile_State::print(int x, int y) {
+void Tile_State::draw(int x, int y, int z, bool tile, bool attr, int style, bool active, bool selected) {
+	int s = TILE_SIZE * z;
+	if (tile) {
+		draw_tile(x, y, z, active, selected);
+	}
+	else if (!attr) {
+		fl_rectf(x, y, s, s, FL_WHITE);
+	}
+	if (attr) {
+		draw_attributes(x, y, z, style, active);
+	}
+}
+
+void Tile_State::print(int x, int y, bool active, bool selected) {
 	if (_tilesets) {
 		for (std::vector<Tileset>::reverse_iterator it = _tilesets->rbegin(); it != _tilesets->rend(); ++it) {
-			if (it->print_tile(this, x, y)) {
+			if (it->print_tile(this, x, y, active)) {
 				return;
 			}
 		}
@@ -240,7 +278,7 @@ void Tile_State::print(int x, int y) {
 	bool r = Config::rainbow_tiles();
 	Fl_Color bg = rainbow_bg_colors[r ? lo : 0];
 	fl_rectf(x, y, TILE_SIZE, TILE_SIZE, bg);
-	Fl_Color fg = x_flip ? y_flip ? FL_YELLOW : FL_MAGENTA : y_flip ? FL_CYAN : rainbow_fg_colors[r ? hi : 0];
+	Fl_Color fg = selected ? FL_YELLOW : x_flip ? y_flip ? FL_YELLOW : FL_MAGENTA : y_flip ? FL_CYAN : rainbow_fg_colors[r ? hi : 0];
 	fl_color(fg);
 	print_digit(x, y+1, hi);
 	print_digit(x+4, y+2, lo);
@@ -256,7 +294,7 @@ void Tile_Swatch::draw() {
 	draw_box();
 	int ox = x() + Fl::box_dx(box()), oy = y() + Fl::box_dy(box());
 	swatch_backdrop_image.draw(ox, oy);
-	_state.draw(ox, oy, !_attributes, _attributes, (int)Config::bold_palettes(), !!active(), false);
+	_state.draw(ox, oy, DEFAULT_ZOOM, !_attributes, _attributes, (int)Config::bold_palettes(), !!active(), false);
 }
 
 Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint16_t id, bool x_flip, bool y_flip,
@@ -270,16 +308,16 @@ Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint16_t id, bo
 }
 
 void Tile_Tessera::draw() {
-	int X = x(), Y = y();
-	_state.draw(X, Y, true, Config::show_attributes(), (int)Config::bold_palettes(), !!active(), false);
+	int X = x(), Y = y(), Z = Config::zoom();
+	_state.draw(X, Y, Z, true, Config::show_attributes(), (int)Config::bold_palettes(), !!active(), false);
 	if (Config::grid()) {
-		draw_grid(X, Y);
+		draw_grid(X, Y, Z);
 	}
 	if (_state.highlighted()) {
-		draw_highlight(X, Y);
+		draw_highlight(X, Y, Z);
 	}
 	if (this == Fl::belowmouse()) {
-		draw_selection_border(X, Y, _state.highlighted());
+		draw_selection_border(X, Y, Z, _state.highlighted());
 	}
 }
 
@@ -325,7 +363,7 @@ Tile_Button::Tile_Button(int x, int y, uint16_t id) : Tile_Thing(id), Fl_Radio_B
 
 void Tile_Button::draw() {
 	int X = x(), Y = y();
-	_state.draw(X, Y, true, Config::show_attributes(), (int)Config::bold_palettes(), !!active(), !!value());
+	_state.draw(X, Y, DEFAULT_ZOOM, true, Config::show_attributes(), (int)Config::bold_palettes(), !!active(), !!value());
 	if (Config::grid()) {
 		draw_grid(X, Y);
 	}
@@ -364,7 +402,7 @@ Palette_Button::Palette_Button(int x, int y, int p) : Tile_Thing(0x000, false, f
 
 void Palette_Button::draw() {
 	int X = x(), Y = y();
-	_state.draw(X, Y, false, true, -1, !!active(), !!value());
+	_state.draw(X, Y, DEFAULT_ZOOM, false, true, -1, !!active(), !!value());
 	if (Config::grid()) {
 		draw_grid(X, Y);
 	}

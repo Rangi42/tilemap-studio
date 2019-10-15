@@ -21,6 +21,10 @@
 #include "undo-disabled.xpm"
 #include "redo.xpm"
 #include "redo-disabled.xpm"
+#include "zoom-in.xpm"
+#include "zoom-in-disabled.xpm"
+#include "zoom-out.xpm"
+#include "zoom-out-disabled.xpm"
 #include "grid.xpm"
 #include "rainbow.xpm"
 #include "bold.xpm"
@@ -55,6 +59,10 @@ static Fl_Pixmap UNDO_ICON(UNDO_XPM);
 static Fl_Pixmap UNDO_DISABLED_ICON(UNDO_DISABLED_XPM);
 static Fl_Pixmap REDO_ICON(REDO_XPM);
 static Fl_Pixmap REDO_DISABLED_ICON(REDO_DISABLED_XPM);
+static Fl_Pixmap ZOOM_IN_ICON(ZOOM_IN_XPM);
+static Fl_Pixmap ZOOM_IN_DISABLED_ICON(ZOOM_IN_DISABLED_XPM);
+static Fl_Pixmap ZOOM_OUT_ICON(ZOOM_OUT_XPM);
+static Fl_Pixmap ZOOM_OUT_DISABLED_ICON(ZOOM_OUT_DISABLED_XPM);
 static Fl_Pixmap GRID_ICON(GRID_XPM);
 static Fl_Pixmap RAINBOW_ICON(RAINBOW_XPM);
 static Fl_Pixmap BOLD_ICON(BOLD_XPM);
