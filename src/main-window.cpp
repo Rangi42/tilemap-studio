@@ -450,6 +450,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Double_W
 	_zoom_in_tb->callback((Fl_Callback *)zoom_in_cb, this);
 	_zoom_in_tb->image(ZOOM_IN_ICON);
 	_zoom_in_tb->deimage(ZOOM_IN_DISABLED_ICON);
+	_zoom_in_tb->shortcut(FL_COMMAND + '+');
 
 	_zoom_out_tb->tooltip("Zoom Out (Ctrl+-)");
 	_zoom_out_tb->callback((Fl_Callback *)zoom_out_cb, this);
