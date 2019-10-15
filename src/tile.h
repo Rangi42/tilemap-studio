@@ -12,7 +12,7 @@
 
 #define SPACE_COLOR 0xFFFFFF00 // white
 
-#define CRGB5(c) (uchar)(((c) & 0xF8) | (((c) & 0xF8) >> 4))
+#define CRGB5(c) (uchar)(((c) & 0xF8) | (((c) & 0xF8) >> 5))
 
 typedef Fl_Color Tile[NUM_TILE_PIXELS];
 
