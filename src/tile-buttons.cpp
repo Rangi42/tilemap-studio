@@ -94,19 +94,13 @@ static const Fl_Color rainbow_fg_colors[16] = {
 static void draw_grid(int x, int y, int z = DEFAULT_ZOOM) {
 	int s = TILE_SIZE * z;
 	fl_color(fl_rgb_color(0x40));
-	for (int i = 1; i < s; i += 4) {
-		fl_point(x+i, y+s-1);
-		fl_point(x+i+1, y+s-1);
-		fl_point(x+s-1, y+i);
-		fl_point(x+s-1, y+i+1);
-	}
+	fl_xyline(x, y+s-1, x+s-1, y);
 	fl_color(fl_rgb_color(0xD0));
-	for (int i = 0; i < s; i += 4) {
-		fl_point(x+i, y+s-1);
-		fl_point(x+i+3, y+s-1);
-		fl_point(x+s-1, y+i);
-		fl_point(x+s-1, y+i+3);
-	}
+	char dashes[3] = {2, 2, 0};
+	fl_line_style(FL_DASH, 0, dashes);
+	fl_xyline(x, y+s-1, x+s-1);
+	fl_yxline(x+s-1, y, y+s-1);
+	fl_line_style(FL_SOLID);
 }
 
 static void draw_highlight(int x, int y, int z = DEFAULT_ZOOM) {
