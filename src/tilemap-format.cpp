@@ -107,15 +107,15 @@ Tilemap_Format guess_format(const char *filename) {
 		fs == SGB_WIDTH * SGB_HEIGHT * 2 - GAME_BOY_WIDTH * GAME_BOY_HEIGHT * 2) {
 		return Tilemap_Format::SGB_BORDER;
 	}
+	if (ends_with(s, ".tilemap.rle")) {
+		return Tilemap_Format::POKEGEAR_CARD;
+	}
 	if (ends_with(s, ".rle")) {
 		return Tilemap_Format::RBY_TOWN_MAP;
 	}
 	if (s == "johto.bin" || s == "kanto.bin" ||
 		fs == GAME_BOY_WIDTH * GAME_BOY_HEIGHT + 1) {
 		return Tilemap_Format::GSC_TOWN_MAP;
-	}
-	if (ends_with(s, ".tilemap.rle")) {
-		return Tilemap_Format::POKEGEAR_CARD;
 	}
 	if (ends_with(s, ".kmp") || fs % 2 ||
 		fs > GAME_BOY_VRAM_SIZE * GAME_BOY_VRAM_SIZE * 2) {
