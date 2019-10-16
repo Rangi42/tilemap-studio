@@ -239,20 +239,19 @@ void Main_Window::image_to_tiles() {
 		// Combine color sets as long as they fit within the color limit
 		std::vector<Color_Set> cs_opt;
 		for (Color_Set &s : cs_full) {
-			int best_i = -1, i = 0;
+			Color_Set *b = NULL;
 			for (Color_Set &c : cs_opt) {
 				Color_Set d;
 				std::set_difference(s.begin(), s.end(), c.begin(), c.end(), std::inserter(d, d.begin()));
 				if (c.size() + d.size() <= max_colors) {
-					best_i = i;
+					b = &c;
 				}
-				++i;
 			}
-			if (best_i == -1) {
-				cs_opt.push_back(s);
+			if (b) {
+				b->insert(s.begin(), s.end());
 			}
 			else {
-				cs_opt[best_i].insert(s.begin(), s.end());
+				cs_opt.push_back(s);
 			}
 		}
 
