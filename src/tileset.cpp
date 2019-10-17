@@ -11,14 +11,18 @@
 #include "tile-buttons.h"
 #include "config.h"
 
-Tileset::Tileset(int start_id, int offset, int length) : _image(NULL), _num_tiles(0),
-	_start_id(start_id), _offset(offset), _length(length), _result(TILESET_NULL) {}
+Tileset::Tileset(int start_id, int offset, int length) : _1x_image(NULL), _2x_image(NULL), _zoomed_image(NULL),
+	_num_tiles(0), _start_id(start_id), _offset(offset), _length(length), _result(TILESET_NULL) {}
 
 Tileset::~Tileset() {}
 
 void Tileset::clear() {
-	delete _image;
-	_image = NULL;
+	delete _1x_image;
+	_1x_image = NULL;
+	delete _2x_image;
+	_2x_image = NULL;
+	delete _zoomed_image;
+	_zoomed_image = NULL;
 	_num_tiles = 0;
 	_start_id = 0x000;
 	_offset = 0;
@@ -26,11 +30,17 @@ void Tileset::clear() {
 	_result = TILESET_NULL;
 }
 
+void Tileset::update_zoom() {
+	if (!_1x_image) { return; }
+	int z = Config::zoom();
+	_zoomed_image = (Fl_RGB_Image *)_1x_image->copy(_1x_image->w() * z, _1x_image->h() * z);
+}
+
 bool Tileset::draw_tile(const Tile_State *ts, int x, int y, int z, bool active) const {
 	int index = (int)ts->id - _start_id + _offset;
 	int limit = (int)_num_tiles;
 	if (_length > 0) { limit = MIN(limit, _length + _offset); }
-	if (index < _offset || index >= limit || !_image) { return false; }
+	if (index < _offset || index >= limit || !_2x_image || !_zoomed_image) { return false; }
 
 	int s = TILE_SIZE * z;
 	if (!active) {
@@ -38,17 +48,16 @@ bool Tileset::draw_tile(const Tile_State *ts, int x, int y, int z, bool active) 
 		return true;
 	}
 
-	int wt = _image->w() / TILE_SIZE_2X;
-	int tx = index % wt * TILE_SIZE_2X, ty = index / wt * TILE_SIZE_2X;
-
 	if (z == DEFAULT_ZOOM) {
+		int wt = _2x_image->w() / TILE_SIZE_2X;
+		int tx = index % wt * TILE_SIZE_2X, ty = index / wt * TILE_SIZE_2X;
 		if (!ts->x_flip && !ts->y_flip) {
-			_image->draw(x, y, TILE_SIZE_2X, TILE_SIZE_2X, tx, ty);
+			_2x_image->draw(x, y, TILE_SIZE_2X, TILE_SIZE_2X, tx, ty);
 		}
 		else {
-			const uchar *data = (const uchar *)_image->data()[0];
-			int d = _image->d(), ld = _image->ld();
-			if (!ld) { ld = _image->w() * d; }
+			const uchar *data = (const uchar *)_2x_image->data()[0];
+			int d = _2x_image->d(), ld = _2x_image->ld();
+			if (!ld) { ld = _2x_image->w() * d; }
 			data += ty * ld + tx * d + (ts->y_flip ? ts->x_flip ? ld + d : ld : ts->x_flip ? d : 0) * (TILE_SIZE_2X - 1);
 			int td = ts->x_flip ? -d : d;
 			int tld = ts->y_flip ? -ld : ld;
@@ -56,20 +65,19 @@ bool Tileset::draw_tile(const Tile_State *ts, int x, int y, int z, bool active) 
 		}
 	}
 	else {
-		const uchar *data = (const uchar *)_image->data()[0];
-		int d = _image->d(), ld = _image->ld();
-		if (!ld) { ld = _image->w() * d; }
-		int dp = d > 1;
-
-		for (int dy = 0; dy < TILE_SIZE; dy++) {
-			int oy = (ty + 2 * (ts->y_flip ? TILE_SIZE - dy - 1 : dy)) * ld;
-			for (int dx = 0; dx < TILE_SIZE; dx++) {
-				int ox = (tx + 2 * (ts->x_flip ? TILE_SIZE - dx - 1 : dx)) * d;
-				const uchar *px = data + oy + ox;
-				uchar r = px[0], g = px[dp], b = px[dp+dp];
-				fl_color(r, g, b);
-				fl_rectf(x + dx * z, y + dy * z, z, z);
-			}
+		int wt = _zoomed_image->w() / s;
+		int tx = index % wt * s, ty = index / wt * s;
+		if (!ts->x_flip && !ts->y_flip) {
+			_zoomed_image->draw(x, y, s, s, tx, ty);
+		}
+		else {
+			const uchar *data = (const uchar *)_zoomed_image->data()[0];
+			int d = _zoomed_image->d(), ld = _zoomed_image->ld();
+			if (!ld) { ld = _zoomed_image->w() * d; }
+			data += ty * ld + tx * d + (ts->y_flip ? ts->x_flip ? ld + d : ld : ts->x_flip ? d : 0) * (s - 1);
+			int td = ts->x_flip ? -d : d;
+			int tld = ts->y_flip ? -ld : ld;
+			fl_draw_image(data, x, y, s, s, td, tld);
 		}
 	}
 	return true;
@@ -79,30 +87,27 @@ bool Tileset::print_tile(const Tile_State *ts, int x, int y, bool active) const 
 	int index = (int)ts->id - _start_id + _offset;
 	int limit = (int)_num_tiles;
 	if (_length > 0) { limit = MIN(limit, _length + _offset); }
-	if (index < _offset || index >= limit || !_image) { return false; }
+	if (index < _offset || index >= limit || !_1x_image) { return false; }
 
 	if (!active) {
 		fl_rectf(x, y, TILE_SIZE, TILE_SIZE, FL_INACTIVE_COLOR);
 		return true;
 	}
 
-	int wt = _image->w() / TILE_SIZE_2X;
-	int tx = index % wt * TILE_SIZE_2X, ty = index / wt * TILE_SIZE_2X;
+	int wt = _1x_image->w() / TILE_SIZE;
+	int tx = index % wt * TILE_SIZE, ty = index / wt * TILE_SIZE;
 
-	const uchar *data = (const uchar *)_image->data()[0];
-	int d = _image->d(), ld = _image->ld();
-	if (!ld) { ld = _image->w() * d; }
-	int dp = d > 1;
-
-	for (int dy = 0; dy < TILE_SIZE; dy++) {
-		int oy = (ty + 2 * (ts->y_flip ? TILE_SIZE - dy - 1 : dy)) * ld;
-		for (int dx = 0; dx < TILE_SIZE; dx++) {
-			int ox = (tx + 2 * (ts->x_flip ? TILE_SIZE - dx - 1 : dx)) * d;
-			const uchar *px = data + oy + ox;
-			uchar r = px[0], g = px[dp], b = px[dp+dp];
-			fl_color(r, g, b);
-			fl_point(x + dx, y + dy);
-		}
+	if (!ts->x_flip && !ts->y_flip) {
+		_1x_image->draw(x, y, TILE_SIZE, TILE_SIZE, tx, ty);
+	}
+	else {
+		const uchar *data = (const uchar *)_1x_image->data()[0];
+		int d = _1x_image->d(), ld = _1x_image->ld();
+		if (!ld) { ld = _1x_image->w() * d; }
+		data += ty * ld + tx * d + (ts->y_flip ? ts->x_flip ? ld + d : ld : ts->x_flip ? d : 0) * (TILE_SIZE - 1);
+		int td = ts->x_flip ? -d : d;
+		int tld = ts->y_flip ? -ld : ld;
+		fl_draw_image(data, x, y, TILE_SIZE, TILE_SIZE, td, tld);
 	}
 	return true;
 }
@@ -120,13 +125,13 @@ Tileset::Result Tileset::read_tiles(const char *f) {
 }
 
 Tileset::Result Tileset::read_png_graphics(const char *f) {
-	Fl_PNG_Image png(f);
-	return postprocess_graphics(&png);
+	Fl_PNG_Image *png = new Fl_PNG_Image(f);
+	return postprocess_graphics(png);
 }
 
 Tileset::Result Tileset::read_bmp_graphics(const char *f) {
-	Fl_BMP_Image bmp(f);
-	return postprocess_graphics(&bmp);
+	Fl_BMP_Image *bmp = new Fl_BMP_Image(f);
+	return postprocess_graphics(bmp);
 }
 
 Tileset::Result Tileset::read_1bpp_graphics(const char *f) {
@@ -330,19 +335,22 @@ Tileset::Result Tileset::parse_4bpp_data(size_t n, uchar *data) {
 Tileset::Result Tileset::postprocess_graphics(Fl_RGB_Image *img) {
 	if (!img || img->fail()) { return (_result = TILESET_BAD_FILE); }
 
-	_image = (Fl_RGB_Image *)img->copy(img->w() * 2, img->h() * 2);
-	if (!_image || _image->fail()) { return (_result = TILESET_BAD_FILE); }
+	_1x_image = img;
+	_2x_image = (Fl_RGB_Image *)img->copy(img->w() * DEFAULT_ZOOM, img->h() * DEFAULT_ZOOM);
+	if (!_2x_image || _2x_image->fail()) { clear(); return (_result = TILESET_BAD_FILE); }
+	update_zoom();
+	if (!_zoomed_image || _zoomed_image->fail()) { clear(); return (_result = TILESET_BAD_FILE); }
 
-	int w = _image->w(), h = _image->h();
-	if (w % TILE_SIZE_2X || h % TILE_SIZE_2X) { return (_result = TILESET_BAD_DIMS); }
+	int w = _1x_image->w(), h = _1x_image->h();
+	if (w % TILE_SIZE || h % TILE_SIZE) { clear(); return (_result = TILESET_BAD_DIMS); }
 
-	w /= TILE_SIZE_2X;
-	h /= TILE_SIZE_2X;
+	w /= TILE_SIZE;
+	h /= TILE_SIZE;
 	_num_tiles = w * h;
 
 	int limit = (int)_num_tiles - _offset;
 	if (_length > 0) { limit = MIN(limit, _length + _offset); }
-	if (_start_id + limit > MAX_NUM_TILES) { return (_result = TILESET_TOO_LARGE); }
+	if (_start_id + limit > MAX_NUM_TILES) { clear(); return (_result = TILESET_TOO_LARGE); }
 
 	return (_result = TILESET_OK);
 }

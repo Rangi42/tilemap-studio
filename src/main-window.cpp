@@ -736,6 +736,7 @@ void Main_Window::update_zoom() {
 		_zoom_in_mi->activate();
 		_zoom_in_tb->activate();
 	}
+	Tile_State::update_zoom();
 	tilemap_width_tb_cb(NULL, this);
 }
 

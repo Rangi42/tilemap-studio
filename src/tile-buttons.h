@@ -30,6 +30,7 @@ private:
 public:
 	inline static void tilesets(std::vector<Tileset> *ts) { _tilesets = ts; }
 	static void alpha(uchar a);
+	static void update_zoom(void);
 public:
 	uint16_t id;
 	bool x_flip, y_flip, priority, obp1;

@@ -165,6 +165,13 @@ void Tile_State::alpha(uchar alfa) {
 	_palette_bgs_image = new Fl_PNG_Image(NULL, palette_bgs_png_buffer, sizeof(palette_bgs_png_buffer));
 }
 
+void Tile_State::update_zoom() {
+	if (!_tilesets) { return; }
+	for (Tileset &t : *_tilesets) {
+		t.update_zoom();
+	}
+}
+
 static Fl_Font tile_fonts[4] = {FL_COURIER, FL_COURIER_ITALIC, FL_COURIER_BOLD, FL_COURIER_BOLD_ITALIC};
 
 void Tile_State::draw_tile(int x, int y, int z, bool active, bool selected) {

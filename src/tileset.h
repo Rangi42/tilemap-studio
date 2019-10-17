@@ -26,7 +26,7 @@ public:
 	enum Result { TILESET_OK, TILESET_BAD_FILE, TILESET_BAD_EXT, TILESET_BAD_DIMS,
 		TILESET_TOO_SHORT, TILESET_TOO_LARGE, TILESET_BAD_CMD, TILESET_NULL };
 private:
-	Fl_RGB_Image *_image;
+	Fl_RGB_Image *_1x_image, *_2x_image, *_zoomed_image;
 	size_t _num_tiles;
 	int _start_id, _offset, _length;
 	Result _result;
@@ -39,6 +39,7 @@ public:
 	inline int length(void) const { return _length; }
 	inline Result result(void) const { return _result; }
 	void clear(void);
+	void update_zoom(void);
 	bool draw_tile(const Tile_State *ts, int x, int y, int z, bool active) const;
 	bool print_tile(const Tile_State *ts, int x, int y, bool active) const;
 	Result read_tiles(const char *f);
