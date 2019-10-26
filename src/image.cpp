@@ -11,7 +11,7 @@
 #include "utils.h"
 #include "image.h"
 
-Image::Result Image::write_image(const char *f, Fl_RGB_Image *img) {
+Image::Result Image::write_image(const char *f, Fl_RGB_Image *img, bool grayscale) {
 	FILE *file = fl_fopen(f, "wb");
 	if (!file) { return IMAGE_BAD_FILE; }
 	// Create the necessary PNG structures
@@ -29,22 +29,26 @@ Image::Result Image::write_image(const char *f, Fl_RGB_Image *img) {
 	png_set_compression_buffer_size(png, 8192);
 	// Write the PNG IHDR chunk
 	size_t w = img->w(), h = img->h();
-	png_set_IHDR(png, info, (png_uint_32)w, (png_uint_32)h, 8, PNG_COLOR_TYPE_RGB,
+	png_set_IHDR(png, info, (png_uint_32)w, (png_uint_32)h, 8, grayscale ? PNG_COLOR_TYPE_GRAY : PNG_COLOR_TYPE_RGB,
 		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 	// Write the other PNG header chunks
 	png_write_info(png, info);
 	// Write the RGB pixels in row-major order from top to bottom
 	const char *buffer = img->data()[0];
-	int dp = img->d();
-	png_bytep png_row = new png_byte[NUM_CHANNELS * w];
+	int d = img->d();
+	int ld = img->ld();
+	if (!ld) { ld = (int)w * d; }
+	int pd = d > 1;
+	size_t pc = grayscale ? 1 : 3;
+	size_t row_size = pc * w;
+	png_bytep png_row = new png_byte[row_size];
 	for (size_t i = 0; i < h; i++) {
-		size_t row = i * w * dp;
 		for (size_t j = 0; j < w; j++) {
-			size_t col = j * dp;
-			size_t px = row + col;
-			png_row[col] = buffer[px];
-			png_row[col+1] = buffer[px+1];
-			png_row[col+2] = buffer[px+2];
+			size_t rd = pc * j;
+			size_t px = ld * i + d * j;
+			for (size_t k = 0; k < pc; k++) {
+				png_row[rd+k] = buffer[px+pd*k];
+			}
 		}
 		png_write_row(png, png_row);
 	}

@@ -10,7 +10,7 @@
 class Image {
 public:
 	enum Result { IMAGE_OK, IMAGE_BAD_FILE, IMAGE_BAD_PNG };
-	static Result write_image(const char *f, Fl_RGB_Image *img);
+	static Result write_image(const char *f, Fl_RGB_Image *img, bool grayscale);
 	static const char *error_message(Result result);
 };
 

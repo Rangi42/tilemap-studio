@@ -1599,7 +1599,7 @@ void Main_Window::print_cb(Fl_Widget *, Main_Window *mw) {
 	}
 
 	Fl_RGB_Image *img = mw->_tilemap.print_tilemap();
-	Image::Result result = Image::write_image(filename, img);
+	Image::Result result = Image::write_image(filename, img, false);
 	delete img;
 	if (result) {
 		std::string msg = "Could not print to ";
