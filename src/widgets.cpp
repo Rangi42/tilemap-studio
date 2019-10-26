@@ -99,7 +99,7 @@ Default_Button::Default_Button(int x, int y, int w, int h, const char *l) : Fl_B
 
 int Default_Button::handle(int event) {
 	if (OS::current_theme() == OS::AERO || OS::current_theme() == OS::METRO || OS::current_theme() == OS::BLUE ||
-		OS::current_theme() == OS::OLIVE || OS::current_theme() == OS::ROSE_GOLD) {
+		OS::current_theme() == OS::OLIVE || OS::current_theme() == OS::ROSE_GOLD || OS::current_theme() == OS::HIGH_CONTRAST) {
 		switch (event) {
 		case FL_ENTER:
 			if (active_r()) {

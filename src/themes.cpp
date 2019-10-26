@@ -2739,6 +2739,18 @@ static void high_contrast_radio_round_down_box(int x, int y, int w, int h, Fl_Co
 	high_contrast_radio_round_down_frame(x, y, w, h, c);
 }
 
+static void high_contrast_hovered_up_frame(int x, int y, int w, int h, Fl_Color) {
+	fl_color(activated_color(fl_rgb_color(0xFF, 0xFF, 0xFF)));
+	fl_rect(x, y, w, h);
+	fl_rect(x+1, y+1, w-2, h-2);
+}
+
+static void high_contrast_hovered_up_box(int x, int y, int w, int h, Fl_Color c) {
+	fl_color(activated_color(fl_rgb_color(0x00, 0x80, 0x80)));
+	fl_rectf(x+2, y+2, w-4, h-4);
+	high_contrast_hovered_up_frame(x, y, w, h, c);
+}
+
 static void use_high_contrast_scheme() {
 	Fl::scheme("none");
 	Fl::set_boxtype(OS_BUTTON_UP_BOX, high_contrast_button_up_box, 2, 2, 4, 4);
@@ -2750,14 +2762,14 @@ static void use_high_contrast_scheme() {
 	Fl::set_boxtype(OS_PANEL_THIN_UP_FRAME, high_contrast_panel_thin_up_frame, 1, 1, 2, 2);
 	Fl::set_boxtype(OS_SPACER_THIN_DOWN_FRAME, high_contrast_spacer_thin_down_frame, 1, 1, 2, 2);
 	Fl::set_boxtype(OS_RADIO_ROUND_DOWN_BOX, high_contrast_radio_round_down_box, 2, 2, 4, 4);
-	Fl::set_boxtype(OS_HOVERED_UP_BOX, high_contrast_button_up_box, 2, 2, 4, 4);
+	Fl::set_boxtype(OS_HOVERED_UP_BOX, high_contrast_hovered_up_box, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_BOX, high_contrast_check_down_box, 2, 2, 4, 4);
-	Fl::set_boxtype(OS_HOVERED_UP_FRAME, high_contrast_button_up_frame, 2, 2, 4, 4);
+	Fl::set_boxtype(OS_HOVERED_UP_FRAME, high_contrast_hovered_up_frame, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_FRAME, high_contrast_check_down_frame, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, high_contrast_check_down_box, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, high_contrast_check_down_frame, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_DEFAULT_BUTTON_BOX, high_contrast_button_up_box, 2, 2, 4, 4);
-	Fl::set_boxtype(OS_TOOLBAR_BUTTON_HOVER_BOX, FL_FLAT_BOX);
+	Fl::set_boxtype(OS_TOOLBAR_BUTTON_HOVER_BOX, OS_HOVERED_UP_BOX);
 	Fl::set_boxtype(OS_TABS_BOX, high_contrast_button_up_box, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_SWATCH_BOX, high_contrast_check_down_box, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_MINI_BUTTON_UP_BOX, high_contrast_button_up_box, 2, 2, 4, 4);
