@@ -269,8 +269,9 @@ int OS_Slider::handle(int event) {
 
 void OS_Slider::draw() {
 	// Based on Fl_Slider::draw()
-	if (damage() & FL_DAMAGE_ALL) { draw_box(box(), active_r() ? color() : fl_inactive(color())); }
-	draw(x()+Fl::box_dx(box()), y()+Fl::box_dy(box()), w()-Fl::box_dw(box()), h()-Fl::box_dh(box()));
+	Fl_Boxtype b = OS::current_theme() == OS::HIGH_CONTRAST ? FL_NO_BOX : box();
+	if (damage() & FL_DAMAGE_ALL) { draw_box(b, active_r() ? color() : fl_inactive(color())); }
+	draw(x()+Fl::box_dx(b), y()+Fl::box_dy(b), w()-Fl::box_dw(b), h()-Fl::box_dh(b));
 }
 
 void OS_Slider::draw(int X, int Y, int W, int H) {
@@ -282,10 +283,11 @@ void OS_Slider::draw(int X, int Y, int W, int H) {
 	int s = MAX((int)(slider_size() * W + 0.5), H / 2 + 2);
 	int lx = X + (int)(v * (W - s) + 0.5);
 	fl_push_clip(X, Y, W, H);
-	draw_box(box(), active_r() ? color() : fl_inactive(color()));
+	Fl_Boxtype b = OS::current_theme() == OS::HIGH_CONTRAST ? FL_NO_BOX : box();
+	draw_box(b, active_r() ? color() : fl_inactive(color()));
 	fl_pop_clip();
-	draw_box(OS::current_theme() == OS::METAL ? OS_BUTTON_UP_BOX : OS_SPACER_THIN_DOWN_BOX,
-		X, Y+H/2-2, W, 4, active_r() ? FL_DARK2 : fl_inactive(FL_DARK2));
+	draw_box(OS::current_theme() == OS::METAL || OS::current_theme() == OS::HIGH_CONTRAST ? OS_BUTTON_UP_BOX :
+		OS_SPACER_THIN_DOWN_BOX, X, Y+H/2-2, W, 4, active_r() ? FL_DARK2 : fl_inactive(FL_DARK2));
 	draw_box(slider(), lx, Y, s, H, FL_GRAY);
 	draw_label(lx, Y, s, H);
 	if (Fl::focus() == this) {
@@ -343,7 +345,7 @@ Dropdown::Dropdown(int x, int y, int w, int h, const char *l) : Fl_Choice(x, y, 
 
 void Dropdown::draw() {
 	// Based on Fl_Choice::draw()
-	Fl_Boxtype bb = OS::current_theme() == OS::METAL ? OS_INPUT_THIN_DOWN_BOX :
+	Fl_Boxtype bb = OS::current_theme() == OS::METAL || OS::current_theme() == OS::HIGH_CONTRAST ? OS_INPUT_THIN_DOWN_BOX :
 		OS::current_theme() == OS::OLIVE ? OS_SWATCH_BOX : FL_DOWN_BOX;
 	int dx = Fl::box_dx(bb);
 	int dy = Fl::box_dy(bb);

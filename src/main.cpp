@@ -53,6 +53,9 @@ static void use_theme(OS::Theme theme) {
 		return;
 	case OS::Theme::DARK:
 		OS::use_dark_theme();
+		return;
+	case OS::Theme::HIGH_CONTRAST:
+		OS::use_high_contrast_theme();
 	}
 }
 
