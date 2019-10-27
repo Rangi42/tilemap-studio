@@ -11,7 +11,7 @@
 #include "utils.h"
 #include "image.h"
 
-Image::Result Image::write_image(const char *f, Fl_RGB_Image *img, bool grayscale) {
+Image::Result Image::write_image(const char *f, Fl_RGB_Image *img, Type type) {
 	FILE *file = fl_fopen(f, "wb");
 	if (!file) { return IMAGE_BAD_FILE; }
 	// Create the necessary PNG structures
@@ -29,7 +29,9 @@ Image::Result Image::write_image(const char *f, Fl_RGB_Image *img, bool grayscal
 	png_set_compression_buffer_size(png, 8192);
 	// Write the PNG IHDR chunk
 	size_t w = img->w(), h = img->h();
-	png_set_IHDR(png, info, (png_uint_32)w, (png_uint_32)h, 8, grayscale ? PNG_COLOR_TYPE_GRAY : PNG_COLOR_TYPE_RGB,
+	int depth = type == IMAGE_TYPE_2BPP ? 2 : type == IMAGE_TYPE_4BPP ? 4 : 8;
+	int color_type = type == IMAGE_TYPE_RGB ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_GRAY;
+	png_set_IHDR(png, info, (png_uint_32)w, (png_uint_32)h, depth, color_type,
 		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 	// Write the other PNG header chunks
 	png_write_info(png, info);
@@ -39,18 +41,38 @@ Image::Result Image::write_image(const char *f, Fl_RGB_Image *img, bool grayscal
 	int ld = img->ld();
 	if (!ld) { ld = (int)w * d; }
 	int pd = d > 1;
-	size_t pc = grayscale ? 1 : 3;
-	size_t row_size = pc * w;
-	png_bytep png_row = new png_byte[row_size];
-	for (size_t i = 0; i < h; i++) {
-		for (size_t j = 0; j < w; j++) {
-			size_t rd = pc * j;
-			size_t px = ld * i + d * j;
-			for (size_t k = 0; k < pc; k++) {
-				png_row[rd+k] = buffer[px+pd*k];
+	png_bytep png_row = NULL;
+	if (type == IMAGE_TYPE_RGB) {
+		size_t rs = w * NUM_CHANNELS;
+		png_row = new png_byte[rs];
+		for (size_t i = 0; i < h; i++) {
+			for (size_t j = 0; j < w; j++) {
+				size_t rd = NUM_CHANNELS * j;
+				size_t px = ld * i + d * j;
+				for (size_t k = 0; k < NUM_CHANNELS; k++) {
+					png_row[rd+k] = buffer[px+pd*k];
+				}
 			}
+			png_write_row(png, png_row);
 		}
-		png_write_row(png, png_row);
+	}
+	else {
+		size_t pq = 8 / (size_t)depth;
+		uchar m = (uchar)pow(2, 8 - depth);
+		size_t rs = w / pq;
+		png_row = new png_byte[rs];
+		for (size_t i = 0; i < h; i++) {
+			for (size_t j = 0; j < rs; j++) {
+				uchar pp = 0;
+				for (size_t k = 0; k < pq; k++) {
+					size_t px = ld * i + d * (j * pq + k);
+					uchar v = (buffer[px] & 0xFF) / m; // [0, 2^8-1] -> [0, 2^depth-1]
+					pp = (pp << depth) | v;
+				}
+				png_row[j] = pp;
+			}
+			png_write_row(png, png_row);
+		}
 	}
 	png_write_end(png, NULL);
 	delete [] png_row;

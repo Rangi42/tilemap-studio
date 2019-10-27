@@ -362,7 +362,8 @@ void Main_Window::image_to_tiles() {
 	// Create the tileset file
 
 	Fl_RGB_Image *timg = print_tileset(tiles, tileset, palettes, tile_palettes, max_colors);
-	Image::Result result = Image::write_image(tileset_filename, timg, make_palette);
+	Image::Result result = Image::write_image(tileset_filename, timg, make_palette ? format_uses_jasc(fmt) ?
+		Image::IMAGE_TYPE_4BPP : Image::IMAGE_TYPE_2BPP : Image::IMAGE_TYPE_RGB);
 	delete timg;
 	if (result) {
 		delete [] tiles;
