@@ -217,6 +217,12 @@
     <None Include="..\res\zoom-out.xpm">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\res\grid-dark.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\obp1-dark.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="tilemap-studio.rc">

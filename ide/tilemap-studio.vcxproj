@@ -151,11 +151,13 @@
     <None Include="..\res\blank.xpm" />
     <None Include="..\res\bold.xpm" />
     <None Include="..\res\error.xpm" />
+    <None Include="..\res\grid-dark.xpm" />
     <None Include="..\res\grid.xpm" />
     <None Include="..\res\help.html" />
     <None Include="..\res\input.xpm" />
     <None Include="..\res\load.xpm" />
     <None Include="..\res\new.xpm" />
+    <None Include="..\res\obp1-dark.xpm" />
     <None Include="..\res\obp1.xpm" />
     <None Include="..\res\open.xpm" />
     <None Include="..\res\output.xpm" />

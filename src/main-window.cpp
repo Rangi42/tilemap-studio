@@ -708,6 +708,9 @@ void Main_Window::update_recent_tilesets() {
 }
 
 void Main_Window::update_icons() {
+	bool dark = OS::is_dark_theme(OS::current_theme());
+	_grid_tb->image(dark ? GRID_DARK_ICON : GRID_ICON);
+	_obp1_tb->image(dark ? OBP1_DARK_ICON : OBP1_ICON);
 	Image::make_deimage(_save_tb);
 	Image::make_deimage(_print_tb);
 	Image::make_deimage(_reload_tb);
