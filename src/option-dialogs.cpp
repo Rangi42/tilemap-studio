@@ -14,6 +14,7 @@
 #include "tileset.h"
 #include "config.h"
 #include "icons.h"
+#include "image.h"
 
 Option_Dialog::Option_Dialog(int w, const char *t) : _width(w), _title(t), _canceled(false),
 	_dialog(NULL), _content(NULL), _ok_button(NULL), _cancel_button(NULL) {}
@@ -106,6 +107,11 @@ Tilemap_Options_Dialog::~Tilemap_Options_Dialog() {
 	delete _attrmap_chooser;
 }
 
+void Tilemap_Options_Dialog::update_icons() {
+	initialize();
+	Image::make_deimage(_attrmap);
+}
+
 void Tilemap_Options_Dialog::use_tilemap(const char *filename) {
 	initialize();
 	const char *name = fl_filename_name(filename);
@@ -149,7 +155,6 @@ void Tilemap_Options_Dialog::initialize_content() {
 	_format->callback((Fl_Callback *)format_cb, this);
 	_attrmap->callback((Fl_Callback *)attrmap_cb, this);
 	_attrmap->image(OPEN_ICON);
-	_attrmap->deimage(OPEN_DISABLED_ICON);
 	_attrmap_name->callback((Fl_Callback *)attrmap_cb, this);
 	_attrmap_chooser->title("Open Attrmap");
 	_attrmap_chooser->filter("Attrmap Files\t*.attrmap\n");

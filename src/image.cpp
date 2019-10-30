@@ -6,6 +6,7 @@
 
 #pragma warning(push, 0)
 #include <FL/Fl.H>
+#include <FL/Fl_Widget.H>
 #pragma warning(pop)
 
 #include "utils.h"
@@ -93,4 +94,21 @@ const char *Image::error_message(Result result) {
 	default:
 		return "Unspecified error.";
 	}
+}
+
+bool Image::make_deimage(Fl_Widget *wgt) {
+	if (!wgt || !wgt->image()) {
+		return false;
+	}
+	Fl_Image *deimg = wgt->image()->copy();
+	if (!deimg) {
+		return false;
+	}
+	deimg->desaturate();
+	deimg->color_average(FL_GRAY, 0.5f);
+	if (wgt->deimage()) {
+		delete wgt->deimage();
+	}
+	wgt->deimage(deimg);
+	return true;
 }

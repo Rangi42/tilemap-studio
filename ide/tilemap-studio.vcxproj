@@ -156,36 +156,23 @@
     <None Include="..\res\input.xpm" />
     <None Include="..\res\load.xpm" />
     <None Include="..\res\new.xpm" />
-    <None Include="..\res\obp1-disabled.xpm" />
     <None Include="..\res\obp1.xpm" />
     <None Include="..\res\open.xpm" />
     <None Include="..\res\output.xpm" />
-    <None Include="..\res\print-disabled.xpm" />
     <None Include="..\res\print.xpm" />
-    <None Include="..\res\priority-disabled.xpm" />
     <None Include="..\res\priority.xpm" />
     <None Include="..\res\rainbow.xpm" />
-    <None Include="..\res\redo-disabled.xpm" />
     <None Include="..\res\redo.xpm" />
-    <None Include="..\res\reformat-disabled.xpm" />
     <None Include="..\res\reformat.xpm" />
-    <None Include="..\res\reload-disabled.xpm" />
     <None Include="..\res\reload.xpm" />
-    <None Include="..\res\resize-disabled.xpm" />
     <None Include="..\res\resize.xpm" />
-    <None Include="..\res\save-disabled.xpm" />
     <None Include="..\res\save.xpm" />
     <None Include="..\res\success.xpm" />
-    <None Include="..\res\undo-disabled.xpm" />
     <None Include="..\res\undo.xpm" />
     <None Include="..\res\warning.xpm" />
-    <None Include="..\res\x-flip-disabled.xpm" />
     <None Include="..\res\x-flip.xpm" />
-    <None Include="..\res\y-flip-disabled.xpm" />
     <None Include="..\res\y-flip.xpm" />
-    <None Include="..\res\zoom-in-disabled.xpm" />
     <None Include="..\res\zoom-in.xpm" />
-    <None Include="..\res\zoom-out-disabled.xpm" />
     <None Include="..\res\zoom-out.xpm" />
   </ItemGroup>
   <ItemGroup>

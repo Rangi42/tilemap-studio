@@ -160,40 +160,22 @@
     <None Include="..\res\print.xpm">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\res\print-disabled.xpm">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\res\redo.xpm">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\res\redo-disabled.xpm">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\res\reload.xpm">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\res\reload-disabled.xpm">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\res\resize.xpm">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\res\resize-disabled.xpm">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\res\save.xpm">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\res\save-disabled.xpm">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\res\success.xpm">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\res\undo.xpm">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\res\undo-disabled.xpm">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\res\warning.xpm">
@@ -211,19 +193,10 @@
     <None Include="..\res\x-flip.xpm">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\res\x-flip-disabled.xpm">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\res\y-flip.xpm">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\res\y-flip-disabled.xpm">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\res\reformat.xpm">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\res\reformat-disabled.xpm">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\res\bold.xpm">
@@ -232,13 +205,7 @@
     <None Include="..\res\obp1.xpm">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\res\obp1-disabled.xpm">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\res\priority.xpm">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\res\priority-disabled.xpm">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\res\blank.xpm">
@@ -247,13 +214,7 @@
     <None Include="..\res\zoom-in.xpm">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\res\zoom-in-disabled.xpm">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\res\zoom-out.xpm">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\res\zoom-out-disabled.xpm">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

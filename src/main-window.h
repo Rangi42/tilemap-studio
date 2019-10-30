@@ -106,6 +106,7 @@ public:
 	}
 	inline void map_editable(bool e) { _map_editable = e; }
 	int handle(int event);
+	void update_icons(void);
 	void update_zoom(void);
 	void update_status(Tile_Tessera *tt);
 	void edit_tile(Tile_Tessera *tt);
