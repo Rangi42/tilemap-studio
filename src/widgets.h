@@ -204,6 +204,8 @@ private:
 public:
 	Workspace(int x, int y, int w, int h, const char *l = NULL);
 	inline void contents(int w, int h) { _content_w = w; _content_h = h; }
+	inline bool has_x_scroll(void) const { return !!hscrollbar.visible(); }
+	inline bool has_y_scroll(void) const { return !!scrollbar.visible(); }
 	int handle(int event);
 };
 

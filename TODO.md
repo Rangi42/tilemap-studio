@@ -2,7 +2,7 @@
 
 ## Features
 
-* **"Großer Block":** Select MxN tiles at once for placement, from the tileset or tilemap
+* **Tileset width:** Adjust the width to help with selecting rectangles of tiles
 * **Palettes:** Combine .pal files with .\*bpp files for accurate tileset rendering
 * **Auto-Load Tileset:** Guess the associated tileset for a tilemap
 * **.tileset files:** Read and export lists of images with start+offset+length values

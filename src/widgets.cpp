@@ -538,8 +538,8 @@ int Workspace::handle(int event) {
 	case FL_DRAG:
 		int dx = Fl::event_x(), dy = Fl::event_y();
 		int nx = _ox + (_cx - dx), ny = _oy + (_cy - dy);
-		int max_x = _content_w - w() + (scrollbar.visible() ? Fl::scrollbar_size() : 0) + Fl::box_dw(box());
-		int max_y = _content_h - h() + (hscrollbar.visible() ? Fl::scrollbar_size() : 0) + Fl::box_dh(box());
+		int max_x = _content_w - w() + (has_y_scroll() ? Fl::scrollbar_size() : 0) + Fl::box_dw(box());
+		int max_y = _content_h - h() + (has_x_scroll() ? Fl::scrollbar_size() : 0) + Fl::box_dh(box());
 		scroll_to(MAX(MIN(nx, max_x), 0), MAX(MIN(ny, max_y), 0));
 		return 1;
 	}

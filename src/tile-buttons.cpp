@@ -2,6 +2,7 @@
 
 #include "themes.h"
 #include "main-window.h"
+#include "tile-selection.h"
 #include "tile-buttons.h"
 
 static const Fl_Color palette_colors[MAX_NUM_PALETTES] = {
@@ -112,14 +113,18 @@ static void draw_highlight(int x, int y, int z = DEFAULT_ZOOM) {
 static void draw_selection_border(int x, int y, int z = DEFAULT_ZOOM, bool highlighted = false) {
 	int s = TILE_SIZE * z;
 	Fl_Color c = highlighted ? FL_YELLOW : FL_WHITE;
-	fl_rect(x, y, s, s, FL_BLACK);
-	fl_rect(x+1, y+1, s-2, s-2, c);
-	if (z > 5) {
-		fl_rect(x+2, y+2, s-4, s-4, c);
-		fl_rect(x+3, y+3, s-6, s-6, FL_BLACK);
+	draw_selection_border(x, y, s, s, c, z > 5);
+}
+
+void draw_selection_border(int x, int y, int w, int h, Fl_Color c, bool zoom) {
+	fl_rect(x, y, w, h, FL_BLACK);
+	fl_rect(x+1, y+1, w-2, h-2, c);
+	if (zoom) {
+		fl_rect(x+2, y+2, w-4, h-4, c);
+		fl_rect(x+3, y+3, w-6, h-6, FL_BLACK);
 	}
 	else {
-		fl_rect(x+2, y+2, s-4, s-4, FL_BLACK);
+		fl_rect(x+2, y+2, w-4, h-4, FL_BLACK);
 	}
 }
 
@@ -298,17 +303,18 @@ void Tile_Swatch::draw() {
 	_state.draw(ox, oy, DEFAULT_ZOOM, !_attributes, _attributes, (int)Config::bold_palettes(), !!active(), false);
 }
 
+static bool pushed_in_tileset = false;
+
 Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint16_t id, bool x_flip, bool y_flip,
-	bool priority, bool obp1, int palette) :
-	Tile_Thing(id, x_flip, y_flip, priority, obp1, palette), Fl_Box(x, y, TILE_SIZE_2X, TILE_SIZE_2X),
-	_row(row), _col(col) {
+	bool priority, bool obp1, int palette) : Grossable(x, y, row, col, id, x_flip, y_flip, priority, obp1, palette) {
 	user_data(NULL);
 	box(FL_NO_BOX);
 	labeltype(FL_NO_LABEL);
-	when(FL_WHEN_RELEASE);
+	type(TILE_TESSERA_TYPE);
 }
 
 void Tile_Tessera::draw() {
+	Main_Window *mw = (Main_Window *)user_data();
 	int X = x(), Y = y(), Z = Config::zoom();
 	_state.draw(X, Y, Z, true, Config::show_attributes(), (int)Config::bold_palettes(), !!active(), false);
 	if (Config::grid()) {
@@ -317,80 +323,192 @@ void Tile_Tessera::draw() {
 	if (_state.highlighted()) {
 		draw_highlight(X, Y, Z);
 	}
-	if (this == Fl::belowmouse()) {
+	if (this == Fl::belowmouse() && !mw->selection().selected_multiple()) {
 		draw_selection_border(X, Y, Z, _state.highlighted());
 	}
 }
 
 int Tile_Tessera::handle(int event) {
+	if (pushed_in_tileset && event != FL_PUSH) {
+		return 0;
+	}
 	Main_Window *mw = (Main_Window *)user_data();
+	Tile_Selection &ts = mw->selection();
 	switch (event) {
 	case FL_ENTER:
-		if (Fl::event_button1() && !Fl::pushed()) {
+		if (ts.selecting() && !ts.from_tileset()) {
+			if (Fl::event_button3()) {
+				ts.continue_selecting(this);
+				mw->redraw_overlay();
+			}
+			else {
+				ts.finish_selecting();
+			}
+		}
+		if ((Fl::event_button1() || Fl::event_button3()) && !Fl::pushed()) {
 			Fl::pushed(this);
-			do_callback();
+			if (Fl::event_button1()) {
+				do_callback();
+			}
 		}
 		mw->update_status(this);
 		redraw();
 		return 1;
 	case FL_LEAVE:
+		if (ts.selecting()) {
+			ts.continue_selecting(NULL);
+		}
 		mw->update_status(NULL);
-		// fallthrough
-	case FL_MOVE:
 		redraw();
 		return 1;
+	case FL_MOVE:
+		return 1;
 	case FL_PUSH:
+		pushed_in_tileset = false;
 		mw->map_editable(true);
 		do_callback();
 		return 1;
 	case FL_RELEASE:
 		mw->map_editable(false);
+		if (ts.selecting() && !ts.from_tileset()) {
+			ts.finish_selecting();
+		}
 		return 1;
 	case FL_DRAG:
 		if (!Fl::event_inside(x(), y(), w(), h())) {
 			Fl::pushed(NULL);
 		}
+		if (Fl::event_button3() && (!ts.selecting() || ts.from_tileset())) {
+			ts.start_selecting(this);
+			mw->redraw_overlay();
+		}
 		return 1;
 	}
-	return Fl_Box::handle(event);
+	return 0;
 }
 
-Tile_Button::Tile_Button(int x, int y, uint16_t id) : Tile_Thing(id), Fl_Radio_Button(x, y, TILE_SIZE_2X, TILE_SIZE_2X) {
+Tile_Button::Tile_Button(int x, int y, uint16_t id) : Grossable(x, y, id / TILES_PER_ROW, id % TILES_PER_ROW, id) {
 	user_data(NULL);
 	box(FL_NO_BOX);
 	labeltype(FL_NO_LABEL);
-	when(FL_WHEN_RELEASE);
+	type(FL_RADIO_BUTTON);
+}
+
+int Tile_Button::value(char v) {
+	// Based on Fl_Radio_Button::value()
+	_old_value = v ? 1 : 0;
+	clear_changed();
+	if (_value != _old_value) {
+		_value = _old_value;
+		redraw();
+		return 1;
+	}
+	return 0;
+}
+
+void Tile_Button::setonly() {
+	// Based on Fl_Radio_Button::setonly()
+	set();
+	Fl_Group *g = parent();
+	Fl_Widget * const *a = g->array();
+	for (int i = g->children(); i--;) {
+		Fl_Widget *o = *a++;
+		if (o != this && o->type() == FL_RADIO_BUTTON) {
+			((Tile_Button *)o)->clear();
+		}
+	}
 }
 
 void Tile_Button::draw() {
+	Main_Window *mw = (Main_Window *)user_data();
 	int X = x(), Y = y();
-	_state.draw(X, Y, DEFAULT_ZOOM, true, Config::show_attributes(), (int)Config::bold_palettes(), !!active(), !!value());
+	bool multi = mw->selection().selected_multiple();
+	_state.draw(X, Y, DEFAULT_ZOOM, true, Config::show_attributes(), (int)Config::bold_palettes(), !!active(), !!value() && !multi);
 	if (Config::grid()) {
 		draw_grid(X, Y);
 	}
 	if (_state.highlighted()) {
 		draw_highlight(X, Y);
 	}
-	if (value()) {
+	if (value() && !multi) {
 		draw_selection_border(X, Y, DEFAULT_ZOOM, _state.highlighted());
 	}
 }
 
 int Tile_Button::handle(int event) {
+	// Based on Fl_Button::handle()
+	char new_value;
+	if (!pushed_in_tileset && event != FL_PUSH) {
+		return 0;
+	}
+	Main_Window *mw = (Main_Window *)user_data();
+	Tile_Selection &ts = mw->selection();
 	switch (event) {
 	case FL_ENTER:
+		if (ts.selecting() && ts.from_tileset()) {
+			if (Fl::event_button1()) {
+				ts.continue_selecting(this);
+				mw->redraw_overlay();
+			}
+			else {
+				ts.finish_selecting();
+			}
+		}
+		if ((Fl::event_button1() || Fl::event_button3()) && !Fl::pushed()) {
+			Fl::pushed(this);
+		}
+		return 1;
 	case FL_LEAVE:
-	case FL_DRAG:
-		// Don't interfere with dragging onto the parent Droppable|Workpane
-		return 0;
+		if (ts.selecting()) {
+			ts.continue_selecting(NULL);
+		}
+		redraw();
+		return 1;
+	case FL_MOVE:
+		return 1;
 	case FL_PUSH:
 		// Don't change the value on right-click
 		if (Fl::event_button() == FL_RIGHT_MOUSE) {
-			do_callback();
 			return 1;
 		}
+		pushed_in_tileset = true;
+		if (Fl::event_inside(this)) {
+			new_value = 1;
+		} else {
+			clear_changed();
+			new_value = _old_value;
+		}
+		if (new_value != _value) {
+			_value = new_value;
+			set_changed();
+			redraw();
+			do_callback();
+		}
+		return 1;
+	case FL_RELEASE:
+		if (_value != _old_value) {
+			set_changed();
+			setonly();
+		}
+		if (!ts.selecting()) {
+			do_callback();
+		}
+		if (ts.selecting() && ts.from_tileset()) {
+			ts.finish_selecting();
+		}
+		return 1;
+	case FL_DRAG:
+		if (!Fl::event_inside(x(), y(), w(), h())) {
+			Fl::pushed(NULL);
+		}
+		if (Fl::event_button1() && (!ts.selecting() || !ts.from_tileset())) {
+			ts.start_selecting(this);
+			mw->redraw_overlay();
+		}
+		return 1;
+	default:
+		return 0;
 	}
-	return Fl_Radio_Button::handle(event);
 }
 
 Palette_Button::Palette_Button(int x, int y, int p) : Tile_Thing(0x000, false, false, false, false, p),

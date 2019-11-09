@@ -23,6 +23,8 @@
 
 class Tileset;
 
+void draw_selection_border(int x, int y, int w, int h, Fl_Color c, bool zoom);
+
 struct Tile_State {
 private:
 	static std::vector<Tileset> *_tilesets;
@@ -97,23 +99,40 @@ public:
 	inline void attributes(bool a) { _attributes = a; }
 };
 
-class Tile_Tessera : public Tile_Thing, public Fl_Box {
+class Grossable : public Tile_Thing, public Fl_Box {
 private:
 	size_t _row, _col;
 public:
-	Tile_Tessera(int x = 0, int y = 0, size_t row = 0, size_t col = 0, uint16_t id = 0x000,
-		bool x_flip = false, bool y_flip = false, bool priority = false, bool obp1 = false, int palette = -1);
+	inline Grossable(int x = 0, int y = 0, size_t row = 0, size_t col = 0, uint16_t id = 0x000,
+		bool x_flip = false, bool y_flip = false, bool priority = false, bool obp1 = false, int palette = -1) :
+		Tile_Thing(id, x_flip, y_flip, priority, obp1, palette), Fl_Box(x, y, TILE_SIZE_2X, TILE_SIZE_2X),
+		_row(row), _col(col) {}
 	inline size_t row(void) const { return _row; }
 	inline size_t col(void) const { return _col; }
 	inline void coords(size_t row, size_t col) { _row = row; _col = col; }
+};
+
+class Tile_Tessera : public Grossable {
+public:
+	static const uchar TILE_TESSERA_TYPE = 0x42;
+public:
+	Tile_Tessera(int x = 0, int y = 0, size_t row = 0, size_t col = 0, uint16_t id = 0x000,
+		bool x_flip = false, bool y_flip = false, bool priority = false, bool obp1 = false, int palette = -1);
 	inline void print(int dx, int dy, bool active, bool selected) { _state.print(dx, dy, active, selected); }
 	void draw(void);
 	int handle(int event);
 };
 
-class Tile_Button : public Tile_Thing, public Fl_Radio_Button {
+class Tile_Button : public Grossable {
+private:
+	char _value, _old_value;
 public:
 	Tile_Button(int x, int y, uint16_t id = 0x000);
+	inline char value(void) const { return _value; }
+	int value(char v);
+	inline int set(void) { return value(1); }
+	inline int clear(void) { return value(0); }
+	void setonly(void);
 	void draw(void);
 	int handle(int event);
 };

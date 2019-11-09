@@ -5,7 +5,7 @@
 #include <vector>
 
 #pragma warning(push, 0)
-#include <FL/Fl_Double_Window.H>
+#include <FL/Fl_Overlay_Window.H>
 #include <FL/Fl_Menu_Bar.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Native_File_Chooser.H>
@@ -14,6 +14,7 @@
 #include "utils.h"
 #include "widgets.h"
 #include "image.h"
+#include "tile-selection.h"
 #include "tile-buttons.h"
 #include "tilemap.h"
 #include "tileset.h"
@@ -23,7 +24,7 @@
 
 #define NUM_RECENT 10
 
-class Main_Window : public Fl_Double_Window {
+class Main_Window : public Fl_Overlay_Window {
 private:
 	// GUI containers
 	Fl_Menu_Bar *_menu_bar;
@@ -80,7 +81,7 @@ private:
 	std::string _recent_tilemaps[NUM_RECENT], _recent_tilesets[NUM_RECENT];
 	Tilemap _tilemap;
 	std::vector<Tileset> _tilesets;
-	Tile_Button *_selected_tile = NULL;
+	Tile_Selection _selection;
 	Palette_Button *_selected_palette = NULL;
 	// Work properties
 	bool _map_editable = false;
@@ -95,16 +96,19 @@ public:
 	~Main_Window();
 	void show(void);
 	inline bool unsaved(void) const { return _tilemap.modified(); }
-	inline uint16_t tile_id(void) const { return _selected_tile ? _selected_tile->id() : 0x000; }
+	inline uint16_t tile_id(void) const { return _selection.selected() ? _selection.id() : 0x000; }
 	inline bool x_flip(void) const { return _x_flip_tb->active() && !!_x_flip_tb->value(); }
 	inline bool y_flip(void) const { return _y_flip_tb->active() && !!_y_flip_tb->value(); }
 	inline int palette(void) const { return _selected_palette && Config::show_attributes() ? (int)_selected_palette->palette() : -1; }
 	inline bool priority(void) const { return _priority_tb->visible() && !!_priority_tb->value(); }
 	inline bool obp1(void) const { return _obp1_tb->visible() && !!_obp1_tb->value(); }
+	inline Tile_Selection &selection(void) { return _selection; }
 	inline const char *modified_filename(void) const {
 		return unsaved() ? _tilemap_file.empty() ? NEW_TILEMAP_NAME : fl_filename_name(_tilemap_file.c_str()) : "";
 	}
+	inline bool map_editable(void) const { return _map_editable; }
 	inline void map_editable(bool e) { _map_editable = e; }
+	void draw_overlay(void);
 	int handle(int event);
 	void update_icons(void);
 	void update_zoom(void);
