@@ -262,6 +262,21 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 		}
 	}
 
+	else if (fmt == Tilemap_Format::SNES_ATTRS) {
+		if (c % 2) {
+			fclose(file);
+			return (_result = TILEMAP_TOO_SHORT_ATTRS);
+		}
+		for (long i = 0; i < c; i += 2) {
+			int v = fgetc(file);
+			int a = fgetc(file);
+			v = v | ((a & 0x03) << 8);
+			bool x_flip = !!(a & 0x40), y_flip = !!(a & 0x80), priority = !!(a & 0x20);
+			int palette = (a & 0x1C) >> 2;
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip, priority, false, palette));
+		}
+	}
+
 	else if (fmt == Tilemap_Format::RBY_TOWN_MAP) {
 		for (long i = 0; i < c - 1; i++) {
 			int b = fgetc(file);
@@ -363,7 +378,7 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 
 bool Tilemap::can_format_as(Tilemap_Format fmt) {
 	int n = format_tileset_size(fmt), m = format_palettes_size(fmt);
-	bool can_flip = format_can_flip(fmt), has_metadata = format_has_metadata(fmt);
+	bool can_flip = format_can_flip(fmt), has_priority = format_has_priority(fmt), has_obp1 = format_has_obp1(fmt);
 	for (Tile_Tessera *tt : _tiles) {
 		if (tt->id() >= n) {
 			return false;
@@ -374,7 +389,10 @@ bool Tilemap::can_format_as(Tilemap_Format fmt) {
 		if ((tt->x_flip() || tt->y_flip()) && !can_flip) {
 			return false;
 		}
-		if ((tt->priority() || tt->obp1()) && !has_metadata) {
+		if (tt->priority() && !has_priority) {
+			return false;
+		}
+		if (tt->obp1() && !has_obp1) {
 			return false;
 		}
 	}
@@ -383,7 +401,7 @@ bool Tilemap::can_format_as(Tilemap_Format fmt) {
 
 void Tilemap::limit_to_format(Tilemap_Format fmt) {
 	int n = format_tileset_size(fmt), m = format_palettes_size(fmt);
-	bool can_flip = format_can_flip(fmt), has_metadata = format_has_metadata(fmt);
+	bool can_flip = format_can_flip(fmt), has_priority = format_has_priority(fmt), has_obp1 = format_has_obp1(fmt);
 	for (Tile_Tessera *tt : _tiles) {
 		if (tt->id() >= n) {
 			tt->id((uint16_t)(n - 1));
@@ -398,8 +416,10 @@ void Tilemap::limit_to_format(Tilemap_Format fmt) {
 			tt->x_flip(false);
 			tt->y_flip(false);
 		}
-		if (!has_metadata) {
+		if (!has_priority) {
 			tt->priority(false);
+		}
+		if (!has_obp1) {
 			tt->obp1(false);
 		}
 	}
@@ -469,6 +489,18 @@ bool Tilemap::write_tiles(const char *tf, const char *af, std::vector<Tile_Tesse
 			if (tt->x_flip()) { a |= 0x40; }
 			if (tt->y_flip()) { a |= 0x80; }
 			if (tt->palette() > -1) { a |= (tt->palette() << 2) & 0x0C; }
+			fputc(a, file);
+		}
+	}
+	else if (fmt == Tilemap_Format::SNES_ATTRS) {
+		for (Tile_Tessera *tt : tiles) {
+			int v = (int)(tt->id() & 0xFF);
+			fputc(v, file);
+			int a = (tt->id() >> 8) & 0x03;
+			if (tt->priority()) { a |= 0x20; }
+			if (tt->x_flip())   { a |= 0x40; }
+			if (tt->y_flip())   { a |= 0x80; }
+			if (tt->palette() > -1) { a |= (tt->palette() << 2) & 0x1C; }
 			fputc(a, file);
 		}
 	}

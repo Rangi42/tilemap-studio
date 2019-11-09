@@ -14,6 +14,7 @@ static const int tileset_sizes[NUM_FORMATS] = {
 	0x200, // GBC_ATTRMAP - 9-bit tile IDs
 	0x400, // GBA_PALETTES - 10-bit tile IDs
 	0x100, // SGB_BORDER - 8-bit tile IDs
+	0x400, // SNES_ATTRS - 10-bit tile IDs
 	0x10,  // RBY_TOWN_MAP - High nybble is reserved for run length
 	0xFF,  // GSC_TOWN_MAP - $FF is reserved for the end marker
 	0x40,  // PC_TOWN_MAP - High two bits are reserved for X/Y flip
@@ -28,6 +29,7 @@ int format_palettes_size(Tilemap_Format fmt) {
 	switch (fmt) {
 	case Tilemap_Format::GBC_ATTRS:
 	case Tilemap_Format::GBC_ATTRMAP:
+	case Tilemap_Format::SNES_ATTRS:
 		return 8;
 	case Tilemap_Format::GBA_PALETTES:
 		return 16;
@@ -45,6 +47,7 @@ int format_palette_size(Tilemap_Format fmt) {
 	case Tilemap_Format::SGB_BORDER:
 		return 4;
 	case Tilemap_Format::GBA_PALETTES:
+	case Tilemap_Format::SNES_ATTRS:
 		return 16;
 	default:
 		return 0;
@@ -57,6 +60,7 @@ static const char *format_names[NUM_FORMATS] = {
 	"GBC tilemap + attrmap",  // GBC_ATTRMAP
 	"GBA tiles + palettes",   // GBA_PALETTES
 	"SGB border",             // SGB_BORDER
+	"SNES attributes",        // SNES_ATTRS
 	"RBY Town Map",           // RBY_TOWN_MAP
 	"GSC Town Map",           // GSC_TOWN_MAP
 	"PC Town Map",            // PC_TOWN_MAP
@@ -82,6 +86,7 @@ static const char *format_extensions[NUM_FORMATS] = {
 	".tilemap",     // GBC_ATTRMAP - e.g. pokecrystal/gfx/mobile/*.{tilemap|attrmap}
 	".bin",         // GBA_PALETTES  e.g. {pokeruby|pokeemerald}/graphics/*/*.bin
 	".map",         // SGB_BORDER - e.g. pokered/gfx/{red|blue}/sgbborder.map
+	".bin",         // SNES_ATTRS
 	".rle",         // RBY_TOWN_MAP - e.g. pokered/gfx/town_map.rle
 	".bin",         // GSC_TOWN_MAP - e.g. pokecrystal/gfx/pokegear/*.bin
 	".bin",         // PC_TOWN_MAP - e.g. polishedcrystal/gfx/town_map/*.bin
@@ -130,7 +135,8 @@ Tilemap_Format guess_format(const char *filename) {
 		return Tilemap_Format::GBC_ATTRS;
 	}
 	Tilemap_Format fmt = Config::format();
-	if (fmt == Tilemap_Format::SGB_BORDER || fmt == Tilemap_Format::GBC_ATTRS || fmt == Tilemap_Format::GBA_PALETTES) {
+	if (fmt == Tilemap_Format::SGB_BORDER || fmt == Tilemap_Format::GBC_ATTRS || fmt == Tilemap_Format::GBA_PALETTES ||
+		fmt == Tilemap_Format::SNES_ATTRS) {
 		return fmt;
 	}
 	return Tilemap_Format::PLAIN;

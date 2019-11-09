@@ -935,14 +935,19 @@ void Main_Window::update_active_controls() {
 		_y_flip_tb->do_callback();
 	}
 
-	if (format_has_metadata(Config::format())) {
+	if (format_has_priority(Config::format())) {
 		_priority_tb->activate();
-		_obp1_tb->activate();
 	}
 	else {
 		_priority_tb->clear();
 		_priority_tb->deactivate();
 		_priority_tb->do_callback();
+	}
+
+	if (format_has_obp1(Config::format())) {
+		_obp1_tb->activate();
+	}
+	else {
 		_obp1_tb->clear();
 		_obp1_tb->deactivate();
 		_obp1_tb->do_callback();

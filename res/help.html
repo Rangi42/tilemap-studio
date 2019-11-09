@@ -5,7 +5,7 @@ R"(<html>
 <body>
 <h1>)" PROGRAM_NAME R"(</h1>
 <p>Copyright © )" CURRENT_YEAR " " PROGRAM_AUTHOR R"(</p>
-<p>A tilemap editor for Game Boy, Color, and Advance projects, with particular support for the <a href="https://github.com/pret">pret</a> Pokémon disassemblies like <a href="https://github.com/pret/pokered">pokered</a>, <a href="https://github.com/pret/pokecrystal">pokecrystal</a>, and <a href="https://github.com/pret/pokeemerald">pokeemerald</a>.</p>
+<p>A tilemap editor for Game Boy, GBC, GBA, or SNES projects, with particular support for the <a href="https://github.com/pret">pret</a> Pokémon disassemblies like <a href="https://github.com/pret/pokered">pokered</a>, <a href="https://github.com/pret/pokecrystal">pokecrystal</a>, and <a href="https://github.com/pret/pokeemerald">pokeemerald</a>.</p>
 <p>Originally meant as a Pokémon Town Map editor inspired by <a href="https://hax.iimarckus.org/topic/97/">GSC Town Map Editor</a> and <a href="https://i.imgur.com/70jDfdM.png">Karteneditor</a>. Later expanded to a multi-platform tilemap editor inspired by <a href="https://github.com/erandis-vol/Tilemap-Creator">Tilemap Creator</a>, <a href="https://www.pokecommunity.com/showthread.php?t=149454">NTME</a>, and <a href="https://www.pokecommunity.com/showthread.php?t=306104">NTME+</a>.
 <p>Implemented with C++ and <a href="http://www.fltk.org/">FLTK</a>. Uses some <a href="https://p.yusukekamiyamane.com/">Fugue</a> icons by Yusuke Kamiyamane.</p>
 <p>Source code is available at <a href="https://github.com/Rangi42/tilemap-studio">https://github.com/Rangi42/tilemap-studio</a>.</p>
@@ -27,6 +27,7 @@ R"(<html>
 <li><b>GBC tilemap + attrmap:</b> The tilemap file itself just has plain tile IDs, but a corresponding attrmap file has the attribute bytes.</li>
 <li><b>GBA tiles + palettes:</b> Bytes come in pairs, encoding 10-bit tile IDs (so up to 1,024 possible tiles), a choice of 16 palettes, and X/Y flip.</li>
 <li><b>SGB border:</b> Bytes come in pairs: a tile ID and an attribute byte. The only supported attribute bits are a choice of four palettes and X/Y flip. Meant for the SGB borders in pokered: gfx)" DIR_SEP "red" DIR_SEP "sgbborder.map and gfx" DIR_SEP "blue" DIR_SEP R"(sgbborder.map.</li>
+<li><b>SNES attributes:</b> Bytes come in pairs, encoding 10-bit tile IDs (so up to 1,024 possible tiles), a choice of 8 palettes, X/Y flip, and priority.</li>
 <li><b>RBY Town Map:</b> A sequence of bytes that each encode a tile ID in their high nybble and a run length in their low nybble, ended by a $00 byte. For example, $46 encodes a sequence of six tiles with ID $04. Only 16 tile IDs can be represented, $00 to $0F. Meant for the Town Map tilemap in pokered: gfx)" DIR_SEP R"(town_map.rle.</li>
 <li><b>GSC Town Map:</b> A sequence of tile IDs ended by an $FF byte (so $FF is not a valid tile ID). Meant for the Town Map tilemaps in pokecrystal: gfx)" DIR_SEP "pokegear" DIR_SEP R"(johto.bin and kanto.bin.</li>
 <li><b>PC Town Map:</b> A sequence of bytes that each encode a tile ID in their low six bits and X/Y flip attributes in their high two bits, ended by an $FF byte. Only 64 tile IDs can be represented, $00 to $3F. Meant for the Town Map tilemaps in <a href="https://github.com/Rangi42/polishedcrystal">Polished Crystal</a>: gfx)" DIR_SEP "town_map" DIR_SEP R"(*.bin.</li>
