@@ -168,7 +168,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_palettes_tab->resizable(NULL);
 	_left_tabs->resizable(_tiles_tab);
 	_left_group->begin();
-	wgt_w = MAX(text_width("Tile: $F:FF", 3), text_width("Tile: $A:AA", 3));
+	wgt_w = MAX(text_width("Map: 999x999", 3), text_width("Set: 999x999", 3));
 	int qw = wgt_w + wgt_m * 2 + wgt_h * 3;
 	int qx = gx + gw - qw;
 	_top_group = new Bounded_Group(qx, gy, qw, wgt_h);
@@ -1368,7 +1368,7 @@ void Main_Window::select_tile(uint16_t id) {
 	_selection.select_single(_tile_buttons[id]);
 	_current_tile->id(id);
 
-	char buffer[16] = {};
+	char buffer[32] = {};
 	int index = (int)id;
 	int bank = index >> 8, offset = index & 0xFF;
 	sprintf(buffer, "Tile: $%d:%02X", bank, offset);
@@ -1385,6 +1385,13 @@ void Main_Window::select_tile(uint16_t id) {
 	_current_tile->redraw();
 	_tile_heading->redraw();
 	_tiles_tab->redraw();
+}
+
+void Main_Window::select_multiple(size_t w, size_t h, bool from_tileset) {
+	char buffer[32] = {};
+	sprintf(buffer, "%s: %dx%d", from_tileset ? "Set" : "Map", w, h);
+	_tile_heading->copy_label(buffer);
+	_tile_heading->redraw();
 }
 
 void Main_Window::highlight_tile(uint16_t id) {

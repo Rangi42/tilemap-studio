@@ -372,6 +372,7 @@ int Tile_Tessera::handle(int event) {
 		mw->map_editable(false);
 		if (ts.selecting() && !ts.from_tileset()) {
 			ts.finish_selecting();
+			mw->select_multiple(ts.width(), ts.height(), false);
 		}
 		return 1;
 	case FL_DRAG:
@@ -495,6 +496,7 @@ int Tile_Button::handle(int event) {
 		}
 		if (ts.selecting() && ts.from_tileset()) {
 			ts.finish_selecting();
+			mw->select_multiple(ts.width(), ts.height(), true);
 		}
 		return 1;
 	case FL_DRAG:

@@ -123,6 +123,7 @@ public:
 	inline void load_tileset(const char *filename) { unload_tilesets_cb(NULL, this); add_tileset(filename); }
 	void add_tileset(const char *filename, int start = 0x00, int offset = 0, int length = 0);
 	void load_recent_tileset(int n);
+	void select_multiple(size_t w, size_t h, bool from_tileset);
 private:
 	void store_recent_tilemap(void);
 	void update_recent_tilemaps(void);
