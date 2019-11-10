@@ -55,16 +55,16 @@ int format_palette_size(Tilemap_Format fmt) {
 }
 
 static const char *format_names[NUM_FORMATS] = {
-	"Plain tiles",            // PLAIN
-	"GBC tiles + attributes", // GBC_ATTRS
-	"GBC tilemap + attrmap",  // GBC_ATTRMAP
-	"GBA tiles + palettes",   // GBA_PALETTES
-	"SGB border",             // SGB_BORDER
-	"SNES attributes",        // SNES_ATTRS
-	"RBY Town Map",           // RBY_TOWN_MAP
-	"GSC Town Map",           // GSC_TOWN_MAP
-	"PC Town Map",            // PC_TOWN_MAP
-	"Pok\xc3\xa9gear card",   // POKEGEAR_CARD
+	"Plain tiles",             // PLAIN
+	"GBC tiles + attributes",  // GBC_ATTRS
+	"GBC tilemap + attrmap",   // GBC_ATTRMAP
+	"GBA tiles + palettes",    // GBA_PALETTES
+	"SGB border",              // SGB_BORDER
+	"SNES tiles + attributes", // SNES_ATTRS
+	"RBY Town Map",            // RBY_TOWN_MAP
+	"GSC Town Map",            // GSC_TOWN_MAP
+	"PC Town Map",             // PC_TOWN_MAP
+	"Pok\xc3\xa9gear card",    // POKEGEAR_CARD
 };
 
 const char *format_name(Tilemap_Format fmt) {
