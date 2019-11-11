@@ -1397,7 +1397,11 @@ void Main_Window::select_tile(uint16_t id) {
 
 void Main_Window::select_multiple(size_t w, size_t h, bool from_tileset) {
 	char buffer[32] = {};
-	sprintf(buffer, "%s: %dx%d", from_tileset ? "Set" : "Map", w, h);
+#ifdef __GNUC__
+	sprintf(buffer, "%s: %zux%zu", from_tileset ? "Set" : "Map", w, h);
+#else
+	sprintf(buffer, "%s: %ux%u", from_tileset ? "Set" : "Map", (uint32_t)w, (uint32_t)h);
+#endif
 	_tile_heading->copy_label(buffer);
 	_tile_heading->redraw();
 }
