@@ -33,9 +33,9 @@ private:
 	void refresh(void);
 public:
 	inline void icon(Icon c) { _icon_type = c; }
-	inline void title(std::string &t) { _title = t; }
-	inline void subject(std::string &s) { _subject = s; }
-	inline void message(std::string &m) { _message = m; }
+	inline void title(const std::string &t) { _title = t; }
+	inline void subject(const std::string &s) { _subject = s; }
+	inline void message(const std::string &m) { _message = m; }
 	inline void width_range(int min_w, int max_w) { _min_w = min_w; _max_w = max_w; }
 	inline bool canceled(void) const { return _canceled; }
 	inline void canceled(bool c) { _canceled = c; }

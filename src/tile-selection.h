@@ -28,8 +28,8 @@ public:
 	inline size_t height(void) const {
 		return (_tile1->row() > _tile2->row() ? _tile1->row() - _tile2->row() : _tile2->row() - _tile1->row()) + 1;
 	}
-	inline void draw_selection_border_at(void) { draw_selection_border_at(_tile1); }
-	void draw_selection_border_at(Grossable *t);
+	inline void draw_selection_border_at(void) const { draw_selection_border_at(_tile1); }
+	void draw_selection_border_at(Grossable *t) const;
 };
 
 #endif

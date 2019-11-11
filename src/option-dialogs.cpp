@@ -711,7 +711,7 @@ void Image_To_Tiles_Dialog::tileset_cb(Fl_Widget *, Image_To_Tiles_Dialog *itd) 
 	else {
 		char filename[FL_PATH_MAX] = {};
 		add_dot_ext(itd->_tileset_chooser->filename(), ".png", filename);
-		itd->_tileset_filename = filename;
+		itd->_tileset_filename.assign(filename);
 	}
 	itd->update_output_names();
 	itd->update_ok_button();

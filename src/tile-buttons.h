@@ -31,7 +31,7 @@ private:
 	static Fl_PNG_Image *_palette_bgs_image;
 public:
 	inline static void tilesets(std::vector<Tileset> *ts) { _tilesets = ts; }
-	static void alpha(uchar a);
+	static void alpha(uchar alfa);
 	static void update_zoom(void);
 public:
 	uint16_t id;
@@ -65,14 +65,14 @@ public:
 	inline Tile_Thing(uint16_t id_ = 0x000, bool x_flip_ = false, bool y_flip_ = false, bool priority_ = false,
 		bool obp1_ = false, int palette_ = -1) : _state(id_, x_flip_, y_flip_, priority_, obp1_, palette_) {}
 	inline Tile_State state(void) const { return _state; }
-	inline void state(Tile_State state) { _state = state; }
+	inline void state(const Tile_State &state) { _state = state; }
 	inline void tile(Tile_State state) {
 		_state.id = state.id; _state.x_flip = state.x_flip; _state.y_flip = state.y_flip;
 	}
-	inline void attributes(Tile_State state) {
+	inline void attributes(const Tile_State &state) {
 		_state.palette = state.palette; _state.priority = state.priority; _state.obp1 = state.obp1;
 	}
-	inline void assign(Tile_State state, bool attr) {
+	inline void assign(const Tile_State &state, bool attr) {
 		if (attr) { attributes(state); } else { tile(state); }
 	}
 	inline uint16_t id(void) const { return _state.id; }

@@ -865,7 +865,7 @@ void Main_Window::update_tileset_metadata() {
 #ifdef __GNUC__
 			sprintf(buffer, "%zu files", _tilesets.size());
 #else
-			sprintf(buffer, "%u files", _tilesets.size());
+			sprintf(buffer, "%u files", (uint32_t)_tilesets.size());
 #endif
 			_tileset_name->copy_label(buffer);
 		}

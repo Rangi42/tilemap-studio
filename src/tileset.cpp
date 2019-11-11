@@ -215,7 +215,7 @@ static void convert_1bpp_row(uchar b, Hue *row) {
 	// %ABCD_EFGH -> %A %B %C %D %E %F %G %H
 	for (int i = 0; i < TILE_SIZE; i++) {
 		int j = TILE_SIZE - i - 1;
-		row[i] = b >> j & 1 ? BLACK : WHITE;
+		row[i] = (b >> j & 1) ? BLACK : WHITE;
 	}
 }
 
