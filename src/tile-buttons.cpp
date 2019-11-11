@@ -303,8 +303,6 @@ void Tile_Swatch::draw() {
 	_state.draw(ox, oy, DEFAULT_ZOOM, !_attributes, _attributes, (int)Config::bold_palettes(), !!active(), false);
 }
 
-static bool pushed_in_tileset = false;
-
 Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint16_t id, bool x_flip, bool y_flip,
 	bool priority, bool obp1, int palette) : Grossable(x, y, row, col, id, x_flip, y_flip, priority, obp1, palette) {
 	user_data(NULL);
@@ -329,9 +327,6 @@ void Tile_Tessera::draw() {
 }
 
 int Tile_Tessera::handle(int event) {
-	if (pushed_in_tileset && event != FL_PUSH) {
-		return 0;
-	}
 	Main_Window *mw = (Main_Window *)user_data();
 	Tile_Selection &ts = mw->selection();
 	switch (event) {
@@ -364,7 +359,6 @@ int Tile_Tessera::handle(int event) {
 	case FL_MOVE:
 		return 1;
 	case FL_PUSH:
-		pushed_in_tileset = false;
 		mw->map_editable(true);
 		do_callback();
 		return 1;
@@ -439,9 +433,6 @@ void Tile_Button::draw() {
 int Tile_Button::handle(int event) {
 	// Based on Fl_Button::handle()
 	char new_value;
-	if (!pushed_in_tileset && event != FL_PUSH) {
-		return 0;
-	}
 	Main_Window *mw = (Main_Window *)user_data();
 	Tile_Selection &ts = mw->selection();
 	switch (event) {
@@ -472,7 +463,6 @@ int Tile_Button::handle(int event) {
 		if (Fl::event_button() == FL_RIGHT_MOUSE) {
 			return 1;
 		}
-		pushed_in_tileset = true;
 		if (Fl::event_inside(this)) {
 			new_value = 1;
 		} else {
