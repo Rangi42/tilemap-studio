@@ -21,7 +21,7 @@ std::string Preferences::get_string(const char *key) {
 	char *value;
 	global_prefs.get(key, value, "");
 	std::string s(value ? value : "");
-	delete value;
+	free(value);
 	return s;
 }
 

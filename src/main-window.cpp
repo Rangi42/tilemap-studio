@@ -397,7 +397,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 			ml->typea = _FL_IMAGE_LABEL;
 			ml->labela = (const char *)icon;
 			ml->typeb = FL_NORMAL_LABEL;
-			ml->labelb = mi->text;
+			char *label = new char[strlen(mi->text) + 1]();
+			strcpy(label, mi->text);
+			ml->labelb = label;
 			mi->image(icon);
 			ml->label(mi);
 		}
@@ -661,7 +663,7 @@ void Main_Window::update_recent_tilemaps() {
 	for (int i = 0; i < NUM_RECENT; i++) {
 		Fl_Multi_Label *ml = (Fl_Multi_Label *)_recent_tilemap_mis[i]->label();
 		if (ml->labelb[0]) {
-			delete ml->labelb;
+			delete [] ml->labelb;
 			ml->labelb = "";
 		}
 		if (_recent_tilemaps[i].empty()) {
@@ -700,7 +702,7 @@ void Main_Window::update_recent_tilesets() {
 	for (int i = 0; i < NUM_RECENT; i++) {
 		Fl_Multi_Label *ml = (Fl_Multi_Label *)_recent_tileset_mis[i]->label();
 		if (ml->labelb && ml->labelb[0]) {
-			delete ml->labelb;
+			delete [] ml->labelb;
 			ml->labelb = "";
 		}
 		if (_recent_tilesets[i].empty()) {
