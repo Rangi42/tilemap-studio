@@ -767,6 +767,26 @@ void Main_Window::update_zoom() {
 	tilemap_width_tb_cb(NULL, this);
 }
 
+void Main_Window::update_selection_status() {
+	char buffer[32] = {};
+	if (_selection.selected_multiple()) {
+#ifdef __GNUC__
+		sprintf(buffer, "%s: %zux%zu", _selection.from_tileset() ? "Set" : "Map", _selection.width(), _selection.height());
+#else
+		sprintf(buffer, "%s: %ux%u", _selection.from_tileset() ? "Set" : "Map",
+			(uint32_t)_selection.width(), (uint32_t)_selection.height());
+#endif
+	}
+	else {
+		int index = (int)_selection.id();
+		int bank = index >> 8, offset = index & 0xFF;
+		sprintf(buffer, "Tile: $%d:%02X", bank, offset);
+		_tile_heading->copy_label(buffer);
+	}
+	_tile_heading->copy_label(buffer);
+	_tile_heading->redraw();
+}
+
 void Main_Window::update_status(Tile_Tessera *tt) {
 	if (!_tilemap.size()) {
 		_tilemap_dimensions->label("");
@@ -1394,13 +1414,7 @@ void Main_Window::select_tile(uint16_t id) {
 	_selection.select_single(_tile_buttons[id]);
 	_current_tile->id(id);
 
-	char buffer[32] = {};
-	int index = (int)id;
-	int bank = index >> 8, offset = index & 0xFF;
-	sprintf(buffer, "Tile: $%d:%02X", bank, offset);
-	_tile_heading->copy_label(buffer);
-
-	int ds = (index / TILES_PER_ROW) * TILE_SIZE_2X;
+	int ds = (int)(id / TILES_PER_ROW) * TILE_SIZE_2X;
 	if (ds >= _tiles_scroll->yposition() + _tiles_scroll->h() - TILE_SIZE_2X / 2) {
 		_tiles_scroll->scroll_to(0, ds + TILE_SIZE_2X - _tiles_scroll->h() + Fl::box_dh(_tiles_scroll->box()));
 	}
@@ -1408,20 +1422,10 @@ void Main_Window::select_tile(uint16_t id) {
 		_tiles_scroll->scroll_to(0, ds);
 	}
 
-	_current_tile->redraw();
-	_tile_heading->redraw();
-	_tiles_tab->redraw();
-}
+	update_selection_status();
 
-void Main_Window::select_multiple(size_t w, size_t h, bool from_tileset) {
-	char buffer[32] = {};
-#ifdef __GNUC__
-	sprintf(buffer, "%s: %zux%zu", from_tileset ? "Set" : "Map", w, h);
-#else
-	sprintf(buffer, "%s: %ux%u", from_tileset ? "Set" : "Map", (uint32_t)w, (uint32_t)h);
-#endif
-	_tile_heading->copy_label(buffer);
-	_tile_heading->redraw();
+	_current_tile->redraw();
+	_tiles_tab->redraw();
 }
 
 void Main_Window::highlight_tile(uint16_t id) {

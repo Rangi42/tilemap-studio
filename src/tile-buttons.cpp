@@ -336,6 +336,7 @@ int Tile_Tessera::handle(int event) {
 		if (ts.selecting() && !ts.from_tileset()) {
 			if (Fl::event_button3()) {
 				ts.continue_selecting(this);
+				mw->update_selection_status();
 				mw->redraw_overlay();
 			}
 			else {
@@ -369,7 +370,7 @@ int Tile_Tessera::handle(int event) {
 		mw->map_editable(false);
 		if (ts.selecting() && !ts.from_tileset()) {
 			ts.finish_selecting();
-			mw->select_multiple(ts.width(), ts.height(), false);
+			mw->update_selection_status();
 		}
 		return 1;
 	case FL_DRAG:
@@ -444,6 +445,7 @@ int Tile_Button::handle(int event) {
 		if (ts.selecting() && ts.from_tileset()) {
 			if (Fl::event_button1()) {
 				ts.continue_selecting(this);
+				mw->update_selection_status();
 				mw->redraw_overlay();
 			}
 			else {
@@ -491,7 +493,7 @@ int Tile_Button::handle(int event) {
 		}
 		if (ts.selecting() && ts.from_tileset()) {
 			ts.finish_selecting();
-			mw->select_multiple(ts.width(), ts.height(), true);
+			mw->update_selection_status();
 		}
 		return 1;
 	case FL_DRAG:

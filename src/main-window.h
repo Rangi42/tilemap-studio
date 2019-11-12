@@ -112,6 +112,7 @@ public:
 	int handle(int event);
 	void update_icons(void);
 	void update_zoom(void);
+	void update_selection_status(void);
 	void update_status(Tile_Tessera *tt);
 	void edit_tile(Tile_Tessera *tt);
 	void flood_fill(Tile_Tessera *tt);
@@ -123,7 +124,6 @@ public:
 	inline void load_tileset(const char *filename) { unload_tilesets_cb(NULL, this); add_tileset(filename); }
 	void add_tileset(const char *filename, int start = 0x00, int offset = 0, int length = 0);
 	void load_recent_tileset(int n);
-	void select_multiple(size_t w, size_t h, bool from_tileset);
 private:
 	void store_recent_tilemap(void);
 	void update_recent_tilemaps(void);
