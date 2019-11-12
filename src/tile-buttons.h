@@ -18,9 +18,6 @@
 #define TILE_SIZE 8
 #define TILE_SIZE_2X (TILE_SIZE * DEFAULT_ZOOM)
 
-#define PALETTES_PER_ROW 8
-#define MAX_NUM_PALETTES 16
-
 class Tileset;
 
 void draw_selection_border(int x, int y, int w, int h, Fl_Color c, bool zoom);
