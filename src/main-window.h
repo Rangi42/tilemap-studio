@@ -69,7 +69,7 @@ private:
 	Modal_Dialog *_error_dialog, *_warning_dialog, *_success_dialog, *_unsaved_dialog, *_about_dialog;
 	Tilemap_Options_Dialog *_tilemap_options_dialog;
 	New_Tilemap_Dialog *_new_tilemap_dialog;
-	Tilemap_Width_Dialog *_tilemap_width_dialog;
+	Group_Width_Dialog *_tileset_width_dialog, *_tilemap_width_dialog;
 	Resize_Dialog *_resize_dialog;
 	Reformat_Dialog *_reformat_dialog;
 	Add_Tileset_Dialog *_add_tileset_dialog;
@@ -81,6 +81,7 @@ private:
 	std::string _recent_tilemaps[NUM_RECENT], _recent_tilesets[NUM_RECENT];
 	Tilemap _tilemap;
 	std::vector<Tileset> _tilesets;
+	int _tileset_width = 16;
 	Tile_Selection _selection;
 	Palette_Button *_selected_palette = NULL;
 	// Work properties
@@ -102,7 +103,7 @@ public:
 	inline int palette(void) const { return _selected_palette && Config::show_attributes() ? (int)_selected_palette->palette() : -1; }
 	inline bool priority(void) const { return _priority_tb->visible() && !!_priority_tb->value(); }
 	inline bool obp1(void) const { return _obp1_tb->visible() && !!_obp1_tb->value(); }
-	inline int tiles_per_row(void) const { return TILES_PER_ROW; }
+	inline int tileset_width(void) const { return _tileset_width; }
 	inline Tile_Selection &selection(void) { return _selection; }
 	inline const char *modified_filename(void) const {
 		return unsaved() ? _tilemap_file.empty() ? NEW_TILEMAP_NAME : fl_filename_name(_tilemap_file.c_str()) : "";
@@ -185,6 +186,7 @@ private:
 	static void rainbow_tiles_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void bold_palettes_cb(Fl_Menu_ *m, Main_Window *mw);
 	// Tools menu
+	static void tileset_width_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void tilemap_width_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void resize_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void reformat_cb(Fl_Menu_ *m, Main_Window *mw);

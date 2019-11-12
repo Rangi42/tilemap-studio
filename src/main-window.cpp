@@ -136,8 +136,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_tiles_scroll = new Workspace(gx+5, qy+5, gw-10, gh-10);
 	int ox = _tiles_scroll->x() + Fl::box_dx(_tiles_scroll->box());
 	int oy = _tiles_scroll->y() + Fl::box_dy(_tiles_scroll->box());
+	int tw = tileset_width();
 	for (int i = 0; i < MAX_NUM_TILES; i++) {
-		int col = i % tiles_per_row(), row = i / tiles_per_row();
+		int col = i % tw, row = i / tw;
 		int tx = ox + col * TILE_SIZE_2X, ty = oy + row * TILE_SIZE_2X;
 		Tile_Button *tb = new Tile_Button(tx, ty, row, col, (uint16_t)i);
 		tb->callback((Fl_Callback *)select_tile_cb, this);
@@ -215,7 +216,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_about_dialog = new Modal_Dialog(this, "About " PROGRAM_NAME, Modal_Dialog::APP_ICON);
 	_tilemap_options_dialog = new Tilemap_Options_Dialog("Tilemap Options");
 	_new_tilemap_dialog = new New_Tilemap_Dialog("New Tilemap");
-	_tilemap_width_dialog = new Tilemap_Width_Dialog("Tilemap Width");
+	_tileset_width_dialog = new Group_Width_Dialog("Tileset Width");
+	_tilemap_width_dialog = new Group_Width_Dialog("Tilemap Width");
 	_resize_dialog = new Resize_Dialog("Resize Tilemap");
 	_reformat_dialog = new Reformat_Dialog("Reformat Tilemap");
 	_add_tileset_dialog = new Add_Tileset_Dialog("Add Tileset");
@@ -339,7 +341,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 			FL_MENU_TOGGLE | (Config::bold_palettes() ? FL_MENU_VALUE : 0)),
 		{},
 		OS_SUBMENU("&Tools"),
-		OS_MENU_ITEM("&Width...", FL_COMMAND + 'd', (Fl_Callback *)tilemap_width_cb, this, 0),
+		OS_MENU_ITEM("&Tileset Width...", FL_COMMAND + 'h', (Fl_Callback *)tileset_width_cb, this, FL_MENU_DIVIDER),
+		OS_MENU_ITEM("Tilemap &Width...", FL_COMMAND + 'd', (Fl_Callback *)tilemap_width_cb, this, 0),
 		OS_MENU_ITEM("Re&size...", FL_COMMAND + 'e', (Fl_Callback *)resize_cb, this, 0),
 		OS_MENU_ITEM("Re&format...", FL_COMMAND + 'f', (Fl_Callback *)reformat_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&Image to Tiles...", FL_COMMAND + 'x', (Fl_Callback *)image_to_tiles_cb, this, 0),
@@ -1000,6 +1003,7 @@ void Main_Window::update_active_controls() {
 	}
 
 	int n = format_tileset_size(Config::format());
+	_tiles_scroll->type((uchar)(tileset_width() > DEFAULT_TILES_PER_ROW ? Fl_Scroll::BOTH_ALWAYS : Fl_Scroll::VERTICAL_ALWAYS));
 	while (_tiles_scroll->children()) {
 		_tiles_scroll->remove(0);
 	}
@@ -1009,7 +1013,7 @@ void Main_Window::update_active_controls() {
 	_tiles_scroll->add(_tiles_scroll->scrollbar);
 	_tiles_scroll->add(_tiles_scroll->hscrollbar);
 	_tiles_scroll->init_sizes();
-	int tw = tiles_per_row() * TILE_SIZE_2X, max_th = ((n + tiles_per_row() - 1) / tiles_per_row()) * TILE_SIZE_2X;
+	int tw = tileset_width() * TILE_SIZE_2X, max_th = ((n + tileset_width() - 1) / tileset_width()) * TILE_SIZE_2X;
 	_tiles_scroll->contents(tw, max_th);
 	if (!Config::show_attributes() && tile_id() >= n) {
 		select_tile(0x000);
@@ -1022,7 +1026,8 @@ void Main_Window::update_active_controls() {
 		max_th = min_th;
 	}
 	else {
-		min_th = tw;
+		min_th = MIN(tw, DEFAULT_TILES_PER_ROW * TILE_SIZE_2X);
+		max_th += tileset_width() > DEFAULT_TILES_PER_ROW ? Fl::scrollbar_size() : 0;
 	}
 	int tdh = 12 + OS_TAB_HEIGHT;
 	_left_tabs->size_range(_left_tabs->w(), min_th + tdh, _left_tabs->w(), max_th + tdh);
@@ -1152,11 +1157,12 @@ void Main_Window::edit_tile(Tile_Tessera *tt) {
 	size_t ox = _selection.left_col(), oy = _selection.top_row();
 	if (_selection.from_tileset()) {
 		uint16_t n = (uint16_t)format_tileset_size(Config::format());
+		size_t tw = (size_t)tileset_width();
 		for (size_t iy = 0; iy < oh; iy++) {
 			size_t dy = y_flip() ? oh - iy - 1 : iy;
 			for (size_t ix = 0; ix < ow; ix++) {
 				size_t dx = x_flip() ? ow - ix - 1 : ix;
-				uint16_t id = (uint16_t)((oy + dy) * tiles_per_row() + ox + dx);
+				uint16_t id = (uint16_t)((oy + dy) * tw + ox + dx);
 				Tile_Tessera *tti = _tilemap.tile(tx+ix, ty+iy);
 				if (tti && id < n) {
 					Tile_State ts(id, x_flip(), y_flip(), priority(), obp1(), palette());
@@ -1425,7 +1431,7 @@ void Main_Window::select_tile(uint16_t id) {
 	_selection.select_single(_tile_buttons[id]);
 	_current_tile->id(id);
 
-	int ds = (int)(id / tiles_per_row()) * TILE_SIZE_2X;
+	int ds = (int)(id / tileset_width()) * TILE_SIZE_2X;
 	if (ds >= _tiles_scroll->yposition() + _tiles_scroll->h() - TILE_SIZE_2X / 2) {
 		_tiles_scroll->scroll_to(0, ds + TILE_SIZE_2X - _tiles_scroll->h() + Fl::box_dh(_tiles_scroll->box()));
 	}
@@ -1920,11 +1926,34 @@ void Main_Window::bold_palettes_tb_cb(Toolbar_Button *, Main_Window *mw) {
 	mw->redraw();
 }
 
+void Main_Window::tileset_width_cb(Fl_Menu_ *, Main_Window *mw) {
+	mw->_tileset_width_dialog->group_width((size_t)mw->_tileset_width);
+	mw->_tileset_width_dialog->show(mw);
+	if (mw->_tileset_width_dialog->canceled()) { return; }
+	int tw = (int)mw->_tileset_width_dialog->group_width();
+	if (tw == mw->_tileset_width) { return; }
+	if (mw->_selection.selected_multiple() && mw->_selection.from_tileset()) {
+		mw->select_tile(mw->_selection.id());
+	}
+	mw->_tileset_width = tw;
+	int ox = mw->_tiles_scroll->x() + Fl::box_dx(mw->_tiles_scroll->box());
+	int oy = mw->_tiles_scroll->y() + Fl::box_dy(mw->_tiles_scroll->box());
+	for (int i = 0; i < MAX_NUM_TILES; i++) {
+		int col = i % tw, row = i / tw;
+		int tx = ox + col * TILE_SIZE_2X, ty = oy + row * TILE_SIZE_2X;
+		Tile_Button *tb = mw->_tile_buttons[i];
+		tb->position(tx, ty);
+		tb->coords((size_t)row, (size_t)col);
+	}
+	mw->update_active_controls();
+	mw->redraw();
+}
+
 void Main_Window::tilemap_width_cb(Fl_Menu_ *, Main_Window *mw) {
-	mw->_tilemap_width_dialog->tilemap_width((size_t)mw->_tilemap_width->value());
+	mw->_tilemap_width_dialog->group_width((size_t)mw->_tilemap_width->value());
 	mw->_tilemap_width_dialog->show(mw);
 	if (mw->_tilemap_width_dialog->canceled()) { return; }
-	mw->_tilemap_width->default_value(mw->_tilemap_width_dialog->tilemap_width());
+	mw->_tilemap_width->default_value(mw->_tilemap_width_dialog->group_width());
 	tilemap_width_tb_cb(NULL, mw);
 }
 

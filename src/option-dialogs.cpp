@@ -414,27 +414,27 @@ int Reformat_Dialog::refresh_content(int ww, int dy) {
 	return ch;
 }
 
-Tilemap_Width_Dialog::Tilemap_Width_Dialog(const char *t) : Option_Dialog(194, t), _tilemap_width(NULL) {}
+Group_Width_Dialog::Group_Width_Dialog(const char *t) : Option_Dialog(194, t), _group_width(NULL) {}
 
-Tilemap_Width_Dialog::~Tilemap_Width_Dialog() {
-	delete _tilemap_width;
+Group_Width_Dialog::~Group_Width_Dialog() {
+	delete _group_width;
 }
 
-void Tilemap_Width_Dialog::initialize_content() {
+void Group_Width_Dialog::initialize_content() {
 	// Populate content group
-	_tilemap_width = new OS_Spinner(0, 0, 0, 0, "Width:");
+	_group_width = new OS_Spinner(0, 0, 0, 0, "Width:");
 	// Initialize content group's children
-	_tilemap_width->align(FL_ALIGN_LEFT);
-	_tilemap_width->range(1, 1024);
+	_group_width->align(FL_ALIGN_LEFT);
+	_group_width->range(1, 1024);
 }
 
-int Tilemap_Width_Dialog::refresh_content(int ww, int dy) {
+int Group_Width_Dialog::refresh_content(int ww, int dy) {
 	int wgt_h = 22, win_m = 10;
 	_content->resize(win_m, dy, ww, wgt_h);
 
-	int wgt_off = win_m + text_width(_tilemap_width->label(), 2);
+	int wgt_off = win_m + text_width(_group_width->label(), 2);
 	int wgt_w = text_width("9999", 2) + wgt_h / 2 + 4;
-	_tilemap_width->resize(wgt_off, dy, wgt_w, wgt_h);
+	_group_width->resize(wgt_off, dy, wgt_w, wgt_h);
 
 	return wgt_h;
 }

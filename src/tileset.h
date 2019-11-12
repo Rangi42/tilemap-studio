@@ -16,7 +16,7 @@
 #define PALETTES_PER_ROW 8
 #define MAX_NUM_PALETTES 16
 
-#define TILES_PER_ROW 16
+#define DEFAULT_TILES_PER_ROW 16
 #define MAX_NUM_TILES 1024
 
 struct Tile_State;

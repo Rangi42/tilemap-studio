@@ -138,14 +138,14 @@ protected:
 	int refresh_content(int ww, int dy);
 };
 
-class Tilemap_Width_Dialog : public Option_Dialog {
+class Group_Width_Dialog : public Option_Dialog {
 private:
-	OS_Spinner *_tilemap_width;
+	OS_Spinner *_group_width;
 public:
-	Tilemap_Width_Dialog(const char *t);
-	~Tilemap_Width_Dialog();
-	inline size_t tilemap_width(void) const { return (size_t)_tilemap_width->value(); }
-	inline void tilemap_width(size_t n) { initialize(); _tilemap_width->value((double)n); }
+	Group_Width_Dialog(const char *t);
+	~Group_Width_Dialog();
+	inline size_t group_width(void) const { return (size_t)_group_width->value(); }
+	inline void group_width(size_t n) { initialize(); _group_width->value((double)n); }
 protected:
 	void initialize_content(void);
 	int refresh_content(int ww, int dy);
