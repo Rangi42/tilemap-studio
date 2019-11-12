@@ -13,7 +13,7 @@ void Tile_Selection::draw_selection_border_at(Grossable *t) const {
 	int tw = t->w() * (int)width(), th = t->h() * (int)height();
 	bool zoom = !_from_tileset && Config::zoom() > 5;
 	fl_push_clip(p->x(), p->y(), pw, ph);
-	draw_selection_border(tx, ty, tw, th, FL_MAGENTA, zoom);
+	draw_selection_border(tx, ty, tw, th, FL_WHITE, zoom);
 	fl_pop_clip();
 }
 
