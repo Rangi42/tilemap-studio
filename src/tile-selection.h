@@ -6,7 +6,7 @@
 
 class Tile_Selection {
 private:
-	Grossable *_tile1, *_tile2;
+	Groupable *_tile1, *_tile2;
 	bool _dragging, _from_tileset;
 public:
 	inline Tile_Selection() : _tile1(NULL), _tile2(NULL), _dragging(false), _from_tileset(false) {}
@@ -20,7 +20,7 @@ public:
 	void select_single(Tile_Button *tb);
 	void start_selecting(Tile_Tessera *tt);
 	void start_selecting(Tile_Button *tb);
-	inline void continue_selecting(Grossable *t) { _tile2 = t; }
+	inline void continue_selecting(Groupable *t) { _tile2 = t; }
 	void finish_selecting(void);
 	inline size_t width(void) const {
 		return 1 + (_tile2 ? _tile1->col() > _tile2->col() ? _tile1->col() - _tile2->col() : _tile2->col() - _tile1->col() : 0);
@@ -29,7 +29,7 @@ public:
 		return 1 + (_tile2 ? _tile1->row() > _tile2->row() ? _tile1->row() - _tile2->row() : _tile2->row() - _tile1->row() : 0);
 	}
 	inline void draw_selection_border_at(void) const { draw_selection_border_at(_tile1); }
-	void draw_selection_border_at(Grossable *t) const;
+	void draw_selection_border_at(Groupable *t) const;
 };
 
 #endif

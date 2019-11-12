@@ -2,7 +2,7 @@
 #include "widgets.h"
 #include "config.h"
 
-void Tile_Selection::draw_selection_border_at(Grossable *t) const {
+void Tile_Selection::draw_selection_border_at(Groupable *t) const {
 	if (!_tile1 || !_tile2) { return; }
 	Workspace *p = (Workspace *)t->parent();
 	if (!p) { return; }

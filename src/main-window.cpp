@@ -1023,8 +1023,8 @@ void Main_Window::update_active_controls() {
 	else {
 		min_th = tw;
 	}
-	int tdw = 12 + Fl::scrollbar_size(), tdh = 12 + OS_TAB_HEIGHT;
-	_left_tabs->size_range(tw + tdw, min_th + tdh, tw + tdw, max_th + tdh);
+	int tdh = 12 + OS_TAB_HEIGHT;
+	_left_tabs->size_range(_left_tabs->w(), min_th + tdh, _left_tabs->w(), max_th + tdh);
 	int tdy = _tilemap_scroll->y() - _left_tabs->y();
 	_left_tabs->resize(_left_tabs->x(), _left_tabs->y(), _left_tabs->w(), _tilemap_scroll->h() + tdy);
 
@@ -1150,13 +1150,14 @@ void Main_Window::edit_tile(Tile_Tessera *tt) {
 	oh = MIN(oh, _tilemap.height() - ty);
 	size_t ox = _selection.left_col(), oy = _selection.top_row();
 	if (_selection.from_tileset()) {
+		uint16_t n = (uint16_t)format_tileset_size(Config::format());
 		for (size_t iy = 0; iy < oh; iy++) {
 			size_t dy = y_flip() ? oh - iy - 1 : iy;
 			for (size_t ix = 0; ix < ow; ix++) {
 				size_t dx = x_flip() ? ow - ix - 1 : ix;
 				uint16_t id = (uint16_t)((oy + dy) * TILES_PER_ROW + ox + dx);
 				Tile_Tessera *tti = _tilemap.tile(tx+ix, ty+iy);
-				if (tti) {
+				if (tti && id < n) {
 					Tile_State ts(id, x_flip(), y_flip(), priority(), obp1(), palette());
 					tti->assign(ts, a);
 					tti->damage(1);

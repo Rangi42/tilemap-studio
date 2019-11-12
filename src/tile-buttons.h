@@ -96,11 +96,11 @@ public:
 	inline void attributes(bool a) { _attributes = a; }
 };
 
-class Grossable : public Tile_Thing, public Fl_Box {
+class Groupable : public Tile_Thing, public Fl_Box {
 private:
 	size_t _row, _col;
 public:
-	inline Grossable(int x = 0, int y = 0, size_t row = 0, size_t col = 0, uint16_t id = 0x000,
+	inline Groupable(int x = 0, int y = 0, size_t row = 0, size_t col = 0, uint16_t id = 0x000,
 		bool x_flip = false, bool y_flip = false, bool priority = false, bool obp1 = false, int palette = -1) :
 		Tile_Thing(id, x_flip, y_flip, priority, obp1, palette), Fl_Box(x, y, TILE_SIZE_2X, TILE_SIZE_2X),
 		_row(row), _col(col) {}
@@ -109,7 +109,7 @@ public:
 	inline void coords(size_t row, size_t col) { _row = row; _col = col; }
 };
 
-class Tile_Tessera : public Grossable {
+class Tile_Tessera : public Groupable {
 public:
 	static const uchar TILE_TESSERA_TYPE = 0x42;
 public:
@@ -120,7 +120,7 @@ public:
 	int handle(int event);
 };
 
-class Tile_Button : public Grossable {
+class Tile_Button : public Groupable {
 private:
 	char _value, _old_value;
 public:

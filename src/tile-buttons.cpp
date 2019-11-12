@@ -304,7 +304,7 @@ void Tile_Swatch::draw() {
 }
 
 Tile_Tessera::Tile_Tessera(int x, int y, size_t row, size_t col, uint16_t id, bool x_flip, bool y_flip,
-	bool priority, bool obp1, int palette) : Grossable(x, y, row, col, id, x_flip, y_flip, priority, obp1, palette) {
+	bool priority, bool obp1, int palette) : Groupable(x, y, row, col, id, x_flip, y_flip, priority, obp1, palette) {
 	user_data(NULL);
 	box(FL_NO_BOX);
 	labeltype(FL_NO_LABEL);
@@ -389,7 +389,7 @@ int Tile_Tessera::handle(int event) {
 	return 0;
 }
 
-Tile_Button::Tile_Button(int x, int y, uint16_t id) : Grossable(x, y, id / TILES_PER_ROW, id % TILES_PER_ROW, id),
+Tile_Button::Tile_Button(int x, int y, uint16_t id) : Groupable(x, y, id / TILES_PER_ROW, id % TILES_PER_ROW, id),
 	_value(), _old_value() {
 	user_data(NULL);
 	box(FL_NO_BOX);
