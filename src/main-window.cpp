@@ -1220,6 +1220,8 @@ void Main_Window::open_tilemap(const char *filename, size_t width, size_t height
 	_tilemap.modified(false);
 	close_cb(NULL, this);
 
+	int n1 = format_tileset_size(Config::format());
+
 	const char *basename;
 
 	if (filename) {
@@ -1258,6 +1260,11 @@ void Main_Window::open_tilemap(const char *filename, size_t width, size_t height
 		Config::format(_new_tilemap_dialog->format());
 
 		_tilemap.new_tiles(width, height);
+	}
+
+	int n2 = format_tileset_size(Config::format());
+	if (_selection.selected_multiple() && _selection.from_tileset() && n2 < n1) {
+		select_tile(_selection.id());
 	}
 
 	size_t n = _tilemap.size();
