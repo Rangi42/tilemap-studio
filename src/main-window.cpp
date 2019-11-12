@@ -1082,6 +1082,11 @@ void Main_Window::reformat_tilemap() {
 		return;
 	}
 
+	int n1 = format_tileset_size(Config::format()), n2 = format_tileset_size(fmt);
+	if (_selection.selected_multiple() && _selection.from_tileset() && n2 < n1) {
+		select_tile(_selection.id());
+	}
+
 	Config::format(fmt);
 	_tilemap.limit_to_format(fmt);
 	_tilemap.modified(true);
