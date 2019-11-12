@@ -110,6 +110,7 @@ public:
 	inline void map_editable(bool e) { _map_editable = e; }
 	void draw_overlay(void);
 	int handle(int event);
+	void clear_flips(void);
 	void update_icons(void);
 	void update_zoom(void);
 	void update_selection_status(void);

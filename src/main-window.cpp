@@ -646,6 +646,15 @@ int Main_Window::handle(int event) {
 	}
 }
 
+void Main_Window::clear_flips() {
+	if (_selection.selected_multiple()) {
+		_x_flip_tb->clear();
+		_x_flip_tb->do_callback();
+		_y_flip_tb->clear();
+		_y_flip_tb->do_callback();
+	}
+}
+
 void Main_Window::store_recent_tilemap() {
 	std::string last(_tilemap_file);
 	for (int i = 0; i < NUM_RECENT; i++) {

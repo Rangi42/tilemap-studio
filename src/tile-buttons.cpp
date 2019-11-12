@@ -370,6 +370,9 @@ int Tile_Tessera::handle(int event) {
 		mw->map_editable(false);
 		if (ts.selecting() && !ts.from_tileset()) {
 			ts.finish_selecting();
+			if (ts.selected_multiple()) {
+				mw->clear_flips();
+			}
 			mw->update_selection_status();
 		}
 		return 1;
