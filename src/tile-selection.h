@@ -23,10 +23,10 @@ public:
 	inline void continue_selecting(Grossable *t) { _tile2 = t; }
 	void finish_selecting(void);
 	inline size_t width(void) const {
-		return (_tile1->col() > _tile2->col() ? _tile1->col() - _tile2->col() : _tile2->col() - _tile1->col()) + 1;
+		return 1 + (_tile2 ? _tile1->col() > _tile2->col() ? _tile1->col() - _tile2->col() : _tile2->col() - _tile1->col() : 0);
 	}
 	inline size_t height(void) const {
-		return (_tile1->row() > _tile2->row() ? _tile1->row() - _tile2->row() : _tile2->row() - _tile1->row()) + 1;
+		return 1 + (_tile2 ? _tile1->row() > _tile2->row() ? _tile1->row() - _tile2->row() : _tile2->row() - _tile1->row() : 0);
 	}
 	inline void draw_selection_border_at(void) const { draw_selection_border_at(_tile1); }
 	void draw_selection_border_at(Grossable *t) const;
