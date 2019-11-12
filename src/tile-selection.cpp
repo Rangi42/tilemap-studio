@@ -21,6 +21,7 @@ void Tile_Selection::select_single(Tile_Button *tb) {
 	_tile1 = tb;
 	_tile2 = NULL;
 	_dragging = false;
+	_from_tileset = true;
 	tb->setonly();
 }
 

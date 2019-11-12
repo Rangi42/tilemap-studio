@@ -326,6 +326,8 @@ void Tile_Tessera::draw() {
 	}
 }
 
+static bool pushed_in_tileset = false;
+
 int Tile_Tessera::handle(int event) {
 	Main_Window *mw = (Main_Window *)user_data();
 	Tile_Selection &ts = mw->selection();
@@ -350,7 +352,7 @@ int Tile_Tessera::handle(int event) {
 		redraw();
 		return 1;
 	case FL_LEAVE:
-		if (ts.selecting() && !ts.from_tileset()) {
+		if (ts.selecting() && !pushed_in_tileset) {
 			ts.continue_selecting(NULL);
 		}
 		mw->update_status(NULL);
@@ -359,7 +361,7 @@ int Tile_Tessera::handle(int event) {
 	case FL_MOVE:
 		return 1;
 	case FL_PUSH:
-		ts.from_tileset(false);
+		pushed_in_tileset = false;
 		mw->map_editable(true);
 		do_callback();
 		return 1;
@@ -374,7 +376,7 @@ int Tile_Tessera::handle(int event) {
 		if (!Fl::event_inside(x(), y(), w(), h())) {
 			Fl::pushed(NULL);
 		}
-		if (Fl::event_button3() && !ts.selecting() && !ts.from_tileset()) {
+		if (Fl::event_button3() && !ts.selecting() && !pushed_in_tileset) {
 			ts.start_selecting(this);
 			mw->redraw_overlay();
 		}
@@ -453,7 +455,7 @@ int Tile_Button::handle(int event) {
 		}
 		return 1;
 	case FL_LEAVE:
-		if (ts.selecting() && ts.from_tileset()) {
+		if (ts.selecting() && pushed_in_tileset) {
 			ts.continue_selecting(NULL);
 		}
 		redraw();
@@ -461,7 +463,7 @@ int Tile_Button::handle(int event) {
 	case FL_MOVE:
 		return 1;
 	case FL_PUSH:
-		ts.from_tileset(true);
+		pushed_in_tileset = true;
 		// Don't change the value on right-click
 		if (Fl::event_button() == FL_RIGHT_MOUSE) {
 			return 1;
@@ -496,7 +498,7 @@ int Tile_Button::handle(int event) {
 		if (!Fl::event_inside(x(), y(), w(), h())) {
 			Fl::pushed(NULL);
 		}
-		if (Fl::event_button1() && !ts.selecting() && ts.from_tileset()) {
+		if (Fl::event_button1() && !ts.selecting() && pushed_in_tileset) {
 			ts.start_selecting(this);
 			mw->redraw_overlay();
 		}
