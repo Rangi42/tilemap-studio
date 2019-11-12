@@ -102,6 +102,7 @@ public:
 	inline int palette(void) const { return _selected_palette && Config::show_attributes() ? (int)_selected_palette->palette() : -1; }
 	inline bool priority(void) const { return _priority_tb->visible() && !!_priority_tb->value(); }
 	inline bool obp1(void) const { return _obp1_tb->visible() && !!_obp1_tb->value(); }
+	inline int tiles_per_row(void) const { return TILES_PER_ROW; }
 	inline Tile_Selection &selection(void) { return _selection; }
 	inline const char *modified_filename(void) const {
 		return unsaved() ? _tilemap_file.empty() ? NEW_TILEMAP_NAME : fl_filename_name(_tilemap_file.c_str()) : "";

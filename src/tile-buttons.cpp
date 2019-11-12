@@ -389,7 +389,7 @@ int Tile_Tessera::handle(int event) {
 	return 0;
 }
 
-Tile_Button::Tile_Button(int x, int y, uint16_t id) : Groupable(x, y, id / TILES_PER_ROW, id % TILES_PER_ROW, id),
+Tile_Button::Tile_Button(int x, int y, size_t row, size_t col, uint16_t id) : Groupable(x, y, row, col, id),
 	_value(), _old_value() {
 	user_data(NULL);
 	box(FL_NO_BOX);

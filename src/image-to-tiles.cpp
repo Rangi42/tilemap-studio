@@ -60,9 +60,9 @@ static Fl_Color indexed_colors[16] = {
 };
 
 static Fl_RGB_Image *print_tileset(const Tile *tiles, std::vector<size_t> &tileset,
-	const std::vector<std::vector<Fl_Color>> &palettes, const std::vector<int> &tile_palettes, size_t nc) {
+	const std::vector<std::vector<Fl_Color>> &palettes, const std::vector<int> &tile_palettes, size_t nc, int rs) {
 	int nt = (int)tileset.size();
-	int tw = MIN(nt, TILES_PER_ROW);
+	int tw = MIN(nt, rs);
 	int th = (nt + tw - 1) / tw;
 
 	size_t np = tile_palettes.size();
@@ -361,7 +361,7 @@ void Main_Window::image_to_tiles() {
 
 	// Create the tileset file
 
-	Fl_RGB_Image *timg = print_tileset(tiles, tileset, palettes, tile_palettes, max_colors);
+	Fl_RGB_Image *timg = print_tileset(tiles, tileset, palettes, tile_palettes, max_colors, tiles_per_row());
 	Image::Result result = Image::write_image(tileset_filename, timg, make_palette ? format_uses_jasc(fmt) ?
 		Image::IMAGE_TYPE_4BPP : Image::IMAGE_TYPE_2BPP : Image::IMAGE_TYPE_RGB);
 	delete timg;

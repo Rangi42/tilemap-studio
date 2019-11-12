@@ -124,7 +124,7 @@ class Tile_Button : public Groupable {
 private:
 	char _value, _old_value;
 public:
-	Tile_Button(int x, int y, uint16_t id = 0x000);
+	Tile_Button(int x, int y, size_t row = 0, size_t col = 0, uint16_t id = 0x000);
 	inline char value(void) const { return _value; }
 	int value(char v);
 	inline int set(void) { return value(1); }
