@@ -622,7 +622,9 @@ void Main_Window::show() {
 
 void Main_Window::draw_overlay() {
 	if (!visible()) { return; }
-	_selection.draw_selection_border_at();
+	if (!_selection.from_tileset() || !Config::show_attributes()) {
+		_selection.draw_selection_border_at();
+	}
 	if (!_selection.selecting()) {
 		Fl_Widget *wgt = Fl::belowmouse();
 		if (wgt && wgt->type() == Tile_Tessera::TILE_TESSERA_TYPE) {
