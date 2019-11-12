@@ -397,9 +397,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 			ml->typea = _FL_IMAGE_LABEL;
 			ml->labela = (const char *)icon;
 			ml->typeb = FL_NORMAL_LABEL;
-			char *label = new char[strlen(mi->text) + 1]();
-			strcpy(label, mi->text);
-			ml->labelb = label;
+			ml->labelb = mi->text;
 			mi->image(icon);
 			ml->label(mi);
 		}
