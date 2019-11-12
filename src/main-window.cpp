@@ -1122,8 +1122,10 @@ void Main_Window::edit_tile(Tile_Tessera *tt) {
 	size_t ox = _selection.left_col(), oy = _selection.top_row();
 	if (_selection.from_tileset()) {
 		for (size_t iy = 0; iy < oh; iy++) {
+			size_t dy = y_flip() ? oh - iy - 1 : iy;
 			for (size_t ix = 0; ix < ow; ix++) {
-				uint16_t id = (uint16_t)((oy + (y_flip() ? oh - iy - 1 : iy)) * TILES_PER_ROW + ox + (x_flip() ? ow - ix - 1 : ix));
+				size_t dx = x_flip() ? ow - ix - 1 : ix;
+				uint16_t id = (uint16_t)((oy + dy) * TILES_PER_ROW + ox + dx);
 				Tile_Tessera *tti = _tilemap.tile(tx+ix, ty+iy);
 				if (tti) {
 					Tile_State ts(id, x_flip(), y_flip(), priority(), obp1(), palette());
@@ -1135,11 +1137,13 @@ void Main_Window::edit_tile(Tile_Tessera *tt) {
 	}
 	else {
 		for (size_t iy = 0; iy < oh; iy++) {
+			size_t dy = y_flip() ? oh - iy - 1 : iy;
 			for (size_t ix = 0; ix < ow; ix++) {
-				Tile_Tessera *gi = _tilemap.tile(ox+ix, oy+iy);
+				size_t dx = x_flip() ? ow - ix - 1 : ix;
+				Tile_Tessera *gi = _tilemap.tile(ox+dx, oy+dy);
 				Tile_Tessera *tti = _tilemap.tile(tx+ix, ty+iy);
 				if (gi && tti) {
-					Tile_State ts(gi->id(), gi->x_flip(), gi->y_flip(), gi->priority(), gi->obp1(), gi->palette());
+					Tile_State ts(gi->id(), x_flip() != gi->x_flip(), y_flip() != gi->y_flip(), gi->priority(), gi->obp1(), gi->palette());
 					tti->assign(ts, a);
 					tti->damage(1);
 				}
