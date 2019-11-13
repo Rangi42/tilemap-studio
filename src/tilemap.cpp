@@ -83,6 +83,14 @@ void Tilemap::resize(size_t w, size_t h, Resize_Dialog::Hor_Align ha, Resize_Dia
 		}
 	}
 
+	if (format_has_palettes(Config::format())) {
+		for (size_t i = 0; i < n; i++) {
+			if (tiles[i]->palette() == -1) {
+				tiles[i]->palette(0);
+			}
+		}
+	}
+
 	clear();
 	_tiles.swap(tiles);
 	width(w);
