@@ -1173,14 +1173,18 @@ void Main_Window::edit_tile(Tile_Tessera *tt) {
 		}
 	}
 	else {
+		const Tilemap_State &tms = _tilemap.last_state();
+		size_t n = _tilemap.size();
+		size_t tw = _tilemap.width();
 		for (size_t iy = 0; iy < oh; iy++) {
 			size_t dy = y_flip() ? oh - iy - 1 : iy;
 			for (size_t ix = 0; ix < ow; ix++) {
 				size_t dx = x_flip() ? ow - ix - 1 : ix;
-				Tile_Tessera *gi = _tilemap.tile(ox+dx, oy+dy);
+				size_t index = (oy + dy) * tw + ox + dx;
 				Tile_Tessera *tti = _tilemap.tile(tx+ix, ty+iy);
-				if (gi && tti) {
-					Tile_State ts(gi->id(), x_flip() != gi->x_flip(), y_flip() != gi->y_flip(), gi->priority(), gi->obp1(), gi->palette());
+				if (tti && index < n) {
+					const Tile_State &ps = tms.state(index);
+					Tile_State ts(ps.id, x_flip() != ps.x_flip, y_flip() != ps.y_flip, ps.priority, ps.obp1, ps.palette);
 					tti->assign(ts, a);
 					tti->damage(1);
 				}

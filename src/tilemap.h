@@ -11,13 +11,14 @@
 
 #define MAX_HISTORY_SIZE 100
 
+struct Tilemap_State {
+	std::vector<Tile_State> states;
+	Tilemap_State() : states() {}
+	Tilemap_State(size_t n) : states(n) {}
+	inline const Tile_State &state(size_t i) const { return states[i]; }
+};
+
 class Tilemap {
-protected:
-	struct Tilemap_State {
-		std::vector<Tile_State> states;
-		Tilemap_State() : states() {}
-		Tilemap_State(size_t n) : states(n) {}
-	};
 public:
 	enum Result { TILEMAP_OK, TILEMAP_BAD_FILE, TILEMAP_EMPTY, TILEMAP_TOO_SHORT_FF, TILEMAP_TOO_LONG_FF,
 		TILEMAP_TOO_SHORT_00, TILEMAP_TOO_LONG_00, TILEMAP_TOO_SHORT_RLE, TILEMAP_TOO_SHORT_ATTRS, TILEMAP_NULL,
@@ -45,6 +46,7 @@ public:
 	inline void modified(bool m) { _modified = m; }
 	inline bool can_undo(void) const { return !_history.empty(); }
 	inline bool can_redo(void) const { return !_future.empty(); }
+	inline const Tilemap_State &last_state(void) const { return _history.back(); }
 	void clear();
 	void reposition_tiles(int x, int y);
 	void remember(void);
