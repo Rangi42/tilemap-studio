@@ -593,7 +593,11 @@ void Image_To_Tiles_Dialog::update_ok_button() {
 
 void Image_To_Tiles_Dialog::initialize_content() {
 	// Populate content group
+	_input_heading = new Label(0, 0, 0, 0, "Input:");
+	_input_spacer = new Spacer(0, 0, 0, 0);
 	_image_heading = new Label(0, 0, 0, 0, "Image:");
+	_output_heading = new Label(0, 0, 0, 0, "Output:");
+	_output_spacer = new Spacer(0, 0, 0, 0);
 	_tileset_heading = new Label(0, 0, 0, 0, "Tileset:");
 	_image = new Toolbar_Button(0, 0, 0, 0);
 	_tileset = new Toolbar_Button(0, 0, 0, 0);
@@ -634,25 +638,42 @@ void Image_To_Tiles_Dialog::initialize_content() {
 
 int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	int wgt_h = 22, win_m = 10, wgt_m = 4;
-	int ch = (wgt_h + wgt_m) * 5 + wgt_h;
+	int ch = (wgt_h + wgt_m) * 7 + wgt_h;
 	_content->resize(win_m, dy, ww, ch);
 
-	int wgt_w = MAX(text_width(_image_heading->label(), 4), text_width(_tileset_heading->label(), 4));
+	int wgt_w = text_width(_input_heading->label(), 4);
 	int wgt_off = win_m;
 
-	_image_heading->resize(wgt_off, dy, wgt_w, wgt_h);
+	_input_heading->resize(wgt_off, dy, wgt_w, wgt_h);
+	wgt_off += _input_heading->w();
+	_input_spacer->resize(wgt_off, dy+wgt_h/2-1, ww-wgt_w, 2);
+	dy += wgt_h + wgt_m;
+
+	int wgt_w2 = MAX(text_width(_image_heading->label(), 4), text_width(_tileset_heading->label(), 4));
+	wgt_off = win_m;
+
+	_image_heading->resize(wgt_off, dy, wgt_w2, wgt_h);
 	wgt_off += _image_heading->w();
 	_image->resize(wgt_off, dy, wgt_h, wgt_h);
 	wgt_off += _image->w();
-	_image_name->resize(wgt_off, dy, ww-wgt_w-wgt_h, wgt_h);
+	_image_name->resize(wgt_off, dy, ww-wgt_w2-wgt_h, wgt_h);
+	dy += wgt_h + wgt_m;
+
+	wgt_w = text_width(_output_heading->label(), 4);
+	wgt_off = win_m;
+
+	_output_heading->resize(wgt_off, dy, wgt_w, wgt_h);
+	wgt_off += _output_heading->w();
+	_output_spacer->resize(wgt_off, dy+wgt_h/2-1, ww-wgt_w, 2);
 	dy += wgt_h + wgt_m;
 
 	wgt_off = win_m;
-	_tileset_heading->resize(wgt_off, dy, wgt_w, wgt_h);
+
+	_tileset_heading->resize(wgt_off, dy, wgt_w2, wgt_h);
 	wgt_off += _tileset_heading->w();
 	_tileset->resize(wgt_off, dy, wgt_h, wgt_h);
 	wgt_off += _tileset->w();
-	_tileset_name->resize(wgt_off, dy, ww-wgt_w-wgt_h, wgt_h);
+	_tileset_name->resize(wgt_off, dy, ww-wgt_w2-wgt_h, wgt_h);
 	dy += wgt_h + wgt_m;
 
 	wgt_off = win_m + text_width(_format->label(), 3);

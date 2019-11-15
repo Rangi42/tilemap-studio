@@ -173,7 +173,8 @@ protected:
 
 class Image_To_Tiles_Dialog : public Option_Dialog {
 private:
-	Label *_image_heading, *_tileset_heading;
+	Label *_input_heading, *_image_heading, *_output_heading, *_tileset_heading;
+	Spacer *_input_spacer, *_output_spacer;
 	Toolbar_Button *_image, *_tileset;
 	Label_Button *_image_name, *_tileset_name;
 	Dropdown *_format;
