@@ -2816,7 +2816,7 @@ void OS::use_high_contrast_theme() {
 #ifdef _WIN32
 OS::Theme OS::_current_theme = is_classic_windows() ? Theme::CLASSIC : is_modern_windows() ? Theme::METRO : Theme::AERO;
 #else
-OS::Theme OS::_current_theme = GREYBIRD;
+OS::Theme OS::_current_theme = Theme::GREYBIRD;
 #endif
 
 bool OS::_is_consolas = false;
