@@ -14,12 +14,12 @@
 
 Image::Result Image::write_image(const char *f, Fl_RGB_Image *img, Type type) {
 	FILE *file = fl_fopen(f, "wb");
-	if (!file) { return IMAGE_BAD_FILE; }
+	if (!file) { return Result::IMAGE_BAD_FILE; }
 	// Create the necessary PNG structures
 	png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-	if (!png) { fclose(file); return IMAGE_BAD_PNG; }
+	if (!png) { fclose(file); return Result::IMAGE_BAD_PNG; }
 	png_infop info = png_create_info_struct(png);
-	if (!info) { fclose(file); return IMAGE_BAD_PNG; }
+	if (!info) { fclose(file); return Result::IMAGE_BAD_PNG; }
 	png_init_io(png, file);
 	// Set compression options
 	png_set_compression_level(png, Z_BEST_COMPRESSION);
@@ -30,8 +30,8 @@ Image::Result Image::write_image(const char *f, Fl_RGB_Image *img, Type type) {
 	png_set_compression_buffer_size(png, 8192);
 	// Write the PNG IHDR chunk
 	size_t w = img->w(), h = img->h();
-	int depth = type == IMAGE_TYPE_2BPP ? 2 : type == IMAGE_TYPE_4BPP ? 4 : 8;
-	int color_type = type == IMAGE_TYPE_RGB ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_GRAY;
+	int depth = type == Type::IMAGE_TYPE_2BPP ? 2 : type == Type::IMAGE_TYPE_4BPP ? 4 : 8;
+	int color_type = type == Type::IMAGE_TYPE_RGB ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_GRAY;
 	png_set_IHDR(png, info, (png_uint_32)w, (png_uint_32)h, depth, color_type,
 		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 	// Write the other PNG header chunks
@@ -43,7 +43,7 @@ Image::Result Image::write_image(const char *f, Fl_RGB_Image *img, Type type) {
 	if (!ld) { ld = (int)w * d; }
 	int pd = d > 1;
 	png_bytep png_row = NULL;
-	if (type == IMAGE_TYPE_RGB) {
+	if (type == Type::IMAGE_TYPE_RGB) {
 		size_t rs = w * NUM_CHANNELS;
 		png_row = new png_byte[rs];
 		for (size_t i = 0; i < h; i++) {
@@ -80,16 +80,16 @@ Image::Result Image::write_image(const char *f, Fl_RGB_Image *img, Type type) {
 	png_destroy_write_struct(&png, &info);
 	png_free_data(png, info, PNG_FREE_ALL, -1);
 	fclose(file);
-	return IMAGE_OK;
+	return Result::IMAGE_OK;
 }
 
 const char *Image::error_message(Result result) {
 	switch (result) {
-	case IMAGE_OK:
+	case Result::IMAGE_OK:
 		return "OK.";
-	case IMAGE_BAD_FILE:
+	case Result::IMAGE_BAD_FILE:
 		return "Cannot open file.";
-	case IMAGE_BAD_PNG:
+	case Result::IMAGE_BAD_PNG:
 		return "Cannot write PNG data.";
 	default:
 		return "Unspecified error.";

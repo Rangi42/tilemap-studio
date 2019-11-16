@@ -23,7 +23,7 @@ struct Tile_State;
 
 class Tileset {
 public:
-	enum Result { TILESET_OK, TILESET_BAD_FILE, TILESET_BAD_EXT, TILESET_BAD_DIMS,
+	enum class Result { TILESET_OK, TILESET_BAD_FILE, TILESET_BAD_EXT, TILESET_BAD_DIMS,
 		TILESET_TOO_SHORT, TILESET_TOO_LARGE, TILESET_BAD_CMD, TILESET_NULL };
 private:
 	Fl_RGB_Image *_1x_image, *_2x_image, *_zoomed_image;

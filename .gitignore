@@ -14,7 +14,12 @@ lib/*
 !lib/fltk-1.3.5-mod.zip
 
 # no IDE files
+.vs
 *.sdf
 *.opensdf
 *.suo
 *.aps
+*.vcxproj.user
+
+# no static analysis files
+*.cppcheck

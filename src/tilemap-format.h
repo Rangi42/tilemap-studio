@@ -17,7 +17,7 @@
 
 #define NUM_FORMATS 10
 
-enum Tilemap_Format { PLAIN, GBC_ATTRS, GBC_ATTRMAP, GBA_PALETTES, SGB_BORDER, SNES_ATTRS,
+enum class Tilemap_Format { PLAIN, GBC_ATTRS, GBC_ATTRMAP, GBA_PALETTES, SGB_BORDER, SNES_ATTRS,
 	RBY_TOWN_MAP, GSC_TOWN_MAP, PC_TOWN_MAP, POKEGEAR_CARD };
 
 inline bool format_has_landmarks(Tilemap_Format fmt) {

@@ -8,7 +8,7 @@
 #include "tileset.h"
 #include "config.h"
 
-Tilemap::Tilemap() : _tiles(), _width(0), _result(TILEMAP_NULL), _modified(false), _history(), _future() {}
+Tilemap::Tilemap() : _tiles(), _width(0), _result(Result::TILEMAP_NULL), _modified(false), _history(), _future() {}
 
 Tilemap::~Tilemap() {
 	clear();
@@ -54,7 +54,7 @@ void Tilemap::resize(size_t w, size_t h, Resize_Dialog::Hor_Align ha, Resize_Dia
 	std::vector<Tile_Tessera *> tiles;
 	tiles.reserve(n);
 	int mx = MAX(px, 0), my = MAX(py, 0), mw = MIN(w, width() + px), mh = MIN(h, height() + py);
-	size_t i = 0;
+	size_t t = 0;
 	for (int y = 0; y < py; y++) {
 		for (int x = 0; x < (int)w; x++) {
 			tiles.emplace_back(new Tile_Tessera());
@@ -65,8 +65,8 @@ void Tilemap::resize(size_t w, size_t h, Resize_Dialog::Hor_Align ha, Resize_Dia
 			tiles.emplace_back(new Tile_Tessera());
 		}
 		for (int x = mx; x < mw; x++) {
-			if (i < size()) {
-				i++;
+			if (t < size()) {
+				t++;
 				tiles.emplace_back(tile(x - px, y - py));
 			}
 			else {
@@ -100,7 +100,7 @@ void Tilemap::resize(size_t w, size_t h, Resize_Dialog::Hor_Align ha, Resize_Dia
 void Tilemap::clear() {
 	_tiles.clear();
 	_width = 0;
-	_result = TILEMAP_NULL;
+	_result = Result::TILEMAP_NULL;
 	_modified = false;
 	_history.clear();
 	_future.clear();
@@ -180,16 +180,16 @@ void Tilemap::new_tiles(size_t w, size_t h) {
 
 Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 	FILE *file = fl_fopen(tf, "rb");
-	if (file == NULL) { return (_result = TILEMAP_BAD_FILE); }
+	if (file == NULL) { return (_result = Result::TILEMAP_BAD_FILE); }
 
 	fseek(file, 0, SEEK_END);
 	long c = ftell(file);
 	rewind(file);
-	if (c < 0) { fclose(file); return (_result = TILEMAP_BAD_FILE); }
-	if (c == 0) { fclose(file); return (_result = TILEMAP_EMPTY); }
+	if (c < 0) { fclose(file); return (_result = Result::TILEMAP_BAD_FILE); }
+	if (c == 0) { fclose(file); return (_result = Result::TILEMAP_EMPTY); }
 
 	std::vector<Tile_Tessera *> tiles;
-	int fmt = Config::format();
+	Tilemap_Format fmt = Config::format();
 
 	if (fmt == Tilemap_Format::PLAIN) {
 		for (long i = 0; i < c; i++) {
@@ -201,7 +201,7 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 	else if (fmt == Tilemap_Format::GBC_ATTRS) {
 		if (c % 2) {
 			fclose(file);
-			return (_result = TILEMAP_TOO_SHORT_ATTRS);
+			return (_result = Result::TILEMAP_TOO_SHORT_ATTRS);
 		}
 		for (long i = 0; i < c; i += 2) {
 			int v = fgetc(file);
@@ -217,7 +217,7 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 		FILE *attr_file = fl_fopen(af, "rb");
 		if (attr_file == NULL) {
 			fclose(file);
-			return (_result = ATTRMAP_BAD_FILE);
+			return (_result = Result::ATTRMAP_BAD_FILE);
 		}
 
 		fseek(attr_file, 0, SEEK_END);
@@ -226,7 +226,7 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 		if (ac != c) {
 			fclose(attr_file);
 			fclose(file);
-			return (_result = ac < 0 ? ATTRMAP_BAD_FILE : ac < c ? ATTRMAP_TOO_SHORT : ATTRMAP_TOO_LONG);
+			return (_result = ac < 0 ? Result::ATTRMAP_BAD_FILE : ac < c ? Result::ATTRMAP_TOO_SHORT : Result::ATTRMAP_TOO_LONG);
 		}
 
 		for (long i = 0; i < c; i++) {
@@ -244,7 +244,7 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 	else if (fmt == Tilemap_Format::GBA_PALETTES) {
 		if (c % 2) {
 			fclose(file);
-			return (_result = TILEMAP_TOO_SHORT_ATTRS);
+			return (_result = Result::TILEMAP_TOO_SHORT_ATTRS);
 		}
 		for (long i = 0; i < c; i += 2) {
 			int v = fgetc(file);
@@ -259,7 +259,7 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 	else if (fmt == Tilemap_Format::SGB_BORDER) {
 		if (c % 2) {
 			fclose(file);
-			return (_result = TILEMAP_TOO_SHORT_ATTRS);
+			return (_result = Result::TILEMAP_TOO_SHORT_ATTRS);
 		}
 		for (long i = 0; i < c; i += 2) {
 			int v = fgetc(file);
@@ -273,7 +273,7 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 	else if (fmt == Tilemap_Format::SNES_ATTRS) {
 		if (c % 2) {
 			fclose(file);
-			return (_result = TILEMAP_TOO_SHORT_ATTRS);
+			return (_result = Result::TILEMAP_TOO_SHORT_ATTRS);
 		}
 		for (long i = 0; i < c; i += 2) {
 			int v = fgetc(file);
@@ -291,7 +291,7 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 			if (b == 0x00) {
 				fclose(file);
 				for (Tile_Tessera *tt : tiles) { delete tt; }
-				return (_result = TILEMAP_TOO_LONG_00);
+				return (_result = Result::TILEMAP_TOO_LONG_00);
 			}
 			int v = (b & 0xF0) >> 4, r = b & 0x0F;
 			for (int j = 0; j < r; j++) {
@@ -302,7 +302,7 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 		if (b != 0x00) {
 			fclose(file);
 			for (Tile_Tessera *tt : tiles) { delete tt; }
-			return (_result = TILEMAP_TOO_SHORT_00);
+			return (_result = Result::TILEMAP_TOO_SHORT_00);
 		}
 	}
 
@@ -312,7 +312,7 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 			if (b == 0xFF) {
 				fclose(file);
 				for (Tile_Tessera *tt : tiles) { delete tt; }
-				return (_result = TILEMAP_TOO_LONG_FF);
+				return (_result = Result::TILEMAP_TOO_LONG_FF);
 			}
 			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)b));
 		}
@@ -320,7 +320,7 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 		if (b != 0xFF) {
 			fclose(file);
 			for (Tile_Tessera *tt : tiles) { delete tt; }
-			return (_result = TILEMAP_TOO_SHORT_FF);
+			return (_result = Result::TILEMAP_TOO_SHORT_FF);
 		}
 	}
 
@@ -330,7 +330,7 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 			if (b == 0xFF) {
 				fclose(file);
 				for (Tile_Tessera *tt : tiles) { delete tt; }
-				return (_result = TILEMAP_TOO_LONG_FF);
+				return (_result = Result::TILEMAP_TOO_LONG_FF);
 			}
 			bool x_flip = !!(b & 0x40), y_flip = !!(b & 0x80);
 			int v = b & 0x3F;
@@ -340,27 +340,27 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 		if (b != 0xFF) {
 			fclose(file);
 			for (Tile_Tessera *tt : tiles) { delete tt; }
-			return (_result = TILEMAP_TOO_SHORT_FF);
+			return (_result = Result::TILEMAP_TOO_SHORT_FF);
 		}
 	}
 
 	else if (fmt == Tilemap_Format::POKEGEAR_CARD) {
 		if (!(c % 2)) {
 			fclose(file);
-			return (_result = TILEMAP_TOO_SHORT_FF);
+			return (_result = Result::TILEMAP_TOO_SHORT_FF);
 		}
 		for (long i = 0; i < c - 1; i += 2) {
 			int v = fgetc(file);
 			if (v == 0xFF) {
 				fclose(file);
 				for (Tile_Tessera *tt : tiles) { delete tt; }
-				return (_result = TILEMAP_TOO_LONG_FF);
+				return (_result = Result::TILEMAP_TOO_LONG_FF);
 			}
 			int r = fgetc(file);
 			if (r == 0xFF) {
 				fclose(file);
 				for (Tile_Tessera *tt : tiles) { delete tt; }
-				return (_result = TILEMAP_TOO_LONG_FF);
+				return (_result = Result::TILEMAP_TOO_LONG_FF);
 			}
 			for (int j = 0; j < r; j++) {
 				tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v));
@@ -370,18 +370,18 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 		if (b != 0xFF) {
 			fclose(file);
 			for (Tile_Tessera *tt : tiles) { delete tt; }
-			return (_result = TILEMAP_TOO_SHORT_FF);
+			return (_result = Result::TILEMAP_TOO_SHORT_FF);
 		}
 	}
 
 	fclose(file);
 
 	_tiles.swap(tiles);
-	if (size() == 0) { return (_result = TILEMAP_EMPTY); }
+	if (size() == 0) { return (_result = Result::TILEMAP_EMPTY); }
 
 	guess_width();
 
-	return (_result = TILEMAP_OK);
+	return (_result = Result::TILEMAP_OK);
 }
 
 bool Tilemap::can_format_as(Tilemap_Format fmt) {
@@ -588,30 +588,30 @@ void Tilemap::guess_width() {
 
 const char *Tilemap::error_message(Result result) {
 	switch (result) {
-	case TILEMAP_OK:
+	case Result::TILEMAP_OK:
 		return "OK.";
-	case TILEMAP_BAD_FILE:
-	case ATTRMAP_BAD_FILE:
+	case Result::TILEMAP_BAD_FILE:
+	case Result::ATTRMAP_BAD_FILE:
 		return "Cannot open file.";
-	case TILEMAP_EMPTY:
+	case Result::TILEMAP_EMPTY:
 		return "Tilemap is empty.";
-	case TILEMAP_TOO_SHORT_FF:
+	case Result::TILEMAP_TOO_SHORT_FF:
 		return "File ends before any $FF.";
-	case TILEMAP_TOO_LONG_FF:
+	case Result::TILEMAP_TOO_LONG_FF:
 		return "File continues after $FF.";
-	case TILEMAP_TOO_SHORT_00:
+	case Result::TILEMAP_TOO_SHORT_00:
 		return "File ends before any $00.";
-	case TILEMAP_TOO_LONG_00:
+	case Result::TILEMAP_TOO_LONG_00:
 		return "File continues after $00.";
-	case TILEMAP_TOO_SHORT_RLE:
+	case Result::TILEMAP_TOO_SHORT_RLE:
 		return "File ends before RLE value.";
-	case TILEMAP_TOO_SHORT_ATTRS:
+	case Result::TILEMAP_TOO_SHORT_ATTRS:
 		return "File ends before attribute value.";
-	case TILEMAP_NULL:
+	case Result::TILEMAP_NULL:
 		return "No file chosen.";
-	case ATTRMAP_TOO_SHORT:
+	case Result::ATTRMAP_TOO_SHORT:
 		return "Attrmap is shorter than tilemap.";
-	case ATTRMAP_TOO_LONG:
+	case Result::ATTRMAP_TOO_LONG:
 		return "Attrmap is longer than tilemap.";
 	default:
 		return "Unspecified error.";

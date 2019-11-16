@@ -2,6 +2,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <iterator>
 #include <algorithm>
 
 #pragma warning(push, 0)
@@ -18,6 +19,11 @@
 #include "tileset.h"
 #include "tile.h"
 #include "main-window.h"
+
+// Avoid "warning C4458: declaration of 'i' hides class member"
+// due to Fl_Window's Fl_X *i
+#pragma warning(push)
+#pragma warning(disable : 4458)
 
 typedef std::set<Fl_Color> Color_Set;
 
@@ -363,14 +369,15 @@ void Main_Window::image_to_tiles() {
 
 	Fl_RGB_Image *timg = print_tileset(tiles, tileset, palettes, tile_palettes, max_colors, tileset_width());
 	Image::Result result = Image::write_image(tileset_filename, timg, make_palette ? format_uses_jasc(fmt) ?
-		Image::IMAGE_TYPE_4BPP : Image::IMAGE_TYPE_2BPP : Image::IMAGE_TYPE_RGB);
+		Image::Type::IMAGE_TYPE_4BPP : Image::Type::IMAGE_TYPE_2BPP : Image::Type::IMAGE_TYPE_RGB);
 	delete timg;
-	if (result) {
+	if (result != Image::Result::IMAGE_OK) {
 		delete [] tiles;
 		std::string msg = "Could not write to ";
 		msg = msg + tileset_basename + "!\n\n" + Image::error_message(result);
 		_error_dialog->message(msg);
 		_error_dialog->show(this);
+		return;
 	}
 
 	delete [] tiles;
@@ -392,3 +399,5 @@ void Main_Window::image_to_tiles() {
 	unload_tilesets_cb(NULL, this);
 	add_tileset(tileset_filename, start_id);
 }
+
+#pragma warning(pop)

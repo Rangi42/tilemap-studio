@@ -35,6 +35,11 @@
 #include "app-icon.xpm"
 #endif
 
+// Avoid "warning C4458: declaration of 'i' hides class member"
+// due to Fl_Window's Fl_X *i
+#pragma warning(push)
+#pragma warning(disable : 4458)
+
 Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_Window(x, y, w, h, PROGRAM_NAME),
 	_tile_buttons(), _tilemap_file(), _attrmap_file(), _tileset_files(), _recent_tilemaps(), _recent_tilesets(),
 	_tilemap(), _tilesets(), _wx(x), _wy(y), _ww(w), _wh(h) {
@@ -42,7 +47,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	Tile_State::tilesets(&_tilesets);
 
 	// Get global configs
-	Tilemap_Format format_config = (Tilemap_Format)Preferences::get("format", Config::format());
+	Tilemap_Format format_config = (Tilemap_Format)Preferences::get("format", (int)Config::format());
 	int zoom_config = Preferences::get("zoom", Config::zoom());
 	int grid_config = Preferences::get("grid", Config::grid());
 	int rainbow_tiles_config = Preferences::get("rainbow", Config::rainbow_tiles());
@@ -209,11 +214,11 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_tilemap_save_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	_tileset_load_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
 	_png_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
-	_error_dialog = new Modal_Dialog(this, "Error", Modal_Dialog::ERROR_ICON);
-	_warning_dialog = new Modal_Dialog(this, "Warning", Modal_Dialog::WARNING_ICON);
-	_success_dialog = new Modal_Dialog(this, "Success", Modal_Dialog::SUCCESS_ICON);
-	_unsaved_dialog = new Modal_Dialog(this, "Warning", Modal_Dialog::WARNING_ICON, true);
-	_about_dialog = new Modal_Dialog(this, "About " PROGRAM_NAME, Modal_Dialog::APP_ICON);
+	_error_dialog = new Modal_Dialog(this, "Error", Modal_Dialog::Icon::ERROR_ICON);
+	_warning_dialog = new Modal_Dialog(this, "Warning", Modal_Dialog::Icon::WARNING_ICON);
+	_success_dialog = new Modal_Dialog(this, "Success", Modal_Dialog::Icon::SUCCESS_ICON);
+	_unsaved_dialog = new Modal_Dialog(this, "Warning", Modal_Dialog::Icon::WARNING_ICON, true);
+	_about_dialog = new Modal_Dialog(this, "About " PROGRAM_NAME, Modal_Dialog::Icon::APP_ICON);
 	_tilemap_options_dialog = new Tilemap_Options_Dialog("Tilemap Options");
 	_new_tilemap_dialog = new New_Tilemap_Dialog("New Tilemap");
 	_tileset_width_dialog = new Group_Width_Dialog("Tileset Width");
@@ -308,27 +313,27 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		OS_SUBMENU("&View"),
 		OS_MENU_ITEM("&Theme", 0, NULL, NULL, FL_SUBMENU | FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&Classic", 0, (Fl_Callback *)classic_theme_cb, this,
-			FL_MENU_RADIO | (OS::current_theme() == OS::CLASSIC ? FL_MENU_VALUE : 0)),
+			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::CLASSIC ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&Aero", 0, (Fl_Callback *)aero_theme_cb, this,
-			FL_MENU_RADIO | (OS::current_theme() == OS::AERO ? FL_MENU_VALUE : 0)),
+			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::AERO ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&Metro", 0, (Fl_Callback *)metro_theme_cb, this,
-			FL_MENU_RADIO | (OS::current_theme() == OS::METRO ? FL_MENU_VALUE : 0)),
+			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::METRO ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("A&qua", 0, (Fl_Callback *)aqua_theme_cb, this,
-			FL_MENU_RADIO | (OS::current_theme() == OS::AQUA ? FL_MENU_VALUE : 0)),
+			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::AQUA ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&Greybird", 0, (Fl_Callback *)greybird_theme_cb, this,
-			FL_MENU_RADIO | (OS::current_theme() == OS::GREYBIRD ? FL_MENU_VALUE : 0)),
+			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::GREYBIRD ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("Me&tal", 0, (Fl_Callback *)metal_theme_cb, this,
-			FL_MENU_RADIO | (OS::current_theme() == OS::METAL ? FL_MENU_VALUE : 0)),
+			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::METAL ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&Blue", 0, (Fl_Callback *)blue_theme_cb, this,
-			FL_MENU_RADIO | (OS::current_theme() == OS::BLUE ? FL_MENU_VALUE : 0)),
+			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::BLUE ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&Olive", 0, (Fl_Callback *)olive_theme_cb, this,
-			FL_MENU_RADIO | (OS::current_theme() == OS::OLIVE ? FL_MENU_VALUE : 0)),
+			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::OLIVE ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&Rose Gold", 0, (Fl_Callback *)rose_gold_theme_cb, this,
-			FL_MENU_RADIO | (OS::current_theme() == OS::ROSE_GOLD ? FL_MENU_VALUE : 0)),
+			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::ROSE_GOLD ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&Dark", 0, (Fl_Callback *)dark_theme_cb, this,
-			FL_MENU_RADIO | (OS::current_theme() == OS::DARK ? FL_MENU_VALUE : 0)),
+			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::DARK ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&High Contrast", 0, (Fl_Callback *)high_contrast_theme_cb, this,
-			FL_MENU_RADIO | (OS::current_theme() == OS::HIGH_CONTRAST ? FL_MENU_VALUE : 0)),
+			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::HIGH_CONTRAST ? FL_MENU_VALUE : 0)),
 		{},
 		OS_MENU_ITEM("Zoom &In", FL_COMMAND + '=', (Fl_Callback *)zoom_in_cb, this, 0),
 		OS_MENU_ITEM("Zoom &Out", FL_COMMAND + '-', (Fl_Callback *)zoom_out_cb, this, 0),
@@ -1003,6 +1008,7 @@ void Main_Window::update_active_controls() {
 	}
 
 	int n = format_tileset_size(Config::format());
+#pragma warning(suppress: 26812)
 	_tiles_scroll->type((uchar)(tileset_width() > DEFAULT_TILES_PER_ROW ? Fl_Scroll::BOTH_ALWAYS : Fl_Scroll::VERTICAL_ALWAYS));
 	while (_tiles_scroll->children()) {
 		_tiles_scroll->remove(0);
@@ -1279,12 +1285,12 @@ void Main_Window::open_tilemap(const char *filename, size_t width, size_t height
 
 		Config::format(_tilemap_options_dialog->format());
 
-		Tilemap::Result r = _tilemap.read_tiles(filename, attrmap_filename);
-		if (r) {
+		Tilemap::Result result = _tilemap.read_tiles(filename, attrmap_filename);
+		if (result != Tilemap::Result::TILEMAP_OK) {
 			_tilemap.clear();
 			std::string msg = "Error reading ";
-			msg = msg + (r >= Tilemap::ATTRMAP_BAD_FILE ? attrmap_basename : basename);
-			msg = msg + "!\n\n" + Tilemap::error_message(r);
+			msg = msg + (result >= Tilemap::Result::ATTRMAP_BAD_FILE ? attrmap_basename : basename);
+			msg = msg + "!\n\n" + Tilemap::error_message(result);
 			_error_dialog->message(msg);
 			_error_dialog->show(this);
 			return;
@@ -1397,7 +1403,7 @@ void Main_Window::add_tileset(const char *filename, int start, int offset, int l
 	const char *basename = fl_filename_name(filename);
 	Tileset tileset(start, offset, length);
 	Tileset::Result result = tileset.read_tiles(filename);
-	if (result) {
+	if (result != Tileset::Result::TILESET_OK) {
 		std::string msg = "Error reading ";
 		msg = msg + basename + "!\n\n" + Tileset::error_message(result);
 		_error_dialog->message(msg);
@@ -1724,9 +1730,9 @@ void Main_Window::print_cb(Fl_Widget *, Main_Window *mw) {
 	}
 
 	Fl_RGB_Image *img = mw->_tilemap.print_tilemap();
-	Image::Result result = Image::write_image(filename, img, Image::IMAGE_TYPE_RGB);
+	Image::Result result = Image::write_image(filename, img, Image::Type::IMAGE_TYPE_RGB);
 	delete img;
-	if (result) {
+	if (result != Image::Result::IMAGE_OK) {
 		std::string msg = "Could not print to ";
 		msg = msg + basename + "!\n\n" + Image::error_message(result);
 		mw->_error_dialog->message(msg);
@@ -1754,12 +1760,12 @@ void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 	}
 
 	// Save global config
-	Preferences::set("theme", OS::current_theme());
+	Preferences::set("theme", (int)OS::current_theme());
 	Preferences::set("x", mw->x());
 	Preferences::set("y", mw->y());
 	Preferences::set("w", mw->w());
 	Preferences::set("h", mw->h());
-	Preferences::set("format", Config::format());
+	Preferences::set("format", (int)Config::format());
 	Preferences::set("zoom", Config::zoom());
 	Preferences::set("grid", Config::grid());
 	Preferences::set("rainbow", Config::rainbow_tiles());
@@ -2109,3 +2115,5 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 		tt->redraw();
 	}
 }
+
+#pragma warning(pop)

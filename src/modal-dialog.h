@@ -11,7 +11,7 @@
 
 class Modal_Dialog {
 public:
-	enum Icon { NO_ICON, SUCCESS_ICON, WARNING_ICON, ERROR_ICON, APP_ICON };
+	enum class Icon { NO_ICON, SUCCESS_ICON, WARNING_ICON, ERROR_ICON, APP_ICON };
 	static Fl_Pixmap SUCCESS_SHIELD_ICON, WARNING_SHIELD_ICON, ERROR_SHIELD_ICON, PROGRAM_ICON;
 private:
 	Icon _icon_type;
@@ -26,7 +26,7 @@ private:
 	Default_Button *_ok_button;
 	OS_Button *_cancel_button;
 public:
-	Modal_Dialog(Fl_Window *top, const char *t = NULL, Icon c = NO_ICON, bool cancel = false);
+	Modal_Dialog(Fl_Window *top, const char *t = NULL, Icon c = Icon::NO_ICON, bool cancel = false);
 	~Modal_Dialog();
 private:
 	void initialize(void);

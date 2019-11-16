@@ -72,24 +72,24 @@ void Modal_Dialog::refresh() {
 	_body->label(_message.c_str());
 	// Refresh icon
 	switch (_icon_type) {
-	case NO_ICON:
+	case Icon::NO_ICON:
 		_icon->image(NULL);
 		break;
-	case SUCCESS_ICON:
+	case Icon::SUCCESS_ICON:
 		_icon->image(SUCCESS_SHIELD_ICON);
 		break;
-	case WARNING_ICON:
+	case Icon::WARNING_ICON:
 		_icon->image(WARNING_SHIELD_ICON);
 		break;
-	case ERROR_ICON:
+	case Icon::ERROR_ICON:
 		_icon->image(ERROR_SHIELD_ICON);
 		break;
-	case APP_ICON:
+	case Icon::APP_ICON:
 		_icon->image(PROGRAM_ICON);
 		break;
 	}
 	// Refresh widget positions and sizes
-	int bwd = (_icon_type == NO_ICON ? 0 : 60) + 20;
+	int bwd = (_icon_type == Icon::NO_ICON ? 0 : 60) + 20;
 	fl_font(_heading->labelfont(), _heading->labelsize());
 	int hw = _max_w - bwd, hh = 0;
 	fl_measure(_heading->label(), hw, hh);
@@ -100,7 +100,7 @@ void Modal_Dialog::refresh() {
 	int ww = w - 20;
 	int heading_h = 25;
 	int btn_w = 80, btn_h = 22;
-	if (_icon_type == NO_ICON) {
+	if (_icon_type == Icon::NO_ICON) {
 		_icon->resize(0, 0, 0, 0);
 		if (_subject.empty()) {
 			_heading->resize(0, 0, 0, 0);

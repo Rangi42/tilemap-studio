@@ -12,7 +12,7 @@
 #include "config.h"
 
 Tileset::Tileset(int start_id, int offset, int length) : _1x_image(NULL), _2x_image(NULL), _zoomed_image(NULL),
-	_num_tiles(0), _start_id(start_id), _offset(offset), _length(length), _result(TILESET_NULL) {}
+	_num_tiles(0), _start_id(start_id), _offset(offset), _length(length), _result(Result::TILESET_NULL) {}
 
 Tileset::~Tileset() {}
 
@@ -27,7 +27,7 @@ void Tileset::clear() {
 	_start_id = 0x000;
 	_offset = 0;
 	_length = 0;
-	_result = TILESET_NULL;
+	_result = Result::TILESET_NULL;
 }
 
 void Tileset::update_zoom() {
@@ -121,7 +121,7 @@ Tileset::Result Tileset::read_tiles(const char *f) {
 	if (ends_with(s, ".4bpp") || ends_with(s, ".4BPP")) { return read_4bpp_graphics(f); }
 	if (ends_with(s, ".1bpp.lz") || ends_with(s, ".1BPP.LZ")) { return read_1bpp_lz_graphics(f); }
 	if (ends_with(s, ".2bpp.lz") || ends_with(s, ".2BPP.LZ")) { return read_2bpp_lz_graphics(f); }
-	return (_result = TILESET_BAD_EXT);
+	return (_result = Result::TILESET_BAD_EXT);
 }
 
 Tileset::Result Tileset::read_png_graphics(const char *f) {
@@ -136,51 +136,51 @@ Tileset::Result Tileset::read_bmp_graphics(const char *f) {
 
 Tileset::Result Tileset::read_1bpp_graphics(const char *f) {
 	FILE *file = fl_fopen(f, "rb");
-	if (!file) { return (_result = TILESET_BAD_FILE); }
+	if (!file) { return (_result = Result::TILESET_BAD_FILE); }
 
 	fseek(file, 0, SEEK_END);
 	long n = ftell(file);
 	rewind(file);
-	if (n % BYTES_PER_1BPP_TILE) { fclose(file); return (_result = TILESET_BAD_DIMS); }
+	if (n % BYTES_PER_1BPP_TILE) { fclose(file); return (_result = Result::TILESET_BAD_DIMS); }
 
 	uchar *data = new uchar[n];
 	size_t r = fread(data, 1, n, file);
 	fclose(file);
-	if (r != (size_t)n) { delete [] data; return (_result = TILESET_BAD_FILE); }
+	if (r != (size_t)n) { delete [] data; return (_result = Result::TILESET_BAD_FILE); }
 
 	return parse_1bpp_data(n, data);
 }
 
 Tileset::Result Tileset::read_2bpp_graphics(const char *f) {
 	FILE *file = fl_fopen(f, "rb");
-	if (!file) { return (_result = TILESET_BAD_FILE); }
+	if (!file) { return (_result = Result::TILESET_BAD_FILE); }
 
 	fseek(file, 0, SEEK_END);
 	long n = ftell(file);
 	rewind(file);
-	if (n % BYTES_PER_2BPP_TILE) { fclose(file); return (_result = TILESET_BAD_DIMS); }
+	if (n % BYTES_PER_2BPP_TILE) { fclose(file); return (_result = Result::TILESET_BAD_DIMS); }
 
 	uchar *data = new uchar[n];
 	size_t r = fread(data, 1, n, file);
 	fclose(file);
-	if (r != (size_t)n) { delete [] data; return (_result = TILESET_BAD_FILE); }
+	if (r != (size_t)n) { delete [] data; return (_result = Result::TILESET_BAD_FILE); }
 
 	return parse_2bpp_data(n, data);
 }
 
 Tileset::Result Tileset::read_4bpp_graphics(const char *f) {
 	FILE *file = fl_fopen(f, "rb");
-	if (!file) { return (_result = TILESET_BAD_FILE); }
+	if (!file) { return (_result = Result::TILESET_BAD_FILE); }
 
 	fseek(file, 0, SEEK_END);
 	long n = ftell(file);
 	rewind(file);
-	if (n % BYTES_PER_4BPP_TILE) { fclose(file); return (_result = TILESET_BAD_DIMS); }
+	if (n % BYTES_PER_4BPP_TILE) { fclose(file); return (_result = Result::TILESET_BAD_DIMS); }
 
 	uchar *data = new uchar[n];
 	size_t r = fread(data, 1, n, file);
 	fclose(file);
-	if (r != (size_t)n) { delete [] data; return (_result = TILESET_BAD_FILE); }
+	if (r != (size_t)n) { delete [] data; return (_result = Result::TILESET_BAD_FILE); }
 
 	return parse_4bpp_data(n, data);
 }
@@ -190,7 +190,7 @@ static Tileset::Result decompress_lz_data(const char *f, uchar *data, size_t lim
 Tileset::Result Tileset::read_1bpp_lz_graphics(const char *f) {
 	uchar *data = new uchar[MAX_NUM_TILES * BYTES_PER_1BPP_TILE];
 	size_t n = 0;
-	if (decompress_lz_data(f, data, MAX_NUM_TILES * BYTES_PER_1BPP_TILE, n) != TILESET_OK) {
+	if (decompress_lz_data(f, data, MAX_NUM_TILES * BYTES_PER_1BPP_TILE, n) != Result::TILESET_OK) {
 		delete [] data;
 		return _result;
 	}
@@ -200,14 +200,14 @@ Tileset::Result Tileset::read_1bpp_lz_graphics(const char *f) {
 Tileset::Result Tileset::read_2bpp_lz_graphics(const char *f) {
 	uchar *data = new uchar[MAX_NUM_TILES * BYTES_PER_2BPP_TILE];
 	size_t n = 0;
-	if (decompress_lz_data(f, data, MAX_NUM_TILES * BYTES_PER_2BPP_TILE, n) != TILESET_OK) {
+	if (decompress_lz_data(f, data, MAX_NUM_TILES * BYTES_PER_2BPP_TILE, n) != Result::TILESET_OK) {
 		delete [] data;
 		return _result;
 	}
 	return parse_2bpp_data(n, data);
 }
 
-enum Hue { WHITE, DARK, LIGHT, BLACK };
+enum class Hue { WHITE, DARK, LIGHT, BLACK };
 
 static Fl_Color hue_colors[NUM_HUES] = {fl_rgb_color(0xFF), fl_rgb_color(0x55), fl_rgb_color(0xAA), fl_rgb_color(0x00)};
 
@@ -215,7 +215,7 @@ static void convert_1bpp_row(uchar b, Hue *row) {
 	// %ABCD_EFGH -> %A %B %C %D %E %F %G %H
 	for (int i = 0; i < TILE_SIZE; i++) {
 		int j = TILE_SIZE - i - 1;
-		row[i] = (b >> j & 1) ? BLACK : WHITE;
+		row[i] = (b >> j & 1) ? Hue::BLACK : Hue::WHITE;
 	}
 }
 
@@ -233,7 +233,7 @@ Tileset::Result Tileset::parse_1bpp_data(size_t n, uchar *data) {
 
 	int limit = (int)_num_tiles - _offset;
 	if (_length > 0) { limit = MIN(limit, _length + _offset); }
-	if (_start_id + limit > MAX_NUM_TILES) { delete [] data; return (_result = TILESET_TOO_LARGE); }
+	if (_start_id + limit > MAX_NUM_TILES) { delete [] data; return (_result = Result::TILESET_TOO_LARGE); }
 
 	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)n * TILE_SIZE);
 	surface->set_current();
@@ -245,7 +245,7 @@ Tileset::Result Tileset::parse_1bpp_data(size_t n, uchar *data) {
 			convert_1bpp_row(b, row);
 			for (int k = 0; k < TILE_SIZE; k++) {
 				Hue hue = row[k];
-				fl_color(hue_colors[hue]);
+				fl_color(hue_colors[(int)hue]);
 				fl_point(k, (int)(i * TILE_SIZE + j));
 			}
 		}
@@ -265,7 +265,7 @@ Tileset::Result Tileset::parse_2bpp_data(size_t n, uchar *data) {
 
 	int limit = (int)_num_tiles - _offset;
 	if (_length > 0) { limit = MIN(limit, _length + _offset); }
-	if (_start_id + limit > MAX_NUM_TILES) { delete [] data; return (_result = TILESET_TOO_LARGE); }
+	if (_start_id + limit > MAX_NUM_TILES) { delete [] data; return (_result = Result::TILESET_TOO_LARGE); }
 
 	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)n * TILE_SIZE);
 	surface->set_current();
@@ -278,7 +278,7 @@ Tileset::Result Tileset::parse_2bpp_data(size_t n, uchar *data) {
 			convert_2bpp_row(b1, b2, row);
 			for (int k = 0; k < TILE_SIZE; k++) {
 				Hue hue = row[k];
-				fl_color(hue_colors[hue]);
+				fl_color(hue_colors[(int)hue]);
 				fl_point(k, (int)(i * TILE_SIZE + j));
 			}
 		}
@@ -305,7 +305,7 @@ Tileset::Result Tileset::parse_4bpp_data(size_t n, uchar *data) {
 
 	int limit = (int)_num_tiles - _offset;
 	if (_length > 0) { limit = MIN(limit, _length + _offset); }
-	if (_start_id + limit > MAX_NUM_TILES) { delete [] data; return (_result = TILESET_TOO_LARGE); }
+	if (_start_id + limit > MAX_NUM_TILES) { delete [] data; return (_result = Result::TILESET_TOO_LARGE); }
 
 	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)n * TILE_SIZE);
 	surface->set_current();
@@ -333,16 +333,16 @@ Tileset::Result Tileset::parse_4bpp_data(size_t n, uchar *data) {
 }
 
 Tileset::Result Tileset::postprocess_graphics(Fl_RGB_Image *img) {
-	if (!img || img->fail()) { return (_result = TILESET_BAD_FILE); }
+	if (!img || img->fail()) { return (_result = Result::TILESET_BAD_FILE); }
 
 	_1x_image = img;
 	_2x_image = (Fl_RGB_Image *)img->copy(img->w() * DEFAULT_ZOOM, img->h() * DEFAULT_ZOOM);
-	if (!_2x_image || _2x_image->fail()) { clear(); return (_result = TILESET_BAD_FILE); }
+	if (!_2x_image || _2x_image->fail()) { clear(); return (_result = Result::TILESET_BAD_FILE); }
 	update_zoom();
-	if (!_zoomed_image || _zoomed_image->fail()) { clear(); return (_result = TILESET_BAD_FILE); }
+	if (!_zoomed_image || _zoomed_image->fail()) { clear(); return (_result = Result::TILESET_BAD_FILE); }
 
 	int w = _1x_image->w(), h = _1x_image->h();
-	if (w % TILE_SIZE || h % TILE_SIZE) { clear(); return (_result = TILESET_BAD_DIMS); }
+	if (w % TILE_SIZE || h % TILE_SIZE) { clear(); return (_result = Result::TILESET_BAD_DIMS); }
 
 	w /= TILE_SIZE;
 	h /= TILE_SIZE;
@@ -350,28 +350,28 @@ Tileset::Result Tileset::postprocess_graphics(Fl_RGB_Image *img) {
 
 	int limit = (int)_num_tiles - _offset;
 	if (_length > 0) { limit = MIN(limit, _length + _offset); }
-	if (_start_id + limit > MAX_NUM_TILES) { clear(); return (_result = TILESET_TOO_LARGE); }
+	if (_start_id + limit > MAX_NUM_TILES) { clear(); return (_result = Result::TILESET_TOO_LARGE); }
 
-	return (_result = TILESET_OK);
+	return (_result = Result::TILESET_OK);
 }
 
 const char *Tileset::error_message(Result result) {
 	switch (result) {
-	case TILESET_OK:
+	case Result::TILESET_OK:
 		return "OK.";
-	case TILESET_BAD_FILE:
+	case Result::TILESET_BAD_FILE:
 		return "Cannot parse file format.";
-	case TILESET_BAD_EXT:
+	case Result::TILESET_BAD_EXT:
 		return "Unknown file extension.";
-	case TILESET_BAD_DIMS:
+	case Result::TILESET_BAD_DIMS:
 		return "Image dimensions do not fit the tile grid.";
-	case TILESET_TOO_SHORT:
+	case Result::TILESET_TOO_SHORT:
 		return "Too few bytes.";
-	case TILESET_TOO_LARGE:
+	case Result::TILESET_TOO_LARGE:
 		return "Too many pixels.";
-	case TILESET_BAD_CMD:
+	case Result::TILESET_BAD_CMD:
 		return "Invalid LZ command.";
-	case TILESET_NULL:
+	case Result::TILESET_NULL:
 		return "No graphics file chosen.";
 	default:
 		return "Unspecified error.";
@@ -379,7 +379,7 @@ const char *Tileset::error_message(Result result) {
 }
 
 // A rundown of Pokemon Crystal's LZ compression scheme:
-enum Lz_Command {
+enum class Lz_Command {
 	// Control commands occupy bits 5-7.
 	// Bits 0-4 serve as the first parameter n for each command.
 	LZ_LITERAL,   // n values for n bytes
@@ -444,7 +444,7 @@ static Tileset::Result decompress_lz_data(const char *f, uchar *data, size_t lim
 		}
 		Lz_Command cmd = (Lz_Command)((b & 0xe0) >> 5);
 		int length = 0;
-		if (cmd == LZ_LONG) {
+		if (cmd == Lz_Command::LZ_LONG) {
 			cmd = (Lz_Command)((b & 0x1c) >> 2);
 			length = (int)(b & 0x03) * 0x100;
 			b = lz_data[address++];
@@ -454,20 +454,20 @@ static Tileset::Result decompress_lz_data(const char *f, uchar *data, size_t lim
 			length = (int)(b & 0x1f) + 1;
 		}
 		switch (cmd) {
-		case LZ_LITERAL:
+		case Lz_Command::LZ_LITERAL:
 			// Copy data directly.
 			for (int i = 0; i < length; i++) {
 				data[len++] = lz_data[address++];
 			}
 			break;
-		case LZ_ITERATE:
+		case Lz_Command::LZ_ITERATE:
 			// Write one byte repeatedly.
 			b = lz_data[address++];
 			for (int i = 0; i < length; i++) {
 				data[len++] = b;
 			}
 			break;
-		case LZ_ALTERNATE:
+		case Lz_Command::LZ_ALTERNATE:
 			// Write alternating bytes.
 			q[0] = lz_data[address++];
 			q[1] = lz_data[address++];
@@ -476,13 +476,13 @@ static Tileset::Result decompress_lz_data(const char *f, uchar *data, size_t lim
 				data[len++] = q[i & 1];
 			}
 			break;
-		case LZ_BLANK:
+		case Lz_Command::LZ_BLANK:
 			// Write zeros.
 			for (int i = 0; i < length; i++) {
 				data[len++] = 0;
 			}
 			break;
-		case LZ_REPEAT:
+		case Lz_Command::LZ_REPEAT:
 			// Repeat bytes from output.
 			b = lz_data[address++];
 			offset = b >= 0x80 ? (int)len - (int)(b & 0x7f) - 1 : (int)b * 0x100 + lz_data[address++];
@@ -490,7 +490,7 @@ static Tileset::Result decompress_lz_data(const char *f, uchar *data, size_t lim
 				data[len++] = data[offset + i];
 			}
 			break;
-		case LZ_FLIP:
+		case Lz_Command::LZ_FLIP:
 			// Repeat flipped bytes from output.
 			b = lz_data[address++];
 			offset = b >= 0x80 ? (int)len - (int)(b & 0x7f) - 1 : (int)b * 0x100 + lz_data[address++];
@@ -499,7 +499,7 @@ static Tileset::Result decompress_lz_data(const char *f, uchar *data, size_t lim
 				data[len++] = bit_flipped[b];
 			}
 			break;
-		case LZ_REVERSE:
+		case Lz_Command::LZ_REVERSE:
 			// Repeat reversed bytes from output.
 			b = lz_data[address++];
 			offset = b >= 0x80 ? (int)len - (int)(b & 0x7f) - 1 : (int)b * 0x100 + lz_data[address++];
@@ -507,7 +507,7 @@ static Tileset::Result decompress_lz_data(const char *f, uchar *data, size_t lim
 				data[len++] = data[offset - i];
 			}
 			break;
-		case LZ_LONG:
+		case Lz_Command::LZ_LONG:
 		default:
 			delete [] lz_data;
 			return Tileset::Result::TILESET_BAD_CMD;

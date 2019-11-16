@@ -22,7 +22,7 @@ static const int tileset_sizes[NUM_FORMATS] = {
 };
 
 int format_tileset_size(Tilemap_Format fmt) {
-	return tileset_sizes[fmt];
+	return tileset_sizes[(int)fmt];
 }
 
 int format_palettes_size(Tilemap_Format fmt) {
@@ -68,7 +68,7 @@ static const char *format_names[NUM_FORMATS] = {
 };
 
 const char *format_name(Tilemap_Format fmt) {
-	return format_names[fmt];
+	return format_names[(int)fmt];
 }
 
 int format_max_name_width() {
@@ -94,7 +94,7 @@ static const char *format_extensions[NUM_FORMATS] = {
 };
 
 const char *format_extension(Tilemap_Format fmt) {
-	return format_extensions[fmt];
+	return format_extensions[(int)fmt];
 }
 
 Tilemap_Format guess_format(const char *filename) {

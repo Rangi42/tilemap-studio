@@ -95,8 +95,8 @@ class Anchor_Button;
 
 class Resize_Dialog : public Option_Dialog {
 public:
-	enum Hor_Align { LEFT, CENTER, RIGHT };
-	enum Vert_Align { TOP, MIDDLE, BOTTOM };
+	enum class Hor_Align { LEFT, CENTER, RIGHT };
+	enum class Vert_Align { TOP, MIDDLE, BOTTOM };
 private:
 	Default_Spinner *_tilemap_width, *_tilemap_height;
 	Anchor_Button *_anchor_buttons[9];
@@ -173,8 +173,9 @@ protected:
 
 class Image_To_Tiles_Dialog : public Option_Dialog {
 private:
-	Label *_input_heading, *_image_heading, *_output_heading, *_tileset_heading;
+	Label *_input_heading, * _output_heading;
 	Spacer *_input_spacer, *_output_spacer;
+	Label * _image_heading, * _tileset_heading;
 	Toolbar_Button *_image, *_tileset;
 	Label_Button *_image_name, *_tileset_name;
 	Dropdown *_format;

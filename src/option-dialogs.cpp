@@ -282,15 +282,15 @@ Resize_Dialog::~Resize_Dialog() {
 }
 
 Resize_Dialog::Hor_Align Resize_Dialog::horizontal_anchor() const {
-	if (_anchor_buttons[0]->value() || _anchor_buttons[3]->value() || _anchor_buttons[6]->value()) { return LEFT; }
-	if (_anchor_buttons[2]->value() || _anchor_buttons[5]->value() || _anchor_buttons[8]->value()) { return RIGHT; }
-	return CENTER;
+	if (_anchor_buttons[0]->value() || _anchor_buttons[3]->value() || _anchor_buttons[6]->value()) { return Hor_Align::LEFT; }
+	if (_anchor_buttons[2]->value() || _anchor_buttons[5]->value() || _anchor_buttons[8]->value()) { return Hor_Align::RIGHT; }
+	return Hor_Align::CENTER;
 }
 
 Resize_Dialog::Vert_Align Resize_Dialog::vertical_anchor() const {
-	if (_anchor_buttons[0]->value() || _anchor_buttons[1]->value() || _anchor_buttons[2]->value()) { return TOP; }
-	if (_anchor_buttons[6]->value() || _anchor_buttons[7]->value() || _anchor_buttons[8]->value()) { return BOTTOM; }
-	return MIDDLE;
+	if (_anchor_buttons[0]->value() || _anchor_buttons[1]->value() || _anchor_buttons[2]->value()) { return Vert_Align::TOP; }
+	if (_anchor_buttons[6]->value() || _anchor_buttons[7]->value() || _anchor_buttons[8]->value()) { return Vert_Align::BOTTOM; }
+	return Vert_Align::MIDDLE;
 }
 
 int Resize_Dialog::anchor() const {
@@ -496,13 +496,17 @@ int Add_Tileset_Dialog::refresh_content(int ww, int dy) {
 	return ch;
 }
 
-Image_To_Tiles_Dialog::Image_To_Tiles_Dialog(const char *t) : Option_Dialog(340, t), _image_heading(NULL),
-	_tileset_heading(NULL), _image(NULL), _tileset(NULL), _image_name(NULL), _tileset_name(NULL), _format(NULL),
-	_output_names(NULL), _palette(NULL), _start_id(NULL), _use_space(NULL), _space_id(NULL), _image_chooser(NULL),
-	_tileset_chooser(NULL), _image_filename(), _tileset_filename(), _tilemap_filename(), _attrmap_filename(),
-	_palette_filename() {}
+Image_To_Tiles_Dialog::Image_To_Tiles_Dialog(const char *t) : Option_Dialog(340, t), _input_heading(NULL),
+	_output_heading(NULL), _input_spacer(NULL), _output_spacer(NULL), _image_heading(NULL), _tileset_heading(NULL),
+	_image(NULL), _tileset(NULL), _image_name(NULL), _tileset_name(NULL), _format(NULL), _output_names(NULL),
+	_palette(NULL), _start_id(NULL), _use_space(NULL), _space_id(NULL), _image_chooser(NULL), _tileset_chooser(NULL),
+	_image_filename(), _tileset_filename(), _tilemap_filename(), _attrmap_filename(), _palette_filename() {}
 
 Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
+	delete _input_heading;
+	delete _output_heading;
+	delete _input_spacer;
+	delete _output_spacer;
 	delete _image_heading;
 	delete _tileset_heading;
 	delete _image;
