@@ -27,7 +27,7 @@ R"(<html>
 <li><b>GBC tilemap + attrmap:</b> The tilemap file itself just has plain tile IDs, but a corresponding attrmap file has the attribute bytes.</li>
 <li><b>GBA tiles + palettes:</b> Bytes come in pairs, encoding 10-bit tile IDs (so up to 1,024 possible tiles), a choice of 16 palettes, and X/Y flip.</li>
 <li><b>SGB border:</b> Bytes come in pairs: a tile ID and an attribute byte. The only supported attribute bits are a choice of four palettes and X/Y flip. Meant for the SGB borders in pokered: gfx)" DIR_SEP "red" DIR_SEP "sgbborder.map and gfx" DIR_SEP "blue" DIR_SEP R"(sgbborder.map.</li>
-<li><b>SNES attributes:</b> Bytes come in pairs, encoding 10-bit tile IDs (so up to 1,024 possible tiles), a choice of 8 palettes, X/Y flip, and priority.</li>
+<li><b>SNES tiles + attributes:</b> Bytes come in pairs, encoding 10-bit tile IDs (so up to 1,024 possible tiles), a choice of 8 palettes, X/Y flip, and priority.</li>
 <li><b>RBY Town Map:</b> A sequence of bytes that each encode a tile ID in their high nybble and a run length in their low nybble, ended by a $00 byte. For example, $46 encodes a sequence of six tiles with ID $04. Only 16 tile IDs can be represented, $00 to $0F. Meant for the Town Map tilemap in pokered: gfx)" DIR_SEP R"(town_map.rle.</li>
 <li><b>GSC Town Map:</b> A sequence of tile IDs ended by an $FF byte (so $FF is not a valid tile ID). Meant for the Town Map tilemaps in pokecrystal: gfx)" DIR_SEP "pokegear" DIR_SEP R"(johto.bin and kanto.bin.</li>
 <li><b>PC Town Map:</b> A sequence of bytes that each encode a tile ID in their low six bits and X/Y flip attributes in their high two bits, ended by an $FF byte. Only 64 tile IDs can be represented, $00 to $3F. Meant for the Town Map tilemaps in <a href="https://github.com/Rangi42/polishedcrystal">Polished Crystal</a>: gfx)" DIR_SEP "town_map" DIR_SEP R"(*.bin.</li>
@@ -38,9 +38,11 @@ R"(<html>
 <p>The tilemap canvas (on the right) and tileset array (on the left) use the mouse:</p>
 <ul>
 <li>Left-click a tile in the tileset array to select it.</li>
+<li>Left-click and drag in the tileset array to select a rectangle of tiles.</li>
 <li>Left-click or drag in the tilemap canvas to place the selected tile.</li>
 <li>Right-click a tile in the tileset array to highlight every use of it in the tilemap. Right-click it again to un-highlight.</li>
 <li>Right-click a tile in the tilemap canvas to select it in the tileset.</li>
+<li>Right-click and drag in the tilemap canvas to select a rectangle of tiles.</li>
 <li>Middle-click and drag to scroll the tileset or tilemap.</li>
 <li>Hold Shift and left-click a group of tiles to flood-fill it with the selected type.</li>
 <li>Hold Ctrl and left-click a tile to replace every tile of that type with the selected type.</li>
@@ -62,7 +64,7 @@ R"(<html>
 	call Get1bpp_2</pre></code>
 <p>To copy its effect, you would add gfx)" DIR_SEP "battle" DIR_SEP R"(hp_exp_bar_border.png with the start ID $76, offset 3, and length 2.</p>
 <hr>
-<p>The general-purpose GBC, GBA, and SGB formats all support palettes. Each tile in the tilemap has a corresponding palette ID. When you choose the Palettes tab instead of the Tiles tab, these can be viewed and edited similarly to the tiles.</p>
+<p>The general-purpose GBC, GBA, SGB, and SNES formats all support palettes. Each tile in the tilemap has a corresponding palette ID. When you choose the Palettes tab instead of the Tiles tab, these can be viewed and edited similarly to the tiles.</p>
 <p>The palette colors are arbitrary; there is no support for using or editing the actual colors displayed in-game. For some projects, the tileset image will already have the right colors; for others, it will be monochrome. You may want to make a colored-in copy of your tileset to help design tilemaps, like the example)" DIR_SEP "pokecrystal" DIR_SEP R"(town_map_pokegear.png image.</p>
 <hr>
 <p>)" PROGRAM_NAME R"( is mainly for editing tilemaps using tilesets that already exist, but it can also create a tilemap and tileset, and optionally a palette, from a screenshot with the Image to Tiles function (Ctrl+X or the toolbar's brown picture button). For example, if you want to display a custom full-screen picture, you might draw a 160x144-pixel (20x18-tile) mockup. You can then create a tilemap and tileset from that mockup, as long as it doesn't need too many unique tiles. Duplicate tiles will not be included in the tileset; this takes X/Y flipped tiles into account if the chosen format supports it.</p>
