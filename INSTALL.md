@@ -7,7 +7,7 @@
 1. Download **install.bat** and **tilemapstudio.exe** from [the latest release](https://github.com/Rangi42/tilemap-studio/releases).
 2. Hold down Shift, right-click **install.bat**, and click "**Run as administrator**". This will install Tilemap Studio to your account and create a shortcut on your Desktop.
 3. Now you can delete the two downloaded files.
-4. Double-click **Tilemap Studio** on your Desktop to open it. If you get an error that "mscvrt120.dll is missing", you need to install the [Microsoft Visual C++ Redistributable for Visual Studio 2019](https://www.visualstudio.com/downloads/). You may need the x64 version as well as the x86 version, at least for Windows 10.
+4. Double-click **Tilemap Studio** on your Desktop to open it. If you get an error that "msvcrt140.dll is missing", you need to install the [Microsoft Visual C++ Redistributable for Visual Studio 2019](https://www.visualstudio.com/downloads/).
 
 If you have Microsoft Visual Studio, you can build Tilemap Studio yourself:
 
