@@ -788,12 +788,7 @@ void Main_Window::update_zoom() {
 void Main_Window::update_selection_status() {
 	char buffer[32] = {};
 	if (_selection.selected_multiple()) {
-#ifdef __GNUC__
 		sprintf(buffer, "%s: %zux%zu", _selection.from_tileset() ? "Set" : "Map", _selection.width(), _selection.height());
-#else
-		sprintf(buffer, "%s: %ux%u", _selection.from_tileset() ? "Set" : "Map",
-			(uint32_t)_selection.width(), (uint32_t)_selection.height());
-#endif
 	}
 	else {
 		int index = (int)_selection.id();
@@ -815,11 +810,7 @@ void Main_Window::update_status(Tile_Tessera *tt) {
 		return;
 	}
 	char buffer[64] = {};
-#ifdef __GNUC__
 	sprintf(buffer, "Tilemap: %zu x %zu", _tilemap.width(), _tilemap.height());
-#else
-	sprintf(buffer, "Tilemap: %u x %u", (uint32_t)_tilemap.width(), (uint32_t)_tilemap.height());
-#endif
 	_tilemap_dimensions->copy_label(buffer);
 	if (!tt) {
 		_hover_id->label("");
@@ -831,21 +822,13 @@ void Main_Window::update_status(Tile_Tessera *tt) {
 	int bank = (int)(tt->id() >> 8), offset = (int)(tt->id() & 0xFF);
 	sprintf(buffer, "ID: $%d:%02X", bank, offset);
 	_hover_id->copy_label(buffer);
-#ifdef __GNUC__
 	sprintf(buffer, "X/Y (%zu, %zu)", tt->col(), tt->row());
-#else
-	sprintf(buffer, "X/Y (%u, %u)", (uint32_t)tt->col(), (uint32_t)tt->row());
-#endif
 	_hover_xy->copy_label(buffer);
 	if (_tilemap.width() == GAME_BOY_WIDTH && _tilemap.height() == GAME_BOY_HEIGHT) {
 		if (format_has_landmarks(Config::format())) {
 			size_t lx = tt->col() * TILE_SIZE + TILE_SIZE / 2;
 			size_t ly = tt->row() * TILE_SIZE + TILE_SIZE / 2;
-#ifdef __GNUC__
 			sprintf(buffer, "Landmark (%zu, %zu)", lx, ly);
-#else
-			sprintf(buffer, "Landmark (%u, %u)", (uint32_t)lx, (uint32_t)ly);
-#endif
 			_hover_landmark->copy_label(buffer);
 		}
 		else if (format_has_emaps(Config::format()) && tt->col() >= 2 && tt->col() <= 0xF + 2 &&
@@ -900,11 +883,7 @@ void Main_Window::update_tileset_metadata() {
 		}
 		else {
 			char buffer[FL_PATH_MAX] = {};
-#ifdef __GNUC__
 			sprintf(buffer, "%zu files", _tilesets.size());
-#else
-			sprintf(buffer, "%u files", (uint32_t)_tilesets.size());
-#endif
 			_tileset_name->copy_label(buffer);
 		}
 	}
