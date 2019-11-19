@@ -180,7 +180,7 @@ void Tilemap::new_tiles(size_t w, size_t h) {
 
 Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 	FILE *file = fl_fopen(tf, "rb");
-	if (file == NULL) { return (_result = Result::TILEMAP_BAD_FILE); }
+	if (!file) { return (_result = Result::TILEMAP_BAD_FILE); }
 
 	fseek(file, 0, SEEK_END);
 	long c = ftell(file);
@@ -215,7 +215,7 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 
 	else if (fmt == Tilemap_Format::GBC_ATTRMAP) {
 		FILE *attr_file = fl_fopen(af, "rb");
-		if (attr_file == NULL) {
+		if (!attr_file) {
 			fclose(file);
 			return (_result = Result::ATTRMAP_BAD_FILE);
 		}

@@ -119,6 +119,7 @@ Tileset::Result Tileset::read_tiles(const char *f) {
 	if (ends_with(s, ".1bpp") || ends_with(s, ".1BPP")) { return read_1bpp_graphics(f); }
 	if (ends_with(s, ".2bpp") || ends_with(s, ".2BPP")) { return read_2bpp_graphics(f); }
 	if (ends_with(s, ".4bpp") || ends_with(s, ".4BPP")) { return read_4bpp_graphics(f); }
+	if (ends_with(s, ".8bpp") || ends_with(s, ".8BPP")) { return read_8bpp_graphics(f); }
 	if (ends_with(s, ".1bpp.lz") || ends_with(s, ".1BPP.LZ")) { return read_1bpp_lz_graphics(f); }
 	if (ends_with(s, ".2bpp.lz") || ends_with(s, ".2BPP.LZ")) { return read_2bpp_lz_graphics(f); }
 	return (_result = Result::TILESET_BAD_EXT);
@@ -183,6 +184,23 @@ Tileset::Result Tileset::read_4bpp_graphics(const char *f) {
 	if (r != (size_t)n) { delete [] data; return (_result = Result::TILESET_BAD_FILE); }
 
 	return parse_4bpp_data(n, data);
+}
+
+Tileset::Result Tileset::read_8bpp_graphics(const char *f) {
+	FILE *file = fl_fopen(f, "rb");
+	if (!file) { return (_result = Result::TILESET_BAD_FILE); }
+
+	fseek(file, 0, SEEK_END);
+	long n = ftell(file);
+	rewind(file);
+	if (n % BYTES_PER_8BPP_TILE) { fclose(file); return (_result = Result::TILESET_BAD_DIMS); }
+
+	uchar *data = new uchar[n];
+	size_t r = fread(data, 1, n, file);
+	fclose(file);
+	if (r != (size_t)n) { delete [] data; return (_result = Result::TILESET_BAD_FILE); }
+
+	return parse_8bpp_data(n, data);
 }
 
 static Tileset::Result decompress_lz_data(const char *f, uchar *data, size_t lim, size_t &len);
@@ -320,6 +338,36 @@ Tileset::Result Tileset::parse_4bpp_data(size_t n, uchar *data) {
 				fl_point(k * 2, py);
 				fl_color(bpp4_colors[hi]);
 				fl_point(k * 2 + 1, py);
+			}
+		}
+	}
+
+	Fl_RGB_Image *img = surface->image();
+	delete surface;
+	Fl_Display_Device::display_device()->set_current();
+
+	delete [] data;
+	return postprocess_graphics(img);
+}
+
+Tileset::Result Tileset::parse_8bpp_data(size_t n, uchar *data) {
+	n /= BYTES_PER_8BPP_TILE;
+	_num_tiles = n;
+
+	int limit = (int)_num_tiles - _offset;
+	if (_length > 0) { limit = MIN(limit, _length + _offset); }
+	if (_start_id + limit > MAX_NUM_TILES) { delete [] data; return (_result = Result::TILESET_TOO_LARGE); }
+
+	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)n * TILE_SIZE);
+	surface->set_current();
+
+	for (size_t i = 0; i < _num_tiles; i++) {
+		for (size_t j = 0; j < TILE_SIZE; j++) {
+			int py = (int)(i * TILE_SIZE + j);
+			for (int k = 0; k < TILE_SIZE; k++) {
+				uchar b = data[i * BYTES_PER_8BPP_TILE + j * TILE_SIZE + k];
+				fl_color(0xFF-b, 0xFF-b, 0xFF-b);
+				fl_point(k, py);
 			}
 		}
 	}

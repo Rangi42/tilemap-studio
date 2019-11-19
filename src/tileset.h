@@ -12,6 +12,7 @@
 #define BYTES_PER_1BPP_TILE (TILE_SIZE * TILE_SIZE / TILE_SIZE)
 #define BYTES_PER_2BPP_TILE (BYTES_PER_1BPP_TILE * 2)
 #define BYTES_PER_4BPP_TILE (BYTES_PER_1BPP_TILE * 4)
+#define BYTES_PER_8BPP_TILE (BYTES_PER_1BPP_TILE * 8)
 
 #define PALETTES_PER_ROW 8
 #define MAX_NUM_PALETTES 16
@@ -49,11 +50,13 @@ private:
 	Result read_1bpp_graphics(const char *f);
 	Result read_2bpp_graphics(const char *f);
 	Result read_4bpp_graphics(const char *f);
+	Result read_8bpp_graphics(const char *f);
 	Result read_1bpp_lz_graphics(const char *f);
 	Result read_2bpp_lz_graphics(const char *f);
 	Result parse_1bpp_data(size_t n, uchar *data);
 	Result parse_2bpp_data(size_t n, uchar *data);
 	Result parse_4bpp_data(size_t n, uchar *data);
+	Result parse_8bpp_data(size_t n, uchar *data);
 	Result postprocess_graphics(Fl_RGB_Image *img);
 public:
 	static const char *error_message(Result result);
