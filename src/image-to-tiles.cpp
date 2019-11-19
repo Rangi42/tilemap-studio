@@ -282,7 +282,7 @@ void Main_Window::image_to_tiles() {
 		// Create the palette file
 		const char *palette_filename = _image_to_tiles_dialog->palette_filename();
 		const char *palette_basename = fl_filename_name(palette_filename);
-		if (!write_palette(palette_filename, palettes, format_uses_jasc(fmt), max_colors)) {
+		if (!write_palette(palette_filename, palettes, format_uses_jasc(fmt) || is_plain, max_colors)) {
 			delete [] tiles;
 			std::string msg = "Could not write to ";
 			msg = msg + palette_basename + "!";
