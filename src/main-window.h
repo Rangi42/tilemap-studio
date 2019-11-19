@@ -65,7 +65,7 @@ private:
 	Fl_Menu_Item *_zoom_in_mi = NULL, *_zoom_out_mi = NULL;
 	Fl_Menu_Item *_tilemap_width_mi = NULL, *_resize_mi = NULL, *_reformat_mi = NULL;
 	// Dialogs
-	Fl_Native_File_Chooser *_tilemap_open_chooser, *_tilemap_save_chooser, *_tileset_load_chooser, *_png_chooser;
+	Fl_Native_File_Chooser *_tilemap_open_chooser, *_tilemap_save_chooser, *_tileset_load_chooser, *_image_print_chooser;
 	Modal_Dialog *_error_dialog, *_warning_dialog, *_success_dialog, *_unsaved_dialog, *_about_dialog;
 	Tilemap_Options_Dialog *_tilemap_options_dialog;
 	New_Tilemap_Dialog *_new_tilemap_dialog;

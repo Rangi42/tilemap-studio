@@ -213,7 +213,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_tilemap_open_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
 	_tilemap_save_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	_tileset_load_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
-	_png_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
+	_image_print_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	_error_dialog = new Modal_Dialog(this, "Error", Modal_Dialog::Icon::ERROR_ICON);
 	_warning_dialog = new Modal_Dialog(this, "Warning", Modal_Dialog::Icon::WARNING_ICON);
 	_success_dialog = new Modal_Dialog(this, "Success", Modal_Dialog::Icon::SUCCESS_ICON);
@@ -549,10 +549,10 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_tileset_load_chooser->title("Open Tileset");
 	_tileset_load_chooser->filter("Tileset Files\t*.{png,bmp,1bpp,2bpp,4bpp,1bpp.lz,2bpp.lz}\n");
 
-	_png_chooser->title("Print Screenshot");
-	_png_chooser->filter("PNG Files\t*.png\n");
-	_png_chooser->preset_file("screenshot.png");
-	_png_chooser->options(Fl_Native_File_Chooser::Option::SAVEAS_CONFIRM);
+	_image_print_chooser->title("Print Screenshot");
+	_image_print_chooser->filter("PNG Files\t*.png\nBMP Files\t*.bmp\n");
+	_image_print_chooser->preset_file("screenshot.png");
+	_image_print_chooser->options(Fl_Native_File_Chooser::Option::SAVEAS_CONFIRM);
 
 	_error_dialog->width_range(280, 700);
 	_warning_dialog->width_range(280, 700);
@@ -596,7 +596,7 @@ Main_Window::~Main_Window() {
 	delete _tilemap_open_chooser;
 	delete _tilemap_save_chooser;
 	delete _tileset_load_chooser;
-	delete _png_chooser;
+	delete _image_print_chooser;
 	delete _error_dialog;
 	delete _warning_dialog;
 	delete _success_dialog;
@@ -1313,7 +1313,7 @@ void Main_Window::open_tilemap(const char *filename, size_t width, size_t height
 	copy_label(buffer);
 	sprintf(buffer, "%s", basename);
 	fl_filename_setext(buffer, sizeof(buffer), ".png");
-	_png_chooser->preset_file(buffer);
+	_image_print_chooser->preset_file(buffer);
 
 	store_recent_tilemap();
 	update_tilemap_metadata();
@@ -1364,7 +1364,7 @@ bool Main_Window::save_tilemap(bool force) {
 
 	strcpy(buffer, basename);
 	fl_filename_setext(buffer, FL_PATH_MAX, ".png");
-	_png_chooser->preset_file(buffer);
+	_image_print_chooser->preset_file(buffer);
 
 	if (force) {
 		store_recent_tilemap();
@@ -1693,16 +1693,16 @@ void Main_Window::unload_tilesets_cb(Fl_Widget *w, Main_Window *mw) {
 void Main_Window::print_cb(Fl_Widget *, Main_Window *mw) {
 	if (!mw->_tilemap.size()) { return; }
 
-	int status = mw->_png_chooser->show();
+	int status = mw->_image_print_chooser->show();
 	if (status == 1) { return; }
 
 	char filename[FL_PATH_MAX] = {};
-	add_dot_ext(mw->_png_chooser->filename(), ".png", filename);
+	add_dot_ext(mw->_image_print_chooser->filename(), ".png", filename);
 	const char *basename = fl_filename_name(filename);
 
 	if (status == -1) {
 		std::string msg = "Could not print to ";
-		msg = msg + basename + "!\n\n" + mw->_png_chooser->errmsg();
+		msg = msg + basename + "!\n\n" + mw->_image_print_chooser->errmsg();
 		mw->_error_dialog->message(msg);
 		mw->_error_dialog->show(mw);
 		return;

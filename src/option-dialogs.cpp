@@ -636,7 +636,7 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_image_chooser->title("Read Image");
 	_image_chooser->filter("Image Files\t*.{png,bmp}\n");
 	_tileset_chooser->title("Write Tileset");
-	_tileset_chooser->filter("PNG Files\t*.png\n");
+	_tileset_chooser->filter("PNG Files\t*.png\nBMP Files\t*.bmp\n");
 	_tileset_chooser->options(Fl_Native_File_Chooser::Option::SAVEAS_CONFIRM);
 }
 
