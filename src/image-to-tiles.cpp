@@ -96,7 +96,7 @@ static Fl_RGB_Image *print_tileset(const Tile *tiles, std::vector<size_t> &tiles
 				Fl_Color c = tile[ty * TILE_SIZE + tx];
 				if (p > -1) {
 					size_t pi = reverse_palettes[p][c];
-					c = indexed_colors[pi * dp];
+					c = dp ? indexed_colors[pi * dp] : fl_rgb_color((uchar)pi);
 				}
 				fl_color(c);
 				fl_point(x * TILE_SIZE + tx, y * TILE_SIZE + ty);
@@ -190,7 +190,7 @@ void Main_Window::image_to_tiles() {
 	bool make_palette = _image_to_tiles_dialog->palette() && (format_has_palettes(fmt) || is_plain);
 
 	std::vector<std::vector<Fl_Color>> palettes;
-	std::vector<int> tile_palettes(n, make_palette && !is_plain ? 0 : -1);
+	std::vector<int> tile_palettes(n, make_palette ? 0 : -1);
 	size_t max_colors = is_plain ? 256 : (size_t)format_palette_size(fmt);
 
 	if (make_palette) {
@@ -371,8 +371,8 @@ void Main_Window::image_to_tiles() {
 	// Create the tileset file
 
 	Fl_RGB_Image *timg = print_tileset(tiles, tileset, palettes, tile_palettes, max_colors, tileset_width());
-	Image::Result result = Image::write_image(tileset_filename, timg, make_palette ? format_uses_jasc(fmt) ?
-		Image::Type::IMAGE_TYPE_4BPP : Image::Type::IMAGE_TYPE_2BPP : Image::Type::IMAGE_TYPE_RGB);
+	Image::Result result = Image::write_image(tileset_filename, timg, make_palette ? is_plain ? Image::Type::IMAGE_TYPE_8BPP :
+		format_uses_jasc(fmt) ? Image::Type::IMAGE_TYPE_4BPP : Image::Type::IMAGE_TYPE_2BPP : Image::Type::IMAGE_TYPE_RGB);
 	delete timg;
 	if (result != Image::Result::IMAGE_OK) {
 		delete [] tiles;
