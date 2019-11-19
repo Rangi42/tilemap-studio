@@ -186,17 +186,18 @@ void Main_Window::image_to_tiles() {
 	// Build the palette
 
 	Tilemap_Format fmt = _image_to_tiles_dialog->format();
-	bool make_palette = _image_to_tiles_dialog->palette() && format_has_palettes(fmt);
+	bool is_plain = fmt == Tilemap_Format::PLAIN;
+	bool make_palette = _image_to_tiles_dialog->palette() && (format_has_palettes(fmt) || is_plain);
 
 	std::vector<std::vector<Fl_Color>> palettes;
-	std::vector<int> tile_palettes(n, make_palette ? 0 : -1);
-	size_t max_colors = (size_t)format_palette_size(fmt);
+	std::vector<int> tile_palettes(n, make_palette && !is_plain ? 0 : -1);
+	size_t max_colors = is_plain ? 256 : (size_t)format_palette_size(fmt);
 
 	if (make_palette) {
 		// Algorithm ported from superfamiconv
 		// <https://github.com/Optiroc/SuperFamiconv>
 
-		size_t max_palettes = (size_t)format_palettes_size(fmt);
+		size_t max_palettes = is_plain ? 1 : (size_t)format_palettes_size(fmt);
 
 		// Get the color set of each tile
 		std::vector<Color_Set> cs_tiles;
@@ -304,17 +305,19 @@ void Main_Window::image_to_tiles() {
 		}
 
 		// Associate tiles with palettes
-		for (size_t i = 0; i < n; i++) {
-			int pal = 0;
-			const Color_Set &s = cs_tiles[i];
-			for (size_t j = 0; j < np; j++) {
-				const Color_Set &c = cs_opt[j];
-				if (std::includes(c.begin(), c.end(), s.begin(), s.end())) {
-					pal = (int)j;
-					break;
+		if (!is_plain) {
+			for (size_t i = 0; i < n; i++) {
+				int pal = 0;
+				const Color_Set &s = cs_tiles[i];
+				for (size_t j = 0; j < np; j++) {
+					const Color_Set &c = cs_opt[j];
+					if (std::includes(c.begin(), c.end(), s.begin(), s.end())) {
+						pal = (int)j;
+						break;
+					}
 				}
+				tile_palettes[i] = pal;
 			}
-			tile_palettes[i] = pal;
 		}
 	}
 

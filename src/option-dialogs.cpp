@@ -567,7 +567,7 @@ void Image_To_Tiles_Dialog::update_output_names() {
 		_output_names->copy_label(output_names);
 	}
 
-	if (format_has_palettes(format())) {
+	if (format_has_palettes(format()) || format() == Tilemap_Format::PLAIN) {
 		_palette->activate();
 		if (_palette_filename.empty()) {
 			_palette->label("Palette: " NO_FILE_SELECTED_LABEL);
