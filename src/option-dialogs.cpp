@@ -499,8 +499,9 @@ int Add_Tileset_Dialog::refresh_content(int ww, int dy) {
 Image_To_Tiles_Dialog::Image_To_Tiles_Dialog(const char *t) : Option_Dialog(340, t), _input_heading(NULL),
 	_output_heading(NULL), _input_spacer(NULL), _output_spacer(NULL), _image_heading(NULL), _tileset_heading(NULL),
 	_image(NULL), _tileset(NULL), _image_name(NULL), _tileset_name(NULL), _format(NULL), _output_names(NULL),
-	_palette(NULL), _start_id(NULL), _use_space(NULL), _space_id(NULL), _image_chooser(NULL), _tileset_chooser(NULL),
-	_image_filename(), _tileset_filename(), _tilemap_filename(), _attrmap_filename(), _palette_filename() {}
+	_palette(NULL), _palette_format(NULL), _palette_name(NULL), _start_id(NULL), _use_space(NULL), _space_id(NULL),
+	_image_chooser(NULL), _tileset_chooser(NULL), _image_filename(), _tileset_filename(), _tilemap_filename(),
+	_attrmap_filename(), _palette_filename() {}
 
 Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
 	delete _input_heading;
@@ -516,6 +517,8 @@ Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
 	delete _format;
 	delete _output_names;
 	delete _palette;
+	delete _palette_format;
+	delete _palette_name;
 	delete _start_id;
 	delete _use_space;
 	delete _space_id;
@@ -532,6 +535,8 @@ void Image_To_Tiles_Dialog::update_image_name() {
 		_image_name->copy_label(basename);
 	}
 }
+
+static const char *palette_exts[NUM_PALETTE_FORMATS] = {".pal", ".pal", ".act", ".gpl"};
 
 void Image_To_Tiles_Dialog::update_output_names() {
 	if (_tileset_filename.empty()) {
@@ -554,7 +559,8 @@ void Image_To_Tiles_Dialog::update_output_names() {
 		_attrmap_filename = output_filename;
 
 		strcpy(output_filename, tileset_filename());
-		fl_filename_setext(output_filename, sizeof(output_filename), PALETTE_EXT);
+		const char *palette_ext = palette_exts[(int)palette_format()];
+		fl_filename_setext(output_filename, sizeof(output_filename), palette_ext);
 		_palette_filename = output_filename;
 
 		char output_names[FL_PATH_MAX] = {};
@@ -569,20 +575,24 @@ void Image_To_Tiles_Dialog::update_output_names() {
 
 	if (format_has_palettes(format()) || format() == Tilemap_Format::PLAIN) {
 		_palette->activate();
+		_palette_format->activate();
+		_palette_name->activate();
 		if (_palette_filename.empty()) {
-			_palette->label("Palette: " NO_FILE_SELECTED_LABEL);
+			_palette_name->label(NO_FILE_SELECTED_LABEL);
 		}
 		else {
 			char buffer[FL_PATH_MAX] = {};
-			strcpy(buffer, "Palette: ");
-			strcat(buffer, fl_filename_name(palette_filename()));
-			_palette->copy_label(buffer);
+			strcpy(buffer, fl_filename_name(palette_filename()));
+			_palette_name->copy_label(buffer);
 		}
 	}
 	else {
-		_palette->label("Palette: N/A");
-		_palette->value(0);
+		_palette->clear();
+		_palette_format->value(0);
+		_palette_name->label("N/A");
 		_palette->deactivate();
+		_palette_format->deactivate();
+		_palette_name->deactivate();
 	}
 }
 
@@ -609,7 +619,9 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_tileset_name = new Label_Button(0, 0, 0, 0, NO_FILE_SELECTED_LABEL);
 	_format = new Dropdown(0, 0, 0, 0, "Format:");
 	_output_names = new Label(0, 0, 0, 0, "Tilemap: " NO_FILE_SELECTED_LABEL);
-	_palette = new OS_Check_Button(0, 0, 0, 0, "Palette: N/A");
+	_palette = new OS_Check_Button(0, 0, 0, 0, "Palette:");
+	_palette_format = new Dropdown(0, 0, 0, 0);
+	_palette_name = new Label(0, 0, 0, 0, NO_FILE_SELECTED_LABEL);
 	_start_id = new Default_Hex_Spinner(0, 0, 0, 0, "Start at ID:");
 	_use_space = new OS_Check_Button(0, 0, 0, 0, "Blank Spaces Use ID:");
 	_space_id = new Default_Hex_Spinner(0, 0, 0, 0);
@@ -626,6 +638,12 @@ void Image_To_Tiles_Dialog::initialize_content() {
 		_format->add(format_name((Tilemap_Format)i));
 	}
 	_format->callback((Fl_Callback *)format_cb, this);
+	_palette_format->add("RGB");
+	_palette_format->add("JASC");
+	_palette_format->add("ACT");
+	_palette_format->add("GPL");
+	_palette_format->callback((Fl_Callback *)format_cb, this);
+	_palette_format->value(0);
 	_start_id->format("%03X");
 	_start_id->range(0x000, MAX_NUM_TILES-1);
 	_start_id->default_value(0x000);
@@ -688,7 +706,15 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	_output_names->resize(win_m, dy, ww, wgt_h);
 	dy += wgt_h + wgt_m;
 
-	_palette->resize(win_m, dy, ww, wgt_h);
+	wgt_w = _palette->labelsize() + 4 + text_width(_palette->label());
+	wgt_off = win_m;
+	_palette->resize(wgt_off, dy, wgt_w, wgt_h);
+	wgt_off += _palette->w() + 4;
+	wgt_w = text_width("JASC", 6) + wgt_h;
+	_palette_format->resize(wgt_off, dy, wgt_w, wgt_h);
+	wgt_off += _palette_format->w() + wgt_m;
+	wgt_w = ww - wgt_off + win_m;
+	_palette_name->resize(wgt_off, dy, wgt_w, wgt_h);
 	dy += wgt_h + wgt_m;
 
 	wgt_w = MAX(text_width("AAA", 2), text_width("FFF", 2)) + wgt_h / 2 + 4;

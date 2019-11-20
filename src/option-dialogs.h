@@ -171,7 +171,11 @@ protected:
 	int refresh_content(int ww, int dy);
 };
 
+#define NUM_PALETTE_FORMATS 4
+
 class Image_To_Tiles_Dialog : public Option_Dialog {
+public:
+	enum class Palette_Format { RGB, JASC, ACT, GPL };
 private:
 	Label *_input_heading, * _output_heading;
 	Spacer *_input_spacer, *_output_spacer;
@@ -181,6 +185,8 @@ private:
 	Dropdown *_format;
 	Label *_output_names;
 	OS_Check_Button *_palette;
+	Dropdown *_palette_format;
+	Label *_palette_name;
 	Default_Hex_Spinner *_start_id;
 	OS_Check_Button *_use_space;
 	Default_Hex_Spinner *_space_id;
@@ -197,6 +203,7 @@ public:
 	inline Tilemap_Format format(void) const { return (Tilemap_Format)_format->value(); }
 	inline void format(Tilemap_Format fmt) { initialize(); _format->value((int)fmt); }
 	inline bool palette(void) const { return !!_palette->value(); }
+	inline Palette_Format palette_format(void) const { return (Palette_Format)_palette_format->value(); }
 	inline uint16_t start_id(void) const { return (uint16_t)_start_id->value(); }
 	inline void start_id(uint16_t n) { initialize(); _start_id->value(n); }
 	inline bool use_space(void) const { return !!_use_space->value(); }

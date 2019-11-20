@@ -13,7 +13,6 @@
 #define GAME_BOY_VRAM_SIZE 32
 
 #define ATTRMAP_EXT ".attrmap"
-#define PALETTE_EXT ".pal"
 
 #define NUM_FORMATS 10
 
@@ -46,13 +45,10 @@ inline bool format_has_obp1(Tilemap_Format fmt) {
 	return fmt == Tilemap_Format::GBC_ATTRS || fmt == Tilemap_Format::GBC_ATTRMAP;
 }
 
-inline bool format_uses_jasc(Tilemap_Format fmt) {
-	return fmt == Tilemap_Format::GBA_PALETTES || fmt == Tilemap_Format::SNES_ATTRS;
-}
-
 int format_tileset_size(Tilemap_Format fmt);
 int format_palettes_size(Tilemap_Format fmt);
 int format_palette_size(Tilemap_Format fmt);
+int format_color_depth(Tilemap_Format fmt);
 const char *format_name(Tilemap_Format fmt);
 const char *format_extension(Tilemap_Format fmt);
 int format_max_name_width(void);

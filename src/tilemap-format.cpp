@@ -54,6 +54,22 @@ int format_palette_size(Tilemap_Format fmt) {
 	}
 }
 
+int format_color_depth(Tilemap_Format fmt) {
+	switch (fmt) {
+	case Tilemap_Format::PLAIN:
+		return 8;
+	case Tilemap_Format::GBA_PALETTES:
+	case Tilemap_Format::SNES_ATTRS:
+		return 4;
+	case Tilemap_Format::GBC_ATTRS:
+	case Tilemap_Format::GBC_ATTRMAP:
+	case Tilemap_Format::SGB_BORDER:
+		return 2;
+	default:
+		return 0;
+	}
+}
+
 static const char *format_names[NUM_FORMATS] = {
 	"Plain tiles",             // PLAIN
 	"GBC tiles + attributes",  // GBC_ATTRS

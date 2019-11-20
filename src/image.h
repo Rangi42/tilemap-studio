@@ -15,13 +15,12 @@
 class Image {
 public:
 	enum class Result { IMAGE_OK, IMAGE_BAD_FILE, IMAGE_BAD_PNG };
-	enum class Type { IMAGE_TYPE_RGB, IMAGE_TYPE_2BPP, IMAGE_TYPE_4BPP, IMAGE_TYPE_8BPP };
-	static Result write_image(const char *f, Fl_RGB_Image *img, Type type);
+	static Result write_image(const char *f, Fl_RGB_Image *img, int bpp = 0);
 	static const char *error_message(Result result);
 	static bool make_deimage(Fl_Widget *wgt);
 private:
-	static Result write_bmp_image(const char *f, Fl_RGB_Image *img, Type type);
-	static Result write_png_image(const char *f, Fl_RGB_Image *img, Type type);
+	static Result write_bmp_image(const char *f, Fl_RGB_Image *img, int bpp);
+	static Result write_png_image(const char *f, Fl_RGB_Image *img, int bpp);
 };
 
 #endif

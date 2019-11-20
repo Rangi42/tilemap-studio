@@ -111,21 +111,12 @@ static Fl_RGB_Image *print_tileset(const Tile *tiles, std::vector<size_t> &tiles
 	return img;
 }
 
-static bool write_palette(const char *f, const std::vector<std::vector<Fl_Color>> &palettes, bool jasc, size_t nc) {
+static bool write_palette(const char *f, const std::vector<std::vector<Fl_Color>> &palettes,
+	Image_To_Tiles_Dialog::Palette_Format pal_fmt, size_t nc) {
 	FILE *file = fl_fopen(f, "w");
 	if (!file) { return false; }
-	if (jasc) {
-		fputs("JASC-PAL\n0100\n", file);
-		fprintf(file, "%d\n", (int)(palettes.size() * nc));
-		for (const std::vector<Fl_Color> &palette : palettes) {
-			for (Fl_Color c : palette) {
-				uchar r, g, b;
-				Fl::get_color(c, r, g, b);
-				fprintf(file, "%d %d %d\n", (int)r, (int)g, (int)b);
-			}
-		}
-	}
-	else {
+
+	if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::RGB) {
 		int p = 0;
 		for (const std::vector<Fl_Color> &palette : palettes) {
 			fprintf(file, "; palette %d\n", p++);
@@ -136,6 +127,46 @@ static bool write_palette(const char *f, const std::vector<std::vector<Fl_Color>
 			}
 		}
 	}
+	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::JASC) {
+		fputs("JASC-PAL\n0100\n", file);
+		fprintf(file, "%d\n", (int)(palettes.size() * nc));
+		for (const std::vector<Fl_Color> &palette : palettes) {
+			for (Fl_Color c : palette) {
+				uchar r, g, b;
+				Fl::get_color(c, r, g, b);
+				fprintf(file, "%d %d %d\n", (int)r, (int)g, (int)b);
+			}
+		}
+	}
+	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::ACT) {
+		for (const std::vector<Fl_Color> &palette : palettes) {
+			for (Fl_Color c : palette) {
+				uchar r, g, b;
+				Fl::get_color(c, r, g, b);
+				fprintf(file, "%c%c%c", r, g, b);
+			}
+		}
+		for (size_t i = palettes.size(); i < 256; i++) {
+			fputc(0, file);
+			fputc(0, file);
+			fputc(0, file);
+		}
+	}
+	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::GPL) {
+		fputs("GIMP Palette\n", file);
+		const char *name = fl_filename_name(f);
+		fprintf(file, "#Palette Name: %s\n", name);
+		fputs("#Description: \n", file);
+		fprintf(file, "#Colors: %zu\n", palettes.size());
+		for (const std::vector<Fl_Color> &palette : palettes) {
+			for (Fl_Color c : palette) {
+				uchar r, g, b;
+				Fl::get_color(c, r, g, b);
+				fprintf(file, "%d\t%d\t%d\t#%02x%02x%02x\n", (int)r, (int)g, (int)b, (int)r, (int)g, (int)b);
+			}
+		}
+	}
+
 	fclose(file);
 	return true;
 }
@@ -186,6 +217,7 @@ void Main_Window::image_to_tiles() {
 	// Build the palette
 
 	Tilemap_Format fmt = _image_to_tiles_dialog->format();
+	Image_To_Tiles_Dialog::Palette_Format pal_fmt = _image_to_tiles_dialog->palette_format();
 	bool is_plain = fmt == Tilemap_Format::PLAIN;
 	bool make_palette = _image_to_tiles_dialog->palette() && (format_has_palettes(fmt) || is_plain);
 
@@ -282,7 +314,7 @@ void Main_Window::image_to_tiles() {
 		// Create the palette file
 		const char *palette_filename = _image_to_tiles_dialog->palette_filename();
 		const char *palette_basename = fl_filename_name(palette_filename);
-		if (!write_palette(palette_filename, palettes, format_uses_jasc(fmt) || is_plain, max_colors)) {
+		if (!write_palette(palette_filename, palettes, pal_fmt, max_colors)) {
 			delete [] tiles;
 			std::string msg = "Could not write to ";
 			msg = msg + palette_basename + "!";
@@ -371,8 +403,7 @@ void Main_Window::image_to_tiles() {
 	// Create the tileset file
 
 	Fl_RGB_Image *timg = print_tileset(tiles, tileset, palettes, tile_palettes, max_colors, tileset_width());
-	Image::Result result = Image::write_image(tileset_filename, timg, make_palette ? is_plain ? Image::Type::IMAGE_TYPE_8BPP :
-		format_uses_jasc(fmt) ? Image::Type::IMAGE_TYPE_4BPP : Image::Type::IMAGE_TYPE_2BPP : Image::Type::IMAGE_TYPE_RGB);
+	Image::Result result = Image::write_image(tileset_filename, timg, make_palette ? format_color_depth(fmt) : 0);
 	delete timg;
 	if (result != Image::Result::IMAGE_OK) {
 		delete [] tiles;
