@@ -111,8 +111,41 @@ static Fl_RGB_Image *print_tileset(const Tile *tiles, std::vector<size_t> &tiles
 	return img;
 }
 
+static bool write_graphic_palette(const char *f, const std::vector<std::vector<Fl_Color>> &palettes,
+	Image_To_Tiles_Dialog::Palette_Format, size_t nc) {
+	int w = (int)nc, h = (int)palettes.size();
+	if (w == 256) { w /= 16; h *= 16; }
+	Fl_Image_Surface *surface = new Fl_Image_Surface(w, h);
+	surface->set_current();
+
+	fl_rectf(0, 0, w, h, FL_BLACK);
+	int i = 0;
+	for (const std::vector<Fl_Color> &palette : palettes) {
+		int j = 0;
+		for (Fl_Color c : palette) {
+			fl_color(c);
+			fl_point(j % w, i + j / w);
+			j++;
+		}
+		i++;
+	}
+
+	Fl_RGB_Image *img = surface->image();
+	delete surface;
+	Fl_Display_Device::display_device()->set_current();
+
+	Image::Result result = Image::write_image(f, img);
+	delete img;
+
+	return result == Image::Result::IMAGE_OK;
+}
+
 static bool write_palette(const char *f, const std::vector<std::vector<Fl_Color>> &palettes,
 	Image_To_Tiles_Dialog::Palette_Format pal_fmt, size_t nc) {
+	if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::PNG || pal_fmt == Image_To_Tiles_Dialog::Palette_Format::BMP) {
+		return write_graphic_palette(f, palettes, pal_fmt, nc);
+	}
+
 	FILE *file = fl_fopen(f, "w");
 	if (!file) { return false; }
 
@@ -128,8 +161,7 @@ static bool write_palette(const char *f, const std::vector<std::vector<Fl_Color>
 		}
 	}
 	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::JASC) {
-		fputs("JASC-PAL\n0100\n", file);
-		fprintf(file, "%d\n", (int)(palettes.size() * nc));
+		fprintf(file, "JASC-PAL\n0100\n%zu\n", palettes.size() * nc);
 		for (const std::vector<Fl_Color> &palette : palettes) {
 			for (Fl_Color c : palette) {
 				uchar r, g, b;
@@ -153,16 +185,13 @@ static bool write_palette(const char *f, const std::vector<std::vector<Fl_Color>
 		}
 	}
 	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::GPL) {
-		fputs("GIMP Palette\n", file);
 		const char *name = fl_filename_name(f);
-		fprintf(file, "#Palette Name: %s\n", name);
-		fputs("#Description: \n", file);
-		fprintf(file, "#Colors: %zu\n", palettes.size());
+		fprintf(file, "GIMP Palette\nName: %s\n", name);
 		for (const std::vector<Fl_Color> &palette : palettes) {
 			for (Fl_Color c : palette) {
 				uchar r, g, b;
 				Fl::get_color(c, r, g, b);
-				fprintf(file, "%d\t%d\t%d\t#%02x%02x%02x\n", (int)r, (int)g, (int)b, (int)r, (int)g, (int)b);
+				fprintf(file, "% 3d % 3d % 3d\t#%02x%02x%02x\n", (int)r, (int)g, (int)b, (int)r, (int)g, (int)b);
 			}
 		}
 	}

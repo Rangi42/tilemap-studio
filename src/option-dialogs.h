@@ -171,11 +171,11 @@ protected:
 	int refresh_content(int ww, int dy);
 };
 
-#define NUM_PALETTE_FORMATS 4
+#define NUM_PALETTE_FORMATS 6
 
 class Image_To_Tiles_Dialog : public Option_Dialog {
 public:
-	enum class Palette_Format { RGB, JASC, ACT, GPL };
+	enum class Palette_Format { RGB, JASC, ACT, GPL, PNG, BMP };
 private:
 	Label *_input_heading, * _output_heading;
 	Spacer *_input_spacer, *_output_spacer;

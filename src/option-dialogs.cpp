@@ -536,7 +536,9 @@ void Image_To_Tiles_Dialog::update_image_name() {
 	}
 }
 
-static const char *palette_exts[NUM_PALETTE_FORMATS] = {".pal", ".pal", ".act", ".gpl"};
+static const char *palette_names[NUM_PALETTE_FORMATS] = {"RGB", "JASC", "ACT", "GPL", "PNG", "BMP"};
+
+static const char *palette_exts[NUM_PALETTE_FORMATS] = {".pal", ".pal", ".act", ".gpl", ".pal.png", ".pal.bmp"};
 
 void Image_To_Tiles_Dialog::update_output_names() {
 	if (_tileset_filename.empty()) {
@@ -638,12 +640,11 @@ void Image_To_Tiles_Dialog::initialize_content() {
 		_format->add(format_name((Tilemap_Format)i));
 	}
 	_format->callback((Fl_Callback *)format_cb, this);
-	_palette_format->add("RGB");
-	_palette_format->add("JASC");
-	_palette_format->add("ACT");
-	_palette_format->add("GPL");
-	_palette_format->callback((Fl_Callback *)format_cb, this);
+	for (int i = 0; i < NUM_PALETTE_FORMATS; i++) {
+		_palette_format->add(palette_names[i]);
+	}
 	_palette_format->value(0);
+	_palette_format->callback((Fl_Callback *)format_cb, this);
 	_start_id->format("%03X");
 	_start_id->range(0x000, MAX_NUM_TILES-1);
 	_start_id->default_value(0x000);
