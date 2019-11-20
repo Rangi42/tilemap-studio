@@ -2080,6 +2080,7 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 			mw->_obp1_tb->do_callback();
 			mw->_priority_tb->redraw();
 			mw->_obp1_tb->redraw();
+			mw->select_tile(tt->id());
 			mw->select_palette(tt->palette());
 		}
 		else {
@@ -2089,6 +2090,9 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 			mw->_y_flip_tb->do_callback();
 			mw->_x_flip_tb->redraw();
 			mw->_y_flip_tb->redraw();
+			if (mw->_palettes_tab->active()) {
+				mw->select_palette(tt->palette());
+			}
 			mw->select_tile(tt->id());
 		}
 		tt->redraw();
