@@ -1697,7 +1697,8 @@ void Main_Window::print_cb(Fl_Widget *, Main_Window *mw) {
 	if (status == 1) { return; }
 
 	char filename[FL_PATH_MAX] = {};
-	add_dot_ext(mw->_image_print_chooser->filename(), ".png", filename);
+	const char *default_ext = mw->_image_print_chooser->filter_value() == 1 ? ".bmp" : ".png";
+	add_dot_ext(mw->_image_print_chooser->filename(), default_ext, filename);
 	const char *basename = fl_filename_name(filename);
 
 	if (status == -1) {
