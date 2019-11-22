@@ -31,8 +31,8 @@ inline bool format_has_attrmap(Tilemap_Format fmt) {
 	return fmt == Tilemap_Format::GBC_ATTRMAP;
 }
 
-inline bool format_can_be_affine(Tilemap_Format fmt) {
-	return fmt == Tilemap_Format::PLAIN;
+inline bool format_is_one_palette(Tilemap_Format fmt) {
+	return fmt == Tilemap_Format::PLAIN || fmt == Tilemap_Format::GBA_8BPP;
 }
 
 inline bool format_can_flip(Tilemap_Format fmt) {
@@ -43,11 +43,11 @@ inline bool format_can_flip(Tilemap_Format fmt) {
 
 inline bool format_has_palettes(Tilemap_Format fmt) {
 	return fmt == Tilemap_Format::SGB_BORDER || fmt == Tilemap_Format::GBC_ATTRS || fmt == Tilemap_Format::GBC_ATTRMAP ||
-		fmt == Tilemap_Format::GBA_4BPP || fmt == Tilemap_Format::GBA_8BPP || fmt == Tilemap_Format::SNES_ATTRS;
+		fmt == Tilemap_Format::GBA_4BPP || fmt == Tilemap_Format::SNES_ATTRS;
 }
 
 inline bool format_can_have_palettes(Tilemap_Format fmt) {
-	return format_has_palettes(fmt) || format_can_be_affine(fmt);
+	return format_has_palettes(fmt) || format_is_one_palette(fmt);
 }
 
 inline bool format_has_priority(Tilemap_Format fmt) {

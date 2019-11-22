@@ -34,8 +34,6 @@ int format_palettes_size(Tilemap_Format fmt) {
 		return 8;
 	case Tilemap_Format::GBA_4BPP:
 		return 16;
-	case Tilemap_Format::GBA_8BPP:
-		return 1;
 	case Tilemap_Format::SGB_BORDER:
 		return 4;
 	default:
@@ -45,15 +43,16 @@ int format_palettes_size(Tilemap_Format fmt) {
 
 int format_palette_size(Tilemap_Format fmt) {
 	switch (fmt) {
+	case Tilemap_Format::PLAIN:
+	case Tilemap_Format::GBA_8BPP:
+		return 256;
+	case Tilemap_Format::GBA_4BPP:
+	case Tilemap_Format::SNES_ATTRS:
+		return 16;
 	case Tilemap_Format::GBC_ATTRS:
 	case Tilemap_Format::GBC_ATTRMAP:
 	case Tilemap_Format::SGB_BORDER:
 		return 4;
-	case Tilemap_Format::GBA_4BPP:
-	case Tilemap_Format::SNES_ATTRS:
-		return 16;
-	case Tilemap_Format::GBA_8BPP:
-		return 256;
 	default:
 		return 0;
 	}
