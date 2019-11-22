@@ -121,7 +121,7 @@ void Tilemap_Options_Dialog::use_tilemap(const char *filename) {
 	_tilemap_header->copy_label(buffer);
 
 	format(guess_format(filename));
-	if (format() == Tilemap_Format::GBC_ATTRMAP) {
+	if (format_has_attrmap(format())) {
 		strcpy(buffer, filename);
 		fl_filename_setext(buffer, sizeof(buffer), ATTRMAP_EXT);
 		_attrmap_filename = buffer;
@@ -183,7 +183,7 @@ int Tilemap_Options_Dialog::refresh_content(int ww, int dy) {
 }
 
 void Tilemap_Options_Dialog::format_cb(Dropdown *, Tilemap_Options_Dialog *tod) {
-	if (tod->format() == Tilemap_Format::GBC_ATTRMAP) {
+	if (format_has_attrmap(tod->format())) {
 		tod->_attrmap_heading->activate();
 		tod->_attrmap->activate();
 		tod->_attrmap_name->activate();
@@ -568,14 +568,14 @@ void Image_To_Tiles_Dialog::update_output_names() {
 		char output_names[FL_PATH_MAX] = {};
 		strcpy(output_names, "Tilemap: ");
 		strcat(output_names, fl_filename_name(tilemap_filename()));
-		if (format() == Tilemap_Format::GBC_ATTRMAP) {
+		if (format_has_attrmap(format())) {
 			strcat(output_names, " / Attrmap: ");
 			strcat(output_names, fl_filename_name(attrmap_filename()));
 		}
 		_output_names->copy_label(output_names);
 	}
 
-	if (format_has_palettes(format()) || format() == Tilemap_Format::PLAIN) {
+	if (format_can_have_palettes(format())) {
 		_palette->activate();
 		_palette_format->activate();
 		_palette_name->activate();

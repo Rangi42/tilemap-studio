@@ -241,7 +241,7 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 		fclose(attr_file);
 	}
 
-	else if (fmt == Tilemap_Format::GBA_PALETTES) {
+	else if (fmt == Tilemap_Format::GBA_4BPP) {
 		if (c % 2) {
 			fclose(file);
 			return (_result = Result::TILEMAP_TOO_SHORT_ATTRS);
@@ -253,6 +253,20 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 			bool x_flip = !!(a & 0x04), y_flip = !!(a & 0x08);
 			int palette = (a & 0xF0) >> 4;
 			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip, false, false, palette));
+		}
+	}
+
+	else if (fmt == Tilemap_Format::GBA_8BPP) {
+		if (c % 2) {
+			fclose(file);
+			return (_result = Result::TILEMAP_TOO_SHORT_ATTRS);
+		}
+		for (long i = 0; i < c; i += 2) {
+			int v = fgetc(file);
+			int a = fgetc(file);
+			v = v | ((a & 0x03) << 8);
+			bool x_flip = !!(a & 0x04), y_flip = !!(a & 0x08);
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip, false, false, 0));
 		}
 	}
 
@@ -478,7 +492,7 @@ bool Tilemap::write_tiles(const char *tf, const char *af, std::vector<Tile_Tesse
 
 		fclose(attr_file);
 	}
-	else if (fmt == Tilemap_Format::GBA_PALETTES) {
+	else if (fmt == Tilemap_Format::GBA_4BPP) {
 		for (Tile_Tessera *tt : tiles) {
 			int v = (int)(tt->id() & 0xFF);
 			fputc(v, file);
@@ -486,6 +500,16 @@ bool Tilemap::write_tiles(const char *tf, const char *af, std::vector<Tile_Tesse
 			if (tt->x_flip()) { a |= 0x04; }
 			if (tt->y_flip()) { a |= 0x08; }
 			if (tt->palette() > -1) { a |= (tt->palette() << 4) & 0xF0; }
+			fputc(a, file);
+		}
+	}
+	else if (fmt == Tilemap_Format::GBA_8BPP) {
+		for (Tile_Tessera *tt : tiles) {
+			int v = (int)(tt->id() & 0xFF);
+			fputc(v, file);
+			int a = (tt->id() >> 8) & 0x03;
+			if (tt->x_flip()) { a |= 0x04; }
+			if (tt->y_flip()) { a |= 0x08; }
 			fputc(a, file);
 		}
 	}
