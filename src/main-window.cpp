@@ -1091,7 +1091,7 @@ void Main_Window::reformat_tilemap() {
 	Tilemap_Format fmt = _reformat_dialog->format();
 	if (Config::format() == fmt) { return; }
 
-	const char *filename = _tilemap_file.c_str();
+	const char *filename = _tilemap_file.empty() ? NEW_TILEMAP_NAME : _tilemap_file.c_str();
 	const char *basename = fl_filename_name(filename);
 
 	if (!_reformat_dialog->force() && !_tilemap.can_format_as(fmt)) {
