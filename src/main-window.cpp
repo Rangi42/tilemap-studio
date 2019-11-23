@@ -1019,7 +1019,7 @@ void Main_Window::update_active_controls() {
 	int tdy = _tilemap_scroll->y() - _left_tabs->y();
 	_left_tabs->resize(_left_tabs->x(), _left_tabs->y(), _left_tabs->w(), _tilemap_scroll->h() + tdy);
 
-	if (format_has_palettes(Config::format())) {
+	if (format_can_edit_palettes(Config::format())) {
 		_palettes_tab->activate();
 		int m = format_palettes_size(Config::format());
 		for (int i = 0; i < MAX_NUM_PALETTES; i++) {

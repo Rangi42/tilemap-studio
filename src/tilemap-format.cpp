@@ -31,11 +31,18 @@ int format_palettes_size(Tilemap_Format fmt) {
 	case Tilemap_Format::GBC_ATTRS:
 	case Tilemap_Format::GBC_ATTRMAP:
 	case Tilemap_Format::SNES_ATTRS:
+	case Tilemap_Format::GSC_TOWN_MAP:
+	case Tilemap_Format::PC_TOWN_MAP:
 		return 8;
 	case Tilemap_Format::GBA_4BPP:
 		return 16;
 	case Tilemap_Format::SGB_BORDER:
 		return 4;
+	case Tilemap_Format::PLAIN:
+	case Tilemap_Format::GBA_8BPP:
+		return 1;
+	case Tilemap_Format::RBY_TOWN_MAP:
+	case Tilemap_Format::POKEGEAR_CARD:
 	default:
 		return 0;
 	}
@@ -52,7 +59,11 @@ int format_palette_size(Tilemap_Format fmt) {
 	case Tilemap_Format::GBC_ATTRS:
 	case Tilemap_Format::GBC_ATTRMAP:
 	case Tilemap_Format::SGB_BORDER:
+	case Tilemap_Format::GSC_TOWN_MAP:
+	case Tilemap_Format::PC_TOWN_MAP:
 		return 4;
+	case Tilemap_Format::RBY_TOWN_MAP:
+	case Tilemap_Format::POKEGEAR_CARD:
 	default:
 		return 0;
 	}
@@ -69,7 +80,11 @@ int format_color_depth(Tilemap_Format fmt) {
 	case Tilemap_Format::GBC_ATTRS:
 	case Tilemap_Format::GBC_ATTRMAP:
 	case Tilemap_Format::SGB_BORDER:
+	case Tilemap_Format::GSC_TOWN_MAP:
+	case Tilemap_Format::PC_TOWN_MAP:
 		return 2;
+	case Tilemap_Format::RBY_TOWN_MAP:
+	case Tilemap_Format::POKEGEAR_CARD:
 	default:
 		return 0;
 	}

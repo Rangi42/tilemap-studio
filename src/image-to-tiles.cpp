@@ -65,7 +65,7 @@ static Fl_Color indexed_colors[16] = {
 	fl_rgb_color(0x33), fl_rgb_color(0x22), fl_rgb_color(0x11), fl_rgb_color(0x00)
 };
 
-static Fl_RGB_Image *print_tileset(const Tile *tiles, std::vector<size_t> &tileset,
+static Fl_RGB_Image *print_tileset(const Tile *tiles, const std::vector<size_t> &tileset,
 	const std::vector<std::vector<Fl_Color>> &palettes, const std::vector<int> &tile_palettes, size_t nc, int tw) {
 	int nt = (int)tileset.size();
 	tw = MIN(nt, tw);
@@ -146,7 +146,7 @@ static bool write_palette(const char *f, const std::vector<std::vector<Fl_Color>
 		return write_graphic_palette(f, palettes, pal_fmt, nc);
 	}
 
-	FILE *file = fl_fopen(f, "w");
+	FILE *file = fl_fopen(f, "wb");
 	if (!file) { return false; }
 
 	if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::RGB) {
@@ -200,6 +200,37 @@ static bool write_palette(const char *f, const std::vector<std::vector<Fl_Color>
 	return true;
 }
 
+static bool write_tilepal(const char *f, const std::vector<size_t> &tileset, const std::vector<int> &tile_palettes) {
+	FILE *file = fl_fopen(f, "wb");
+	if (!file) { return false; }
+
+	fputs("pertilepals: MACRO\nrept _NARG / 2\n\tdn \\2, \\1\n\tshift\n\tshift\nendr\nENDM\n", file);
+	size_t nt = tileset.size();
+	size_t np = MAX(nt, 16 * 3);
+	for (size_t i = 0; i < np; i++) {
+		if (!(i % 16)) {
+			fputs("\n\tpertilepals ", file);
+		}
+		if (i < nt) {
+			size_t ti = tileset[i];
+			fprintf(file, "%d", tile_palettes[ti]);
+		}
+		else {
+			fputc('0', file);
+		}
+		if (i < np - 1 && i % 16 != 15) {
+			fputs(", ", file);
+		}
+	}
+	if (np % 2) {
+		fputs(", 0", file);
+	}
+	fputc('\n', file);
+
+	fclose(file);
+	return true;
+}
+
 static double luminance(Fl_Color c) {
 	uchar r, g, b;
 	Fl::get_color(c, r, g, b);
@@ -247,8 +278,7 @@ void Main_Window::image_to_tiles() {
 
 	Tilemap_Format fmt = _image_to_tiles_dialog->format();
 	Image_To_Tiles_Dialog::Palette_Format pal_fmt = _image_to_tiles_dialog->palette_format();
-	bool make_palette = _image_to_tiles_dialog->palette() && format_can_have_palettes(fmt);
-	bool is_one_palette = format_is_one_palette(fmt);
+	bool make_palette = _image_to_tiles_dialog->palette() && format_can_make_palettes(fmt);
 
 	std::vector<std::vector<Fl_Color>> palettes;
 	std::vector<int> tile_palettes(n, make_palette ? 0 : -1);
@@ -258,7 +288,7 @@ void Main_Window::image_to_tiles() {
 		// Algorithm ported from superfamiconv
 		// <https://github.com/Optiroc/SuperFamiconv>
 
-		size_t max_palettes = is_one_palette ? 1 : (size_t)format_palettes_size(fmt);
+		size_t max_palettes = (size_t)format_palettes_size(fmt);
 
 		// Get the color set of each tile
 		std::vector<Color_Set> cs_tiles;
@@ -366,19 +396,17 @@ void Main_Window::image_to_tiles() {
 		}
 
 		// Associate tiles with palettes
-		if (!is_one_palette) {
-			for (size_t i = 0; i < n; i++) {
-				int pal = 0;
-				const Color_Set &s = cs_tiles[i];
-				for (size_t j = 0; j < np; j++) {
-					const Color_Set &c = cs_opt[j];
-					if (std::includes(c.begin(), c.end(), s.begin(), s.end())) {
-						pal = (int)j;
-						break;
-					}
+		for (size_t i = 0; i < n; i++) {
+			int pal = 0;
+			const Color_Set &s = cs_tiles[i];
+			for (size_t j = 0; j < np; j++) {
+				const Color_Set &c = cs_opt[j];
+				if (std::includes(c.begin(), c.end(), s.begin(), s.end())) {
+					pal = (int)j;
+					break;
 				}
-				tile_palettes[i] = pal;
 			}
+			tile_palettes[i] = pal;
 		}
 	}
 
@@ -427,6 +455,21 @@ void Main_Window::image_to_tiles() {
 
 	for (Tile_Tessera *tt : tilemap) {
 		delete tt;
+	}
+
+	// Create the tilepal file
+
+	if (make_palette && format_has_per_tile_palettes(fmt)) {
+		const char *tilepal_filename = _image_to_tiles_dialog->tilepal_filename();
+		const char *tilepal_basename = fl_filename_name(tilepal_filename);
+		if (!write_tilepal(tilepal_filename, tileset, tile_palettes)) {
+			delete [] tiles;
+			std::string msg = "Could not write to ";
+			msg = msg + tilepal_basename + "!";
+			_error_dialog->message(msg);
+			_error_dialog->show(this);
+			return;
+		}
 	}
 
 	// Create the tileset file

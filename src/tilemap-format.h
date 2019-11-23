@@ -14,6 +14,8 @@
 
 #define ATTRMAP_EXT ".attrmap"
 
+#define TILEPAL_EXT ".asm"
+
 #define NUM_FORMATS 11
 
 enum class Tilemap_Format { PLAIN, GBC_ATTRS, GBC_ATTRMAP, GBA_4BPP, GBA_8BPP, SGB_BORDER, SNES_ATTRS,
@@ -31,23 +33,23 @@ inline bool format_has_attrmap(Tilemap_Format fmt) {
 	return fmt == Tilemap_Format::GBC_ATTRMAP;
 }
 
-inline bool format_is_one_palette(Tilemap_Format fmt) {
-	return fmt == Tilemap_Format::PLAIN || fmt == Tilemap_Format::GBA_8BPP;
+inline bool format_can_make_palettes(Tilemap_Format fmt) {
+	return fmt != Tilemap_Format::RBY_TOWN_MAP && fmt != Tilemap_Format::POKEGEAR_CARD;
+}
+
+inline bool format_can_edit_palettes(Tilemap_Format fmt) {
+	return fmt == Tilemap_Format::GBC_ATTRS || fmt == Tilemap_Format::GBC_ATTRMAP || fmt == Tilemap_Format::GBA_4BPP ||
+		fmt == Tilemap_Format::SGB_BORDER || fmt == Tilemap_Format::SNES_ATTRS;
+}
+
+inline bool format_has_per_tile_palettes(Tilemap_Format fmt) {
+	return fmt == Tilemap_Format::GSC_TOWN_MAP || fmt == Tilemap_Format::PC_TOWN_MAP;
 }
 
 inline bool format_can_flip(Tilemap_Format fmt) {
-	return fmt == Tilemap_Format::SGB_BORDER || fmt == Tilemap_Format::GBC_ATTRS || fmt == Tilemap_Format::GBC_ATTRMAP ||
-		fmt == Tilemap_Format::GBA_4BPP || fmt == Tilemap_Format::GBA_8BPP || fmt == Tilemap_Format::SNES_ATTRS ||
+	return fmt == Tilemap_Format::GBC_ATTRS || fmt == Tilemap_Format::GBC_ATTRMAP || fmt == Tilemap_Format::GBA_4BPP ||
+		fmt == Tilemap_Format::GBA_8BPP || fmt == Tilemap_Format::SGB_BORDER || fmt == Tilemap_Format::SNES_ATTRS ||
 		fmt == Tilemap_Format::PC_TOWN_MAP;
-}
-
-inline bool format_has_palettes(Tilemap_Format fmt) {
-	return fmt == Tilemap_Format::SGB_BORDER || fmt == Tilemap_Format::GBC_ATTRS || fmt == Tilemap_Format::GBC_ATTRMAP ||
-		fmt == Tilemap_Format::GBA_4BPP || fmt == Tilemap_Format::SNES_ATTRS;
-}
-
-inline bool format_can_have_palettes(Tilemap_Format fmt) {
-	return format_has_palettes(fmt) || format_is_one_palette(fmt);
 }
 
 inline bool format_has_priority(Tilemap_Format fmt) {

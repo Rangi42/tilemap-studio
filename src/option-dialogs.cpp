@@ -501,7 +501,7 @@ Image_To_Tiles_Dialog::Image_To_Tiles_Dialog(const char *t) : Option_Dialog(340,
 	_image(NULL), _tileset(NULL), _image_name(NULL), _tileset_name(NULL), _format(NULL), _output_names(NULL),
 	_palette(NULL), _palette_format(NULL), _palette_name(NULL), _start_id(NULL), _use_space(NULL), _space_id(NULL),
 	_image_chooser(NULL), _tileset_chooser(NULL), _image_filename(), _tileset_filename(), _tilemap_filename(),
-	_attrmap_filename(), _palette_filename() {}
+	_attrmap_filename(), _palette_filename(), _tilepal_filename() {}
 
 Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
 	delete _input_heading;
@@ -546,6 +546,7 @@ void Image_To_Tiles_Dialog::update_output_names() {
 		_tilemap_filename.clear();
 		_attrmap_filename.clear();
 		_palette_filename.clear();
+		_tilepal_filename.clear();
 		_output_names->label("Tilemap: " NO_FILE_SELECTED_LABEL);
 	}
 	else {
@@ -565,6 +566,10 @@ void Image_To_Tiles_Dialog::update_output_names() {
 		fl_filename_setext(output_filename, sizeof(output_filename), palette_ext);
 		_palette_filename = output_filename;
 
+		strcpy(output_filename, tileset_filename());
+		fl_filename_setext(output_filename, sizeof(output_filename), TILEPAL_EXT);
+		_tilepal_filename = output_filename;
+
 		char output_names[FL_PATH_MAX] = {};
 		strcpy(output_names, "Tilemap: ");
 		strcat(output_names, fl_filename_name(tilemap_filename()));
@@ -575,7 +580,7 @@ void Image_To_Tiles_Dialog::update_output_names() {
 		_output_names->copy_label(output_names);
 	}
 
-	if (format_can_have_palettes(format())) {
+	if (format_can_make_palettes(format())) {
 		_palette->activate();
 		_palette_format->activate();
 		_palette_name->activate();
@@ -583,9 +588,13 @@ void Image_To_Tiles_Dialog::update_output_names() {
 			_palette_name->label(NO_FILE_SELECTED_LABEL);
 		}
 		else {
-			char buffer[FL_PATH_MAX] = {};
-			strcpy(buffer, fl_filename_name(palette_filename()));
-			_palette_name->copy_label(buffer);
+			char output_names[FL_PATH_MAX] = {};
+			strcpy(output_names, fl_filename_name(palette_filename()));
+			if (format_has_per_tile_palettes(format())) {
+				strcat(output_names, " / ");
+				strcat(output_names, fl_filename_name(tilepal_filename()));
+			}
+			_palette_name->copy_label(output_names);
 		}
 	}
 	else {

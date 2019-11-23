@@ -191,7 +191,7 @@ private:
 	OS_Check_Button *_use_space;
 	Default_Hex_Spinner *_space_id;
 	Fl_Native_File_Chooser *_image_chooser, *_tileset_chooser;
-	std::string _image_filename, _tileset_filename, _tilemap_filename, _attrmap_filename, _palette_filename;
+	std::string _image_filename, _tileset_filename, _tilemap_filename, _attrmap_filename, _palette_filename, _tilepal_filename;
 public:
 	Image_To_Tiles_Dialog(const char *t);
 	~Image_To_Tiles_Dialog();
@@ -200,6 +200,7 @@ public:
 	inline const char *tilemap_filename(void) const { return _tilemap_filename.c_str(); }
 	inline const char *attrmap_filename(void) const { return _attrmap_filename.c_str(); }
 	inline const char *palette_filename(void) const { return _palette_filename.c_str(); }
+	inline const char *tilepal_filename(void) const { return _tilepal_filename.c_str(); }
 	inline Tilemap_Format format(void) const { return (Tilemap_Format)_format->value(); }
 	inline void format(Tilemap_Format fmt) { initialize(); _format->value((int)fmt); }
 	inline bool palette(void) const { return !!_palette->value(); }
