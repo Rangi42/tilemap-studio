@@ -616,6 +616,26 @@ void Image_To_Tiles_Dialog::update_ok_button() {
 	}
 }
 
+Image_To_Tiles_Dialog::Palette_Format Image_To_Tiles_Dialog::default_palette_format(Tilemap_Format fmt) {
+	switch (fmt) {
+	case Tilemap_Format::GBA_4BPP:
+	case Tilemap_Format::GBA_8BPP:
+		return Palette_Format::JASC;
+	case Tilemap_Format::GBC_ATTRS:
+	case Tilemap_Format::GBC_ATTRMAP:
+	case Tilemap_Format::SGB_BORDER:
+	case Tilemap_Format::RBY_TOWN_MAP:
+	case Tilemap_Format::GSC_TOWN_MAP:
+	case Tilemap_Format::PC_TOWN_MAP:
+	case Tilemap_Format::POKEGEAR_CARD:
+		return Palette_Format::RGB;
+	case Tilemap_Format::PLAIN:
+	case Tilemap_Format::SNES_ATTRS:
+	default:
+		return palette_format();
+	}
+}
+
 void Image_To_Tiles_Dialog::initialize_content() {
 	// Populate content group
 	_input_heading = new Label(0, 0, 0, 0, "Input:");
@@ -653,7 +673,7 @@ void Image_To_Tiles_Dialog::initialize_content() {
 		_palette_format->add(palette_names[i]);
 	}
 	_palette_format->value(0);
-	_palette_format->callback((Fl_Callback *)format_cb, this);
+	_palette_format->callback((Fl_Callback *)palette_format_cb, this);
 	_start_id->format("%03X");
 	_start_id->range(0x000, MAX_NUM_TILES-1);
 	_start_id->default_value(0x000);
@@ -781,6 +801,12 @@ void Image_To_Tiles_Dialog::tileset_cb(Fl_Widget *, Image_To_Tiles_Dialog *itd) 
 }
 
 void Image_To_Tiles_Dialog::format_cb(Dropdown *, Image_To_Tiles_Dialog *itd) {
+	Palette_Format pal_fmt = itd->default_palette_format(itd->format());
+	itd->_palette_format->value((int)pal_fmt);
+	itd->update_output_names();
+}
+
+void Image_To_Tiles_Dialog::palette_format_cb(Dropdown *, Image_To_Tiles_Dialog *itd) {
 	itd->update_output_names();
 }
 

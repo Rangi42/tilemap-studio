@@ -213,6 +213,7 @@ private:
 	void update_image_name(void);
 	void update_output_names(void);
 	void update_ok_button(void);
+	Palette_Format default_palette_format(Tilemap_Format fmt);
 protected:
 	void initialize_content(void);
 	int refresh_content(int ww, int dy);
@@ -220,6 +221,7 @@ private:
 	static void image_cb(Fl_Widget *w, Image_To_Tiles_Dialog *itd);
 	static void tileset_cb(Fl_Widget *w, Image_To_Tiles_Dialog *itd);
 	static void format_cb(Dropdown *dd, Image_To_Tiles_Dialog *itd);
+	static void palette_format_cb(Dropdown *dd, Image_To_Tiles_Dialog *itd);
 	static void use_space_cb(OS_Check_Button *cb, Image_To_Tiles_Dialog *itd);
 };
 
