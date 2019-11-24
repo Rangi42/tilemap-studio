@@ -213,7 +213,7 @@ private:
 	void update_image_name(void);
 	void update_output_names(void);
 	void update_ok_button(void);
-	Palette_Format default_palette_format(Tilemap_Format fmt);
+	Palette_Format default_palette_format(Tilemap_Format fmt) const;
 protected:
 	void initialize_content(void);
 	int refresh_content(int ww, int dy);

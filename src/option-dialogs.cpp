@@ -616,7 +616,7 @@ void Image_To_Tiles_Dialog::update_ok_button() {
 	}
 }
 
-Image_To_Tiles_Dialog::Palette_Format Image_To_Tiles_Dialog::default_palette_format(Tilemap_Format fmt) {
+Image_To_Tiles_Dialog::Palette_Format Image_To_Tiles_Dialog::default_palette_format(Tilemap_Format fmt) const {
 	switch (fmt) {
 	case Tilemap_Format::GBA_4BPP:
 	case Tilemap_Format::GBA_8BPP:

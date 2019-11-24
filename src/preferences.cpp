@@ -1,7 +1,7 @@
 #pragma warning(push, 0)
 #include <FL/Fl_Preferences.H>
 #include <FL/filename.H>
-#include <FL/fl_utf8.H>
+#include <FL/fl_utf8.h>
 #pragma warning(pop)
 
 #include "version.h"
