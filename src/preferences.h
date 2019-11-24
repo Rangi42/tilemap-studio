@@ -14,6 +14,7 @@ private:
 	static Fl_Preferences *_preferences;
 public:
 	static void initialize(const char *argv0);
+	static void close(void);
 	static int get(const char *key, int default_ = 0);
 	static void set(const char *key, int value);
 	static std::string get_string(const char *key);

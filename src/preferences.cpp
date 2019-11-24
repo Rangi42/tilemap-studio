@@ -69,6 +69,12 @@ void Preferences::initialize(const char *argv0) {
 	_preferences = new Fl_Preferences(Fl_Preferences::USER, PROGRAM_AUTHOR, PROGRAM_NAME);
 }
 
+void Preferences::close() {
+	_preferences->flush();
+	delete _preferences;
+	_preferences = NULL;
+}
+
 int Preferences::get(const char *key, int default_) {
 	int value;
 	_preferences->get(key, value, default_);

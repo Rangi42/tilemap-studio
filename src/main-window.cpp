@@ -1765,6 +1765,8 @@ void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 		Preferences::set("resize-anchor", mw->_resize_dialog->anchor());
 	}
 
+	Preferences::close();
+
 	exit(EXIT_SUCCESS);
 }
 
