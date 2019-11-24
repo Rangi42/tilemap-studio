@@ -579,7 +579,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		);
 
 	update_icons();
-	update_zoom();
+	update_zoom(Config::zoom());
 	update_recent_tilemaps();
 	update_recent_tilesets();
 	update_tilemap_metadata();
@@ -761,7 +761,7 @@ void Main_Window::update_icons() {
 	_tilemap_options_dialog->update_icons();
 }
 
-void Main_Window::update_zoom() {
+void Main_Window::update_zoom(int old_zoom) {
 	char buffer[64] = {};
 	sprintf(buffer, "Zoom: %dx", Config::zoom());
 	_zoom_level->copy_label(buffer);
@@ -782,7 +782,11 @@ void Main_Window::update_zoom() {
 		_zoom_in_tb->activate();
 	}
 	Tile_State::update_zoom();
+	int px = _tilemap_scroll->xposition(), py = _tilemap_scroll->yposition();
 	tilemap_width_tb_cb(NULL, this);
+	int sx = px * Config::zoom() / old_zoom, sy = py * Config::zoom() / old_zoom;
+	_tilemap_scroll->scroll_to(sx, sy);
+	_tilemap_scroll->redraw();
 }
 
 void Main_Window::update_selection_status() {
@@ -1856,24 +1860,27 @@ void Main_Window::high_contrast_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 }
 
 void Main_Window::zoom_in_cb(Fl_Widget *, Main_Window *mw) {
+	int old_zoom = Config::zoom();
 	if (Config::zoom() < MAX_ZOOM) {
 		Config::zoom(Config::zoom() + 1);
 	}
-	mw->update_zoom();
+	mw->update_zoom(old_zoom);
 	mw->redraw();
 }
 
 void Main_Window::zoom_out_cb(Fl_Widget *, Main_Window *mw) {
+	int old_zoom = Config::zoom();
 	if (Config::zoom() > MIN_ZOOM) {
 		Config::zoom(Config::zoom() - 1);
 	}
-	mw->update_zoom();
+	mw->update_zoom(old_zoom);
 	mw->redraw();
 }
 
 void Main_Window::zoom_reset_cb(Fl_Widget *, Main_Window *mw) {
+	int old_zoom = Config::zoom();
 	Config::zoom(DEFAULT_ZOOM);
-	mw->update_zoom();
+	mw->update_zoom(old_zoom);
 	mw->redraw();
 }
 

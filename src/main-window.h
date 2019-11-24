@@ -114,7 +114,7 @@ public:
 	int handle(int event);
 	void clear_flips(void);
 	void update_icons(void);
-	void update_zoom(void);
+	void update_zoom(int old_zoom);
 	void update_selection_status(void);
 	void update_status(Tile_Tessera *tt);
 	void edit_tile(Tile_Tessera *tt);
