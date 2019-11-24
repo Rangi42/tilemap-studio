@@ -501,7 +501,7 @@ void Main_Window::image_to_tiles() {
 	update_active_controls();
 	redraw();
 
-	open_tilemap(tilemap_filename);
+	open_tilemap(tilemap_filename, w);
 	unload_tilesets_cb(NULL, this);
 	add_tileset(tileset_filename, start_id);
 }
