@@ -461,7 +461,7 @@ void Add_Tileset_Dialog::limit_tileset_options(const char *filename) {
 void Add_Tileset_Dialog::initialize_content() {
 	// Populate content group
 	_tileset_header = new Label(0, 0, 0, 0);
-	_start_id = new Default_Hex_Spinner(0, 0, 0, 0, "Start at ID:");
+	_start_id = new Default_Hex_Spinner(0, 0, 0, 0, "Start at ID: $");
 	_offset = new Default_Spinner(0, 0, 0, 0, "Offset:");
 	_length = new Default_Spinner(0, 0, 0, 0, "Length:");
 	// Initialize content group's children
@@ -496,7 +496,7 @@ int Add_Tileset_Dialog::refresh_content(int ww, int dy) {
 	return ch;
 }
 
-Image_To_Tiles_Dialog::Image_To_Tiles_Dialog(const char *t) : Option_Dialog(340, t), _input_heading(NULL),
+Image_To_Tiles_Dialog::Image_To_Tiles_Dialog(const char *t) : Option_Dialog(360, t), _input_heading(NULL),
 	_output_heading(NULL), _input_spacer(NULL), _output_spacer(NULL), _image_heading(NULL), _tileset_heading(NULL),
 	_image(NULL), _tileset(NULL), _image_name(NULL), _tileset_name(NULL), _format(NULL), _output_names(NULL),
 	_palette(NULL), _palette_format(NULL), _palette_name(NULL), _start_id(NULL), _use_space(NULL), _space_id(NULL),
@@ -653,8 +653,8 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_palette = new OS_Check_Button(0, 0, 0, 0, "Palette:");
 	_palette_format = new Dropdown(0, 0, 0, 0);
 	_palette_name = new Label(0, 0, 0, 0, NO_FILE_SELECTED_LABEL);
-	_start_id = new Default_Hex_Spinner(0, 0, 0, 0, "Start at ID:");
-	_use_space = new OS_Check_Button(0, 0, 0, 0, "Blank Spaces Use ID:");
+	_start_id = new Default_Hex_Spinner(0, 0, 0, 0, "Start at ID: $");
+	_use_space = new OS_Check_Button(0, 0, 0, 0, "Blank Spaces Use ID: $");
 	_space_id = new Default_Hex_Spinner(0, 0, 0, 0);
 	_image_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
 	_tileset_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
