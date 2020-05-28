@@ -1174,7 +1174,8 @@ void Main_Window::edit_tile(Tile_Tessera *tt) {
 				if (tti && index < n) {
 					const Tile_State &ps = tms.state(index);
 					Tile_State ts(ps.id, x_flip() != ps.x_flip, y_flip() != ps.y_flip, ps.priority, ps.obp1, ps.palette);
-					tti->assign(ts, a);
+					tti->attributes(ts);
+					if (!a) { tti->tile(ts); }
 					tti->damage(1);
 				}
 			}
