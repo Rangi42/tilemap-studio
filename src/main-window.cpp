@@ -1141,15 +1141,14 @@ void Main_Window::edit_tile(Tile_Tessera *tt) {
 	bool a = Config::show_attributes();
 	size_t tx = tt->col(), ty = tt->row();
 	size_t ow = _selection.width(), oh = _selection.height();
-	ow = MIN(ow, _tilemap.width() - tx);
-	oh = MIN(oh, _tilemap.height() - ty);
 	size_t ox = _selection.left_col(), oy = _selection.top_row();
+	size_t mx = MIN(ow, _tilemap.width() - tx), my = MIN(oh, _tilemap.height() - ty);
 	if (_selection.from_tileset()) {
 		uint16_t n = (uint16_t)format_tileset_size(Config::format());
 		size_t tw = (size_t)tileset_width();
-		for (size_t iy = 0; iy < oh; iy++) {
+		for (size_t iy = 0; iy < my; iy++) {
 			size_t dy = y_flip() ? oh - iy - 1 : iy;
-			for (size_t ix = 0; ix < ow; ix++) {
+			for (size_t ix = 0; ix < mx; ix++) {
 				size_t dx = x_flip() ? ow - ix - 1 : ix;
 				uint16_t id = (uint16_t)((oy + dy) * tw + ox + dx);
 				Tile_Tessera *tti = _tilemap.tile(tx+ix, ty+iy);
@@ -1165,9 +1164,9 @@ void Main_Window::edit_tile(Tile_Tessera *tt) {
 		const Tilemap_State &tms = _tilemap.last_state();
 		size_t n = _tilemap.size();
 		size_t tw = _tilemap.width();
-		for (size_t iy = 0; iy < oh; iy++) {
+		for (size_t iy = 0; iy < my; iy++) {
 			size_t dy = y_flip() ? oh - iy - 1 : iy;
-			for (size_t ix = 0; ix < ow; ix++) {
+			for (size_t ix = 0; ix < mx; ix++) {
 				size_t dx = x_flip() ? ow - ix - 1 : ix;
 				size_t index = (oy + dy) * tw + ox + dx;
 				Tile_Tessera *tti = _tilemap.tile(tx+ix, ty+iy);
