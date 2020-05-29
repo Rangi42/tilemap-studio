@@ -161,12 +161,12 @@ static bool write_palette(const char *f, const std::vector<std::vector<Fl_Color>
 		}
 	}
 	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::JASC) {
-		fprintf(file, "JASC-PAL\n0100\n%zu\n", palettes.size() * nc);
+		fprintf(file, "JASC-PAL\r\n0100\r\n%zu\r\n", palettes.size() * nc);
 		for (const std::vector<Fl_Color> &palette : palettes) {
 			for (Fl_Color c : palette) {
 				uchar r, g, b;
 				Fl::get_color(c, r, g, b);
-				fprintf(file, "%d %d %d\n", (int)r, (int)g, (int)b);
+				fprintf(file, "%d %d %d\r\n", (int)r, (int)g, (int)b);
 			}
 		}
 	}
