@@ -1322,7 +1322,7 @@ void Main_Window::open_tilemap(const char *filename, size_t width, size_t height
 	char buffer[FL_PATH_MAX] = {};
 	sprintf(buffer, PROGRAM_NAME " - %s", basename);
 	copy_label(buffer);
-	sprintf(buffer, "%s", basename);
+	strcpy(buffer, basename);
 	fl_filename_setext(buffer, sizeof(buffer), ".png");
 	_image_print_chooser->preset_file(buffer);
 
@@ -1437,7 +1437,7 @@ void Main_Window::load_corresponding_tileset(const char *filename) {
 	const char *extensions[8] = {".png", ".bmp", ".1bpp", ".2bpp", ".4bpp", ".8bpp", ".1bpp.lz", ".2bpp.lz"};
 	for (int i = 0; i < 8; i++) {
 		const char *ext = extensions[i];
-		sprintf(buffer, "%s", filename);
+		strcpy(buffer, filename);
 		fl_filename_setext(buffer, sizeof(buffer), ext);
 		if (file_exists(buffer)) {
 			load_tileset(buffer);
