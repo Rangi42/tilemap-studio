@@ -52,11 +52,13 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	int grid_config = Preferences::get("grid", Config::grid());
 	int rainbow_tiles_config = Preferences::get("rainbow", Config::rainbow_tiles());
 	int bold_palettes_config = Preferences::get("bold", Config::bold_palettes());
+	int auto_tileset_config = Preferences::get("tileset", Config::auto_load_tileset());
 	Config::format(format_config);
 	Config::zoom(zoom_config);
 	Config::grid(!!grid_config);
 	Config::rainbow_tiles(!!rainbow_tiles_config);
 	Config::bold_palettes(!!bold_palettes_config);
+	Config::auto_load_tileset(!!auto_tileset_config);
 
 	for (int i = 0; i < NUM_RECENT; i++) {
 		_recent_tilemaps[i] = Preferences::get_string(Fl_Preferences::Name("recent-map%d", i));
@@ -353,6 +355,10 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		OS_MENU_ITEM("Re&format...", FL_COMMAND + 'f', (Fl_Callback *)reformat_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&Image to Tiles...", FL_COMMAND + 'x', (Fl_Callback *)image_to_tiles_cb, this, 0),
 		{},
+		OS_SUBMENU("&Options"),
+		OS_MENU_ITEM("&Auto-Load Tileset", 0, (Fl_Callback *)auto_load_tileset_cb, this,
+			FL_MENU_TOGGLE | (Config::auto_load_tileset() ? FL_MENU_VALUE : 0)),
+	{},
 		OS_SUBMENU("&Help"),
 		OS_MENU_ITEM("&Help", FL_F + 1, (Fl_Callback *)help_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&About", FL_COMMAND + '/', (Fl_Callback *)about_cb, this, 0),
@@ -1320,6 +1326,11 @@ void Main_Window::open_tilemap(const char *filename, size_t width, size_t height
 	fl_filename_setext(buffer, sizeof(buffer), ".png");
 	_image_print_chooser->preset_file(buffer);
 
+	// auto-load corresponding tileset
+	if (filename && Config::auto_load_tileset()) {
+		load_corresponding_tileset(filename);
+	}
+
 	store_recent_tilemap();
 	update_tilemap_metadata();
 	update_status(NULL);
@@ -1419,6 +1430,20 @@ void Main_Window::load_recent_tileset(int n) {
 
 	const char *filename = _recent_tilesets[n].c_str();
 	load_tileset(filename);
+}
+
+void Main_Window::load_corresponding_tileset(const char *filename) {
+	char buffer[FL_PATH_MAX] = {};
+	const char *extensions[8] = {".png", ".bmp", ".1bpp", ".2bpp", ".4bpp", ".8bpp", ".1bpp.lz", ".2bpp.lz"};
+	for (int i = 0; i < 8; i++) {
+		const char *ext = extensions[i];
+		sprintf(buffer, "%s", filename);
+		fl_filename_setext(buffer, sizeof(buffer), ext);
+		if (file_exists(buffer)) {
+			load_tileset(buffer);
+			return;
+		}
+	}
 }
 
 void Main_Window::select_tile(uint16_t id) {
@@ -1755,6 +1780,7 @@ void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 	Preferences::set("grid", Config::grid());
 	Preferences::set("rainbow", Config::rainbow_tiles());
 	Preferences::set("bold", Config::bold_palettes());
+	Preferences::set("tileset", Config::auto_load_tileset());
 	Preferences::set("alpha", (int)mw->_transparency->value());
 	for (int i = 0; i < NUM_RECENT; i++) {
 		Preferences::set_string(Fl_Preferences::Name("recent-map%d", i), mw->_recent_tilemaps[i]);
@@ -1978,6 +2004,10 @@ void Main_Window::image_to_tiles_cb(Fl_Widget *, Main_Window *mw) {
 	mw->_image_to_tiles_dialog->show(mw);
 	if (mw->_image_to_tiles_dialog->canceled()) { return; }
 	mw->image_to_tiles();
+}
+
+void Main_Window::auto_load_tileset_cb(Fl_Menu_ *m, Main_Window *) {
+	Config::auto_load_tileset(!!m->mvalue()->value());
 }
 
 void Main_Window::help_cb(Fl_Widget *, Main_Window *mw) {

@@ -7,3 +7,4 @@ bool Config::_rainbow_tiles = false;
 bool Config::_bold_palettes = true;
 uint16_t Config::_highlight_id = (uint16_t)-1;
 bool Config::_show_attributes = false;
+bool Config::_auto_load_tileset = true;

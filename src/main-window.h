@@ -43,7 +43,7 @@ private:
 	Fl_Menu_Item *_classic_theme_mi = NULL, *_aero_theme_mi = NULL, *_metro_theme_mi = NULL, *_aqua_theme_mi = NULL,
 		*_greybird_theme_mi = NULL, *_metal_theme_mi = NULL, *_blue_theme_mi = NULL, *_olive_theme_mi = NULL,
 		*_rose_gold_theme_mi = NULL, *_dark_theme_mi = NULL, *_high_contrast_theme_mi = NULL;
-	Fl_Menu_Item *_grid_mi = NULL, *_rainbow_tiles_mi = NULL, *_bold_palettes_mi = NULL;
+	Fl_Menu_Item *_grid_mi = NULL, *_rainbow_tiles_mi = NULL, *_bold_palettes_mi = NULL, *_auto_tileset_mi = NULL;
 	Toolbar_Button *_new_tb, *_open_tb, *_save_tb, *_print_tb, *_load_tb, *_add_tb, *_reload_tb, *_undo_tb, *_redo_tb,
 		*_zoom_in_tb, *_zoom_out_tb;
 	Toolbar_Toggle_Button *_grid_tb, *_rainbow_tiles_tb, *_bold_palettes_tb;
@@ -127,6 +127,7 @@ public:
 	inline void load_tileset(const char *filename) { unload_tilesets_cb(NULL, this); add_tileset(filename); }
 	void add_tileset(const char *filename, int start = 0x00, int offset = 0, int length = 0);
 	void load_recent_tileset(int n);
+	void load_corresponding_tileset(const char *filename);
 private:
 	void store_recent_tilemap(void);
 	void update_recent_tilemaps(void);
@@ -191,6 +192,8 @@ private:
 	static void resize_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void reformat_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void image_to_tiles_cb(Fl_Widget *w, Main_Window *mw);
+	// Options menu
+	static void auto_load_tileset_cb(Fl_Menu_ *m, Main_Window *mw);
 	// Help menu
 	static void help_cb(Fl_Widget *w, Main_Window *mw);
 	static void about_cb(Fl_Widget *w, Main_Window *mw);
