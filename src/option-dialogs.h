@@ -19,6 +19,7 @@
 
 #define NO_FILE_SELECTED_LABEL "No file selected"
 #define NO_FILES_SELECTED_LABEL "No file(s) selected"
+#define NO_FILES_DETERMINED_LABEL "No file(s) determined"
 
 class Option_Dialog {
 protected:
@@ -213,23 +214,22 @@ class Image_To_Tiles_Dialog : public Option_Dialog {
 public:
 	enum class Palette_Format { RGB, JASC, ACT, GPL, PNG, BMP };
 private:
-	Label *_input_heading, * _output_heading;
-	Spacer *_input_spacer, *_output_spacer;
-	Label * _image_heading, * _tileset_heading;
+	Label *_tileset_heading, * _tilemap_heading;
+	Spacer *_tileset_spacer, *_tilemap_spacer, *_palette_spacer;
+	Label * _input_heading, * _output_heading;
 	Toolbar_Button *_image, *_tileset;
 	Label_Button *_image_name, *_tileset_name;
+	Label *_tilemap_name;
 	Dropdown *_format;
-	Label *_output_names;
-	OS_Check_Button *_palette;
-	Dropdown *_palette_format;
-	Label *_palette_name;
-	OS_Check_Button *_color_zero;
-	OS_Hex_Input *_color_zero_rgb;
-	Fl_Button *_color_zero_swatch;
-	Label *_color_zero_note;
 	Default_Hex_Spinner *_start_id;
 	OS_Check_Button *_use_space;
 	Default_Hex_Spinner *_space_id;
+	OS_Check_Button *_palette;
+	Label *_palette_name;
+	Dropdown *_palette_format;
+	OS_Check_Button *_color_zero;
+	OS_Hex_Input *_color_zero_rgb;
+	Fl_Button *_color_zero_swatch;
 	Fl_Native_File_Chooser *_image_chooser, *_tileset_chooser;
 	std::string _image_filename, _tileset_filename, _tilemap_filename, _attrmap_filename, _palette_filename, _tilepal_filename;
 public:

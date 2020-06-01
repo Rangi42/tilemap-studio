@@ -608,36 +608,36 @@ int Add_Tileset_Dialog::refresh_content(int ww, int dy) {
 	return ch;
 }
 
-Image_To_Tiles_Dialog::Image_To_Tiles_Dialog(const char *t) : Option_Dialog(360, t), _input_heading(NULL),
-	_output_heading(NULL), _input_spacer(NULL), _output_spacer(NULL), _image_heading(NULL), _tileset_heading(NULL),
-	_image(NULL), _tileset(NULL), _image_name(NULL), _tileset_name(NULL), _format(NULL), _output_names(NULL), _palette(NULL),
-	_palette_format(NULL), _palette_name(NULL), _color_zero(NULL), _color_zero_rgb(NULL), _color_zero_swatch(NULL),
-	_color_zero_note(NULL), _start_id(NULL), _use_space(NULL), _space_id(NULL), _image_chooser(NULL), _tileset_chooser(NULL),
-	_image_filename(), _tileset_filename(), _tilemap_filename(), _attrmap_filename(), _palette_filename(), _tilepal_filename() {}
+Image_To_Tiles_Dialog::Image_To_Tiles_Dialog(const char *t) : Option_Dialog(360, t), _tileset_heading(NULL), _tilemap_heading(NULL),
+	_tileset_spacer(NULL), _tilemap_spacer(NULL), _palette_spacer(NULL), _input_heading(NULL), _output_heading(NULL), _image(NULL),
+	_tileset(NULL), _image_name(NULL), _tileset_name(NULL), _tilemap_name(NULL), _format(NULL), _start_id(NULL), _use_space(NULL),
+	_space_id(NULL), _palette(NULL), _palette_name(NULL), _palette_format(NULL),_color_zero(NULL), _color_zero_rgb(NULL),
+	_color_zero_swatch(NULL), _image_chooser(NULL), _tileset_chooser(NULL), _image_filename(), _tileset_filename(), _tilemap_filename(),
+	_attrmap_filename(), _palette_filename(), _tilepal_filename() {}
 
 Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
+	delete _tileset_heading;
+	delete _tilemap_heading;
+	delete _tileset_spacer;
+	delete _tilemap_spacer;
+	delete _palette_spacer;
 	delete _input_heading;
 	delete _output_heading;
-	delete _input_spacer;
-	delete _output_spacer;
-	delete _image_heading;
-	delete _tileset_heading;
 	delete _image;
 	delete _tileset;
 	delete _image_name;
 	delete _tileset_name;
+	delete _tilemap_name;
 	delete _format;
-	delete _output_names;
-	delete _palette;
-	delete _palette_format;
-	delete _palette_name;
-	delete _color_zero;
-	delete _color_zero_rgb;
-	delete _color_zero_swatch;
-	delete _color_zero_note;
 	delete _start_id;
 	delete _use_space;
 	delete _space_id;
+	delete _palette;
+	delete _palette_name;
+	delete _palette_format;
+	delete _color_zero;
+	delete _color_zero_rgb;
+	delete _color_zero_swatch;
 	delete _image_chooser;
 	delete _tileset_chooser;
 }
@@ -688,7 +688,7 @@ void Image_To_Tiles_Dialog::update_output_names() {
 		_attrmap_filename.clear();
 		_palette_filename.clear();
 		_tilepal_filename.clear();
-		_output_names->label("Tilemap: " NO_FILE_SELECTED_LABEL);
+		_tilemap_name->label("Output: " NO_FILES_DETERMINED_LABEL);
 	}
 	else {
 		_tileset_name->copy_label(fl_filename_name(tileset_filename()));
@@ -711,30 +711,31 @@ void Image_To_Tiles_Dialog::update_output_names() {
 		fl_filename_setext(output_filename, sizeof(output_filename), TILEPAL_EXT);
 		_tilepal_filename = output_filename;
 
-		char output_names[FL_PATH_MAX] = {};
-		strcpy(output_names, "Tilemap: ");
-		strcat(output_names, fl_filename_name(tilemap_filename()));
+		char tilemap_name[FL_PATH_MAX] = {};
+		strcpy(tilemap_name, "Output: ");
+		strcat(tilemap_name, fl_filename_name(tilemap_filename()));
 		if (format_has_attrmap(format())) {
-			strcat(output_names, " / Attrmap: ");
-			strcat(output_names, fl_filename_name(attrmap_filename()));
+			strcat(tilemap_name, " / ");
+			strcat(tilemap_name, fl_filename_name(attrmap_filename()));
 		}
-		_output_names->copy_label(output_names);
+		_tilemap_name->copy_label(tilemap_name);
 	}
 
 	if (format_can_make_palettes(format())) {
 		_palette->activate();
 		_palette->do_callback();
 		if (_palette_filename.empty()) {
-			_palette_name->label(NO_FILE_SELECTED_LABEL);
+			_palette_name->label("Output: " NO_FILES_DETERMINED_LABEL);
 		}
 		else {
-			char output_names[FL_PATH_MAX] = {};
-			strcpy(output_names, fl_filename_name(palette_filename()));
+			char palette_name[FL_PATH_MAX] = {};
+			strcpy(palette_name, "Output: ");
+			strcat(palette_name, fl_filename_name(palette_filename()));
 			if (format_has_per_tile_palettes(format())) {
-				strcat(output_names, " / ");
-				strcat(output_names, fl_filename_name(tilepal_filename()));
+				strcat(palette_name, " / ");
+				strcat(palette_name, fl_filename_name(tilepal_filename()));
 			}
-			_palette_name->copy_label(output_names);
+			_palette_name->copy_label(palette_name);
 		}
 	}
 	else {
@@ -784,31 +785,33 @@ Image_To_Tiles_Dialog::Palette_Format Image_To_Tiles_Dialog::default_palette_for
 
 void Image_To_Tiles_Dialog::initialize_content() {
 	// Populate content group
-	_input_heading = new Label(0, 0, 0, 0, "Input:");
-	_input_spacer = new Spacer(0, 0, 0, 0);
-	_image_heading = new Label(0, 0, 0, 0, "Image:");
-	_output_heading = new Label(0, 0, 0, 0, "Output:");
-	_output_spacer = new Spacer(0, 0, 0, 0);
 	_tileset_heading = new Label(0, 0, 0, 0, "Tileset:");
+	_tilemap_heading = new Label(0, 0, 0, 0, "Tilemap:");
+	_tileset_spacer = new Spacer(0, 0, 0, 0);
+	_tilemap_spacer = new Spacer(0, 0, 0, 0);
+	_palette_spacer = new Spacer(0, 0, 0, 0);
+	_input_heading = new Label(0, 0, 0, 0, "Input:");
+	_output_heading = new Label(0, 0, 0, 0, "Output:");
 	_image = new Toolbar_Button(0, 0, 0, 0);
 	_tileset = new Toolbar_Button(0, 0, 0, 0);
 	_image_name = new Label_Button(0, 0, 0, 0, NO_FILE_SELECTED_LABEL);
 	_tileset_name = new Label_Button(0, 0, 0, 0, NO_FILE_SELECTED_LABEL);
+	_tilemap_name = new Label(0, 0, 0, 0, "Output: " NO_FILES_DETERMINED_LABEL);
 	_format = new Dropdown(0, 0, 0, 0, "Format:");
-	_output_names = new Label(0, 0, 0, 0, "Tilemap: " NO_FILE_SELECTED_LABEL);
-	_palette = new OS_Check_Button(0, 0, 0, 0, "Palette:");
-	_palette_format = new Dropdown(0, 0, 0, 0);
-	_palette_name = new Label(0, 0, 0, 0, NO_FILE_SELECTED_LABEL);
-	_color_zero = new OS_Check_Button(0, 0, 0, 0, "Color 0: #");
-	_color_zero_rgb = new OS_Hex_Input(0, 0, 0, 0);
-	_color_zero_swatch = new Fl_Button(0, 0, 0, 0);
-	_color_zero_note = new Label(0, 0, 0, 0, "(for every palette)");
 	_start_id = new Default_Hex_Spinner(0, 0, 0, 0, "Start at ID: $");
 	_use_space = new OS_Check_Button(0, 0, 0, 0, "Blank Spaces Use ID: $");
 	_space_id = new Default_Hex_Spinner(0, 0, 0, 0);
+	_palette = new OS_Check_Button(0, 0, 0, 0, "Palette:");
+	_palette_name = new Label(0, 0, 0, 0, "Output: " NO_FILES_DETERMINED_LABEL);
+	_palette_format = new Dropdown(0, 0, 0, 0, "Format:");
+	_color_zero = new OS_Check_Button(0, 0, 0, 0, "Color 0: #");
+	_color_zero_rgb = new OS_Hex_Input(0, 0, 0, 0);
+	_color_zero_swatch = new Fl_Button(0, 0, 0, 0);
 	_image_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
 	_tileset_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	// Initialize content group's children
+	_input_heading->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
+	_output_heading->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 	_image->callback((Fl_Callback *)image_cb, this);
 	_image->image(INPUT_ICON);
 	_tileset->callback((Fl_Callback *)tileset_cb, this);
@@ -849,74 +852,46 @@ void Image_To_Tiles_Dialog::initialize_content() {
 
 int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	int wgt_h = 22, win_m = 10, wgt_m = 4;
-	int ch = (wgt_h + wgt_m) * 8 + wgt_h;
+	int ch = (wgt_h + wgt_m) * 9 + wgt_h;
 	_content->resize(win_m, dy, ww, ch);
 
-	int wgt_w = text_width(_input_heading->label(), 4);
+	int wgt_w = text_width(_tileset_heading->label(), 4);
 	int wgt_off = win_m;
+	_tileset_heading->resize(wgt_off, dy, wgt_w, wgt_h);
+	wgt_off += _tileset_heading->w();
+	_tileset_spacer->resize(wgt_off, dy+wgt_h/2-1, ww-wgt_w, 2);
+	dy += wgt_h + wgt_m;
 
+	wgt_w = MAX(text_width(_input_heading->label(), 4), text_width(_output_heading->label(), 4));
+	wgt_off = win_m;
 	_input_heading->resize(wgt_off, dy, wgt_w, wgt_h);
 	wgt_off += _input_heading->w();
-	_input_spacer->resize(wgt_off, dy+wgt_h/2-1, ww-wgt_w, 2);
-	dy += wgt_h + wgt_m;
-
-	int wgt_w2 = MAX(text_width(_image_heading->label(), 4), text_width(_tileset_heading->label(), 4));
-	wgt_off = win_m;
-
-	_image_heading->resize(wgt_off, dy, wgt_w2, wgt_h);
-	wgt_off += _image_heading->w();
 	_image->resize(wgt_off, dy, wgt_h, wgt_h);
 	wgt_off += _image->w();
-	_image_name->resize(wgt_off, dy, ww-wgt_w2-wgt_h, wgt_h);
+	_image_name->resize(wgt_off, dy, ww-wgt_w-wgt_h, wgt_h);
 	dy += wgt_h + wgt_m;
 
-	wgt_w = text_width(_output_heading->label(), 4);
 	wgt_off = win_m;
-
 	_output_heading->resize(wgt_off, dy, wgt_w, wgt_h);
 	wgt_off += _output_heading->w();
-	_output_spacer->resize(wgt_off, dy+wgt_h/2-1, ww-wgt_w, 2);
-	dy += wgt_h + wgt_m;
-
-	wgt_off = win_m;
-
-	_tileset_heading->resize(wgt_off, dy, wgt_w2, wgt_h);
-	wgt_off += _tileset_heading->w();
 	_tileset->resize(wgt_off, dy, wgt_h, wgt_h);
 	wgt_off += _tileset->w();
-	_tileset_name->resize(wgt_off, dy, ww-wgt_w2-wgt_h, wgt_h);
+	_tileset_name->resize(wgt_off, dy, ww-wgt_w-wgt_h, wgt_h);
+	dy += wgt_h + wgt_m;
+
+	wgt_w = text_width(_tilemap_heading->label(), 4);
+	wgt_off = win_m;
+	_tilemap_heading->resize(wgt_off, dy, wgt_w, wgt_h);
+	wgt_off += _tilemap_heading->w();
+	_tilemap_spacer->resize(wgt_off, dy+wgt_h/2-1, ww-wgt_w, 2);
+	dy += wgt_h + wgt_m;
+
+	_tilemap_name->resize(win_m, dy, ww, wgt_h);
 	dy += wgt_h + wgt_m;
 
 	wgt_off = win_m + text_width(_format->label(), 3);
 	wgt_w = format_max_name_width() + wgt_h;
 	_format->resize(wgt_off, dy, wgt_w, wgt_h);
-	dy += wgt_h + wgt_m;
-
-	_output_names->resize(win_m, dy, ww, wgt_h);
-	dy += wgt_h + wgt_m;
-
-	wgt_w = _palette->labelsize() + 4 + text_width(_palette->label());
-	wgt_off = win_m;
-	_palette->resize(wgt_off, dy, wgt_w, wgt_h);
-	wgt_off += _palette->w() + 4;
-	wgt_w = text_width("JASC", 6) + wgt_h;
-	_palette_format->resize(wgt_off, dy, wgt_w, wgt_h);
-	wgt_off += _palette_format->w() + wgt_m;
-	wgt_w = ww - wgt_off + win_m;
-	_palette_name->resize(wgt_off, dy, wgt_w, wgt_h);
-	dy += wgt_h + wgt_m;
-
-	wgt_w = _color_zero->labelsize() + 4 + text_width(_color_zero->label());
-	wgt_off = win_m;
-	_color_zero->resize(wgt_off, dy, wgt_w, wgt_h);
-	wgt_off += _color_zero->w() + 4;
-	wgt_w = MAX(text_width("AAAAAA", 2), text_width("FFFFFF", 2));
-	_color_zero_rgb->resize(wgt_off, dy, wgt_w, wgt_h);
-	wgt_off += _color_zero_rgb->w() + wgt_m;
-	_color_zero_swatch->resize(wgt_off, dy, wgt_h, wgt_h);
-	wgt_off += _color_zero_swatch->w() + wgt_m;
-	wgt_w = ww - wgt_off + win_m;
-	_color_zero_note->resize(wgt_off, dy, wgt_w, wgt_h);
 	dy += wgt_h + wgt_m;
 
 	wgt_w = MAX(text_width("AAA", 2), text_width("FFF", 2)) + wgt_h / 2 + 4;
@@ -928,6 +903,29 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	wgt_off += _use_space->w();
 	wgt_w = MAX(text_width("AAA", 2), text_width("FFF", 2)) + wgt_h / 2 + 4;
 	_space_id->resize(wgt_off, dy, wgt_w, wgt_h);
+	dy += wgt_h + wgt_m;
+
+	wgt_w = _palette->labelsize() + 4 + text_width(_palette->label());
+	wgt_off = win_m;
+	_palette->resize(wgt_off, dy, wgt_w, wgt_h);
+	wgt_off += _palette->w();
+	_palette_spacer->resize(wgt_off, dy+wgt_h/2-1, ww-wgt_w, 2);
+	dy += wgt_h + wgt_m;
+
+	_palette_name->resize(win_m, dy, ww, wgt_h);
+	dy += wgt_h + wgt_m;
+
+	wgt_off = win_m + text_width(_palette_format->label(), 3);
+	wgt_w = text_width("JASC", 6) + wgt_h;
+	_palette_format->resize(wgt_off, dy, wgt_w, wgt_h);
+	wgt_off += _palette_format->w() + wgt_m;
+	wgt_w = _color_zero->labelsize() + 4 + text_width(_color_zero->label());
+	_color_zero->resize(wgt_off, dy, wgt_w, wgt_h);
+	wgt_off += _color_zero->w() + 4;
+	wgt_w = MAX(text_width("AAAAAA", 2), text_width("FFFFFF", 2));
+	_color_zero_rgb->resize(wgt_off, dy, wgt_w, wgt_h);
+	wgt_off += _color_zero_rgb->w() + wgt_m;
+	_color_zero_swatch->resize(wgt_off, dy, wgt_h, wgt_h);
 
 	_image_filename.clear();
 	_tileset_filename.clear();
@@ -1006,17 +1004,14 @@ void Image_To_Tiles_Dialog::color_zero_cb(OS_Check_Button *, Image_To_Tiles_Dial
 	if (itd->color_zero()) {
 		itd->_color_zero_rgb->activate();
 		itd->_color_zero_swatch->activate();
-		itd->_color_zero_note->activate();
 	}
 	else {
 		itd->_color_zero_rgb->deactivate();
 		itd->_color_zero_swatch->deactivate();
-		itd->_color_zero_note->deactivate();
 	}
 	itd->_color_zero_rgb->do_callback();
 	itd->_color_zero_rgb->redraw();
 	itd->_color_zero_swatch->redraw();
-	itd->_color_zero_note->redraw();
 }
 
 void Image_To_Tiles_Dialog::color_zero_rgb_cb(OS_Hex_Input *, Image_To_Tiles_Dialog *itd) {
