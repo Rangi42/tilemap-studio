@@ -905,7 +905,7 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	_space_id->resize(wgt_off, dy, wgt_w, wgt_h);
 	dy += wgt_h + wgt_m;
 
-	wgt_w = _palette->labelsize() + 4 + text_width(_palette->label());
+	wgt_w = _palette->labelsize() + 4 + text_width(_palette->label(), 3);
 	wgt_off = win_m;
 	_palette->resize(wgt_off, dy, wgt_w, wgt_h);
 	wgt_off += _palette->w();
