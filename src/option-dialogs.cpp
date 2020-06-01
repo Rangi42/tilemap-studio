@@ -943,7 +943,7 @@ void Image_To_Tiles_Dialog::color_zero_swatch_cb(Fl_Button *, Image_To_Tiles_Dia
 	cc.rgbResult = fl_to_win_color(itd->fl_color_zero());
 	cc.Flags = CC_FULLOPEN | CC_RGBINIT;
 
-	if (ChooseColor(&cc) == TRUE) {
+	if (ChooseColor(&cc)) {
 		uchar r = GetRValue(cc.rgbResult), g = GetGValue(cc.rgbResult), b = GetBValue(cc.rgbResult);
 		char buffer[10] = {};
 		sprintf(buffer, "%02X%02X%02X", r, g, b);
