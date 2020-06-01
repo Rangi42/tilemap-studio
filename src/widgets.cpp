@@ -58,6 +58,15 @@ OS_Input::OS_Input(int x, int y, int w, int h, const char *l) : Fl_Input(x, y, w
 	align(FL_ALIGN_LEFT | FL_ALIGN_CLIP);
 }
 
+OS_Hex_Input::OS_Hex_Input(int x, int y, int w, int h, const char *l) : Hex_Input(x, y, w, h, l) {
+	labelfont(OS_FONT);
+	labelsize(OS_FONT_SIZE);
+	textfont(OS_FONT);
+	textsize(OS_FONT_SIZE);
+	box(OS_INPUT_THIN_DOWN_BOX);
+	align(FL_ALIGN_LEFT | FL_ALIGN_CLIP);
+}
+
 OS_Button::OS_Button(int x, int y, int w, int h, const char *l) : Fl_Button(x, y, w, h, l) {
 	labelfont(OS_FONT);
 	labelsize(OS_FONT_SIZE);

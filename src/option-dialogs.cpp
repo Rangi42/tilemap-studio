@@ -499,9 +499,9 @@ int Add_Tileset_Dialog::refresh_content(int ww, int dy) {
 Image_To_Tiles_Dialog::Image_To_Tiles_Dialog(const char *t) : Option_Dialog(360, t), _input_heading(NULL),
 	_output_heading(NULL), _input_spacer(NULL), _output_spacer(NULL), _image_heading(NULL), _tileset_heading(NULL),
 	_image(NULL), _tileset(NULL), _image_name(NULL), _tileset_name(NULL), _format(NULL), _output_names(NULL),
-	_palette(NULL), _palette_format(NULL), _palette_name(NULL), _start_id(NULL), _use_space(NULL), _space_id(NULL),
-	_image_chooser(NULL), _tileset_chooser(NULL), _image_filename(), _tileset_filename(), _tilemap_filename(),
-	_attrmap_filename(), _palette_filename(), _tilepal_filename() {}
+	_palette(NULL), _palette_format(NULL), _palette_name(NULL), _color_zero(NULL), _color_zero_rgb(NULL),
+	_color_zero_note(NULL), _start_id(NULL), _use_space(NULL), _space_id(NULL), _image_chooser(NULL), _tileset_chooser(NULL),
+	_image_filename(), _tileset_filename(), _tilemap_filename(), _attrmap_filename(), _palette_filename(), _tilepal_filename() {}
 
 Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
 	delete _input_heading;
@@ -519,6 +519,9 @@ Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
 	delete _palette;
 	delete _palette_format;
 	delete _palette_name;
+	delete _color_zero;
+	delete _color_zero_rgb;
+	delete _color_zero_note;
 	delete _start_id;
 	delete _use_space;
 	delete _space_id;
@@ -582,8 +585,7 @@ void Image_To_Tiles_Dialog::update_output_names() {
 
 	if (format_can_make_palettes(format())) {
 		_palette->activate();
-		_palette_format->activate();
-		_palette_name->activate();
+		_palette->do_callback();
 		if (_palette_filename.empty()) {
 			_palette_name->label(NO_FILE_SELECTED_LABEL);
 		}
@@ -602,8 +604,7 @@ void Image_To_Tiles_Dialog::update_output_names() {
 		_palette_format->value(0);
 		_palette_name->label("N/A");
 		_palette->deactivate();
-		_palette_format->deactivate();
-		_palette_name->deactivate();
+		_palette->do_callback();
 	}
 }
 
@@ -653,6 +654,9 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_palette = new OS_Check_Button(0, 0, 0, 0, "Palette:");
 	_palette_format = new Dropdown(0, 0, 0, 0);
 	_palette_name = new Label(0, 0, 0, 0, NO_FILE_SELECTED_LABEL);
+	_color_zero = new OS_Check_Button(0, 0, 0, 0, "Color 0: #");
+	_color_zero_rgb = new OS_Hex_Input(0, 0, 0, 0);
+	_color_zero_note = new Label(0, 0, 0, 0, "(for every palette)");
 	_start_id = new Default_Hex_Spinner(0, 0, 0, 0, "Start at ID: $");
 	_use_space = new OS_Check_Button(0, 0, 0, 0, "Blank Spaces Use ID: $");
 	_space_id = new Default_Hex_Spinner(0, 0, 0, 0);
@@ -669,11 +673,17 @@ void Image_To_Tiles_Dialog::initialize_content() {
 		_format->add(format_name((Tilemap_Format)i));
 	}
 	_format->callback((Fl_Callback *)format_cb, this);
+	_palette->callback((Fl_Callback *)palette_cb, this);
 	for (int i = 0; i < NUM_PALETTE_FORMATS; i++) {
 		_palette_format->add(palette_names[i]);
 	}
 	_palette_format->value(0);
 	_palette_format->callback((Fl_Callback *)palette_format_cb, this);
+	_color_zero->callback((Fl_Callback *)color_zero_cb, this);
+	_color_zero_rgb->value("FF00FF");
+	_color_zero_rgb->maximum_size(6);
+	_color_zero_rgb->callback((Fl_Callback *)color_zero_rgb_cb, this);
+	_color_zero_rgb->when(FL_WHEN_ENTER_KEY);
 	_start_id->format("%03X");
 	_start_id->range(0x000, MAX_NUM_TILES-1);
 	_start_id->default_value(0x000);
@@ -690,7 +700,7 @@ void Image_To_Tiles_Dialog::initialize_content() {
 
 int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	int wgt_h = 22, win_m = 10, wgt_m = 4;
-	int ch = (wgt_h + wgt_m) * 7 + wgt_h;
+	int ch = (wgt_h + wgt_m) * 8 + wgt_h;
 	_content->resize(win_m, dy, ww, ch);
 
 	int wgt_w = text_width(_input_heading->label(), 4);
@@ -747,6 +757,17 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	_palette_name->resize(wgt_off, dy, wgt_w, wgt_h);
 	dy += wgt_h + wgt_m;
 
+	wgt_w = _color_zero->labelsize() + 4 + text_width(_color_zero->label());
+	wgt_off = win_m;
+	_color_zero->resize(wgt_off, dy, wgt_w, wgt_h);
+	wgt_off += _color_zero->w() + 4;
+	wgt_w = MAX(text_width("AAAAAA", 2), text_width("FFFFFF", 2));
+	_color_zero_rgb->resize(wgt_off, dy, wgt_w, wgt_h);
+	wgt_off += _color_zero_rgb->w() + wgt_m;
+	wgt_w = ww - wgt_off + win_m;
+	_color_zero_note->resize(wgt_off, dy, wgt_w, wgt_h);
+	dy += wgt_h + wgt_m;
+
 	wgt_w = MAX(text_width("AAA", 2), text_width("FFF", 2)) + wgt_h / 2 + 4;
 	wgt_off = win_m + text_width(_start_id->label(), 3);
 	_start_id->resize(wgt_off, dy, wgt_w, wgt_h);
@@ -763,7 +784,9 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	update_output_names();
 	update_ok_button();
 
-	use_space_cb(_use_space, this);
+	_palette->do_callback();
+	_color_zero->do_callback();
+	_use_space->do_callback();
 
 	return ch;
 }
@@ -806,8 +829,51 @@ void Image_To_Tiles_Dialog::format_cb(Dropdown *, Image_To_Tiles_Dialog *itd) {
 	itd->update_output_names();
 }
 
+void Image_To_Tiles_Dialog::palette_cb(OS_Check_Button *, Image_To_Tiles_Dialog *itd) {
+	if (itd->palette()) {
+		itd->_palette_format->activate();
+		itd->_palette_name->activate();
+		itd->_color_zero->activate();
+	}
+	else {
+		itd->_palette_format->deactivate();
+		itd->_palette_name->deactivate();
+		itd->_color_zero->deactivate();
+		itd->_color_zero->clear();
+	}
+	itd->_palette_format->redraw();
+	itd->_palette_name->redraw();
+	itd->_color_zero->redraw();
+	itd->_color_zero->do_callback();
+}
+
 void Image_To_Tiles_Dialog::palette_format_cb(Dropdown *, Image_To_Tiles_Dialog *itd) {
 	itd->update_output_names();
+}
+
+void Image_To_Tiles_Dialog::color_zero_cb(OS_Check_Button *, Image_To_Tiles_Dialog *itd) {
+	if (itd->color_zero()) {
+		itd->_color_zero_rgb->activate();
+		itd->_color_zero_note->activate();
+	}
+	else {
+		itd->_color_zero_rgb->deactivate();
+		itd->_color_zero_note->deactivate();
+	}
+	itd->_color_zero_rgb->redraw();
+	itd->_color_zero_note->redraw();
+}
+
+void Image_To_Tiles_Dialog::color_zero_rgb_cb(OS_Hex_Input *, Image_To_Tiles_Dialog *itd) {
+	size_t n = strlen(itd->_color_zero_rgb->value());
+	if (n < 6) {
+		char buffer[7] = {};
+		for (size_t i = 0; i < 6 - n; i++) {
+			buffer[i] = '0';
+		}
+		strcat(buffer, itd->_color_zero_rgb->value());
+		itd->_color_zero_rgb->value(buffer);
+	}
 }
 
 void Image_To_Tiles_Dialog::use_space_cb(OS_Check_Button *, Image_To_Tiles_Dialog *itd) {

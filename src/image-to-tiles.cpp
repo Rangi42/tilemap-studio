@@ -237,6 +237,30 @@ static double luminance(Fl_Color c) {
 	return 0.299 * (double)r + 0.587 * (double)g + 0.114 * (double)b;
 }
 
+static Fl_Color parse_rgb_color(const char *s) {
+	char rgb[7] = {};
+	size_t n = strlen(s);
+	if (n < 6) {
+		for (size_t i = 0; i < 6 - n; i++) {
+			rgb[i] = '0';
+		}
+	}
+	strncat(rgb, s, 6);
+
+	char buffer[3] = {};
+	buffer[0] = rgb[0];
+	buffer[1] = rgb[1];
+	uchar r = (uchar)std::stoi(buffer, NULL, 16);
+	buffer[0] = rgb[2];
+	buffer[1] = rgb[3];
+	uchar g = (uchar)std::stoi(buffer, NULL, 16);
+	buffer[0] = rgb[4];
+	buffer[1] = rgb[5];
+	uchar b = (uchar)std::stoi(buffer, NULL, 16);
+
+	return fl_rgb_color(CRGB5(r), CRGB5(g), CRGB5(b));
+}
+
 void Main_Window::image_to_tiles() {
 	// Open the input image
 
@@ -288,6 +312,9 @@ void Main_Window::image_to_tiles() {
 		// Algorithm ported from superfamiconv
 		// <https://github.com/Optiroc/SuperFamiconv>
 
+		bool use_color_zero = _image_to_tiles_dialog->color_zero();
+		Fl_Color color_zero = use_color_zero ? parse_rgb_color(_image_to_tiles_dialog->color_zero_rgb()) : FL_BLACK;
+
 		size_t max_palettes = (size_t)format_palettes_size(fmt);
 
 		// Get the color set of each tile
@@ -296,6 +323,9 @@ void Main_Window::image_to_tiles() {
 		for (; qi < n; qi++) {
 			const Tile &tile = tiles[qi];
 			Color_Set s;
+			if (use_color_zero) {
+				s.insert(color_zero);
+			}
 			for (int j = 0; j < NUM_TILE_PIXELS; j++) {
 				s.insert(tile[j]);
 			}
@@ -358,10 +388,14 @@ void Main_Window::image_to_tiles() {
 			return a.size() > b.size();
 		});
 
-		// Sort each palette from brightest to darkest color, padded with black
+		// Sort each palette from brightest to darkest color, padded with black, keeping color 0 first
 		for (Color_Set &s : cs_opt) {
 			std::vector<Fl_Color> palette(s.begin(), s.end());
-			std::sort(palette.begin(), palette.end(), [](Fl_Color a, Fl_Color b) {
+			std::sort(palette.begin(), palette.end(), [use_color_zero, color_zero](Fl_Color a, Fl_Color b) {
+				if (use_color_zero) {
+					if (a == color_zero) { return true; }
+					if (b == color_zero) { return false; }
+				}
 				return luminance(a) > luminance(b);
 			});
 			for (size_t i = palette.size(); i < max_colors; i++) {

@@ -54,6 +54,11 @@ public:
 	OS_Input(int x, int y, int w, int h, const char *l = NULL);
 };
 
+class OS_Hex_Input : public Hex_Input {
+public:
+	OS_Hex_Input(int x, int y, int w, int h, const char *l = NULL);
+};
+
 class OS_Button : public Fl_Button {
 public:
 	OS_Button(int x, int y, int w, int h, const char *l = NULL);
