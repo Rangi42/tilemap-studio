@@ -15,6 +15,7 @@
 #include "config.h"
 #include "icons.h"
 #include "image.h"
+#include "tile.h"
 
 Option_Dialog::Option_Dialog(int w, const char *t) : _width(w), _title(t), _canceled(false),
 	_dialog(NULL), _content(NULL), _ok_button(NULL), _cancel_button(NULL) {}
@@ -498,8 +499,8 @@ int Add_Tileset_Dialog::refresh_content(int ww, int dy) {
 
 Image_To_Tiles_Dialog::Image_To_Tiles_Dialog(const char *t) : Option_Dialog(360, t), _input_heading(NULL),
 	_output_heading(NULL), _input_spacer(NULL), _output_spacer(NULL), _image_heading(NULL), _tileset_heading(NULL),
-	_image(NULL), _tileset(NULL), _image_name(NULL), _tileset_name(NULL), _format(NULL), _output_names(NULL),
-	_palette(NULL), _palette_format(NULL), _palette_name(NULL), _color_zero(NULL), _color_zero_rgb(NULL),
+	_image(NULL), _tileset(NULL), _image_name(NULL), _tileset_name(NULL), _format(NULL), _output_names(NULL), _palette(NULL),
+	_palette_format(NULL), _palette_name(NULL), _color_zero(NULL), _color_zero_rgb(NULL), _color_zero_swatch(NULL),
 	_color_zero_note(NULL), _start_id(NULL), _use_space(NULL), _space_id(NULL), _image_chooser(NULL), _tileset_chooser(NULL),
 	_image_filename(), _tileset_filename(), _tilemap_filename(), _attrmap_filename(), _palette_filename(), _tilepal_filename() {}
 
@@ -521,12 +522,38 @@ Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
 	delete _palette_name;
 	delete _color_zero;
 	delete _color_zero_rgb;
+	delete _color_zero_swatch;
 	delete _color_zero_note;
 	delete _start_id;
 	delete _use_space;
 	delete _space_id;
 	delete _image_chooser;
 	delete _tileset_chooser;
+}
+
+Fl_Color Image_To_Tiles_Dialog::fl_color_zero() const {
+	const char *s = _color_zero_rgb->value();
+	char rgb[7] = {};
+	size_t n = strlen(s);
+	if (n < 6) {
+		for (size_t i = 0; i < 6 - n; i++) {
+			rgb[i] = '0';
+		}
+	}
+	strncat(rgb, s, 6);
+
+	char buffer[3] = {};
+	buffer[0] = rgb[0];
+	buffer[1] = rgb[1];
+	uchar r = (uchar)std::stoi(buffer, NULL, 16);
+	buffer[0] = rgb[2];
+	buffer[1] = rgb[3];
+	uchar g = (uchar)std::stoi(buffer, NULL, 16);
+	buffer[0] = rgb[4];
+	buffer[1] = rgb[5];
+	uchar b = (uchar)std::stoi(buffer, NULL, 16);
+
+	return fl_rgb_color(CRGB5(r), CRGB5(g), CRGB5(b));
 }
 
 void Image_To_Tiles_Dialog::update_image_name() {
@@ -617,6 +644,13 @@ void Image_To_Tiles_Dialog::update_ok_button() {
 	}
 }
 
+void Image_To_Tiles_Dialog::update_color_zero_swatch() {
+	Fl_Color c = _color_zero_swatch->active() ? fl_color_zero() : FL_BACKGROUND_COLOR;
+	_color_zero_swatch->color(c);
+	_color_zero_swatch->selection_color(c);
+	_color_zero_swatch->redraw();
+}
+
 Image_To_Tiles_Dialog::Palette_Format Image_To_Tiles_Dialog::default_palette_format(Tilemap_Format fmt) const {
 	switch (fmt) {
 	case Tilemap_Format::GBA_4BPP:
@@ -656,6 +690,7 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_palette_name = new Label(0, 0, 0, 0, NO_FILE_SELECTED_LABEL);
 	_color_zero = new OS_Check_Button(0, 0, 0, 0, "Color 0: #");
 	_color_zero_rgb = new OS_Hex_Input(0, 0, 0, 0);
+	_color_zero_swatch = new Fl_Button(0, 0, 0, 0);
 	_color_zero_note = new Label(0, 0, 0, 0, "(for every palette)");
 	_start_id = new Default_Hex_Spinner(0, 0, 0, 0, "Start at ID: $");
 	_use_space = new OS_Check_Button(0, 0, 0, 0, "Blank Spaces Use ID: $");
@@ -684,6 +719,9 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_color_zero_rgb->maximum_size(6);
 	_color_zero_rgb->callback((Fl_Callback *)color_zero_rgb_cb, this);
 	_color_zero_rgb->when(FL_WHEN_ENTER_KEY);
+	_color_zero_swatch->box(OS_SWATCH_BOX);
+	_color_zero_swatch->down_box(OS_SWATCH_BOX);
+	_color_zero_swatch->callback((Fl_Callback *)color_zero_swatch_cb, this);
 	_start_id->format("%03X");
 	_start_id->range(0x000, MAX_NUM_TILES-1);
 	_start_id->default_value(0x000);
@@ -764,6 +802,8 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	wgt_w = MAX(text_width("AAAAAA", 2), text_width("FFFFFF", 2));
 	_color_zero_rgb->resize(wgt_off, dy, wgt_w, wgt_h);
 	wgt_off += _color_zero_rgb->w() + wgt_m;
+	_color_zero_swatch->resize(wgt_off, dy, wgt_h, wgt_h);
+	wgt_off += _color_zero_swatch->w() + wgt_m;
 	wgt_w = ww - wgt_off + win_m;
 	_color_zero_note->resize(wgt_off, dy, wgt_w, wgt_h);
 	dy += wgt_h + wgt_m;
@@ -854,13 +894,17 @@ void Image_To_Tiles_Dialog::palette_format_cb(Dropdown *, Image_To_Tiles_Dialog 
 void Image_To_Tiles_Dialog::color_zero_cb(OS_Check_Button *, Image_To_Tiles_Dialog *itd) {
 	if (itd->color_zero()) {
 		itd->_color_zero_rgb->activate();
+		itd->_color_zero_swatch->activate();
 		itd->_color_zero_note->activate();
 	}
 	else {
 		itd->_color_zero_rgb->deactivate();
+		itd->_color_zero_swatch->deactivate();
 		itd->_color_zero_note->deactivate();
 	}
+	itd->_color_zero_rgb->do_callback();
 	itd->_color_zero_rgb->redraw();
+	itd->_color_zero_swatch->redraw();
 	itd->_color_zero_note->redraw();
 }
 
@@ -874,6 +918,39 @@ void Image_To_Tiles_Dialog::color_zero_rgb_cb(OS_Hex_Input *, Image_To_Tiles_Dia
 		strcat(buffer, itd->_color_zero_rgb->value());
 		itd->_color_zero_rgb->value(buffer);
 	}
+	itd->update_color_zero_swatch();
+}
+
+#ifdef _WIN32
+static DWORD fl_to_win_color(Fl_Color c) {
+	uchar r, g, b;
+	Fl::get_color(c, r, g, b);
+	return RGB(r, g, b);
+}
+#endif
+
+void Image_To_Tiles_Dialog::color_zero_swatch_cb(Fl_Button *, Image_To_Tiles_Dialog *itd) {
+	itd->update_color_zero_swatch();
+
+#ifdef _WIN32
+	static COLORREF customColors[16];
+
+	CHOOSECOLOR cc;
+	ZeroMemory(&cc, sizeof(cc));
+	cc.lStructSize = sizeof(cc);
+	cc.hwndOwner = fl_xid(itd->_dialog);
+	cc.lpCustColors = (LPDWORD)customColors;
+	cc.rgbResult = fl_to_win_color(itd->fl_color_zero());
+	cc.Flags = CC_FULLOPEN | CC_RGBINIT;
+
+	if (ChooseColor(&cc) == TRUE) {
+		uchar r = GetRValue(cc.rgbResult), g = GetGValue(cc.rgbResult), b = GetBValue(cc.rgbResult);
+		char buffer[10] = {};
+		sprintf(buffer, "%02X%02X%02X", r, g, b);
+		itd->_color_zero_rgb->value(buffer);
+		itd->update_color_zero_swatch();
+	}
+#endif
 }
 
 void Image_To_Tiles_Dialog::use_space_cb(OS_Check_Button *, Image_To_Tiles_Dialog *itd) {

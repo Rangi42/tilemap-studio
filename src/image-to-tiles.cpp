@@ -237,30 +237,6 @@ static double luminance(Fl_Color c) {
 	return 0.299 * (double)r + 0.587 * (double)g + 0.114 * (double)b;
 }
 
-static Fl_Color parse_rgb_color(const char *s) {
-	char rgb[7] = {};
-	size_t n = strlen(s);
-	if (n < 6) {
-		for (size_t i = 0; i < 6 - n; i++) {
-			rgb[i] = '0';
-		}
-	}
-	strncat(rgb, s, 6);
-
-	char buffer[3] = {};
-	buffer[0] = rgb[0];
-	buffer[1] = rgb[1];
-	uchar r = (uchar)std::stoi(buffer, NULL, 16);
-	buffer[0] = rgb[2];
-	buffer[1] = rgb[3];
-	uchar g = (uchar)std::stoi(buffer, NULL, 16);
-	buffer[0] = rgb[4];
-	buffer[1] = rgb[5];
-	uchar b = (uchar)std::stoi(buffer, NULL, 16);
-
-	return fl_rgb_color(CRGB5(r), CRGB5(g), CRGB5(b));
-}
-
 void Main_Window::image_to_tiles() {
 	// Open the input image
 
@@ -313,7 +289,7 @@ void Main_Window::image_to_tiles() {
 		// <https://github.com/Optiroc/SuperFamiconv>
 
 		bool use_color_zero = _image_to_tiles_dialog->color_zero();
-		Fl_Color color_zero = use_color_zero ? parse_rgb_color(_image_to_tiles_dialog->color_zero_rgb()) : FL_BLACK;
+		Fl_Color color_zero = _image_to_tiles_dialog->fl_color_zero();
 
 		size_t max_palettes = (size_t)format_palettes_size(fmt);
 

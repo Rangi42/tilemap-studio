@@ -189,6 +189,7 @@ private:
 	Label *_palette_name;
 	OS_Check_Button *_color_zero;
 	OS_Hex_Input *_color_zero_rgb;
+	Fl_Button *_color_zero_swatch;
 	Label *_color_zero_note;
 	Default_Hex_Spinner *_start_id;
 	OS_Check_Button *_use_space;
@@ -209,7 +210,7 @@ public:
 	inline bool palette(void) const { return !!_palette->value(); }
 	inline Palette_Format palette_format(void) const { return (Palette_Format)_palette_format->value(); }
 	inline bool color_zero(void) const { return !!_color_zero->value(); }
-	inline const char *color_zero_rgb(void) const { return _color_zero_rgb->value(); }
+	Fl_Color fl_color_zero(void) const;
 	inline uint16_t start_id(void) const { return (uint16_t)_start_id->value(); }
 	inline void start_id(uint16_t n) { initialize(); _start_id->value(n); }
 	inline bool use_space(void) const { return !!_use_space->value(); }
@@ -218,6 +219,7 @@ private:
 	void update_image_name(void);
 	void update_output_names(void);
 	void update_ok_button(void);
+	void update_color_zero_swatch(void);
 	Palette_Format default_palette_format(Tilemap_Format fmt) const;
 protected:
 	void initialize_content(void);
@@ -230,6 +232,7 @@ private:
 	static void palette_format_cb(Dropdown *dd, Image_To_Tiles_Dialog *itd);
 	static void color_zero_cb(OS_Check_Button *cb, Image_To_Tiles_Dialog *itd);
 	static void color_zero_rgb_cb(OS_Hex_Input *cb, Image_To_Tiles_Dialog *itd);
+	static void color_zero_swatch_cb(Fl_Button *w, Image_To_Tiles_Dialog *itd);
 	static void use_space_cb(OS_Check_Button *cb, Image_To_Tiles_Dialog *itd);
 };
 
