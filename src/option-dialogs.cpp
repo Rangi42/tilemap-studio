@@ -263,6 +263,117 @@ int New_Tilemap_Dialog::refresh_content(int ww, int dy) {
 	return ch;
 }
 
+Print_Options_Dialog::Print_Options_Dialog(const char *t) : _title(t), _copied(false), _canceled(false), _dialog(NULL),
+_show_heading(NULL), _grid(NULL), _rainbow_tiles(NULL), _palettes(NULL), _bold_palettes(NULL), _export_button(NULL), _copy_button(NULL),
+_cancel_button(NULL) {}
+
+Print_Options_Dialog::~Print_Options_Dialog() {
+	delete _dialog;
+	delete _show_heading;
+	delete _grid;
+	delete _rainbow_tiles;
+	delete _palettes;
+	delete _bold_palettes;
+	delete _export_button;
+	delete _copy_button;
+	delete _cancel_button;
+}
+
+void Print_Options_Dialog::initialize() {
+	if (_dialog) { return; }
+	Fl_Group *prev_current = Fl_Group::current();
+	Fl_Group::current(NULL);
+	// Populate dialog
+	_dialog = new Fl_Double_Window(0, 0, 0, 0, _title);
+	_show_heading = new Label(0, 0, 0, 0, "Show:");
+	_grid = new OS_Check_Button(0, 0, 0, 0, "Grid");
+	_rainbow_tiles = new OS_Check_Button(0, 0, 0, 0, "Rainbow Tiles");
+	_palettes = new OS_Check_Button(0, 0, 0, 0, "Palettes");
+	_bold_palettes = new OS_Check_Button(0, 0, 0, 0, "Bold Palettes");
+	_export_button = new Default_Button(0, 0, 0, 0, "Export...");
+	_copy_button = new OS_Button(0, 0, 0, 0, "Copy");
+	_cancel_button = new OS_Button(0, 0, 0, 0, "Cancel");
+	_dialog->end();
+	// Initialize dialog
+	_dialog->resizable(NULL);
+	_dialog->callback((Fl_Callback *)cancel_cb, this);
+	_dialog->set_modal();
+	// Initialize dialog's children
+	_export_button->tooltip("Export (Enter)");
+	_export_button->callback((Fl_Callback *)close_cb, this);
+	_copy_button->shortcut(FL_COMMAND + 'c');
+	_copy_button->tooltip("Copy (Ctrl+C)");
+	_copy_button->callback((Fl_Callback *)copy_cb, this);
+	_cancel_button->shortcut(FL_Escape);
+	_cancel_button->tooltip("Cancel (Esc)");
+	_cancel_button->callback((Fl_Callback *)cancel_cb, this);
+	Fl_Group::current(prev_current);
+}
+
+void Print_Options_Dialog::refresh() {
+	_copied = _canceled = false;
+	_dialog->copy_label(_title);
+	// Refresh widget positions and sizes
+	fl_font(OS_FONT, OS_FONT_SIZE);
+	int btn_w = 80, wgt_h = 22, win_m = 10, wgt_m = 4;
+	int dx = win_m, dy = win_m;
+	int wgt_w = text_width(_show_heading->label(), 4);
+	_show_heading->resize(dx, dy, wgt_w, wgt_h);
+	dx += _show_heading->w() + wgt_m;
+	wgt_w = text_width(_grid->label(), 2) + wgt_h;
+	_grid->resize(dx, dy, wgt_w, wgt_h);
+	dx += _grid->w() + wgt_m;
+	wgt_w = text_width(_rainbow_tiles->label(), 2) + wgt_h;
+	_rainbow_tiles->resize(dx, dy, wgt_w, wgt_h);
+	dx += _rainbow_tiles->w() + wgt_m;
+	wgt_w = text_width(_palettes->label(), 2) + wgt_h;
+	_palettes->resize(dx, dy, wgt_w, wgt_h);
+	dx += _palettes->w() + wgt_m;
+	wgt_w = text_width(_bold_palettes->label(), 2) + wgt_h;
+	_bold_palettes->resize(dx, dy, wgt_w, wgt_h);
+	dx += _bold_palettes->w() + win_m;
+	if (dx < 288) { dx = 288; }
+	dy += wgt_h + 16;
+#ifdef _WIN32
+	_export_button->resize(dx - 278, dy, btn_w, wgt_h);
+	_copy_button->resize(dx - 184, dy, btn_w, wgt_h);
+	_cancel_button->resize(dx - 90, dy, btn_w, wgt_h);
+#else
+	_cancel_button->resize(dx - 278, dy, btn_w, wgt_h);
+	_copy_button->resize(dx - 184, dy, btn_w, wgt_h);
+	_export_button->resize(dx - 90, dy, btn_w, wgt_h);
+#endif
+	dy += wgt_h + win_m;
+	_dialog->size_range(dx, dy, dx, dy);
+	_dialog->size(dx, dy);
+	_dialog->redraw();
+}
+
+void Print_Options_Dialog::show(const Fl_Widget *p) {
+	initialize();
+	refresh();
+	int x = p->x() + (p->w() - _dialog->w()) / 2;
+	int y = p->y() + (p->h() - _dialog->h()) / 2;
+	_dialog->position(x, y);
+	_export_button->take_focus();
+	_dialog->show();
+	while (_dialog->shown()) { Fl::wait(); }
+}
+
+void Print_Options_Dialog::close_cb(Fl_Widget *, Print_Options_Dialog *pd) {
+	pd->_dialog->hide();
+}
+
+void Print_Options_Dialog::copy_cb(Fl_Widget *, Print_Options_Dialog *pd) {
+	pd->_copied = true;
+	pd->_dialog->hide();
+}
+
+void Print_Options_Dialog::cancel_cb(Fl_Widget *, Print_Options_Dialog *pd) {
+	pd->_canceled = true;
+	pd->_dialog->hide();
+}
+
 class Anchor_Button : public OS_Button {
 private:
 	int _anchor;

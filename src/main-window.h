@@ -70,6 +70,7 @@ private:
 	Tilemap_Options_Dialog *_tilemap_options_dialog;
 	New_Tilemap_Dialog *_new_tilemap_dialog;
 	Group_Width_Dialog *_tileset_width_dialog, *_tilemap_width_dialog;
+	Print_Options_Dialog *_print_options_dialog;
 	Resize_Dialog *_resize_dialog;
 	Reformat_Dialog *_reformat_dialog;
 	Add_Tileset_Dialog *_add_tileset_dialog;

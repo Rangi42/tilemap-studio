@@ -1,9 +1,5 @@
 #include <cstdio>
 
-#pragma warning(push, 0)
-#include <FL/Fl_Image_Surface.H>
-#pragma warning(pop)
-
 #include "tilemap.h"
 #include "tileset.h"
 #include "config.h"
@@ -574,17 +570,11 @@ bool Tilemap::write_tiles(const char *tf, const char *af, std::vector<Tile_Tesse
 	return true;
 }
 
-Fl_RGB_Image *Tilemap::print_tilemap() const {
-	Fl_Image_Surface *surface = new Fl_Image_Surface((int)width() * TILE_SIZE, (int)height() * TILE_SIZE);
-	surface->set_current();
+void Tilemap::print_tilemap() const {
 	for (Tile_Tessera *tt : _tiles) {
 		int dx = (int)tt->col() * TILE_SIZE, dy = (int)tt->row() * TILE_SIZE;
 		tt->print(dx, dy, true, false);
 	}
-	Fl_RGB_Image *img = surface->image();
-	delete surface;
-	Fl_Display_Device::display_device()->set_current();
-	return img;
 }
 
 void Tilemap::guess_width() {

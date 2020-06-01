@@ -57,7 +57,7 @@ public:
 	bool can_format_as(Tilemap_Format fmt);
 	void limit_to_format(Tilemap_Format fmt);
 	inline bool write_tiles(const char *tf, const char *af) { return write_tiles(tf, af, _tiles, Config::format()); }
-	Fl_RGB_Image *print_tilemap(void) const;
+	void print_tilemap(void) const;
 	void guess_width(void);
 public:
 	static bool write_tiles(const char *tf, const char *af, std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt);

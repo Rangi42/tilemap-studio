@@ -181,7 +181,7 @@ static Fl_Font tile_fonts[4] = {FL_COURIER, FL_COURIER_ITALIC, FL_COURIER_BOLD, 
 
 void Tile_State::draw_tile(int x, int y, int z, bool active, bool selected) {
 	if (z == 1) {
-		print(x, y, active, selected);
+		draw_tile_1x(x, y, active, selected);
 		return;
 	}
 	if (_tilesets) {
@@ -272,7 +272,7 @@ void Tile_State::draw(int x, int y, int z, bool tile, bool attr, int style, bool
 	}
 }
 
-void Tile_State::print(int x, int y, bool active, bool selected) {
+void Tile_State::draw_tile_1x(int x, int y, bool active, bool selected) {
 	if (_tilesets) {
 		for (std::vector<Tileset>::reverse_iterator it = _tilesets->rbegin(); it != _tilesets->rend(); ++it) {
 			if (it->print_tile(this, x, y, active)) {
@@ -288,6 +288,40 @@ void Tile_State::print(int x, int y, bool active, bool selected) {
 	fl_color(fg);
 	print_digit(x, y+1, hi);
 	print_digit(x+4, y+2, lo);
+}
+
+void Tile_State::print(int x, int y, bool active, bool selected, int palette_) {
+	bool drawn = false;
+	if (_tilesets) {
+		for (std::vector<Tileset>::reverse_iterator it = _tilesets->rbegin(); it != _tilesets->rend(); ++it) {
+			if (it->print_tile(this, x, y, active)) {
+				drawn = true;
+				break;
+			}
+		}
+	}
+	if (!drawn) {
+		char hi = (char)((id & 0xF0) >> 4), lo = (char)(id & 0x0F);
+		bool r = Config::print_rainbow_tiles();
+		Fl_Color bg = rainbow_bg_colors[r ? lo : 0];
+		fl_rectf(x, y, TILE_SIZE, TILE_SIZE, bg);
+		Fl_Color fg = selected ? FL_YELLOW : x_flip ? y_flip ? FL_YELLOW : FL_MAGENTA : y_flip ? FL_CYAN : rainbow_fg_colors[r ? hi : 0];
+		fl_color(fg);
+		print_digit(x, y+1, hi);
+		print_digit(x+4, y+2, lo);
+	}
+	if (Config::print_grid()) {
+		draw_grid(x, y, 1);
+	}
+	if (palette_ > -1) {
+		if (Config::print_bold_palettes()) {
+			_palette_bgs_image->draw(x, y, TILE_SIZE, TILE_SIZE, TILE_SIZE * MAX_ZOOM * palette_, 0);
+		}
+		if (Config::print_palettes()) {
+			int dy = !Config::print_grid();
+			palette_digits_image.draw(x+1, y+dy, 5, 7, 5 * palette_, 0);
+		}
+	}
 }
 
 Tile_Swatch::Tile_Swatch(int x, int y, int w, int h) : Tile_Thing(), Fl_Box(x, y, w, h), _attributes() {

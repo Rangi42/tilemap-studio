@@ -10,6 +10,8 @@
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Toggle_Button.H>
 #include <FL/Fl_Multi_Label.H>
+#include <FL/Fl_Copy_Surface.H>
+#include <FL/Fl_Image_Surface.H>
 #pragma warning(pop)
 
 #include "version.h"
@@ -225,6 +227,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_new_tilemap_dialog = new New_Tilemap_Dialog("New Tilemap");
 	_tileset_width_dialog = new Group_Width_Dialog("Tileset Width");
 	_tilemap_width_dialog = new Group_Width_Dialog("Tilemap Width");
+	_print_options_dialog = new Print_Options_Dialog("Print Options");
 	_resize_dialog = new Resize_Dialog("Resize Tilemap");
 	_reformat_dialog = new Reformat_Dialog("Reformat Tilemap");
 	_add_tileset_dialog = new Add_Tileset_Dialog("Add Tileset");
@@ -569,6 +572,11 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_new_tilemap_dialog->tilemap_width(GAME_BOY_WIDTH);
 	_new_tilemap_dialog->tilemap_height(GAME_BOY_HEIGHT);
 
+	_print_options_dialog->grid(Config::print_grid());
+	_print_options_dialog->rainbow_tiles(Config::print_rainbow_tiles());
+	_print_options_dialog->palettes(Config::print_palettes());
+	_print_options_dialog->bold_palettes(Config::print_bold_palettes());
+
 	std::string subject(PROGRAM_NAME " " PROGRAM_VERSION_STRING), message(
 		"Copyright \xc2\xa9 " CURRENT_YEAR " " PROGRAM_AUTHOR ".\n"
 		"\n"
@@ -609,6 +617,7 @@ Main_Window::~Main_Window() {
 	delete _success_dialog;
 	delete _unsaved_dialog;
 	delete _about_dialog;
+	delete _print_options_dialog;
 	delete _resize_dialog;
 	delete _reformat_dialog;
 	delete _image_to_tiles_dialog;
@@ -1723,36 +1732,63 @@ void Main_Window::unload_tilesets_cb(Fl_Widget *w, Main_Window *mw) {
 void Main_Window::print_cb(Fl_Widget *, Main_Window *mw) {
 	if (!mw->_tilemap.size()) { return; }
 
-	int status = mw->_image_print_chooser->show();
-	if (status == 1) { return; }
+	mw->_print_options_dialog->show(mw);
+	Config::print_grid(mw->_print_options_dialog->grid());
+	Config::print_rainbow_tiles(mw->_print_options_dialog->rainbow_tiles());
+	Config::print_palettes(mw->_print_options_dialog->palettes());
+	Config::print_bold_palettes(mw->_print_options_dialog->bold_palettes());
+	if (mw->_print_options_dialog->canceled()) { return; }
 
-	char filename[FL_PATH_MAX] = {};
-	const char *default_ext = mw->_image_print_chooser->filter_value() == 1 ? ".bmp" : ".png";
-	add_dot_ext(mw->_image_print_chooser->filename(), default_ext, filename);
-	const char *basename = fl_filename_name(filename);
+	int w = (int)mw->_tilemap.width() * TILE_SIZE, h = (int)mw->_tilemap.height() * TILE_SIZE;
+	if (mw->_print_options_dialog->copied()) {
+		Fl_Copy_Surface *surface = new Fl_Copy_Surface(w, h);
+		surface->set_current();
+		mw->_tilemap.print_tilemap();
+		delete surface;
+		Fl_Display_Device::display_device()->set_current();
 
-	if (status == -1) {
-		std::string msg = "Could not print to ";
-		msg = msg + basename + "!\n\n" + mw->_image_print_chooser->errmsg();
-		mw->_error_dialog->message(msg);
-		mw->_error_dialog->show(mw);
-		return;
-	}
-
-	Fl_RGB_Image *img = mw->_tilemap.print_tilemap();
-	Image::Result result = Image::write_image(filename, img);
-	delete img;
-	if (result != Image::Result::IMAGE_OK) {
-		std::string msg = "Could not print to ";
-		msg = msg + basename + "!\n\n" + Image::error_message(result);
-		mw->_error_dialog->message(msg);
-		mw->_error_dialog->show(mw);
-	}
-	else {
-		std::string msg = "Printed ";
-		msg = msg + basename + "!";
+		std::string msg = "Copied to clipboard!";
 		mw->_success_dialog->message(msg);
 		mw->_success_dialog->show(mw);
+	}
+	else {
+		int status = mw->_image_print_chooser->show();
+		if (status == 1) { return; }
+
+		char filename[FL_PATH_MAX] = {};
+		const char *default_ext = mw->_image_print_chooser->filter_value() == 1 ? ".bmp" : ".png";
+		add_dot_ext(mw->_image_print_chooser->filename(), default_ext, filename);
+		const char *basename = fl_filename_name(filename);
+
+		if (status == -1) {
+			std::string msg = "Could not print to ";
+			msg = msg + basename + "!\n\n" + mw->_image_print_chooser->errmsg();
+			mw->_error_dialog->message(msg);
+			mw->_error_dialog->show(mw);
+			return;
+		}
+
+		Fl_Image_Surface *surface = new Fl_Image_Surface(w, h);
+		surface->set_current();
+		mw->_tilemap.print_tilemap();
+		Fl_RGB_Image *img = surface->image();
+		delete surface;
+		Fl_Display_Device::display_device()->set_current();
+
+		Image::Result result = Image::write_image(filename, img);
+		delete img;
+		if (result != Image::Result::IMAGE_OK) {
+			std::string msg = "Could not print to ";
+			msg = msg + basename + "!\n\n" + Image::error_message(result);
+			mw->_error_dialog->message(msg);
+			mw->_error_dialog->show(mw);
+		}
+		else {
+			std::string msg = "Printed ";
+			msg = msg + basename + "!";
+			mw->_success_dialog->message(msg);
+			mw->_success_dialog->show(mw);
+		}
 	}
 }
 
@@ -1782,6 +1818,10 @@ void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 	Preferences::set("bold", Config::bold_palettes());
 	Preferences::set("tileset", Config::auto_load_tileset());
 	Preferences::set("alpha", (int)mw->_transparency->value());
+	Preferences::set("print-grid", Config::print_grid());
+	Preferences::set("print-rainbow", Config::print_rainbow_tiles());
+	Preferences::set("print-palettes", Config::print_palettes());
+	Preferences::set("print-bold", Config::print_bold_palettes());
 	for (int i = 0; i < NUM_RECENT; i++) {
 		Preferences::set_string(Fl_Preferences::Name("recent-map%d", i), mw->_recent_tilemaps[i]);
 	}

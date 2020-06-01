@@ -93,6 +93,42 @@ protected:
 
 class Anchor_Button;
 
+class Print_Options_Dialog {
+private:
+	const char *_title;
+	bool _copied, _canceled;
+	Fl_Double_Window *_dialog;
+	Label *_show_heading;
+	OS_Check_Button *_grid, *_rainbow_tiles, *_palettes, *_bold_palettes;
+	Default_Button *_export_button;
+	OS_Button *_copy_button, *_cancel_button;
+public:
+	Print_Options_Dialog(const char *t = NULL);
+	~Print_Options_Dialog();
+	inline bool copied(void) const { return _copied; }
+	inline void copied(bool c) { _copied = c; }
+	inline bool canceled(void) const { return _canceled; }
+	inline void canceled(bool c) { _canceled = c; }
+	inline bool grid(void) const { return !!_grid->value(); }
+	inline void grid(bool g) { initialize(); _grid->value(g); }
+	inline bool rainbow_tiles(void) const { return !!_rainbow_tiles->value(); }
+	inline void rainbow_tiles(bool r) { initialize(); _rainbow_tiles->value(r); }
+	inline bool palettes(void) const { return !!_palettes->value(); }
+	inline void palettes(bool p) { initialize(); _palettes->value(p); }
+	inline bool bold_palettes(void) const { return !!_bold_palettes->value(); }
+	inline void bold_palettes(bool b) { initialize(); _bold_palettes->value(b); }
+private:
+	void initialize(void);
+	void refresh(void);
+public:
+	inline bool initialized(void) const { return !!_dialog; }
+	void show(const Fl_Widget *p);
+private:
+	static void close_cb(Fl_Widget *, Print_Options_Dialog *pd);
+	static void copy_cb(Fl_Widget *, Print_Options_Dialog *pd);
+	static void cancel_cb(Fl_Widget *, Print_Options_Dialog *pd);
+};
+
 class Resize_Dialog : public Option_Dialog {
 public:
 	enum class Hor_Align { LEFT, CENTER, RIGHT };

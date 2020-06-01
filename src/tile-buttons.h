@@ -49,9 +49,10 @@ public:
 	}
 	inline bool highlighted(void) const { return id == Config::highlight_id(); }
 	void draw(int x, int y, int z, bool tile, bool attr, int style, bool active, bool selected);
-	void print(int x, int y, bool active, bool selected);
+	void print(int x, int y, bool active, bool selected, int palette_ = -1);
 private:
 	void draw_tile(int x, int y, int z, bool active, bool selected);
+	void draw_tile_1x(int x, int y, bool active, bool selected);
 	void draw_attributes(int x, int y, int z, int style, bool active);
 };
 
@@ -115,7 +116,7 @@ public:
 public:
 	Tile_Tessera(int x = 0, int y = 0, size_t row = 0, size_t col = 0, uint16_t id = 0x000,
 		bool x_flip = false, bool y_flip = false, bool priority = false, bool obp1 = false, int palette = -1);
-	inline void print(int dx, int dy, bool active, bool selected) { _state.print(dx, dy, active, selected); }
+	inline void print(int dx, int dy, bool active, bool selected) { _state.print(dx, dy, active, selected, palette()); }
 	void draw(void);
 	int handle(int event);
 };
