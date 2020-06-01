@@ -918,7 +918,7 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	wgt_off = win_m + text_width(_palette_format->label(), 3);
 	wgt_w = text_width("JASC", 6) + wgt_h;
 	_palette_format->resize(wgt_off, dy, wgt_w, wgt_h);
-	wgt_off += _palette_format->w() + wgt_m;
+	wgt_off += _palette_format->w() + win_m;
 	wgt_w = _color_zero->labelsize() + 4 + text_width(_color_zero->label());
 	_color_zero->resize(wgt_off, dy, wgt_w, wgt_h);
 	wgt_off += _color_zero->w() + 4;
