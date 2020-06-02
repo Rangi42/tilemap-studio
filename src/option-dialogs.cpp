@@ -74,9 +74,7 @@ void Option_Dialog::refresh() {
 	_dialog->redraw();
 }
 
-void Option_Dialog::show(const Fl_Widget *p) {
-	initialize();
-	refresh();
+void Option_Dialog::reveal(const Fl_Widget *p) {
 	int x = p->x() + (p->w() - _dialog->w()) / 2;
 	int y = p->y() + (p->h() - _dialog->h()) / 2;
 	_dialog->position(x, y);
@@ -938,16 +936,6 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	_use_space->do_callback();
 
 	return ch;
-}
-
-void Image_To_Tiles_Dialog::reshow(const Fl_Widget *p) {
-	_canceled = false;
-	int x = p->x() + (p->w() - _dialog->w()) / 2;
-	int y = p->y() + (p->h() - _dialog->h()) / 2;
-	_dialog->position(x, y);
-	_ok_button->take_focus();
-	_dialog->show();
-	while (_dialog->shown()) { Fl::wait(); }
 }
 
 void Image_To_Tiles_Dialog::image_cb(Fl_Widget *, Image_To_Tiles_Dialog *itd) {

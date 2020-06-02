@@ -38,12 +38,13 @@ public:
 protected:
 	void initialize(void);
 	void refresh(void);
+	void reveal(const Fl_Widget *p);
 	virtual void initialize_content(void) = 0;
 	virtual int refresh_content(int ww, int dy) = 0;
 	virtual void finish(void) {}
 public:
 	inline bool initialized(void) const { return !!_dialog; }
-	void show(const Fl_Widget *p);
+	inline void show(const Fl_Widget *p) { initialize(); refresh(); reveal(p); }
 private:
 	static void close_cb(Fl_Widget *, Option_Dialog *od);
 	static void cancel_cb(Fl_Widget *, Option_Dialog *od);
@@ -251,7 +252,7 @@ public:
 	inline void start_id(uint16_t n) { initialize(); _start_id->value(n); }
 	inline bool use_space(void) const { return !!_use_space->value(); }
 	inline uint16_t space_id(void) const { return (uint16_t)_space_id->value(); }
-	void reshow(const Fl_Widget *p);
+	inline void reshow(const Fl_Widget *p) { _canceled = false; reveal(p); }
 private:
 	void update_image_name(void);
 	void update_output_names(void);
