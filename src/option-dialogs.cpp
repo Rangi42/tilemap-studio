@@ -799,13 +799,13 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_tilemap_name = new Label(0, 0, 0, 0, "Output: " NO_FILES_DETERMINED_LABEL);
 	_format = new Dropdown(0, 0, 0, 0, "Format:");
 	_start_id = new Default_Hex_Spinner(0, 0, 0, 0, "Start at ID: $");
-	_use_space = new OS_Check_Button(0, 0, 0, 0, "Blank Spaces Use ID: $");
-	_space_id = new Default_Hex_Spinner(0, 0, 0, 0);
+	_use_space = new OS_Check_Button(0, 0, 0, 0, "Blank Spaces Use ID: ");
+	_space_id = new Default_Hex_Spinner(0, 0, 0, 0, "$");
 	_palette = new OS_Check_Button(0, 0, 0, 0, "Palette:");
 	_palette_name = new Label(0, 0, 0, 0, "Output: " NO_FILES_DETERMINED_LABEL);
 	_palette_format = new Dropdown(0, 0, 0, 0, "Format:");
-	_color_zero = new OS_Check_Button(0, 0, 0, 0, "Color 0: #");
-	_color_zero_rgb = new OS_Hex_Input(0, 0, 0, 0);
+	_color_zero = new OS_Check_Button(0, 0, 0, 0, "Color 0: ");
+	_color_zero_rgb = new OS_Hex_Input(0, 0, 0, 0, "#");
 	_color_zero_swatch = new Fl_Button(0, 0, 0, 0);
 	_image_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
 	_tileset_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
@@ -900,7 +900,7 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	wgt_w = text_width(_use_space->label(), 3) + _use_space->labelsize() + 4;
 	wgt_off += _start_id->w() + win_m;
 	_use_space->resize(wgt_off, dy, wgt_w, wgt_h);
-	wgt_off += _use_space->w();
+	wgt_off += _use_space->w() + text_width(_space_id->label(), 1);
 	wgt_w = MAX(text_width("AAA", 2), text_width("FFF", 2)) + wgt_h / 2 + 4;
 	_space_id->resize(wgt_off, dy, wgt_w, wgt_h);
 	dy += wgt_h + wgt_m;
@@ -921,7 +921,7 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	wgt_off += _palette_format->w() + win_m;
 	wgt_w = _color_zero->labelsize() + 4 + text_width(_color_zero->label());
 	_color_zero->resize(wgt_off, dy, wgt_w, wgt_h);
-	wgt_off += _color_zero->w() + 4;
+	wgt_off += _color_zero->w() + 4 + text_width(_color_zero_rgb->label(), 1);
 	wgt_w = MAX(text_width("AAAAAA", 2), text_width("FFFFFF", 2));
 	_color_zero_rgb->resize(wgt_off, dy, wgt_w, wgt_h);
 	wgt_off += _color_zero_rgb->w() + wgt_m;
