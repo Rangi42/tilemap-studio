@@ -2043,7 +2043,10 @@ void Main_Window::image_to_tiles_cb(Fl_Widget *, Main_Window *mw) {
 	mw->_image_to_tiles_dialog->format(Config::format());
 	mw->_image_to_tiles_dialog->show(mw);
 	if (mw->_image_to_tiles_dialog->canceled()) { return; }
-	mw->image_to_tiles();
+	while (!mw->image_to_tiles()) {
+		mw->_image_to_tiles_dialog->reshow(mw);
+		if (mw->_image_to_tiles_dialog->canceled()) { return; }
+	}
 }
 
 void Main_Window::auto_load_tileset_cb(Fl_Menu_ *m, Main_Window *) {

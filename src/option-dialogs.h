@@ -251,6 +251,7 @@ public:
 	inline void start_id(uint16_t n) { initialize(); _start_id->value(n); }
 	inline bool use_space(void) const { return !!_use_space->value(); }
 	inline uint16_t space_id(void) const { return (uint16_t)_space_id->value(); }
+	void reshow(const Fl_Widget *p);
 private:
 	void update_image_name(void);
 	void update_output_names(void);

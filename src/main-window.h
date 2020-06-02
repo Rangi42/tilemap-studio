@@ -143,7 +143,7 @@ private:
 	void select_tile(uint16_t id);
 	void highlight_tile(uint16_t id);
 	void select_palette(int palette);
-	void image_to_tiles(void);
+	bool image_to_tiles(void);
 private:
 	// Drag-and-drop
 	static void drag_and_drop_tilemap_cb(DnD_Receiver *dndr, Main_Window *mw);
