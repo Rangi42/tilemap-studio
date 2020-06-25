@@ -25,7 +25,7 @@ bool ends_with(std::string_view s, std::string_view p) {
 	return s.size() >= p.size() && !s.compare(s.size() - p.size(), p.size(), p);
 }
 
-bool ends_with(const std::wstring &s, const std::wstring &p) {
+bool ends_with(std::wstring_view s, std::wstring_view p) {
 	return s.size() >= p.size() && !s.compare(s.size() - p.size(), p.size(), p);
 }
 

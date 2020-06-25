@@ -83,7 +83,7 @@ extern const std::string whitespace;
 
 bool starts_with(std::string_view s, std::string_view p);
 bool ends_with(std::string_view s, std::string_view p);
-bool ends_with(const std::wstring &s, const std::wstring &p);
+bool ends_with(std::wstring_view s, std::wstring_view p);
 void trim(std::string &s, const std::string &t = whitespace);
 void remove_comment(std::string &s, char c = ';');
 void remove_dot_ext(const char *f, char *s);
