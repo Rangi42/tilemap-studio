@@ -17,11 +17,11 @@
 
 const std::string whitespace(" \f\n\r\t\v");
 
-bool starts_with(const std::string &s, const std::string &p) {
+bool starts_with(std::string_view s, std::string_view p) {
 	return !s.compare(0, p.size(), p);
 }
 
-bool ends_with(const std::string &s, const std::string &p) {
+bool ends_with(std::string_view s, std::string_view p) {
 	return s.size() >= p.size() && !s.compare(s.size() - p.size(), p.size(), p);
 }
 
