@@ -1080,6 +1080,19 @@ void Main_Window::update_active_controls() {
 	}
 }
 
+void Main_Window::update_tileset_width(int tw) {
+	_tileset_width = tw;
+	int ox = _tiles_scroll->x() + Fl::box_dx(_tiles_scroll->box());
+	int oy = _tiles_scroll->y() + Fl::box_dy(_tiles_scroll->box());
+	for (int i = 0; i < MAX_NUM_TILES; i++) {
+		int col = i % tw, row = i / tw;
+		int tx = ox + col * TILE_SIZE_2X, ty = oy + row * TILE_SIZE_2X;
+		Tile_Button *tb = _tile_buttons[i];
+		tb->position(tx, ty);
+		tb->coords((size_t)row, (size_t)col);
+	}
+}
+
 void Main_Window::resize_tilemap() {
 	size_t w = _resize_dialog->tilemap_width(), h = _resize_dialog->tilemap_height();
 	size_t n = w * h;
@@ -1310,6 +1323,10 @@ void Main_Window::open_tilemap(const char *filename, size_t width, size_t height
 		Config::format(_new_tilemap_dialog->format());
 
 		_tilemap.new_tiles(width, height);
+	}
+
+	if (Config::format() == Tilemap_Format::RBY_TOWN_MAP && _tileset_width == 16) {
+		update_tileset_width(4);
 	}
 
 	int n2 = format_tileset_size(Config::format());
@@ -2001,16 +2018,7 @@ void Main_Window::tileset_width_cb(Fl_Menu_ *, Main_Window *mw) {
 	if (mw->_selection.selected_multiple() && mw->_selection.from_tileset()) {
 		mw->select_tile(mw->_selection.id());
 	}
-	mw->_tileset_width = tw;
-	int ox = mw->_tiles_scroll->x() + Fl::box_dx(mw->_tiles_scroll->box());
-	int oy = mw->_tiles_scroll->y() + Fl::box_dy(mw->_tiles_scroll->box());
-	for (int i = 0; i < MAX_NUM_TILES; i++) {
-		int col = i % tw, row = i / tw;
-		int tx = ox + col * TILE_SIZE_2X, ty = oy + row * TILE_SIZE_2X;
-		Tile_Button *tb = mw->_tile_buttons[i];
-		tb->position(tx, ty);
-		tb->coords((size_t)row, (size_t)col);
-	}
+	mw->update_tileset_width(tw);
 	mw->update_active_controls();
 	mw->redraw();
 }

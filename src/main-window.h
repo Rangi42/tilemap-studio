@@ -137,6 +137,7 @@ private:
 	void update_tilemap_metadata(void);
 	void update_tileset_metadata(void);
 	void update_active_controls(void);
+	void update_tileset_width(int tw);
 	void resize_tilemap(void);
 	void reformat_tilemap(void);
 	bool save_tilemap(bool force);
