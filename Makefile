@@ -14,7 +14,7 @@ tmpdir = tmp
 debugdir = tmp/debug
 bindir = bin
 
-CXXFLAGS = -std=c++11 -I$(srcdir) -I$(resdir) $(shell fltk-config --use-images --cxxflags)
+CXXFLAGS = -std=c++17 -I$(srcdir) -I$(resdir) $(shell fltk-config --use-images --cxxflags)
 LDFLAGS = $(shell fltk-config --use-images --ldflags) $(shell pkg-config --libs libpng xpm)
 
 RELEASEFLAGS = -DNDEBUG -O3 -flto -march=native

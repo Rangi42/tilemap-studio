@@ -31,7 +31,7 @@ Run the following commands:
 
 ```bash
 # Install dependencies
-# (you need at least g++ 4.9 for <regex> support)
+# (you need at least g++ 7 for C++11 <regex> and C++17 <string_view> support)
 sudo apt-get install make g++ git unzip
 sudo apt-get install zlib1g-dev libpng-dev libxpm-dev libx11-dev libxft-dev libxinerama-dev libfontconfig1-dev x11proto-xext-dev libxrender-dev libxfixes-dev
 
