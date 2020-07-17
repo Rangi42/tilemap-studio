@@ -17,7 +17,7 @@ Browse the menu items, toolbar buttons, and Help dialog to learn how to use Tile
 | **Click/drag**       | Select tile(s) | Place tiles      |
 | **Middle drag**      | Scroll         | Scroll           |
 | **Right-click**      | Highlight tile | Select tile      |
-| **Right drag**       |                | Select rectangle |
+| **Right drag**       |                | Select tiles     |
 | **Ctrl+click**       |                | Replace tile     |
 | **Shift+click**      |                | Flood fill       |
 | **Alt+click**        |                | Swap tiles       |
