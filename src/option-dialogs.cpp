@@ -820,6 +820,7 @@ void Image_To_Tiles_Dialog::initialize_content() {
 		_format->add(format_name((Tilemap_Format)i));
 	}
 	_format->callback((Fl_Callback *)format_cb, this);
+	_palette->value(1);
 	_palette->callback((Fl_Callback *)palette_cb, this);
 	for (int i = 0; i < NUM_PALETTE_FORMATS; i++) {
 		_palette_format->add(palette_names[i]);
