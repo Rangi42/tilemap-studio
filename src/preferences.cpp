@@ -93,6 +93,6 @@ std::string Preferences::get_string(const char *key) {
 	return s;
 }
 
-void Preferences::set_string(const char *key, std::string &value) {
+void Preferences::set_string(const char *key, const std::string &value) {
 	_preferences->set(key, value.c_str());
 }

@@ -53,7 +53,7 @@ public:
 	static bool is_modern_windows(void);
 #endif
 	inline static Theme current_theme(void) { return _current_theme; }
-	inline static bool is_dark_theme(Theme t) { return t == Theme::DARK || t == Theme::HIGH_CONTRAST; }
+	inline static constexpr bool is_dark_theme(Theme t) { return t == Theme::DARK || t == Theme::HIGH_CONTRAST; }
 	inline static bool is_consolas(void) { return _is_consolas; }
 	static void use_native_fonts(void);
 	static void use_native_scheme(void);

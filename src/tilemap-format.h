@@ -21,42 +21,42 @@
 enum class Tilemap_Format { PLAIN, GBC_ATTRS, GBC_ATTRMAP, GBA_4BPP, GBA_8BPP, SGB_BORDER, SNES_ATTRS,
 	RBY_TOWN_MAP, GSC_TOWN_MAP, PC_TOWN_MAP, POKEGEAR_CARD };
 
-inline bool format_has_landmarks(Tilemap_Format fmt) {
+inline constexpr bool format_has_landmarks(Tilemap_Format fmt) {
 	return fmt == Tilemap_Format::GSC_TOWN_MAP || fmt == Tilemap_Format::PC_TOWN_MAP;
 }
 
-inline bool format_has_emaps(Tilemap_Format fmt) {
+inline constexpr bool format_has_emaps(Tilemap_Format fmt) {
 	return fmt == Tilemap_Format::RBY_TOWN_MAP;
 }
 
-inline bool format_has_attrmap(Tilemap_Format fmt) {
+inline constexpr bool format_has_attrmap(Tilemap_Format fmt) {
 	return fmt == Tilemap_Format::GBC_ATTRMAP;
 }
 
-inline bool format_can_make_palettes(Tilemap_Format fmt) {
+inline constexpr bool format_can_make_palettes(Tilemap_Format fmt) {
 	return fmt != Tilemap_Format::RBY_TOWN_MAP && fmt != Tilemap_Format::POKEGEAR_CARD;
 }
 
-inline bool format_can_edit_palettes(Tilemap_Format fmt) {
+inline constexpr bool format_can_edit_palettes(Tilemap_Format fmt) {
 	return fmt == Tilemap_Format::GBC_ATTRS || fmt == Tilemap_Format::GBC_ATTRMAP || fmt == Tilemap_Format::GBA_4BPP ||
 		fmt == Tilemap_Format::SGB_BORDER || fmt == Tilemap_Format::SNES_ATTRS;
 }
 
-inline bool format_has_per_tile_palettes(Tilemap_Format fmt) {
+inline constexpr bool format_has_per_tile_palettes(Tilemap_Format fmt) {
 	return fmt == Tilemap_Format::GSC_TOWN_MAP || fmt == Tilemap_Format::PC_TOWN_MAP;
 }
 
-inline bool format_can_flip(Tilemap_Format fmt) {
+inline constexpr bool format_can_flip(Tilemap_Format fmt) {
 	return fmt == Tilemap_Format::GBC_ATTRS || fmt == Tilemap_Format::GBC_ATTRMAP || fmt == Tilemap_Format::GBA_4BPP ||
 		fmt == Tilemap_Format::GBA_8BPP || fmt == Tilemap_Format::SGB_BORDER || fmt == Tilemap_Format::SNES_ATTRS ||
 		fmt == Tilemap_Format::PC_TOWN_MAP;
 }
 
-inline bool format_has_priority(Tilemap_Format fmt) {
+inline constexpr bool format_has_priority(Tilemap_Format fmt) {
 	return fmt == Tilemap_Format::GBC_ATTRS || fmt == Tilemap_Format::GBC_ATTRMAP || fmt == Tilemap_Format::SNES_ATTRS;
 }
 
-inline bool format_has_obp1(Tilemap_Format fmt) {
+inline constexpr bool format_has_obp1(Tilemap_Format fmt) {
 	return fmt == Tilemap_Format::GBC_ATTRS || fmt == Tilemap_Format::GBC_ATTRMAP;
 }
 

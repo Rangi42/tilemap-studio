@@ -453,7 +453,7 @@ int OS_Tabs::handle(int event) {
 		if (Fl::event_y() > y() + OS_TAB_HEIGHT) {
 			return Fl_Group::handle(event);
 		}
-		// fallthrough
+		[[fallthrough]];
 	case FL_DRAG:
 	case FL_RELEASE:
 		o = which(Fl::event_x(), Fl::event_y());

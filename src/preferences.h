@@ -18,7 +18,7 @@ public:
 	static int get(const char *key, int default_ = 0);
 	static void set(const char *key, int value);
 	static std::string get_string(const char *key);
-	static void set_string(const char *key, std::string &value);
+	static void set_string(const char *key, const std::string &value);
 };
 
 #endif
