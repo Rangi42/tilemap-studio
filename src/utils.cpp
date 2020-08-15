@@ -1,16 +1,10 @@
+#include <cstring>
 #include <sys/stat.h>
-
-#ifdef _WIN32
-#include <io.h>
-#else
-#include <unistd.h>
-#include <libgen.h>
-#include <string.h>
-#endif
 
 #pragma warning(push, 0)
 #include <FL/fl_draw.H>
 #include <FL/filename.H>
+#include <FL/fl_utf8.h>
 #pragma warning(pop)
 
 #include "utils.h"
@@ -64,11 +58,7 @@ int text_width(const char *l, int pad) {
 }
 
 bool file_exists(const char *f) {
-#ifdef _WIN32
-	return !_access_s(f, 4);
-#else
-	return !access(f, 4);
-#endif
+	return !fl_access(f, 4); // R_OK
 }
 
 size_t file_size(const char *f) {
