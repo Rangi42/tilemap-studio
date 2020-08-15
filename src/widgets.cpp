@@ -361,8 +361,8 @@ void Dropdown::draw() {
 	int dx = Fl::box_dx(bb);
 	int dy = Fl::box_dy(bb);
 	int H = h() - 2 * dy;
-	int W = (H > 20) ? 20 : H;
-	int X = x() + w() - W - dx;
+	int W = MIN(H, 20);
+	int X = x() + w() - W - MAX(dx, dy);
 	int Y = y() + dy;
 	int w1 = MAX((W - 4) / 3, 1);
 	int x1 = X + (W - 2 * w1 - 1) / 2;

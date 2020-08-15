@@ -201,8 +201,8 @@ static void use_classic_scheme() {
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_BOX, classic_check_down_box, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_HOVERED_UP_FRAME, classic_button_up_frame, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_FRAME, classic_check_down_frame, 2, 2, 4, 4);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, classic_check_down_box, 2, 2, 4, 4);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, classic_check_down_frame, 2, 2, 4, 4);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, classic_check_down_box, 2, 3, 4, 6);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, classic_check_down_frame, 2, 3, 4, 6);
 	Fl::set_boxtype(OS_DEFAULT_BUTTON_BOX, classic_button_up_box, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_TOOLBAR_BUTTON_HOVER_BOX, FL_FLAT_BOX);
 	Fl::set_boxtype(OS_TABS_BOX, classic_button_up_box, 2, 2, 4, 4);
@@ -553,8 +553,8 @@ static void use_aero_scheme() {
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_BOX, aero_depressed_down_box, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_HOVERED_UP_FRAME, aero_hovered_up_frame, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_FRAME, aero_depressed_down_frame, 2, 2, 4, 4);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, aero_input_thin_down_box, 1, 1, 2, 2);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, aero_input_thin_down_frame, 1, 1, 2, 2);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, aero_input_thin_down_box, 1, 2, 2, 4);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, aero_input_thin_down_frame, 1, 2, 2, 4);
 	Fl::set_boxtype(OS_DEFAULT_BUTTON_BOX, aero_default_button_box, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_TOOLBAR_BUTTON_HOVER_BOX, FL_FLAT_BOX);
 	Fl::set_boxtype(OS_TABS_BOX, aero_tabs_box, 2, 1, 4, 2);
@@ -686,8 +686,8 @@ static void use_metro_scheme() {
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_BOX, metro_depressed_down_box, 1, 1, 2, 2);
 	Fl::set_boxtype(OS_HOVERED_UP_FRAME, metro_hovered_up_frame, 1, 1, 2, 2);
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_FRAME, metro_depressed_down_frame, 1, 1, 2, 2);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, metro_input_thin_down_box, 1, 1, 2, 2);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, metro_input_thin_down_frame, 1, 1, 2, 2);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, metro_input_thin_down_box, 1, 2, 2, 4);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, metro_input_thin_down_frame, 1, 2, 2, 4);
 	Fl::set_boxtype(OS_DEFAULT_BUTTON_BOX, metro_default_button_box, 1, 1, 2, 2);
 	Fl::set_boxtype(OS_TOOLBAR_BUTTON_HOVER_BOX, FL_FLAT_BOX);
 	Fl::set_boxtype(OS_TABS_BOX, aero_tabs_box, 2, 1, 4, 2);
@@ -996,8 +996,8 @@ static void use_aqua_scheme() {
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_BOX, aqua_depressed_down_box, 1, 1, 2, 2);
 	Fl::set_boxtype(OS_HOVERED_UP_FRAME, OS_BUTTON_UP_FRAME);
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_FRAME, aqua_depressed_down_frame, 1, 1, 2, 2);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, aqua_input_thin_down_box, 2, 2, 4, 4);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, aqua_input_thin_down_frame, 2, 2, 4, 4);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, aqua_input_thin_down_box, 2, 3, 4, 6);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, aqua_input_thin_down_frame, 2, 3, 4, 6);
 	Fl::set_boxtype(OS_DEFAULT_BUTTON_BOX, aqua_default_button_box, 1, 1, 2, 2);
 	Fl::set_boxtype(OS_TOOLBAR_BUTTON_HOVER_BOX, FL_FLAT_BOX);
 	Fl::set_boxtype(OS_TABS_BOX, aqua_tabs_box, 2, 1, 4, 2);
@@ -1318,8 +1318,8 @@ static void use_greybird_scheme() {
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_BOX, greybird_depressed_down_box, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_HOVERED_UP_FRAME, greybird_hovered_up_frame, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_FRAME, greybird_depressed_down_frame, 2, 2, 4, 4);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, greybird_input_thin_down_box, 2, 2, 4, 4);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, greybird_input_thin_down_frame, 2, 2, 4, 4);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, greybird_input_thin_down_box, 2, 3, 4, 6);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, greybird_input_thin_down_frame, 2, 3, 4, 6);
 	Fl::set_boxtype(OS_DEFAULT_BUTTON_BOX, greybird_default_button_box, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_TOOLBAR_BUTTON_HOVER_BOX, OS_BUTTON_UP_BOX);
 	Fl::set_boxtype(OS_TABS_BOX, greybird_tabs_box, 2, 2, 4, 4);
@@ -1464,7 +1464,7 @@ static void use_metal_scheme() {
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_BOX, OS_CHECK_DOWN_BOX);
 	Fl::set_boxtype(OS_HOVERED_UP_FRAME, OS_BUTTON_UP_FRAME);
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_FRAME, OS_BUTTON_UP_FRAME);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, metal_input_thin_down_box, 1, 1, 2, 2);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, metal_input_thin_down_box, 1, 2, 2, 4);
 	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, OS_BUTTON_UP_FRAME);
 	Fl::set_boxtype(OS_DEFAULT_BUTTON_BOX, OS_BUTTON_UP_BOX);
 	Fl::set_boxtype(OS_TOOLBAR_BUTTON_HOVER_BOX, FL_FLAT_BOX);
@@ -1726,8 +1726,8 @@ static void use_blue_scheme() {
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_BOX, blue_depressed_down_box, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_HOVERED_UP_FRAME, blue_hovered_up_frame, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_FRAME, blue_depressed_down_frame, 2, 2, 4, 4);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, aero_input_thin_down_box, 1, 1, 2, 2);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, aero_input_thin_down_frame, 1, 1, 2, 2);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, aero_input_thin_down_box, 1, 2, 2, 4);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, aero_input_thin_down_frame, 1, 2, 2, 4);
 	Fl::set_boxtype(OS_DEFAULT_BUTTON_BOX, blue_default_button_box, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_TOOLBAR_BUTTON_HOVER_BOX, FL_FLAT_BOX);
 	Fl::set_boxtype(OS_TABS_BOX, blue_tabs_box, 2, 1, 4, 2);
@@ -2149,8 +2149,8 @@ static void use_olive_scheme() {
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_BOX, OS_CHECK_DOWN_BOX);
 	Fl::set_boxtype(OS_HOVERED_UP_FRAME, olive_hovered_up_frame, 1, 3, 2, 6);
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_FRAME, OS_CHECK_DOWN_FRAME);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, olive_input_thin_down_box, 1, 1, 2, 2);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, olive_input_thin_down_frame, 1, 1, 2, 2);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, olive_input_thin_down_box, 1, 2, 2, 4);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, olive_input_thin_down_frame, 1, 2, 2, 4);
 	Fl::set_boxtype(OS_DEFAULT_BUTTON_BOX, olive_default_button_up_box, 1, 3, 2, 6);
 	Fl::set_boxtype(OS_TOOLBAR_BUTTON_HOVER_BOX, olive_toolbar_button_hover_box, 1, 2, 2, 4);
 	Fl::set_boxtype(OS_TABS_BOX, olive_tabs_box, 2, 1, 4, 2);
@@ -2411,8 +2411,8 @@ static void use_rose_gold_scheme() {
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_BOX, rose_gold_depressed_down_box, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_HOVERED_UP_FRAME, rose_gold_hovered_up_frame, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_FRAME, rose_gold_depressed_down_frame, 2, 2, 4, 4);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, aero_input_thin_down_box, 1, 1, 2, 2);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, aero_input_thin_down_frame, 1, 1, 2, 2);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, aero_input_thin_down_box, 1, 2, 2, 4);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, aero_input_thin_down_frame, 1, 2, 2, 4);
 	Fl::set_boxtype(OS_DEFAULT_BUTTON_BOX, rose_gold_default_button_box, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_TOOLBAR_BUTTON_HOVER_BOX, OS_BUTTON_UP_BOX);
 	Fl::set_boxtype(OS_TABS_BOX, rose_gold_tabs_box, 2, 1, 4, 2);
@@ -2633,8 +2633,8 @@ static void use_dark_scheme() {
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_BOX, dark_depressed_down_box, 1, 1, 2, 2);
 	Fl::set_boxtype(OS_HOVERED_UP_FRAME, OS_BUTTON_UP_FRAME);
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_FRAME, dark_depressed_down_frame, 1, 1, 2, 2);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, dark_input_thin_down_box, 1, 1, 2, 2);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, dark_input_thin_down_frame, 1, 1, 2, 2);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, dark_input_thin_down_box, 1, 2, 2, 4);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, dark_input_thin_down_frame, 1, 2, 2, 4);
 	Fl::set_boxtype(OS_DEFAULT_BUTTON_BOX, OS_BUTTON_UP_BOX);
 	Fl::set_boxtype(OS_TOOLBAR_BUTTON_HOVER_BOX, OS_BUTTON_UP_BOX);
 	Fl::set_boxtype(OS_TABS_BOX, dark_tabs_box, 2, 2, 4, 4);
@@ -2778,8 +2778,8 @@ static void use_high_contrast_scheme() {
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_BOX, high_contrast_check_down_box, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_HOVERED_UP_FRAME, high_contrast_hovered_up_frame, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_FRAME, high_contrast_check_down_frame, 2, 2, 4, 4);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, high_contrast_check_down_box, 2, 2, 4, 4);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, high_contrast_check_down_frame, 2, 2, 4, 4);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, high_contrast_check_down_box, 2, 3, 4, 6);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, high_contrast_check_down_frame, 2, 3, 4, 6);
 	Fl::set_boxtype(OS_DEFAULT_BUTTON_BOX, high_contrast_default_button_box, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_TOOLBAR_BUTTON_HOVER_BOX, OS_HOVERED_UP_BOX);
 	Fl::set_boxtype(OS_TABS_BOX, high_contrast_button_up_box, 2, 2, 4, 4);
