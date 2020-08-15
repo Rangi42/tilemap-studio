@@ -1653,9 +1653,9 @@ void Main_Window::save_as_cb(Fl_Widget *, Main_Window *mw) {
 		return;
 	}
 
-	mw->_tilemap_file = filename ? filename : "";
+	mw->_tilemap_file.assign(filename);
 	fl_filename_setext(filename, sizeof(filename), ATTRMAP_EXT);
-	mw->_attrmap_file = filename ? filename : "";
+	mw->_attrmap_file.assign(filename);
 	mw->save_tilemap(true);
 }
 
