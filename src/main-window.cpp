@@ -851,10 +851,11 @@ void Main_Window::update_status(Tile_Tessera *tt) {
 			sprintf(buffer, "Landmark (%zu, %zu)", lx, ly);
 			_hover_landmark->copy_label(buffer);
 		}
-		else if (format_has_emaps(Config::format()) && tt->col() >= 2 && tt->col() <= 0xF + 2 &&
+		else if (format_has_emaps(Config::format()) &&
+			tt->col() >= 2 && tt->col() <= 0xF + 2 &&
 			tt->row() >= 1 && tt->row() <= 0xF + 1) {
-			int lx = (int)tt->col() - 2, ly = (int)tt->row() - 1;
-			sprintf(buffer, "EMAP $%X, $%X", lx, ly);
+			size_t lx = tt->col() - 2, ly = tt->row() - 1;
+			sprintf(buffer, "Map (%zu, %zu)", lx, ly);
 			_hover_landmark->copy_label(buffer);
 		}
 		else {
