@@ -45,7 +45,7 @@ int Hex_Input::handle_key() {
 	}
 	Fl::compose_reset();
 	char a = Fl::event_text()[0];
-	int ip = MIN(position(), mark());
+	int ip = std::min(position(), mark());
 	if (isxdigit((unsigned char)a) || (!ip && (a == '+' || a == '-'))) {
 		if (readonly()) {
 			fl_beep();

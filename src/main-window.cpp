@@ -179,7 +179,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_palettes_tab->resizable(NULL);
 	_left_tabs->resizable(_tiles_tab);
 	_left_group->begin();
-	wgt_w = MAX(text_width("Map: 999x999", 3), text_width("Set: 999x999", 3));
+	wgt_w = std::max(text_width("Map: 999x999", 3), text_width("Set: 999x999", 3));
 	int qw = wgt_w + wgt_m * 2 + wgt_h * 3;
 	int qx = gx + gw - qw;
 	_top_group = new Bounded_Group(qx, gy, qw, wgt_h);
@@ -1032,7 +1032,7 @@ void Main_Window::update_active_controls() {
 		max_th = min_th;
 	}
 	else {
-		min_th = MIN(tw, DEFAULT_TILES_PER_ROW * TILE_SIZE_2X);
+		min_th = std::min(tw, DEFAULT_TILES_PER_ROW * TILE_SIZE_2X);
 		max_th += tileset_width() > DEFAULT_TILES_PER_ROW ? Fl::scrollbar_size() : 0;
 	}
 	int tdh = 12 + OS_TAB_HEIGHT;
@@ -1172,7 +1172,7 @@ void Main_Window::edit_tile(Tile_Tessera *tt) {
 	size_t tx = tt->col(), ty = tt->row();
 	size_t ow = _selection.width(), oh = _selection.height();
 	size_t ox = _selection.left_col(), oy = _selection.top_row();
-	size_t mx = MIN(ow, _tilemap.width() - tx), my = MIN(oh, _tilemap.height() - ty);
+	size_t mx = std::min(ow, _tilemap.width() - tx), my = std::min(oh, _tilemap.height() - ty);
 	if (_selection.from_tileset()) {
 		uint16_t n = (uint16_t)format_tileset_size(Config::format());
 		size_t tw = (size_t)tileset_width();

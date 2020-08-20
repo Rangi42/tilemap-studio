@@ -39,7 +39,7 @@ void Tileset::update_zoom() {
 bool Tileset::draw_tile(const Tile_State *ts, int x, int y, int z, bool active) const {
 	int index = (int)ts->id - _start_id + _offset;
 	int limit = (int)_num_tiles;
-	if (_length > 0) { limit = MIN(limit, _length + _offset); }
+	if (_length > 0) { limit = std::min(limit, _length + _offset); }
 	if (index < _offset || index >= limit || !_2x_image || !_zoomed_image) { return false; }
 
 	int s = TILE_SIZE * z;
@@ -86,7 +86,7 @@ bool Tileset::draw_tile(const Tile_State *ts, int x, int y, int z, bool active) 
 bool Tileset::print_tile(const Tile_State *ts, int x, int y, bool active) const {
 	int index = (int)ts->id - _start_id + _offset;
 	int limit = (int)_num_tiles;
-	if (_length > 0) { limit = MIN(limit, _length + _offset); }
+	if (_length > 0) { limit = std::min(limit, _length + _offset); }
 	if (index < _offset || index >= limit || !_1x_image) { return false; }
 
 	if (!active) {
@@ -250,7 +250,7 @@ Tileset::Result Tileset::parse_1bpp_data(size_t n, uchar *data) {
 	_num_tiles = n;
 
 	int limit = (int)_num_tiles - _offset;
-	if (_length > 0) { limit = MIN(limit, _length + _offset); }
+	if (_length > 0) { limit = std::min(limit, _length + _offset); }
 	if (_start_id + limit > MAX_NUM_TILES) { delete [] data; return (_result = Result::TILESET_TOO_LARGE); }
 
 	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)n * TILE_SIZE);
@@ -282,7 +282,7 @@ Tileset::Result Tileset::parse_2bpp_data(size_t n, uchar *data) {
 	_num_tiles = n;
 
 	int limit = (int)_num_tiles - _offset;
-	if (_length > 0) { limit = MIN(limit, _length + _offset); }
+	if (_length > 0) { limit = std::min(limit, _length + _offset); }
 	if (_start_id + limit > MAX_NUM_TILES) { delete [] data; return (_result = Result::TILESET_TOO_LARGE); }
 
 	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)n * TILE_SIZE);
@@ -322,7 +322,7 @@ Tileset::Result Tileset::parse_4bpp_data(size_t n, uchar *data) {
 	_num_tiles = n;
 
 	int limit = (int)_num_tiles - _offset;
-	if (_length > 0) { limit = MIN(limit, _length + _offset); }
+	if (_length > 0) { limit = std::min(limit, _length + _offset); }
 	if (_start_id + limit > MAX_NUM_TILES) { delete [] data; return (_result = Result::TILESET_TOO_LARGE); }
 
 	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)n * TILE_SIZE);
@@ -355,7 +355,7 @@ Tileset::Result Tileset::parse_8bpp_data(size_t n, uchar *data) {
 	_num_tiles = n;
 
 	int limit = (int)_num_tiles - _offset;
-	if (_length > 0) { limit = MIN(limit, _length + _offset); }
+	if (_length > 0) { limit = std::min(limit, _length + _offset); }
 	if (_start_id + limit > MAX_NUM_TILES) { delete [] data; return (_result = Result::TILESET_TOO_LARGE); }
 
 	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)n * TILE_SIZE);
@@ -397,7 +397,7 @@ Tileset::Result Tileset::postprocess_graphics(Fl_RGB_Image *img) {
 	_num_tiles = w * h;
 
 	int limit = (int)_num_tiles - _offset;
-	if (_length > 0) { limit = MIN(limit, _length + _offset); }
+	if (_length > 0) { limit = std::min(limit, _length + _offset); }
 	if (_start_id + limit > MAX_NUM_TILES) { clear(); return (_result = Result::TILESET_TOO_LARGE); }
 
 	return (_result = Result::TILESET_OK);

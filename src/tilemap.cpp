@@ -49,7 +49,7 @@ void Tilemap::resize(size_t w, size_t h, Resize_Dialog::Hor_Align ha, Resize_Dia
 	size_t n = w * h;
 	std::vector<Tile_Tessera *> tiles;
 	tiles.reserve(n);
-	int mx = MAX(px, 0), my = MAX(py, 0), mw = MIN(w, width() + px), mh = MIN(h, height() + py);
+	int mx = std::max(px, 0), my = std::max(py, 0), mw = std::min(w, width() + px), mh = std::min(h, height() + py);
 	size_t t = 0;
 	for (int y = 0; y < py; y++) {
 		for (int x = 0; x < (int)w; x++) {

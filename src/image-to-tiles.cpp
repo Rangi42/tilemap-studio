@@ -68,7 +68,7 @@ static Fl_Color indexed_colors[16] = {
 static Fl_RGB_Image *print_tileset(const Tile *tiles, const std::vector<size_t> &tileset,
 	const std::vector<std::vector<Fl_Color>> &palettes, const std::vector<int> &tile_palettes, size_t nc, int tw) {
 	int nt = (int)tileset.size();
-	tw = MIN(nt, tw);
+	tw = std::min(nt, tw);
 	int th = (nt + tw - 1) / tw;
 
 	size_t np = tile_palettes.size();
@@ -206,7 +206,7 @@ static bool write_tilepal(const char *f, const std::vector<size_t> &tileset, con
 
 	fputs("pertilepals: MACRO\nrept _NARG / 2\n\tdn \\2, \\1\n\tshift\n\tshift\nendr\nENDM\n", file);
 	size_t nt = tileset.size();
-	size_t np = MAX(nt, 16 * 3);
+	size_t np = std::max(nt, (size_t)(16 * 3));
 	for (size_t i = 0; i < np; i++) {
 		if (!(i % 16)) {
 			fputs("\n\tpertilepals ", file);

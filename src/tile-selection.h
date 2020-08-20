@@ -15,8 +15,8 @@ public:
 	inline bool selecting(void) const { return _dragging; }
 	inline bool from_tileset(void) const { return _from_tileset; }
 	inline uint16_t id(void) const { return _tile1->id(); }
-	inline size_t top_row(void) const { return MIN(_tile1->row(), _tile2->row()); }
-	inline size_t left_col(void) const { return MIN(_tile1->col(), _tile2->col()); }
+	inline size_t top_row(void) const { return std::min(_tile1->row(), _tile2->row()); }
+	inline size_t left_col(void) const { return std::min(_tile1->col(), _tile2->col()); }
 	void select_single(Tile_Button *tb);
 	void start_selecting(Tile_Tessera *tt);
 	void start_selecting(Tile_Button *tb);

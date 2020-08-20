@@ -8,8 +8,8 @@ void Tile_Selection::draw_selection_border_at(Groupable *t) const {
 	if (!p) { return; }
 	int pw = p->w() - (p->has_y_scroll() ? Fl::scrollbar_size() : 0);
 	int ph = p->h() - (p->has_x_scroll() ? Fl::scrollbar_size() : 0);
-	int tx = t == _tile1 ? MIN(_tile1->x(), _tile2->x()) : t->x();
-	int ty = t == _tile1 ? MIN(_tile1->y(), _tile2->y()) : t->y();
+	int tx = t == _tile1 ? std::min(_tile1->x(), _tile2->x()) : t->x();
+	int ty = t == _tile1 ? std::min(_tile1->y(), _tile2->y()) : t->y();
 	int tw = t->w() * (int)width(), th = t->h() * (int)height();
 	bool zoom = !_from_tileset && Config::zoom() > 5;
 	fl_push_clip(p->x(), p->y(), pw, ph);

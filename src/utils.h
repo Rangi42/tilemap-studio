@@ -8,37 +8,6 @@
 #include <string>
 #include <string_view>
 
-#ifdef _DEBUG
-
-#pragma warning(push, 0)
-#include <FL/fl_ask.H>
-#pragma warning(pop)
-
-#include <iostream>
-#include <sstream>
-
-#ifdef _WIN32
-
-#include <windows.h>
-
-#define DEBUGPRINT(X) \
-	__pragma(warning(push)) \
-	__pragma(warning(disable:4127)) \
-	do { \
-		std::wstringstream wss_dbg_; \
-		wss_dbg_ << X << std::endl; \
-		OutputDebugString(wss_dbg_.str().c_str()); \
-	} while (0) \
-	__pragma(warning(pop))
-
-#endif
-
-#else
-
-#define DEBUGPRINT(X)
-
-#endif
-
 #ifdef _WIN32
 #define DIR_SEP "\\"
 #else
@@ -47,9 +16,6 @@
 
 #define STRINGIFY(x) _STRINGIFY_HELPER(x)
 #define _STRINGIFY_HELPER(x) #x
-
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 #ifdef _WIN32
 #define FILL(a, v, n) \
