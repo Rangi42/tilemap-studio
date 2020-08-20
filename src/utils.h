@@ -7,6 +7,7 @@
 #include <cmath>
 #include <string>
 #include <string_view>
+#include <algorithm>
 
 #ifdef _WIN32
 #define DIR_SEP "\\"
@@ -16,25 +17,6 @@
 
 #define STRINGIFY(x) _STRINGIFY_HELPER(x)
 #define _STRINGIFY_HELPER(x) #x
-
-#ifdef _WIN32
-#define FILL(a, v, n) \
-	__pragma(warning(push)) \
-	__pragma(warning(disable:4127)) \
-	do { \
-		for (size_t __fill_i_ = 0; __fill_i_ < (size_t)(n); __fill_i_++) { \
-			a[__fill_i_] = (v); \
-		} \
-	} while (0) \
-	__pragma(warning(pop))
-#else
-#define FILL(a, v, n) \
-	do { \
-		for (size_t __fill_i_ = 0; __fill_i_ < (size_t)(n); __fill_i_++) { \
-			a[__fill_i_] = (v); \
-		} \
-	} while (0)
-#endif
 
 #ifndef _countof
 #define _countof(a) (sizeof(a) / sizeof(a[0]))

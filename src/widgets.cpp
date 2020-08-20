@@ -1,5 +1,3 @@
-#include <algorithm>
-
 #pragma warning(push, 0)
 #include <FL/Fl.H>
 #include <FL/Fl_Box.H>

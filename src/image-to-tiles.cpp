@@ -3,7 +3,6 @@
 #include <set>
 #include <map>
 #include <iterator>
-#include <algorithm>
 
 #pragma warning(push, 0)
 #include <FL/Fl.H>
