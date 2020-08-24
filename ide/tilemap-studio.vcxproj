@@ -100,7 +100,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>fltkimages.lib;fltkpng.lib;fltkzlib.lib;fltk.lib;opengl32.lib;glu32.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
