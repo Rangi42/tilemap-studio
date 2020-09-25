@@ -1465,7 +1465,13 @@ void Main_Window::load_corresponding_tileset(const char *filename) {
 	for (int i = 0; i < 8; i++) {
 		const char *ext = extensions[i];
 		strcpy(buffer, filename);
-		fl_filename_setext(buffer, sizeof(buffer), ext);
+		if (ends_with(filename, ".tilemap.rle")) {
+			buffer[strlen(buffer)-12] = '\0';
+			strcat(buffer, ext);
+		}
+		else {
+			fl_filename_setext(buffer, sizeof(buffer), ext);
+		}
 		if (file_exists(buffer)) {
 			load_tileset(buffer);
 			return;
