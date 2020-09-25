@@ -354,6 +354,36 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 		}
 	}
 
+	else if (fmt == Tilemap_Format::SW_TOWN_MAP) {
+		if (!(c % 2)) {
+			fclose(file);
+			return (_result = Result::TILEMAP_TOO_SHORT_00);
+		}
+		for (long i = 0; i < c - 1; i += 2) {
+			int v = fgetc(file);
+			if (v == 0x00) {
+				fclose(file);
+				for (Tile_Tessera *tt : tiles) { delete tt; }
+				return (_result = Result::TILEMAP_TOO_LONG_00);
+			}
+			int r = fgetc(file);
+			if (r == 0x00) {
+				fclose(file);
+				for (Tile_Tessera *tt : tiles) { delete tt; }
+				return (_result = Result::TILEMAP_TOO_LONG_00);
+			}
+			for (int j = 0; j < r; j++) {
+				tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v));
+			}
+		}
+		int b = fgetc(file);
+		if (b != 0x00) {
+			fclose(file);
+			for (Tile_Tessera *tt : tiles) { delete tt; }
+			return (_result = Result::TILEMAP_TOO_SHORT_00);
+		}
+	}
+
 	else if (fmt == Tilemap_Format::POKEGEAR_CARD) {
 		if (!(c % 2)) {
 			fclose(file);
@@ -545,21 +575,33 @@ bool Tilemap::write_tiles(const char *tf, const char *af, std::vector<Tile_Tesse
 			fputc(b, file);
 		}
 	}
-	else if (fmt == Tilemap_Format::POKEGEAR_CARD) {
+	else if (fmt == Tilemap_Format::SW_TOWN_MAP) {
 		size_t n = tiles.size();
 		for (size_t i = 0; i < n;) {
 			Tile_Tessera *tt = tiles[i++];
 			int v = (int)tt->id(), r = 1;
 			while (i < n && (int)tiles[i]->id() == v) {
 				i++;
-				if (++r == 0xFF) { break; } // maximum byte
 			}
 			fputc(v, file);
 			fputc(r, file);
 		}
 	}
+	else if (fmt == Tilemap_Format::POKEGEAR_CARD) {
+	size_t n = tiles.size();
+	for (size_t i = 0; i < n;) {
+		Tile_Tessera *tt = tiles[i++];
+		int v = (int)tt->id(), r = 1;
+		while (i < n && (int)tiles[i]->id() == v) {
+			i++;
+			if (++r == 0xFF) { break; } // maximum byte
+		}
+		fputc(v, file);
+		fputc(r, file);
+	}
+	}
 
-	if (fmt == Tilemap_Format::RBY_TOWN_MAP) {
+	if (fmt == Tilemap_Format::RBY_TOWN_MAP || fmt == Tilemap_Format::SW_TOWN_MAP) {
 		fputc(0x00, file);
 	}
 	else if (fmt == Tilemap_Format::GSC_TOWN_MAP || fmt == Tilemap_Format::PC_TOWN_MAP || fmt == Tilemap_Format::POKEGEAR_CARD) {

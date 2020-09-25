@@ -19,6 +19,7 @@ static const int tileset_sizes[NUM_FORMATS] = {
 	0x10,  // RBY_TOWN_MAP - High nybble is reserved for run length
 	0xFF,  // GSC_TOWN_MAP - $FF is reserved for the end marker
 	0x40,  // PC_TOWN_MAP - High two bits are reserved for X/Y flip
+	0x100, // SW_TOWN_MAP - 8-bit tile IDs (but $00 is reserved for the end marker)
 	0xFF,  // POKEGEAR_CARD - $FF is reserved for the end marker
 };
 
@@ -42,6 +43,7 @@ int format_palettes_size(Tilemap_Format fmt) {
 	case Tilemap_Format::GBA_8BPP:
 		return 1;
 	case Tilemap_Format::RBY_TOWN_MAP:
+	case Tilemap_Format::SW_TOWN_MAP:
 	case Tilemap_Format::POKEGEAR_CARD:
 	default:
 		return 0;
@@ -63,6 +65,7 @@ int format_palette_size(Tilemap_Format fmt) {
 	case Tilemap_Format::PC_TOWN_MAP:
 		return 4;
 	case Tilemap_Format::RBY_TOWN_MAP:
+	case Tilemap_Format::SW_TOWN_MAP:
 	case Tilemap_Format::POKEGEAR_CARD:
 	default:
 		return 0;
@@ -84,6 +87,7 @@ int format_color_depth(Tilemap_Format fmt) {
 	case Tilemap_Format::PC_TOWN_MAP:
 		return 2;
 	case Tilemap_Format::RBY_TOWN_MAP:
+	case Tilemap_Format::SW_TOWN_MAP:
 	case Tilemap_Format::POKEGEAR_CARD:
 	default:
 		return 0;
@@ -101,6 +105,7 @@ static const char *format_names[NUM_FORMATS] = {
 	"RBY Town Map",              // RBY_TOWN_MAP
 	"GSC Town Map",              // GSC_TOWN_MAP
 	"PC Town Map",               // PC_TOWN_MAP
+	"SW Town Map",               // SW_TOWN_MAP
 	"Pok\xc3\xa9gear card",      // POKEGEAR_CARD
 };
 
@@ -128,6 +133,7 @@ static const char *format_extensions[NUM_FORMATS] = {
 	".rle",         // RBY_TOWN_MAP - e.g. pokered/gfx/town_map.rle
 	".bin",         // GSC_TOWN_MAP - e.g. pokecrystal/gfx/pokegear/*.bin
 	".bin",         // PC_TOWN_MAP - e.g. polishedcrystal/gfx/town_map/*.bin
+	".tilemap.rle", // SW_TOWN_MAP - e.g. pokegold-spaceworld/gfx/trainer_gear/town_map.tilemap.rle
 	".tilemap.rle", // POKEGEAR_CARD - e.g. pokecrystal/gfx/pokegear/*.tilemap.rle
 };
 

@@ -32,6 +32,7 @@ R"(<html>
 <li><b>RBY Town Map:</b> A sequence of bytes that each encode a tile ID in their high nybble and a run length in their low nybble, ended by a $00 byte. For example, $46 encodes a sequence of six tiles with ID $04. Only 16 tile IDs can be represented, $00 to $0F. Meant for the Town Map tilemap in pokered: gfx)" DIR_SEP R"(town_map.rle.</li>
 <li><b>GSC Town Map:</b> A sequence of tile IDs ended by an $FF byte (so $FF is not a valid tile ID). Meant for the Town Map tilemaps in pokecrystal: gfx)" DIR_SEP "pokegear" DIR_SEP R"(johto.bin and kanto.bin.</li>
 <li><b>PC Town Map:</b> A sequence of bytes that each encode a tile ID in their low six bits and X/Y flip attributes in their high two bits, ended by an $FF byte. Only 64 tile IDs can be represented, $00 to $3F. Meant for the Town Map tilemaps in <a href="https://github.com/Rangi42/polishedcrystal">Polished Crystal</a>: gfx)" DIR_SEP "town_map" DIR_SEP R"(*.bin.</li>
+<li><b>SW Town Map:</b> A sequence of tile IDs and run lengths, ended by a $00 byte (so $00 is not a valid tile ID). For example, $0F $06 encodes a sequence of 6 tiles with ID $0F. Meant for the Town Map tilemap in pokegold-spaceworld: gfx)" DIR_SEP "trainer_gear" DIR_SEP R"(town_map.tilemap.rle.</li>
 <li><b>Pok&eacute;gear card:</b> A sequence of tile IDs and run lengths, ended by an $FF byte (so $FF is not a valid tile ID). For example, $F0 $0D encodes a sequence of 13 tiles with ID $F0. Meant for the Pok&eacute;gear card tilemaps in pokecrystal: gfx)" DIR_SEP "pokegear" DIR_SEP R"(*.tilemap.rle.</li>
 </ul>
 <hr>

@@ -772,6 +772,7 @@ Image_To_Tiles_Dialog::Palette_Format Image_To_Tiles_Dialog::default_palette_for
 	case Tilemap_Format::RBY_TOWN_MAP:
 	case Tilemap_Format::GSC_TOWN_MAP:
 	case Tilemap_Format::PC_TOWN_MAP:
+	case Tilemap_Format::SW_TOWN_MAP:
 	case Tilemap_Format::POKEGEAR_CARD:
 		return Palette_Format::RGB;
 	case Tilemap_Format::PLAIN:

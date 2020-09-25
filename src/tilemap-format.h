@@ -16,10 +16,10 @@
 
 #define TILEPAL_EXT ".asm"
 
-#define NUM_FORMATS 11
+#define NUM_FORMATS 12
 
 enum class Tilemap_Format { PLAIN, GBC_ATTRS, GBC_ATTRMAP, GBA_4BPP, GBA_8BPP, SGB_BORDER, SNES_ATTRS,
-	RBY_TOWN_MAP, GSC_TOWN_MAP, PC_TOWN_MAP, POKEGEAR_CARD };
+	RBY_TOWN_MAP, GSC_TOWN_MAP, PC_TOWN_MAP, SW_TOWN_MAP, POKEGEAR_CARD };
 
 inline constexpr bool format_has_landmarks(Tilemap_Format fmt) {
 	return fmt == Tilemap_Format::GSC_TOWN_MAP || fmt == Tilemap_Format::PC_TOWN_MAP;
@@ -34,7 +34,7 @@ inline constexpr bool format_has_attrmap(Tilemap_Format fmt) {
 }
 
 inline constexpr bool format_can_make_palettes(Tilemap_Format fmt) {
-	return fmt != Tilemap_Format::RBY_TOWN_MAP && fmt != Tilemap_Format::POKEGEAR_CARD;
+	return fmt != Tilemap_Format::RBY_TOWN_MAP && fmt != Tilemap_Format::SW_TOWN_MAP && fmt != Tilemap_Format::POKEGEAR_CARD;
 }
 
 inline constexpr bool format_can_edit_palettes(Tilemap_Format fmt) {
