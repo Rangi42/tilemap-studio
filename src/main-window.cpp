@@ -1013,7 +1013,7 @@ void Main_Window::update_active_controls() {
 	while (_tiles_scroll->children()) {
 		_tiles_scroll->remove(0);
 	}
-	for (int i = 0; i < n; i++) {
+	for (int i = Config::format() == Tilemap_Format::SW_TOWN_MAP ? 0x01 : 0x00; i < n; i++) {
 		_tiles_scroll->add(_tile_buttons[i]);
 	}
 	_tiles_scroll->add(_tiles_scroll->scrollbar);
