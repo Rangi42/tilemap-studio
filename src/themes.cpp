@@ -214,6 +214,7 @@ static void use_classic_scheme() {
 	Fl::set_boxtype(FL_UP_BOX, classic_button_up_box, 2, 2, 4, 4);
 	Fl::set_boxtype(FL_DOWN_BOX, classic_check_down_box, 2, 2, 4, 4);
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, classic_radio_round_down_box, 2, 2, 4, 4);
+	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 }
 
 static void use_classic_colors() {
@@ -566,6 +567,7 @@ static void use_aero_scheme() {
 	Fl::set_boxtype(FL_UP_BOX, OS_BUTTON_UP_BOX);
 	Fl::set_boxtype(FL_DOWN_BOX, OS_CHECK_DOWN_BOX);
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, OS_RADIO_ROUND_DOWN_BOX);
+	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 }
 
 static void use_aero_colors() {
@@ -699,6 +701,7 @@ static void use_metro_scheme() {
 	Fl::set_boxtype(FL_UP_BOX, OS_BUTTON_UP_BOX);
 	Fl::set_boxtype(FL_DOWN_BOX, OS_CHECK_DOWN_BOX);
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, OS_RADIO_ROUND_DOWN_BOX);
+	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 }
 
 static void use_metro_colors() {
@@ -1009,6 +1012,7 @@ static void use_aqua_scheme() {
 	Fl::set_boxtype(FL_UP_BOX, OS_BUTTON_UP_BOX);
 	Fl::set_boxtype(FL_DOWN_BOX, OS_BUTTON_UP_BOX);
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, OS_RADIO_ROUND_DOWN_BOX);
+	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 }
 
 static void use_aqua_colors() {
@@ -1331,6 +1335,7 @@ static void use_greybird_scheme() {
 	Fl::set_boxtype(FL_UP_BOX, OS_BUTTON_UP_BOX);
 	Fl::set_boxtype(FL_DOWN_BOX, OS_CHECK_DOWN_BOX);
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, OS_RADIO_ROUND_DOWN_BOX);
+	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 }
 
 static void use_greybird_colors() {
@@ -1351,14 +1356,14 @@ void OS::use_greybird_theme() {
 	_current_theme = Theme::GREYBIRD;
 }
 
-/***************************** Metal (Java Swing) *****************************/
+/***************************** Ocean (Java Swing) *****************************/
 
-static void metal_button_up_frame(int x, int y, int w, int h, Fl_Color) {
+static void ocean_button_up_frame(int x, int y, int w, int h, Fl_Color) {
 	fl_color(activated_color(fl_rgb_color(0x7A, 0x8A, 0x99)));
 	fl_rect(x, y, w, h);
 }
 
-static void metal_button_up_box(int x, int y, int w, int h, Fl_Color c) {
+static void ocean_button_up_box(int x, int y, int w, int h, Fl_Color c) {
 	if (w >= h) {
 		int m = h * 3 / 10;
 		// top gradient
@@ -1377,10 +1382,10 @@ static void metal_button_up_box(int x, int y, int w, int h, Fl_Color c) {
 		horizontal_gradient(x+m, y+1, x+w-2, y+h-2, activated_color(fl_rgb_color(0xFF, 0xFF, 0xFF)),
 			activated_color(fl_rgb_color(0xBB, 0xD1, 0xE6)));
 	}
-	metal_button_up_frame(x, y, w, h, c);
+	ocean_button_up_frame(x, y, w, h, c);
 }
 
-static void metal_panel_thin_up_frame(int x, int y, int w, int h, Fl_Color) {
+static void ocean_panel_thin_up_frame(int x, int y, int w, int h, Fl_Color) {
 	// top and left borders
 	fl_color(activated_color(fl_rgb_color(0xFF, 0xFF, 0xFF)));
 	fl_yxline(x, y+h-2, y, x+w-2);
@@ -1389,13 +1394,13 @@ static void metal_panel_thin_up_frame(int x, int y, int w, int h, Fl_Color) {
 	fl_xyline(x, y+h-1, x+w-1, y);
 }
 
-static void metal_panel_thin_up_box(int x, int y, int w, int h, Fl_Color c) {
+static void ocean_panel_thin_up_box(int x, int y, int w, int h, Fl_Color c) {
 	fl_color(activated_color(c));
 	fl_rectf(x+1, y+1, w-2, h-2);
-	metal_panel_thin_up_frame(x, y, w, h, c);
+	ocean_panel_thin_up_frame(x, y, w, h, c);
 }
 
-static void metal_spacer_thin_down_frame(int x, int y, int w, int h, Fl_Color) {
+static void ocean_spacer_thin_down_frame(int x, int y, int w, int h, Fl_Color) {
 	// top and left borders
 	fl_color(activated_color(fl_rgb_color(0x63, 0x82, 0xBF)));
 	fl_yxline(x, y+h-2, y, x+w-2);
@@ -1404,18 +1409,18 @@ static void metal_spacer_thin_down_frame(int x, int y, int w, int h, Fl_Color) {
 	fl_xyline(x, y+h-1, x+w-1, y);
 }
 
-static void metal_spacer_thin_down_box(int x, int y, int w, int h, Fl_Color c) {
+static void ocean_spacer_thin_down_box(int x, int y, int w, int h, Fl_Color c) {
 	fl_color(activated_color(c));
 	fl_rectf(x+1, y+1, w-2, h-2);
-	metal_spacer_thin_down_frame(x, y, w, h, c);
+	ocean_spacer_thin_down_frame(x, y, w, h, c);
 }
 
-static void metal_radio_round_down_frame(int x, int y, int w, int h, Fl_Color) {
+static void ocean_radio_round_down_frame(int x, int y, int w, int h, Fl_Color) {
 	fl_color(activated_color(fl_rgb_color(0x7A, 0x8A, 0x99)));
 	fl_arc(x, y, w, h, 0.0, 360.0);
 }
 
-static void metal_radio_round_down_box(int x, int y, int w, int h, Fl_Color c) {
+static void ocean_radio_round_down_box(int x, int y, int w, int h, Fl_Color c) {
 	int m = h * 3 / 10;
 	// top gradient
 	vertical_gradient(x+1, y+1, x+w-2, y+m, activated_color(fl_rgb_color(0xDF, 0xE9, 0xF3)),
@@ -1423,52 +1428,52 @@ static void metal_radio_round_down_box(int x, int y, int w, int h, Fl_Color c) {
 	// bottom gradient
 	vertical_gradient(x+1, y+m, x+w-2, y+h-2, activated_color(fl_rgb_color(0xFF, 0xFF, 0xFF)),
 		activated_color(fl_rgb_color(0xBB, 0xD1, 0xE6)));
-	metal_radio_round_down_frame(x, y, w, h, c);
+	ocean_radio_round_down_frame(x, y, w, h, c);
 }
 
-static void metal_input_thin_down_box(int x, int y, int w, int h, Fl_Color c) {
+static void ocean_input_thin_down_box(int x, int y, int w, int h, Fl_Color c) {
 	fl_color(activated_color(c));
 	fl_rectf(x+1, y+1, w-2, h-2);
-	metal_button_up_frame(x, y, w, h, c);
+	ocean_button_up_frame(x, y, w, h, c);
 }
 
-static void metal_depressed_down_box(int x, int y, int w, int h, Fl_Color c) {
+static void ocean_depressed_down_box(int x, int y, int w, int h, Fl_Color c) {
 	fl_color(activated_color(fl_rgb_color(0xBB, 0xCF, 0xE3)));
 	fl_rectf(x+1, y+1, w-2, h-2);
-	metal_button_up_frame(x, y, w, h, c);
+	ocean_button_up_frame(x, y, w, h, c);
 }
 
-static void metal_tabs_frame(int x, int y, int w, int h, Fl_Color) {
+static void ocean_tabs_frame(int x, int y, int w, int h, Fl_Color) {
 	fl_color(activated_color(fl_rgb_color(0x63, 0x82, 0xBF)));
 	fl_rect(x, y, w, h);
 }
 
-static void metal_tabs_box(int x, int y, int w, int h, Fl_Color c) {
+static void ocean_tabs_box(int x, int y, int w, int h, Fl_Color c) {
 	fl_color(activated_color(c));
 	fl_rectf(x+1, y+1, w-2, h-2);
-	metal_tabs_frame(x, y, w, h, c);
+	ocean_tabs_frame(x, y, w, h, c);
 }
 
-static void use_metal_scheme() {
+static void use_ocean_scheme() {
 	Fl::scheme("none");
-	Fl::set_boxtype(OS_BUTTON_UP_BOX, metal_button_up_box, 1, 1, 2, 2);
-	Fl::set_boxtype(OS_CHECK_DOWN_BOX, metal_depressed_down_box, 1, 1, 2, 2);
-	Fl::set_boxtype(OS_BUTTON_UP_FRAME, metal_button_up_frame, 1, 1, 2, 2);
+	Fl::set_boxtype(OS_BUTTON_UP_BOX, ocean_button_up_box, 1, 1, 2, 2);
+	Fl::set_boxtype(OS_CHECK_DOWN_BOX, ocean_depressed_down_box, 1, 1, 2, 2);
+	Fl::set_boxtype(OS_BUTTON_UP_FRAME, ocean_button_up_frame, 1, 1, 2, 2);
 	Fl::set_boxtype(OS_CHECK_DOWN_FRAME, OS_BUTTON_UP_FRAME);
-	Fl::set_boxtype(OS_PANEL_THIN_UP_BOX, metal_panel_thin_up_box, 1, 1, 2, 2);
-	Fl::set_boxtype(OS_SPACER_THIN_DOWN_BOX, metal_spacer_thin_down_box, 1, 1, 2, 2);
-	Fl::set_boxtype(OS_PANEL_THIN_UP_FRAME, metal_panel_thin_up_frame, 1, 1, 2, 2);
-	Fl::set_boxtype(OS_SPACER_THIN_DOWN_FRAME, metal_spacer_thin_down_frame, 1, 1, 2, 2);
-	Fl::set_boxtype(OS_RADIO_ROUND_DOWN_BOX, metal_radio_round_down_box, 1, 1, 2, 2);
+	Fl::set_boxtype(OS_PANEL_THIN_UP_BOX, ocean_panel_thin_up_box, 1, 1, 2, 2);
+	Fl::set_boxtype(OS_SPACER_THIN_DOWN_BOX, ocean_spacer_thin_down_box, 1, 1, 2, 2);
+	Fl::set_boxtype(OS_PANEL_THIN_UP_FRAME, ocean_panel_thin_up_frame, 1, 1, 2, 2);
+	Fl::set_boxtype(OS_SPACER_THIN_DOWN_FRAME, ocean_spacer_thin_down_frame, 1, 1, 2, 2);
+	Fl::set_boxtype(OS_RADIO_ROUND_DOWN_BOX, ocean_radio_round_down_box, 1, 1, 2, 2);
 	Fl::set_boxtype(OS_HOVERED_UP_BOX, OS_BUTTON_UP_BOX);
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_BOX, OS_CHECK_DOWN_BOX);
 	Fl::set_boxtype(OS_HOVERED_UP_FRAME, OS_BUTTON_UP_FRAME);
 	Fl::set_boxtype(OS_DEPRESSED_DOWN_FRAME, OS_BUTTON_UP_FRAME);
-	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, metal_input_thin_down_box, 1, 2, 2, 4);
+	Fl::set_boxtype(OS_INPUT_THIN_DOWN_BOX, ocean_input_thin_down_box, 1, 2, 2, 4);
 	Fl::set_boxtype(OS_INPUT_THIN_DOWN_FRAME, OS_BUTTON_UP_FRAME);
 	Fl::set_boxtype(OS_DEFAULT_BUTTON_BOX, OS_BUTTON_UP_BOX);
 	Fl::set_boxtype(OS_TOOLBAR_BUTTON_HOVER_BOX, FL_FLAT_BOX);
-	Fl::set_boxtype(OS_TABS_BOX, metal_tabs_box, 2, 1, 4, 2);
+	Fl::set_boxtype(OS_TABS_BOX, ocean_tabs_box, 2, 1, 4, 2);
 	Fl::set_boxtype(OS_SWATCH_BOX, OS_INPUT_THIN_DOWN_BOX);
 	Fl::set_boxtype(OS_MINI_BUTTON_UP_BOX, OS_BUTTON_UP_BOX);
 	Fl::set_boxtype(OS_MINI_DEPRESSED_DOWN_BOX, OS_CHECK_DOWN_BOX);
@@ -1477,9 +1482,10 @@ static void use_metal_scheme() {
 	Fl::set_boxtype(FL_UP_BOX, OS_BUTTON_UP_BOX);
 	Fl::set_boxtype(FL_DOWN_BOX, OS_BUTTON_UP_BOX);
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, OS_RADIO_ROUND_DOWN_BOX);
+	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 }
 
-static void use_metal_colors() {
+static void use_ocean_colors() {
 	Fl::background(0xEE, 0xEE, 0xEE);
 	Fl::background2(0xFF, 0xFF, 0xFF);
 	Fl::foreground(0x33, 0x33, 0x33);
@@ -1490,11 +1496,11 @@ static void use_metal_colors() {
 	Fl_Tooltip::textcolor(FL_FOREGROUND_COLOR);
 }
 
-void OS::use_metal_theme() {
-	use_metal_scheme();
-	use_metal_colors();
+void OS::use_ocean_theme() {
+	use_ocean_scheme();
+	use_ocean_colors();
 	use_native_settings();
-	_current_theme = Theme::METAL;
+	_current_theme = Theme::OCEAN;
 }
 
 /************************** Blue (Windows Calculator) *************************/
@@ -1739,6 +1745,7 @@ static void use_blue_scheme() {
 	Fl::set_boxtype(FL_UP_BOX, OS_BUTTON_UP_BOX);
 	Fl::set_boxtype(FL_DOWN_BOX, OS_CHECK_DOWN_BOX);
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, OS_RADIO_ROUND_DOWN_BOX);
+	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 }
 
 static void use_blue_colors() {
@@ -2162,6 +2169,7 @@ static void use_olive_scheme() {
 	Fl::set_boxtype(FL_UP_BOX, OS_BUTTON_UP_BOX);
 	Fl::set_boxtype(FL_DOWN_BOX, olive_check_down_box, 1, 1, 2, 2);
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, OS_RADIO_ROUND_DOWN_BOX);
+	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 }
 
 static void use_olive_colors() {
@@ -2424,6 +2432,7 @@ static void use_rose_gold_scheme() {
 	Fl::set_boxtype(FL_UP_BOX, OS_BUTTON_UP_BOX);
 	Fl::set_boxtype(FL_DOWN_BOX, OS_CHECK_DOWN_BOX);
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, OS_RADIO_ROUND_DOWN_BOX);
+	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 }
 
 static void use_rose_gold_colors() {
@@ -2646,6 +2655,7 @@ static void use_dark_scheme() {
 	Fl::set_boxtype(FL_UP_BOX, OS_BUTTON_UP_BOX);
 	Fl::set_boxtype(FL_DOWN_BOX, OS_BUTTON_UP_BOX);
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, OS_RADIO_ROUND_DOWN_BOX);
+	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 }
 
 static void use_dark_colors() {
@@ -2791,6 +2801,7 @@ static void use_high_contrast_scheme() {
 	Fl::set_boxtype(FL_UP_BOX, high_contrast_button_up_box, 2, 2, 4, 4);
 	Fl::set_boxtype(FL_DOWN_BOX, high_contrast_check_down_box, 2, 2, 4, 4);
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, high_contrast_radio_round_down_box, 2, 2, 4, 4);
+	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 }
 
 static void use_high_contrast_colors() {

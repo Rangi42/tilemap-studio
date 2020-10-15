@@ -172,9 +172,9 @@ void OS_Check_Button::draw() {
 }
 
 Label_Button::Label_Button(int x, int y, int w, int h, const char *l) : OS_Button(x, y, w, h, l) {
-	box(FL_FLAT_BOX);
+	box(OS_BG_BOX);
 	color(FL_BACKGROUND_COLOR);
-	down_box(FL_FLAT_BOX);
+	down_box(OS_BG_BOX);
 	down_color(FL_BACKGROUND_COLOR);
 	align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 }
@@ -297,7 +297,7 @@ void OS_Slider::draw(int x, int y, int w, int h) {
 	Fl_Boxtype b = OS::current_theme() == OS::Theme::HIGH_CONTRAST ? FL_NO_BOX : box();
 	draw_box(b, active_r() ? color() : fl_inactive(color()));
 	fl_pop_clip();
-	draw_box(OS::current_theme() == OS::Theme::METAL || OS::current_theme() == OS::Theme::HIGH_CONTRAST ?
+	draw_box(OS::current_theme() == OS::Theme::OCEAN || OS::current_theme() == OS::Theme::HIGH_CONTRAST ?
 		OS_BUTTON_UP_BOX : OS_SPACER_THIN_DOWN_BOX, x, y+h/2-2, w, 4, active_r() ? FL_DARK2 : fl_inactive(FL_DARK2));
 	draw_box(slider(), lx, y, s, h, FL_GRAY);
 	draw_label(lx, y, s, h);
@@ -356,7 +356,7 @@ Dropdown::Dropdown(int x, int y, int w, int h, const char *l) : Fl_Choice(x, y, 
 
 void Dropdown::draw() {
 	// Based on Fl_Choice::draw()
-	Fl_Boxtype bb = OS::current_theme() == OS::Theme::METAL || OS::current_theme() == OS::Theme::HIGH_CONTRAST ?
+	Fl_Boxtype bb = OS::current_theme() == OS::Theme::OCEAN || OS::current_theme() == OS::Theme::HIGH_CONTRAST ?
 		OS_INPUT_THIN_DOWN_BOX : OS::current_theme() == OS::Theme::OLIVE ? OS_SWATCH_BOX : FL_DOWN_BOX;
 	int dx = Fl::box_dx(bb);
 	int dy = Fl::box_dy(bb);
@@ -621,7 +621,7 @@ void Toolbar::draw() {
 }
 
 Toolbar_Button::Toolbar_Button(int x, int y, int w, int h, const char *l) : Fl_Button(x, y, w, h, l) {
-	box(FL_FLAT_BOX);
+	box(OS_BG_BOX);
 	color(FL_BACKGROUND_COLOR);
 	down_box(OS_MINI_DEPRESSED_DOWN_BOX);
 	down_color(FL_SELECTION_COLOR);
@@ -660,7 +660,7 @@ int Toolbar_Button::handle(int event) {
 		return 0;
 	case FL_LEAVE:
 		color(FL_BACKGROUND_COLOR);
-		box(FL_FLAT_BOX);
+		box(OS_BG_BOX);
 		redraw();
 		return 1;
 	case FL_PUSH:

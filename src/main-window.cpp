@@ -243,6 +243,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_tileset_dnd_receiver->user_data(this);
 
 	// Configure window
+	box(OS_BG_BOX);
 	size_range(647, 406);
 	resizable(_main_group);
 	callback((Fl_Callback *)exit_cb, this);
@@ -328,11 +329,11 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::AQUA ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&Greybird", 0, (Fl_Callback *)greybird_theme_cb, this,
 			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::GREYBIRD ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("Me&tal", 0, (Fl_Callback *)metal_theme_cb, this,
-			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::METAL ? FL_MENU_VALUE : 0)),
+		OS_MENU_ITEM("&Ocean", 0, (Fl_Callback *)ocean_theme_cb, this,
+			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::OCEAN ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&Blue", 0, (Fl_Callback *)blue_theme_cb, this,
 			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::BLUE ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("&Olive", 0, (Fl_Callback *)olive_theme_cb, this,
+		OS_MENU_ITEM("Oli&ve", 0, (Fl_Callback *)olive_theme_cb, this,
 			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::OLIVE ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&Rose Gold", 0, (Fl_Callback *)rose_gold_theme_cb, this,
 			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::ROSE_GOLD ? FL_MENU_VALUE : 0)),
@@ -383,7 +384,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_metro_theme_mi = TS_FIND_MENU_ITEM_CB(metro_theme_cb);
 	_aqua_theme_mi = TS_FIND_MENU_ITEM_CB(aqua_theme_cb);
 	_greybird_theme_mi = TS_FIND_MENU_ITEM_CB(greybird_theme_cb);
-	_metal_theme_mi = TS_FIND_MENU_ITEM_CB(metal_theme_cb);
+	_ocean_theme_mi = TS_FIND_MENU_ITEM_CB(ocean_theme_cb);
 	_blue_theme_mi = TS_FIND_MENU_ITEM_CB(blue_theme_cb);
 	_olive_theme_mi = TS_FIND_MENU_ITEM_CB(olive_theme_cb);
 	_rose_gold_theme_mi = TS_FIND_MENU_ITEM_CB(rose_gold_theme_cb);
@@ -1910,9 +1911,9 @@ void Main_Window::greybird_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	mw->redraw();
 }
 
-void Main_Window::metal_theme_cb(Fl_Menu_ *, Main_Window *mw) {
-	OS::use_metal_theme();
-	mw->_metal_theme_mi->setonly();
+void Main_Window::ocean_theme_cb(Fl_Menu_ *, Main_Window *mw) {
+	OS::use_ocean_theme();
+	mw->_ocean_theme_mi->setonly();
 	mw->update_icons();
 	mw->redraw();
 }

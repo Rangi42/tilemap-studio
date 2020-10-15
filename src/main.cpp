@@ -39,8 +39,8 @@ static void use_theme(OS::Theme theme) {
 	case OS::Theme::GREYBIRD:
 		OS::use_greybird_theme();
 		return;
-	case OS::Theme::METAL:
-		OS::use_metal_theme();
+	case OS::Theme::OCEAN:
+		OS::use_ocean_theme();
 		return;
 	case OS::Theme::BLUE:
 		OS::use_blue_theme();

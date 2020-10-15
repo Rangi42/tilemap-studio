@@ -41,7 +41,7 @@ private:
 	DnD_Receiver *_tilemap_dnd_receiver, *_tileset_dnd_receiver;
 	Fl_Menu_Item *_recent_tilemap_mis[NUM_RECENT], *_recent_tileset_mis[NUM_RECENT];
 	Fl_Menu_Item *_classic_theme_mi = NULL, *_aero_theme_mi = NULL, *_metro_theme_mi = NULL, *_aqua_theme_mi = NULL,
-		*_greybird_theme_mi = NULL, *_metal_theme_mi = NULL, *_blue_theme_mi = NULL, *_olive_theme_mi = NULL,
+		*_greybird_theme_mi = NULL, *_ocean_theme_mi = NULL, *_blue_theme_mi = NULL, *_olive_theme_mi = NULL,
 		*_rose_gold_theme_mi = NULL, *_dark_theme_mi = NULL, *_high_contrast_theme_mi = NULL;
 	Fl_Menu_Item *_grid_mi = NULL, *_rainbow_tiles_mi = NULL, *_bold_palettes_mi = NULL, *_auto_tileset_mi = NULL;
 	Toolbar_Button *_new_tb, *_open_tb, *_save_tb, *_print_tb, *_load_tb, *_add_tb, *_reload_tb, *_undo_tb, *_redo_tb,
@@ -176,7 +176,7 @@ private:
 	static void metro_theme_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void aqua_theme_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void greybird_theme_cb(Fl_Menu_ *m, Main_Window *mw);
-	static void metal_theme_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void ocean_theme_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void blue_theme_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void olive_theme_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void rose_gold_theme_cb(Fl_Menu_ *m, Main_Window *mw);
