@@ -101,8 +101,8 @@ int OS_Button::handle(int event) {
 Default_Button::Default_Button(int x, int y, int w, int h, const char *l) : Fl_Button(x, y, w, h, l) {
 	labelfont(OS_FONT);
 	labelsize(OS_FONT_SIZE);
-	box(OS_DEFAULT_BUTTON_BOX);
-	down_box(OS_DEPRESSED_DOWN_BOX);
+	box(OS_DEFAULT_BUTTON_UP_BOX);
+	down_box(OS_DEFAULT_DEPRESSED_DOWN_BOX);
 	shortcut(FL_Enter);
 }
 
@@ -113,7 +113,7 @@ int Default_Button::handle(int event) {
 		switch (event) {
 		case FL_ENTER:
 			if (active_r()) {
-				box(OS_HOVERED_UP_BOX);
+				box(OS_DEFAULT_HOVERED_UP_BOX);
 				redraw();
 				return 1;
 			}
@@ -121,7 +121,7 @@ int Default_Button::handle(int event) {
 		case FL_LEAVE:
 		case FL_HIDE:
 		case FL_DEACTIVATE:
-			box(OS_DEFAULT_BUTTON_BOX);
+			box(OS_DEFAULT_BUTTON_UP_BOX);
 			redraw();
 			return 1;
 		}
