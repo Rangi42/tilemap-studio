@@ -54,6 +54,9 @@ static void use_theme(OS::Theme theme) {
 	case OS::Theme::DARK:
 		OS::use_dark_theme();
 		return;
+	case OS::Theme::BRUSHED_METAL:
+		OS::use_brushed_metal_theme();
+		return;
 	case OS::Theme::HIGH_CONTRAST:
 		OS::use_high_contrast_theme();
 	}

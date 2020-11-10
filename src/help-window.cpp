@@ -32,6 +32,7 @@ void Help_Window::initialize() {
 	_spacer = new Fl_Box(10, 10, _width-110, _height-52);
 	_window->end();
 	// Initialize window
+	_window->box(OS_BG_BOX);
 	_window->resizable(_spacer);
 	_window->callback((Fl_Callback *)close_cb, this);
 	// Initialize window's children

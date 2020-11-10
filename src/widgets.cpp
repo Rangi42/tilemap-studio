@@ -132,7 +132,7 @@ int Default_Button::handle(int event) {
 OS_Check_Button::OS_Check_Button(int x, int y, int w, int h, const char *l) : Fl_Check_Button(x, y, w, h, l) {
 	labelfont(OS_FONT);
 	labelsize(OS_FONT_SIZE);
-	box(FL_FLAT_BOX);
+	box(OS_BG_BOX);
 	align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 	selection_color(FL_SELECTION_COLOR);
 }
@@ -265,6 +265,7 @@ int Default_Hex_Spinner::handle(int event) {
 OS_Slider::OS_Slider(int x, int y, int w, int h, const char *l) : Fl_Hor_Nice_Slider(x, y, w, h, l) {
 	labelfont(OS_FONT);
 	labelsize(OS_FONT_SIZE);
+	box(FL_NO_BOX);
 	slider(OS_BUTTON_UP_BOX);
 	slider_size(0.0);
 	align(FL_ALIGN_LEFT | FL_ALIGN_CLIP);
@@ -279,7 +280,7 @@ int OS_Slider::handle(int event) {
 
 void OS_Slider::draw() {
 	// Based on Fl_Slider::draw()
-	Fl_Boxtype b = OS::current_theme() == OS::Theme::HIGH_CONTRAST ? FL_NO_BOX : box();
+	Fl_Boxtype b = box();
 	if (damage() & FL_DAMAGE_ALL) { draw_box(b, active_r() ? color() : fl_inactive(color())); }
 	draw(x()+Fl::box_dx(b), y()+Fl::box_dy(b), w()-Fl::box_dw(b), h()-Fl::box_dh(b));
 }

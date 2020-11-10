@@ -46,6 +46,7 @@ void Modal_Dialog::initialize() {
 	_canceled = false;
 	_dialog->end();
 	// Initialize dialog
+	_dialog->box(OS_BG_BOX);
 	_dialog->resizable(NULL);
 	_dialog->callback((Fl_Callback *)close_cb, this);
 	_dialog->set_modal();

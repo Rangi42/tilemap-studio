@@ -159,6 +159,7 @@
     <None Include="..\res\app-icon.xpm" />
     <None Include="..\res\blank.xpm" />
     <None Include="..\res\bold.xpm" />
+    <None Include="..\res\brushed-metal.dat" />
     <None Include="..\res\error.xpm" />
     <None Include="..\res\grid-dark.xpm" />
     <None Include="..\res\grid.xpm" />

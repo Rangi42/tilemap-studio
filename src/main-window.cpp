@@ -339,6 +339,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::ROSE_GOLD ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&Dark", 0, (Fl_Callback *)dark_theme_cb, this,
 			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::DARK ? FL_MENU_VALUE : 0)),
+		OS_MENU_ITEM("Brushed Me&tal", 0, (Fl_Callback *)brushed_metal_theme_cb, this,
+			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::BRUSHED_METAL ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&High Contrast", 0, (Fl_Callback *)high_contrast_theme_cb, this,
 			FL_MENU_RADIO | (OS::current_theme() == OS::Theme::HIGH_CONTRAST ? FL_MENU_VALUE : 0)),
 		{},
@@ -389,6 +391,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_olive_theme_mi = TS_FIND_MENU_ITEM_CB(olive_theme_cb);
 	_rose_gold_theme_mi = TS_FIND_MENU_ITEM_CB(rose_gold_theme_cb);
 	_dark_theme_mi = TS_FIND_MENU_ITEM_CB(dark_theme_cb);
+	_brushed_metal_theme_mi = TS_FIND_MENU_ITEM_CB(brushed_metal_theme_cb);
 	_high_contrast_theme_mi = TS_FIND_MENU_ITEM_CB(high_contrast_theme_cb);
 	_grid_mi = TS_FIND_MENU_ITEM_CB(grid_cb);
 	_rainbow_tiles_mi = TS_FIND_MENU_ITEM_CB(rainbow_tiles_cb);
@@ -1942,6 +1945,13 @@ void Main_Window::rose_gold_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 void Main_Window::dark_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_dark_theme();
 	mw->_dark_theme_mi->setonly();
+	mw->update_icons();
+	mw->redraw();
+}
+
+void Main_Window::brushed_metal_theme_cb(Fl_Menu_ *, Main_Window *mw) {
+	OS::use_brushed_metal_theme();
+	mw->_brushed_metal_theme_mi->setonly();
 	mw->update_icons();
 	mw->redraw();
 }
