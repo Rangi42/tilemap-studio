@@ -1418,7 +1418,11 @@ bool Main_Window::save_tilemap(bool force) {
 	}
 
 	std::string msg = "Saved ";
-	msg = msg + basename + "!";
+	msg += basename;
+	if (attrmap_filename && *attrmap_filename) {
+		msg = msg + "\nand " + fl_filename_name(attrmap_filename);
+	}
+	msg += "!";
 	_success_dialog->message(msg);
 	_success_dialog->show(this);
 
