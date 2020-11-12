@@ -2070,7 +2070,9 @@ void Main_Window::reformat_cb(Fl_Menu_ *, Main_Window *mw) {
 }
 
 void Main_Window::image_to_tiles_cb(Fl_Widget *, Main_Window *mw) {
-	mw->_image_to_tiles_dialog->format(Config::format());
+	if (!mw->_image_to_tiles_dialog->initialized()) {
+		mw->_image_to_tiles_dialog->format(Config::format());
+	}
 	mw->_image_to_tiles_dialog->show(mw);
 	if (mw->_image_to_tiles_dialog->canceled()) { return; }
 	while (!mw->image_to_tiles()) {
