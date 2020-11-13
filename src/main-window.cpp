@@ -352,7 +352,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		OS_MENU_ITEM("&Rainbow Tiles", FL_COMMAND + 'i', (Fl_Callback *)rainbow_tiles_cb, this,
 			FL_MENU_TOGGLE | (Config::rainbow_tiles() ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&Bold Palettes", FL_COMMAND + 'b', (Fl_Callback *)bold_palettes_cb, this,
-			FL_MENU_TOGGLE | (Config::bold_palettes() ? FL_MENU_VALUE : 0)),
+			FL_MENU_TOGGLE | (Config::bold_palettes() ? FL_MENU_VALUE : 0) | FL_MENU_DIVIDER),
+		OS_MENU_ITEM("Full &Screen", FL_F + 11, (Fl_Callback *)full_screen_cb, this, FL_MENU_TOGGLE),
 		{},
 		OS_SUBMENU("&Tools"),
 		OS_MENU_ITEM("&Tileset Width...", FL_COMMAND + 'h', (Fl_Callback *)tileset_width_cb, this, FL_MENU_DIVIDER),
@@ -396,6 +397,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_grid_mi = TS_FIND_MENU_ITEM_CB(grid_cb);
 	_rainbow_tiles_mi = TS_FIND_MENU_ITEM_CB(rainbow_tiles_cb);
 	_bold_palettes_mi = TS_FIND_MENU_ITEM_CB(bold_palettes_cb);
+	_full_screen_mi = TS_FIND_MENU_ITEM_CB(full_screen_cb);
 	// Conditional menu items
 	_close_mi = TS_FIND_MENU_ITEM_CB(close_cb);
 	_save_mi = TS_FIND_MENU_ITEM_CB(save_cb);
@@ -2029,6 +2031,17 @@ void Main_Window::bold_palettes_tb_cb(Toolbar_Button *, Main_Window *mw) {
 	if (Config::bold_palettes()) { mw->_bold_palettes_mi->set(); }
 	else { mw->_bold_palettes_mi->clear(); }
 	mw->redraw();
+}
+
+void Main_Window::full_screen_cb(Fl_Menu_ *m, Main_Window *mw) {
+	if (m->mvalue()->value()) {
+		mw->_wx = mw->x(); mw->_wy = mw->y();
+		mw->_ww = mw->w(); mw->_wh = mw->h();
+		mw->fullscreen();
+	}
+	else {
+		mw->fullscreen_off(mw->_wx, mw->_wy, mw->_ww, mw->_wh);
+	}
 }
 
 void Main_Window::tileset_width_cb(Fl_Menu_ *, Main_Window *mw) {

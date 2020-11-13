@@ -43,7 +43,8 @@ private:
 	Fl_Menu_Item *_classic_theme_mi = NULL, *_aero_theme_mi = NULL, *_metro_theme_mi = NULL, *_aqua_theme_mi = NULL,
 		*_greybird_theme_mi = NULL, *_ocean_theme_mi = NULL, *_blue_theme_mi = NULL, *_olive_theme_mi = NULL,
 		*_rose_gold_theme_mi = NULL, *_dark_theme_mi = NULL, *_brushed_metal_theme_mi = NULL, *_high_contrast_theme_mi = NULL;
-	Fl_Menu_Item *_grid_mi = NULL, *_rainbow_tiles_mi = NULL, *_bold_palettes_mi = NULL, *_auto_tileset_mi = NULL;
+	Fl_Menu_Item *_grid_mi = NULL, *_rainbow_tiles_mi = NULL, *_bold_palettes_mi = NULL, *_auto_tileset_mi = NULL,
+		*_full_screen_mi = NULL;
 	Toolbar_Button *_new_tb, *_open_tb, *_save_tb, *_print_tb, *_load_tb, *_add_tb, *_reload_tb, *_undo_tb, *_redo_tb,
 		*_zoom_in_tb, *_zoom_out_tb;
 	Toolbar_Toggle_Button *_grid_tb, *_rainbow_tiles_tb, *_bold_palettes_tb;
@@ -205,6 +206,7 @@ private:
 	static void rainbow_tiles_tb_cb(Toolbar_Button *tb, Main_Window *mw);
 	static void bold_palettes_tb_cb(Toolbar_Button *tb, Main_Window *mw);
 	static void tilemap_width_tb_cb(OS_Spinner *ss, Main_Window *mw);
+	static void full_screen_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void x_flip_cb(Toolbar_Toggle_Button *tb, Main_Window *mw);
 	static void y_flip_cb(Toolbar_Toggle_Button *tb, Main_Window *mw);
 	static void priority_cb(OS_Check_Button *cb, Main_Window *mw);
