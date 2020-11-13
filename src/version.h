@@ -1,11 +1,11 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-#define PROGRAM_VERSION 3,2,1
+#define PROGRAM_VERSION 3,2,2
 #ifdef _DEBUG
-#define PROGRAM_VERSION_STRING "3.2.1 [DEBUG]"
+#define PROGRAM_VERSION_STRING "3.2.2 [DEBUG]"
 #else
-#define PROGRAM_VERSION_STRING "3.2.1"
+#define PROGRAM_VERSION_STRING "3.2.2"
 #endif
 
 #define PROGRAM_EXE_NAME "tilemapstudio"
