@@ -99,7 +99,7 @@ static const char *format_names[NUM_FORMATS] = {
 	"GBC tiles + attributes",    // GBC_ATTRS
 	"GBC tilemap + attrmap",     // GBC_ATTRMAP
 	"GBA tiles + 4bpp palettes", // GBA_4BPP
-	"GBA tiles + 8bpp palettes", // GBA_8BPP
+	"GBA tiles + 8bpp palette",  // GBA_8BPP
 	"SGB border",                // SGB_BORDER
 	"SNES tiles + attributes",   // SNES_ATTRS
 	"RBY Town Map",              // RBY_TOWN_MAP
