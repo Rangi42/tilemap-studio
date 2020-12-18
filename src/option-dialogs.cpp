@@ -656,13 +656,13 @@ Fl_Color Image_To_Tiles_Dialog::fl_color_zero() const {
 	char buffer[3] = {};
 	buffer[0] = rgb[0];
 	buffer[1] = rgb[1];
-	uchar r = (uchar)std::stoi(buffer, NULL, 16);
+	uchar r = (uchar)strtoul(buffer, NULL, 16);
 	buffer[0] = rgb[2];
 	buffer[1] = rgb[3];
-	uchar g = (uchar)std::stoi(buffer, NULL, 16);
+	uchar g = (uchar)strtoul(buffer, NULL, 16);
 	buffer[0] = rgb[4];
 	buffer[1] = rgb[5];
-	uchar b = (uchar)std::stoi(buffer, NULL, 16);
+	uchar b = (uchar)strtoul(buffer, NULL, 16);
 
 	return fl_rgb_color(CRGB5(r), CRGB5(g), CRGB5(b));
 }

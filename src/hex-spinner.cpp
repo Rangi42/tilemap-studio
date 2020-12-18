@@ -119,7 +119,7 @@ void Hex_Spinner::update() {
 }
 
 void Hex_Spinner::input_cb(Hex_Input *, Hex_Spinner *hs) {
-	int v = std::stoi(hs->_input.value(), NULL, 16);
+	int v = strtol(hs->_input.value(), NULL, 16);
 	if (v < hs->_minimum) {
 		hs->_value = hs->_minimum;
 		hs->update();
