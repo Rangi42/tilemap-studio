@@ -67,6 +67,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		_recent_tilesets[i] = Preferences::get_string(Fl_Preferences::Name("recent-set%d", i));
 	}
 
+	int fullscreen = Preferences::get("fullscreen", 0);
+
 	// Populate window
 
 	int wx = 0, wy = 0, ww = w, wh = h;
@@ -353,7 +355,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 			FL_MENU_TOGGLE | (Config::rainbow_tiles() ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&Bold Palettes", FL_COMMAND + 'b', (Fl_Callback *)bold_palettes_cb, this,
 			FL_MENU_TOGGLE | (Config::bold_palettes() ? FL_MENU_VALUE : 0) | FL_MENU_DIVIDER),
-		OS_MENU_ITEM("Full &Screen", FL_F + 11, (Fl_Callback *)full_screen_cb, this, FL_MENU_TOGGLE),
+		OS_MENU_ITEM("Full &Screen", FL_F + 11, (Fl_Callback *)full_screen_cb, this,
+			FL_MENU_TOGGLE | (fullscreen ? FL_MENU_VALUE : 0)),
 		{},
 		OS_SUBMENU("&Tools"),
 		OS_MENU_ITEM("&Tileset Width...", FL_COMMAND + 'h', (Fl_Callback *)tileset_width_cb, this, FL_MENU_DIVIDER),
@@ -1841,10 +1844,20 @@ void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 
 	// Save global config
 	Preferences::set("theme", (int)OS::current_theme());
-	Preferences::set("x", mw->x());
-	Preferences::set("y", mw->y());
-	Preferences::set("w", mw->w());
-	Preferences::set("h", mw->h());
+	if (mw->full_screen()) {
+		Preferences::set("x", mw->_wx);
+		Preferences::set("y", mw->_wy);
+		Preferences::set("w", mw->_ww);
+		Preferences::set("h", mw->_wh);
+		Preferences::set("fullscreen", 1);
+	}
+	else {
+		Preferences::set("x", mw->x());
+		Preferences::set("y", mw->y());
+		Preferences::set("w", mw->w());
+		Preferences::set("h", mw->h());
+		Preferences::set("fullscreen", 0);
+	}
 	Preferences::set("format", (int)Config::format());
 	Preferences::set("zoom", Config::zoom());
 	Preferences::set("grid", Config::grid());

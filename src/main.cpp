@@ -85,6 +85,9 @@ int main(int argc, char **argv) {
 	int w = Preferences::get("w", 647), h = Preferences::get("h", 406);
 	Main_Window window(x, y, w, h);
 	window.show();
+	if (window.full_screen()) {
+		window.fullscreen();
+	}
 
 	if (argc > 1) {
 		window.open_tilemap(argv[1]);
