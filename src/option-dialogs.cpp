@@ -574,18 +574,20 @@ void Add_Tileset_Dialog::initialize_content() {
 	// Populate content group
 	_tileset_header = new Label(0, 0, 0, 0);
 	_start_id = new Default_Hex_Spinner(0, 0, 0, 0, "Start at ID: $");
-	_offset = new Default_Spinner(0, 0, 0, 0, "Offset:");
-	_length = new Default_Spinner(0, 0, 0, 0, "Length:");
+	_offset = new Default_Hex_Spinner(0, 0, 0, 0, "Offset: $");
+	_length = new Default_Hex_Spinner(0, 0, 0, 0, "Length: $");
 	// Initialize content group's children
 	_start_id->format("%03X");
 	_start_id->range(0x00, MAX_NUM_TILES-1);
-	_start_id->default_value(0x00);
+	_start_id->default_value(0x000);
 	_offset->align(FL_ALIGN_LEFT);
-	_offset->range(0, 1024);
-	_offset->default_value(0);
+	_offset->format("%X");
+	_offset->range(0x0, 0x400);
+	_offset->default_value(0x0);
 	_length->align(FL_ALIGN_LEFT);
-	_length->range(0, 1024);
-	_length->default_value(0);
+	_length->format("%X");
+	_length->range(0x0, 0x400);
+	_length->default_value(0x0);
 }
 
 int Add_Tileset_Dialog::refresh_content(int ww, int dy) {
@@ -600,7 +602,6 @@ int Add_Tileset_Dialog::refresh_content(int ww, int dy) {
 	_start_id->resize(wgt_off, dy, wgt_w, wgt_h);
 	dy += wgt_h + wgt_m;
 	wgt_off = win_m + text_width(_offset->label(), 3);
-	wgt_w = text_width("9999", 2) + wgt_h / 2 + 4;
 	_offset->resize(wgt_off, dy, wgt_w, wgt_h);
 	wgt_off = _offset->x() + _offset->w() + win_m + text_width(_length->label(), 3);
 	_length->resize(wgt_off, dy, wgt_w, wgt_h);

@@ -192,17 +192,16 @@ protected:
 class Add_Tileset_Dialog : public Option_Dialog {
 private:
 	Label *_tileset_header;
-	Default_Hex_Spinner *_start_id;
-	Default_Spinner *_offset, *_length;
+	Default_Hex_Spinner *_start_id, *_offset, *_length;
 public:
 	Add_Tileset_Dialog(const char *t);
 	~Add_Tileset_Dialog();
 	inline int start_id(void) const { return _start_id->value(); }
 	inline void start_id(int n) { initialize(); _start_id->value(n); }
-	inline int offset(void) const { return (int)_offset->value(); }
-	inline void offset(int n) { initialize(); _offset->value((double)n); }
-	inline int length(void) const { return (int)_length->value(); }
-	inline void length(int n) { initialize(); _length->value((double)n); }
+	inline int offset(void) const { return _offset->value(); }
+	inline void offset(int n) { initialize(); _offset->value(n); }
+	inline int length(void) const { return _length->value(); }
+	inline void length(int n) { initialize(); _length->value(n); }
 	void limit_tileset_options(const char *filename);
 protected:
 	void initialize_content(void);
