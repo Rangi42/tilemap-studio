@@ -100,7 +100,7 @@ Image::Result Image::write_png_image(const char *f, Fl_RGB_Image *img, int bpp,
 			png_write_row(png, png_row);
 		}
 	}
-	png_write_end(png, NULL);
+	png_write_end(png, info);
 	delete [] png_row;
 	if (plte) { png_free(png, plte); }
 	png_destroy_write_struct(&png, &info);

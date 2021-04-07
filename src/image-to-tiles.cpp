@@ -27,11 +27,18 @@
 typedef std::set<Fl_Color> Color_Set;
 
 static bool build_tilemap(const Tile *tiles, size_t n, std::vector<int> tile_palettes,
-	std::vector<Tile_Tessera *> &tilemap, std::vector<size_t> &tileset,
-	Tilemap_Format fmt, uint16_t start_id, bool use_space, uint16_t space_id) {
+	std::vector<Tile_Tessera *> &tilemap, std::vector<size_t> &tileset, Tilemap_Format fmt, uint16_t start_id,
+	bool use_space, uint16_t space_id, Fl_Color space_color) {
 	for (size_t i = 0; i < n; i++) {
+		if (use_space && tileset.size() == space_id) {
+			size_t j = 0;
+			for (; j < n; j++) {
+				if (is_blank_tile(tiles[j], space_color)) { break; }
+			}
+			tileset.push_back(j);
+		}
 		const Tile &tile = tiles[i];
-		if (use_space && is_blank_tile(tile)) {
+		if (use_space && is_blank_tile(tile, space_color)) {
 			tilemap.push_back(new Tile_Tessera(0, 0, 0, 0, space_id, false, false, false, false, tile_palettes[i]));
 			continue;
 		}
@@ -65,7 +72,8 @@ static Fl_Color indexed_colors[16] = {
 };
 
 static Fl_RGB_Image *print_tileset(const Tile *tiles, const std::vector<size_t> &tileset,
-	const std::vector<Palette> &palettes, const std::vector<int> &tile_palettes, size_t nc, int tw, bool indexed) {
+	const std::vector<Palette> &palettes, const std::vector<int> &tile_palettes, size_t nc, int tw,
+	Fl_Color blank_color, bool indexed) {
 	int nt = (int)tileset.size();
 	tw = std::min(nt, tw);
 	int th = (nt + tw - 1) / tw;
@@ -84,11 +92,12 @@ static Fl_RGB_Image *print_tileset(const Tile *tiles, const std::vector<size_t> 
 	Fl_Image_Surface *surface = new Fl_Image_Surface(tw * TILE_SIZE, th * TILE_SIZE);
 	surface->set_current();
 
-	fl_rectf(0, 0, tw * TILE_SIZE, th * TILE_SIZE, FL_WHITE);
+	fl_rectf(0, 0, tw * TILE_SIZE, th * TILE_SIZE, indexed ? 0 : blank_color);
 	for (int i = 0; i < nt; i++) {
 		size_t ti = tileset[i];
 		const Tile &tile = tiles[ti];
 		int p = ti < np ? tile_palettes[ti] : -1;
+		if (p == -1 && indexed) { continue; }
 		int x = i % tw, y = i / tw;
 		for (int ty = 0; ty < TILE_SIZE; ty++) {
 			for (int tx = 0; tx < TILE_SIZE; tx++) {
@@ -110,8 +119,8 @@ static Fl_RGB_Image *print_tileset(const Tile *tiles, const std::vector<size_t> 
 	return img;
 }
 
-static bool write_graphic_palette(const char *f, const std::vector<Palette> &palettes, Image_To_Tiles_Dialog::Palette_Format,
-	size_t nc) {
+static bool write_graphic_palette(const char *f, const std::vector<Palette> &palettes,
+	Image_To_Tiles_Dialog::Palette_Format, size_t nc) {
 	int w = (int)nc, h = (int)palettes.size();
 	if (w == 256) { w /= 16; h *= 16; }
 	Fl_Image_Surface *surface = new Fl_Image_Surface(w, h);
@@ -139,8 +148,8 @@ static bool write_graphic_palette(const char *f, const std::vector<Palette> &pal
 	return result == Image::Result::IMAGE_OK;
 }
 
-static bool write_palette(const char *f, const std::vector<Palette> &palettes, Image_To_Tiles_Dialog::Palette_Format pal_fmt,
-	size_t nc) {
+static bool write_palette(const char *f, const std::vector<Palette> &palettes,
+	Image_To_Tiles_Dialog::Palette_Format pal_fmt, size_t nc) {
 	if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::PLTE) {
 		return true;
 	}
@@ -216,7 +225,8 @@ static bool write_tilepal(const char *f, const std::vector<size_t> &tileset, con
 		}
 		if (i < nt) {
 			size_t ti = tileset[i];
-			fprintf(file, "%d", tile_palettes[ti]);
+			int pi = ti < tile_palettes.size() ? tile_palettes[ti] : 0;
+			fprintf(file, "%d", pi);
 		}
 		else {
 			fputc('0', file);
@@ -283,6 +293,9 @@ bool Main_Window::image_to_tiles() {
 	Image_To_Tiles_Dialog::Palette_Format pal_fmt = _image_to_tiles_dialog->palette_format();
 	bool make_palette = _image_to_tiles_dialog->palette() && format_can_make_palettes(fmt);
 
+	bool use_color_zero = _image_to_tiles_dialog->color_zero();
+	Fl_Color color_zero = use_color_zero ? _image_to_tiles_dialog->fl_color_zero() : 0xFFFFFF00 /* white */;
+
 	std::vector<Palette> palettes;
 	std::vector<int> tile_palettes(n, make_palette ? 0 : -1);
 	size_t max_colors = (size_t)format_palette_size(fmt);
@@ -290,9 +303,6 @@ bool Main_Window::image_to_tiles() {
 	if (make_palette) {
 		// Algorithm ported from superfamiconv
 		// <https://github.com/Optiroc/SuperFamiconv>
-
-		bool use_color_zero = _image_to_tiles_dialog->color_zero();
-		Fl_Color color_zero = _image_to_tiles_dialog->fl_color_zero();
 
 		size_t max_palettes = (size_t)format_palettes_size(fmt);
 
@@ -431,7 +441,8 @@ bool Main_Window::image_to_tiles() {
 	uint16_t start_id = _image_to_tiles_dialog->start_id();
 	bool use_space = _image_to_tiles_dialog->use_space();
 	uint16_t space_id = _image_to_tiles_dialog->space_id();
-	if (!build_tilemap(tiles, n, tile_palettes, tilemap, tileset, fmt, start_id, use_space, space_id)) {
+
+	if (!build_tilemap(tiles, n, tile_palettes, tilemap, tileset, fmt, start_id, use_space, space_id, color_zero)) {
 		for (Tile_Tessera *tt : tilemap) {
 			delete tt;
 		}
@@ -488,7 +499,8 @@ bool Main_Window::image_to_tiles() {
 	// Create the tileset file
 
 	bool indexed = make_palette && pal_fmt == Image_To_Tiles_Dialog::Palette_Format::PLTE;
-	Fl_RGB_Image *timg = print_tileset(tiles, tileset, palettes, tile_palettes, max_colors, tileset_width(), indexed);
+	Fl_RGB_Image *timg = print_tileset(tiles, tileset, palettes, tile_palettes, max_colors, tileset_width(),
+		color_zero, indexed);
 	Image::Result result = indexed ? Image::write_image(tileset_filename, timg, 0, &palettes, max_colors) :
 		Image::write_image(tileset_filename, timg, make_palette ? format_color_depth(fmt) : 0);
 	delete timg;
