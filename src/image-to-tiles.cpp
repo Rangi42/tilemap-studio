@@ -65,14 +65,14 @@ static Fl_Color indexed_colors[16] = {
 };
 
 static Fl_RGB_Image *print_tileset(const Tile *tiles, const std::vector<size_t> &tileset,
-	const std::vector<std::vector<Fl_Color>> &palettes, const std::vector<int> &tile_palettes, size_t nc, int tw) {
+	const std::vector<Palette> &palettes, const std::vector<int> &tile_palettes, size_t nc, int tw, bool indexed) {
 	int nt = (int)tileset.size();
 	tw = std::min(nt, tw);
 	int th = (nt + tw - 1) / tw;
 
 	size_t np = tile_palettes.size();
 	std::vector<std::map<Fl_Color, size_t>> reverse_palettes;
-	for (const std::vector<Fl_Color> &palette : palettes) {
+	for (const Palette &palette : palettes) {
 		std::map<Fl_Color, size_t> reverse_palette;
 		for (size_t i = 0; i < nc; i++) {
 			reverse_palette.emplace(palette[i], i);
@@ -95,7 +95,7 @@ static Fl_RGB_Image *print_tileset(const Tile *tiles, const std::vector<size_t> 
 				Fl_Color c = tile[ty * TILE_SIZE + tx];
 				if (p > -1) {
 					size_t pi = reverse_palettes[p][c];
-					c = dp ? indexed_colors[pi * dp] : fl_rgb_color((uchar)pi);
+					c = dp && !indexed ? indexed_colors[pi * dp] : fl_rgb_color((uchar)pi);
 				}
 				fl_color(c);
 				fl_point(x * TILE_SIZE + tx, y * TILE_SIZE + ty);
@@ -110,8 +110,8 @@ static Fl_RGB_Image *print_tileset(const Tile *tiles, const std::vector<size_t> 
 	return img;
 }
 
-static bool write_graphic_palette(const char *f, const std::vector<std::vector<Fl_Color>> &palettes,
-	Image_To_Tiles_Dialog::Palette_Format, size_t nc) {
+static bool write_graphic_palette(const char *f, const std::vector<Palette> &palettes, Image_To_Tiles_Dialog::Palette_Format,
+	size_t nc) {
 	int w = (int)nc, h = (int)palettes.size();
 	if (w == 256) { w /= 16; h *= 16; }
 	Fl_Image_Surface *surface = new Fl_Image_Surface(w, h);
@@ -119,7 +119,7 @@ static bool write_graphic_palette(const char *f, const std::vector<std::vector<F
 
 	fl_rectf(0, 0, w, h, FL_BLACK);
 	int i = 0;
-	for (const std::vector<Fl_Color> &palette : palettes) {
+	for (const Palette &palette : palettes) {
 		int j = 0;
 		for (Fl_Color c : palette) {
 			fl_color(c);
@@ -139,8 +139,12 @@ static bool write_graphic_palette(const char *f, const std::vector<std::vector<F
 	return result == Image::Result::IMAGE_OK;
 }
 
-static bool write_palette(const char *f, const std::vector<std::vector<Fl_Color>> &palettes,
-	Image_To_Tiles_Dialog::Palette_Format pal_fmt, size_t nc) {
+static bool write_palette(const char *f, const std::vector<Palette> &palettes, Image_To_Tiles_Dialog::Palette_Format pal_fmt,
+	size_t nc) {
+	if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::PLTE) {
+		return true;
+	}
+
 	if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::PNG || pal_fmt == Image_To_Tiles_Dialog::Palette_Format::BMP) {
 		return write_graphic_palette(f, palettes, pal_fmt, nc);
 	}
@@ -150,7 +154,7 @@ static bool write_palette(const char *f, const std::vector<std::vector<Fl_Color>
 
 	if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::RGB) {
 		int p = 0;
-		for (const std::vector<Fl_Color> &palette : palettes) {
+		for (const Palette &palette : palettes) {
 			fprintf(file, "; palette %d\n", p++);
 			for (Fl_Color c : palette) {
 				uchar r, g, b;
@@ -161,7 +165,7 @@ static bool write_palette(const char *f, const std::vector<std::vector<Fl_Color>
 	}
 	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::JASC) {
 		fprintf(file, "JASC-PAL\r\n0100\r\n%zu\r\n", palettes.size() * nc);
-		for (const std::vector<Fl_Color> &palette : palettes) {
+		for (const Palette &palette : palettes) {
 			for (Fl_Color c : palette) {
 				uchar r, g, b;
 				Fl::get_color(c, r, g, b);
@@ -170,7 +174,7 @@ static bool write_palette(const char *f, const std::vector<std::vector<Fl_Color>
 		}
 	}
 	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::ACT) {
-		for (const std::vector<Fl_Color> &palette : palettes) {
+		for (const Palette &palette : palettes) {
 			for (Fl_Color c : palette) {
 				uchar r, g, b;
 				Fl::get_color(c, r, g, b);
@@ -186,7 +190,7 @@ static bool write_palette(const char *f, const std::vector<std::vector<Fl_Color>
 	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::GPL) {
 		const char *name = fl_filename_name(f);
 		fprintf(file, "GIMP Palette\nName: %s\n", name);
-		for (const std::vector<Fl_Color> &palette : palettes) {
+		for (const Palette &palette : palettes) {
 			for (Fl_Color c : palette) {
 				uchar r, g, b;
 				Fl::get_color(c, r, g, b);
@@ -279,7 +283,7 @@ bool Main_Window::image_to_tiles() {
 	Image_To_Tiles_Dialog::Palette_Format pal_fmt = _image_to_tiles_dialog->palette_format();
 	bool make_palette = _image_to_tiles_dialog->palette() && format_can_make_palettes(fmt);
 
-	std::vector<std::vector<Fl_Color>> palettes;
+	std::vector<Palette> palettes;
 	std::vector<int> tile_palettes(n, make_palette ? 0 : -1);
 	size_t max_colors = (size_t)format_palette_size(fmt);
 
@@ -365,7 +369,7 @@ bool Main_Window::image_to_tiles() {
 
 		// Sort each palette from brightest to darkest color, padded with black, keeping color 0 first
 		for (Color_Set &s : cs_opt) {
-			std::vector<Fl_Color> palette(s.begin(), s.end());
+			Palette palette(s.begin(), s.end());
 			std::sort(palette.begin(), palette.end(), [use_color_zero, color_zero](Fl_Color a, Fl_Color b) {
 				if (use_color_zero) {
 					if (a == color_zero) { return true; }
@@ -483,8 +487,10 @@ bool Main_Window::image_to_tiles() {
 
 	// Create the tileset file
 
-	Fl_RGB_Image *timg = print_tileset(tiles, tileset, palettes, tile_palettes, max_colors, tileset_width());
-	Image::Result result = Image::write_image(tileset_filename, timg, make_palette ? format_color_depth(fmt) : 0);
+	bool indexed = make_palette && pal_fmt == Image_To_Tiles_Dialog::Palette_Format::PLTE;
+	Fl_RGB_Image *timg = print_tileset(tiles, tileset, palettes, tile_palettes, max_colors, tileset_width(), indexed);
+	Image::Result result = indexed ? Image::write_image(tileset_filename, timg, 0, &palettes, max_colors) :
+		Image::write_image(tileset_filename, timg, make_palette ? format_color_depth(fmt) : 0);
 	delete timg;
 	if (result != Image::Result::IMAGE_OK) {
 		delete [] tiles;

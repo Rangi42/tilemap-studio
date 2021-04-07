@@ -1,6 +1,8 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
+#include <vector>
+
 #pragma warning(push, 0)
 #include <FL/Fl_RGB_Image.H>
 #pragma warning(pop)
@@ -12,15 +14,20 @@
 
 #define NUM_CHANNELS 3
 
+typedef std::vector<Fl_Color> Palette;
+
 class Image {
 public:
 	enum class Result { IMAGE_OK, IMAGE_BAD_FILE, IMAGE_BAD_PNG };
-	static Result write_image(const char *f, Fl_RGB_Image *img, int bpp = 0);
+	static Result write_image(const char *f, Fl_RGB_Image *img, int bpp = 0,
+		const std::vector<Palette> *palettes = NULL, size_t max_colors = 0);
 	static const char *error_message(Result result);
 	static bool make_deimage(Fl_Widget *wgt);
 private:
-	static Result write_bmp_image(const char *f, Fl_RGB_Image *img, int bpp);
-	static Result write_png_image(const char *f, Fl_RGB_Image *img, int bpp);
+	static Result write_bmp_image(const char *f, Fl_RGB_Image *img, int bpp,
+		const std::vector<Palette> *palettes, size_t max_colors);
+	static Result write_png_image(const char *f, Fl_RGB_Image *img, int bpp,
+		const std::vector<Palette> *palettes, size_t max_colors);
 };
 
 #endif

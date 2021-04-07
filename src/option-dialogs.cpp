@@ -678,9 +678,9 @@ void Image_To_Tiles_Dialog::update_image_name() {
 	}
 }
 
-static const char *palette_names[NUM_PALETTE_FORMATS] = {"RGB", "JASC", "ACT", "GPL", "PNG", "BMP"};
+static const char *palette_names[NUM_PALETTE_FORMATS] = {"PLTE", "RGB", "JASC", "ACT", "GPL", "PNG", "BMP"};
 
-static const char *palette_exts[NUM_PALETTE_FORMATS] = {".pal", ".pal", ".act", ".gpl", ".pal.png", ".pal.bmp"};
+static const char *palette_exts[NUM_PALETTE_FORMATS] = {".png", ".pal", ".pal", ".act", ".gpl", ".pal.png", ".pal.bmp"};
 
 void Image_To_Tiles_Dialog::update_output_names() {
 	if (_tileset_filename.empty()) {

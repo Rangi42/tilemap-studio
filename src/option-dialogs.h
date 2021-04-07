@@ -208,11 +208,11 @@ protected:
 	int refresh_content(int ww, int dy);
 };
 
-#define NUM_PALETTE_FORMATS 6
+#define NUM_PALETTE_FORMATS 7
 
 class Image_To_Tiles_Dialog : public Option_Dialog {
 public:
-	enum class Palette_Format { RGB, JASC, ACT, GPL, PNG, BMP };
+	enum class Palette_Format { PLTE, RGB, JASC, ACT, GPL, PNG, BMP };
 private:
 	Label *_tileset_heading, * _tilemap_heading;
 	Spacer *_tileset_spacer, *_tilemap_spacer, *_palette_spacer;

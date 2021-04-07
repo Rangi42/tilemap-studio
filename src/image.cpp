@@ -12,16 +12,22 @@
 #include "utils.h"
 #include "image.h"
 
-Image::Result Image::write_image(const char *f, Fl_RGB_Image *img, int bpp) {
+Image::Result Image::write_image(const char *f, Fl_RGB_Image *img, int bpp,
+	const std::vector<Palette> *palettes, size_t max_colors) {
 	if (ends_with(f, ".bmp") || ends_with(f, ".BMP")) {
-		return write_bmp_image(f, img, bpp);
+		return write_bmp_image(f, img, bpp, palettes, max_colors);
 	}
-	return write_png_image(f, img, bpp);
+	return write_png_image(f, img, bpp, palettes, max_colors);
 }
 
-Image::Result Image::write_png_image(const char *f, Fl_RGB_Image *img, int bpp) {
+Image::Result Image::write_png_image(const char *f, Fl_RGB_Image *img, int bpp,
+	const std::vector<Palette> *palettes, size_t max_colors) {
 	FILE *file = fl_fopen(f, "wb");
 	if (!file) { return Result::IMAGE_BAD_FILE; }
+	// Calculate the bit depth
+	size_t nc = palettes ? palettes->size() * max_colors : 0;
+	if (nc > PNG_MAX_PALETTE_LENGTH) { fclose(file); return Result::IMAGE_BAD_PNG; }
+	int depth = palettes ? (nc <= 2 ? 1 : nc <= 4 ? 2 : nc <= 16 ? 4 : 8) : bpp ? bpp : 8;
 	// Create the necessary PNG structures
 	png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	if (!png) { fclose(file); return Result::IMAGE_BAD_PNG; }
@@ -37,10 +43,21 @@ Image::Result Image::write_png_image(const char *f, Fl_RGB_Image *img, int bpp) 
 	png_set_compression_buffer_size(png, 8192);
 	// Write the PNG IHDR chunk
 	size_t w = img->w(), h = img->h();
-	int depth = bpp ? bpp : 8;
-	int color_type = bpp ? PNG_COLOR_TYPE_GRAY : PNG_COLOR_TYPE_RGB;
+	int color_type = palettes ? PNG_COLOR_TYPE_PALETTE : bpp ? PNG_COLOR_TYPE_GRAY : PNG_COLOR_TYPE_RGB;
 	png_set_IHDR(png, info, (png_uint_32)w, (png_uint_32)h, depth, color_type,
 		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+	// Fill in the PNG PLTE chunk
+	png_colorp plte = NULL;
+	if (palettes) {
+		plte = (png_colorp)png_malloc(png, nc * sizeof(png_color));
+		for (size_t i = 0; i < palettes->size(); i++) {
+			for (size_t j = 0; j < max_colors; j++) {
+				size_t pi = i * max_colors + j;
+				Fl::get_color((*palettes)[i][j], plte[pi].red, plte[pi].green, plte[pi].blue);
+			}
+		}
+		png_set_PLTE(png, info, plte, (int)nc);
+	}
 	// Write the other PNG header chunks
 	png_write_info(png, info);
 	// Write the RGB pixels in row-major order from top to bottom
@@ -50,7 +67,7 @@ Image::Result Image::write_png_image(const char *f, Fl_RGB_Image *img, int bpp) 
 	if (!ld) { ld = (int)w * d; }
 	int pd = d > 1;
 	png_bytep png_row = NULL;
-	if (bpp) {
+	if (palettes || bpp) {
 		size_t pq = 8 / (size_t)depth;
 		uchar m = (uchar)pow(2, 8 - depth);
 		size_t rs = w / pq;
@@ -60,7 +77,8 @@ Image::Result Image::write_png_image(const char *f, Fl_RGB_Image *img, int bpp) 
 				uchar pp = 0;
 				for (size_t k = 0; k < pq; k++) {
 					size_t px = ld * i + d * (j * pq + k);
-					uchar v = (buffer[px] & 0xFF) / m; // [0, 2^8-1] -> [0, 2^depth-1]
+					uchar v = buffer[px] & 0xFF;
+					if (!palettes) { v /= m; } // [0, 2^8-1] -> [0, 2^depth-1]
 					pp = (pp << depth) | v;
 				}
 				png_row[j] = pp;
@@ -84,13 +102,19 @@ Image::Result Image::write_png_image(const char *f, Fl_RGB_Image *img, int bpp) 
 	}
 	png_write_end(png, NULL);
 	delete [] png_row;
+	if (plte) { png_free(png, plte); }
 	png_destroy_write_struct(&png, &info);
 	png_free_data(png, info, PNG_FREE_ALL, -1);
 	fclose(file);
 	return Result::IMAGE_OK;
 }
 
-Image::Result Image::write_bmp_image(const char *f, Fl_RGB_Image *img, int) {
+Image::Result Image::write_bmp_image(const char *f, Fl_RGB_Image *img, int bpp,
+	const std::vector<Palette> *palettes, size_t max_colors) {
+	if (palettes) {
+		// TODO
+		return write_png_image(f, img, bpp, palettes, max_colors);
+	}
 	FILE *file = fl_fopen(f, "wb");
 	if (!file) { return Result::IMAGE_BAD_FILE; }
 	// Write the BMP headers
