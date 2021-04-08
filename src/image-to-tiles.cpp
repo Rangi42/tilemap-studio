@@ -30,7 +30,7 @@ static bool build_tilemap(const Tile *tiles, size_t n, std::vector<int> tile_pal
 	std::vector<Tile_Tessera *> &tilemap, std::vector<size_t> &tileset, Tilemap_Format fmt, uint16_t start_id,
 	bool use_space, uint16_t space_id, Fl_Color space_color) {
 	for (size_t i = 0; i < n; i++) {
-		if (use_space && tileset.size() == space_id) {
+		if (use_space && start_id + tileset.size() == space_id) {
 			size_t j = 0;
 			for (; j < n; j++) {
 				if (is_blank_tile(tiles[j], space_color)) { break; }
