@@ -476,7 +476,8 @@ int OS_Tabs::handle(int event) {
 				}
 			}
 			Fl_Tooltip::current(o);
-		} else {
+		}
+		else {
 			push(o);
 		}
 		return 1;

@@ -654,6 +654,26 @@ void Main_Window::show() {
 #endif
 }
 
+bool Main_Window::maximized() const {
+#ifdef _WIN32
+	WINDOWPLACEMENT wp;
+	wp.length = sizeof(wp);
+	if (!GetWindowPlacement(fl_xid(this), &wp)) { return false; }
+	return wp.showCmd == SW_MAXIMIZE;
+#else
+	// TODO: get maximized state with Xlib
+	return false;
+#endif
+}
+
+void Main_Window::maximize() {
+#ifdef _WIN32
+	ShowWindow(fl_xid(this), SW_MAXIMIZE);
+#else
+	// TODO: set maximized state with Xlib
+#endif
+}
+
 void Main_Window::draw_overlay() {
 	if (!visible()) { return; }
 	if (!_selection.from_tileset() || !Config::show_attributes()) {
@@ -1851,6 +1871,37 @@ void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 		Preferences::set("h", mw->_wh);
 		Preferences::set("fullscreen", 1);
 	}
+#ifdef _WIN32
+	else if (mw->maximized()) {
+		HWND hwnd = fl_xid(mw);
+		WINDOWPLACEMENT wp;
+		wp.length = sizeof(wp);
+		if (GetWindowPlacement(hwnd, &wp)) {
+			// Get the window border size
+			RECT br;
+			SetRectEmpty(&br);
+			DWORD styleEx = GetWindowLong(hwnd, GWL_EXSTYLE);
+			AdjustWindowRectEx(&br, WS_OVERLAPPEDWINDOW, FALSE, styleEx);
+			// Subtract the border size from the normal window position
+			RECT wr = wp.rcNormalPosition;
+			wr.left -= br.left;
+			wr.right -= br.right;
+			wr.top -= br.top;
+			wr.bottom -= br.bottom;
+			Preferences::set("x", wr.left);
+			Preferences::set("y", wr.top);
+			Preferences::set("w", wr.right - wr.left);
+			Preferences::set("h", wr.bottom - wr.top);
+		}
+		else {
+			Preferences::set("x", mw->x());
+			Preferences::set("y", mw->y());
+			Preferences::set("w", mw->w());
+			Preferences::set("h", mw->h());
+		}
+		Preferences::set("fullscreen", 0);
+	}
+#endif
 	else {
 		Preferences::set("x", mw->x());
 		Preferences::set("y", mw->y());
@@ -1858,6 +1909,7 @@ void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 		Preferences::set("h", mw->h());
 		Preferences::set("fullscreen", 0);
 	}
+	Preferences::set("maximized", mw->maximized());
 	Preferences::set("format", (int)Config::format());
 	Preferences::set("zoom", Config::zoom());
 	Preferences::set("grid", Config::grid());

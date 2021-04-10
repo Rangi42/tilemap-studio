@@ -98,6 +98,8 @@ public:
 	Main_Window(int x, int y, int w, int h, const char *l = NULL);
 	~Main_Window();
 	void show(void);
+	bool maximized(void) const;
+	void maximize(void);
 	inline bool full_screen(void) const { return _full_screen_mi && !!_full_screen_mi->value(); }
 	inline bool unsaved(void) const { return _tilemap.modified(); }
 	inline uint16_t tile_id(void) const { return _selection.selected() ? _selection.id() : 0x000; }

@@ -509,7 +509,8 @@ int Tile_Button::handle(int event) {
 		}
 		if (Fl::event_inside(this)) {
 			new_value = 1;
-		} else {
+		}
+		else {
 			clear_changed();
 			new_value = _old_value;
 		}
