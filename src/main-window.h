@@ -171,6 +171,7 @@ private:
 	static void load_recent_tileset_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void clear_recent_tilesets_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void unload_tilesets_cb(Fl_Widget *w, Main_Window *mw);
+	static void auto_load_tileset_cb(Fl_Menu_ *m, Main_Window *mw);
 	// Edit menu
 	static void undo_cb(Fl_Widget *w, Main_Window *mw);
 	static void redo_cb(Fl_Widget *w, Main_Window *mw);
@@ -199,8 +200,6 @@ private:
 	static void resize_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void reformat_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void image_to_tiles_cb(Fl_Widget *w, Main_Window *mw);
-	// Options menu
-	static void auto_load_tileset_cb(Fl_Menu_ *m, Main_Window *mw);
 	// Help menu
 	static void help_cb(Fl_Widget *w, Main_Window *mw);
 	static void about_cb(Fl_Widget *w, Main_Window *mw);

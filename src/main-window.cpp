@@ -313,7 +313,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		OS_NULL_MENU_ITEM(FL_ALT + FL_SHIFT + '0', (Fl_Callback *)load_recent_tileset_cb, this, 0),
 		OS_MENU_ITEM("Clear &Recent", 0, (Fl_Callback *)clear_recent_tilesets_cb, this, 0),
 		{},
-		OS_MENU_ITEM("&Unload", FL_COMMAND + 'W', (Fl_Callback *)unload_tilesets_cb, this, 0),
+		OS_MENU_ITEM("&Unload", FL_COMMAND + 'W', (Fl_Callback *)unload_tilesets_cb, this, FL_MENU_DIVIDER),
+		OS_MENU_ITEM("Au&to-Load Tileset", 0, (Fl_Callback *)auto_load_tileset_cb, this,
+			FL_MENU_TOGGLE | (Config::auto_load_tileset() ? FL_MENU_VALUE : 0)),
 		{},
 		OS_SUBMENU("&Edit"),
 		OS_MENU_ITEM("&Undo", FL_COMMAND + 'z', (Fl_Callback *)undo_cb, this, 0),
@@ -365,10 +367,6 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		OS_MENU_ITEM("Re&format...", FL_COMMAND + 'f', (Fl_Callback *)reformat_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&Image to Tiles...", FL_COMMAND + 'x', (Fl_Callback *)image_to_tiles_cb, this, 0),
 		{},
-		OS_SUBMENU("&Options"),
-		OS_MENU_ITEM("&Auto-Load Tileset", 0, (Fl_Callback *)auto_load_tileset_cb, this,
-			FL_MENU_TOGGLE | (Config::auto_load_tileset() ? FL_MENU_VALUE : 0)),
-	{},
 		OS_SUBMENU("&Help"),
 		OS_MENU_ITEM("&Help", FL_F + 1, (Fl_Callback *)help_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&About", FL_COMMAND + '/', (Fl_Callback *)about_cb, this, 0),
@@ -1786,6 +1784,10 @@ void Main_Window::unload_tilesets_cb(Fl_Widget *w, Main_Window *mw) {
 	mw->redraw();
 }
 
+void Main_Window::auto_load_tileset_cb(Fl_Menu_ *m, Main_Window *) {
+	Config::auto_load_tileset(!!m->mvalue()->value());
+}
+
 void Main_Window::print_cb(Fl_Widget *, Main_Window *mw) {
 	if (!mw->_tilemap.size()) { return; }
 
@@ -2157,10 +2159,6 @@ void Main_Window::image_to_tiles_cb(Fl_Widget *, Main_Window *mw) {
 		mw->_image_to_tiles_dialog->reshow(mw);
 		if (mw->_image_to_tiles_dialog->canceled()) { return; }
 	}
-}
-
-void Main_Window::auto_load_tileset_cb(Fl_Menu_ *m, Main_Window *) {
-	Config::auto_load_tileset(!!m->mvalue()->value());
 }
 
 void Main_Window::help_cb(Fl_Widget *, Main_Window *mw) {
