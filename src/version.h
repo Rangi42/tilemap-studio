@@ -1,11 +1,11 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-#define PROGRAM_VERSION 3,2,2
+#define PROGRAM_VERSION 3,3,0
 #ifdef _DEBUG
-#define PROGRAM_VERSION_STRING "3.2.2 [DEBUG]"
+#define PROGRAM_VERSION_STRING "3.3.0 [DEBUG]"
 #else
-#define PROGRAM_VERSION_STRING "3.2.2"
+#define PROGRAM_VERSION_STRING "3.3.0"
 #endif
 
 #define PROGRAM_EXE_NAME "tilemapstudio"
@@ -20,6 +20,6 @@
 
 #define PROGRAM_AUTHOR "Rangi"
 
-#define CURRENT_YEAR "2020"
+#define CURRENT_YEAR "2021"
 
 #endif
