@@ -2,14 +2,18 @@
 
 ## Windows
 
-**To install Tilemap Studio:**
+### Install the Tilemap Studio release
 
 1. Download **install.bat** and **tilemapstudio.exe** from [the latest release](https://github.com/Rangi42/tilemap-studio/releases).
 2. Hold down Shift, right-click **install.bat**, and click "**Run as administrator**". This will install Tilemap Studio to your account and create a shortcut on your Desktop.
 3. Now you can delete the two downloaded files.
 4. Double-click **Tilemap Studio** on your Desktop to open it. If you get an error that "msvcrt140.dll is missing", you need to install the [Microsoft Visual C++ Redistributable for Visual Studio 2019](https://www.visualstudio.com/downloads/).
 
-If you have [Microsoft Visual Studio](https://visualstudio.microsoft.com/), you can build Tilemap Studio yourself:
+### Build Tilemap Studio from source
+
+You will need [Microsoft Visual Studio](https://visualstudio.microsoft.com/vs/); the Community edition is free.
+
+If the pre-built release already works for you, you don't have to build it yourself.
 
 1. On GitHub, click the green "**Code**" button and click "**Download ZIP**". This will download **tilemap-studio-master.zip**.
 2. Unzip tilemap-studio-master.zip. This will create the **tilemap-studio-master** folder.
@@ -30,14 +34,33 @@ If you have [Microsoft Visual Studio](https://visualstudio.microsoft.com/), you 
 
 ## Linux
 
+### Install dependencies
+
+You need at least g++ 7 for C++17 `<string_view>` support.
+
+#### Ubuntu/Debian
+
 Run the following commands:
 
 ```bash
-# Install dependencies
-# (you need at least g++ 7 for C++11 <regex> and C++17 <string_view> support)
 sudo apt install make g++ git autoconf
 sudo apt install zlib1g-dev libpng-dev libxpm-dev libx11-dev libxft-dev libxinerama-dev libfontconfig1-dev x11proto-xext-dev libxrender-dev libxfixes-dev
+```
 
+#### Fedora
+
+Run the following commands:
+
+```bash
+sudo dnf install make g++ git autoconf
+sudo dnf install zlib-devel libpng-devel libXpm-devel libX11-devel libXft-devel libXinerama-devel fontconfig-devel libXext-devel libXrender-devel libXfixes-devel
+```
+
+### Install and build Tilemap Studio
+
+Run the following commands:
+
+```bash
 # Clone Tilemap Studio
 git clone https://github.com/Rangi42/tilemap-studio.git
 cd tilemap-studio
