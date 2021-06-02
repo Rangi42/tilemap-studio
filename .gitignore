@@ -1,20 +1,15 @@
-# output directory
+# directories
 bin/
-
-# working directory
+lib/
+share/
 tmp/
+fltk/
 
-# no binaries
-*.exe
-
-# no libraries
-*.lib
-*.a
-lib/*
-!lib/fltk-1.3.5-mod.zip
+# no FL includes
+include/FL/
 
 # no IDE files
-.vs
+.vs/
 *.sdf
 *.opensdf
 *.suo
