@@ -1,4 +1,4 @@
-# Tilemap Studio [![Build Status](https://travis-ci.org/Rangi42/tilemap-studio.svg?branch=master)](https://travis-ci.org/Rangi42/tilemap-studio)
+# Tilemap Studio [![Build Status](https://github.com/Rangi42/tilemap-studio/actions/workflows/main.yml/badge.svg)](https://github.com/Rangi42/tilemap-studio/actions)
 
 A tilemap editor for Game Boy, GBC, GBA, or SNES projects. Specifically meant to support the [pret](https://github.com/pret) disassemblies like [pokered](https://github.com/pret/pokered), [pokecrystal](https://github.com/pret/pokecrystal), and [pokeemerald](https://github.com/pret/pokeemerald); as well as hacks including [Polished Crystal](https://github.com/Rangi42/polishedcrystal), [Red++](https://github.com/TheFakeMateo/RedPlusPlus), [Orange](https://github.com/PiaCarrot/pokeorange), [Prism](https://www.reddit.com/r/PokemonPrism), and many more.
 
