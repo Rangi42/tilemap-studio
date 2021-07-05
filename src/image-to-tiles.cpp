@@ -305,6 +305,7 @@ bool Main_Window::image_to_tiles() {
 		// <https://github.com/Optiroc/SuperFamiconv>
 
 		size_t max_palettes = (size_t)format_palettes_size(fmt);
+		uint16_t start_index = _image_to_tiles_dialog->start_index();
 
 		// Get the color set of each tile
 		std::vector<Color_Set> cs_tiles;
@@ -387,10 +388,25 @@ bool Main_Window::image_to_tiles() {
 				}
 				return luminance(a) > luminance(b);
 			});
+			if (max_palettes == 1) {
+				// Pad the palette to start at the right index
+				for (uint16_t i = 0; i < start_index; i++) {
+					palette.insert(palette.begin(), i == 0 ? color_zero : FL_BLACK);
+				}
+			}
 			for (size_t i = palette.size(); i < max_colors; i++) {
 				palette.push_back(FL_BLACK);
 			}
 			palettes.push_back(palette);
+		}
+
+		// Pad the palettes to start at the right index
+		if (max_palettes > 1) {
+			for (uint16_t i = 0; i < start_index; i++) {
+				Palette palette(max_colors, FL_BLACK);
+				palette[0] = color_zero;
+				palettes.insert(palettes.begin(), palette);
+			}
 		}
 
 		// Create the palette file
@@ -412,6 +428,16 @@ bool Main_Window::image_to_tiles() {
 			std::string msg = "Could not convert ";
 			msg = msg + image_basename + "!\n\nThe tiles need more than " +
 				std::to_string(max_palettes) + " palettes.\n\nAll " +
+				std::to_string(np) + " palettes were written to " + palette_basename + ".";
+			_error_dialog->message(msg);
+			_error_dialog->show(this);
+			return false;
+		}
+		else if (max_palettes == 1 && palettes[0].size() > max_colors) {
+			delete [] tiles;
+			std::string msg = "Could not convert ";
+			msg = msg + image_basename + "!\n\nThe tiles need more than " +
+				std::to_string(max_colors) + " colors.\n\nAll " +
 				std::to_string(np) + " palettes were written to " + palette_basename + ".";
 			_error_dialog->message(msg);
 			_error_dialog->show(this);

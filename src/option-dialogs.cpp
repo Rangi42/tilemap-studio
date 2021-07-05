@@ -612,9 +612,9 @@ int Add_Tileset_Dialog::refresh_content(int ww, int dy) {
 Image_To_Tiles_Dialog::Image_To_Tiles_Dialog(const char *t) : Option_Dialog(360, t), _tileset_heading(NULL), _tilemap_heading(NULL),
 	_tileset_spacer(NULL), _tilemap_spacer(NULL), _palette_spacer(NULL), _input_heading(NULL), _output_heading(NULL), _image(NULL),
 	_tileset(NULL), _image_name(NULL), _tileset_name(NULL), _tilemap_name(NULL), _format(NULL), _start_id(NULL), _use_space(NULL),
-	_space_id(NULL), _palette(NULL), _palette_name(NULL), _palette_format(NULL),_color_zero(NULL), _color_zero_rgb(NULL),
-	_color_zero_swatch(NULL), _image_chooser(NULL), _tileset_chooser(NULL), _image_filename(), _tileset_filename(), _tilemap_filename(),
-	_attrmap_filename(), _palette_filename(), _tilepal_filename() {}
+	_space_id(NULL), _palette(NULL), _palette_name(NULL), _palette_format(NULL), _start_index_label(NULL), _start_index(NULL),
+	_color_zero(NULL), _color_zero_rgb(NULL), _color_zero_swatch(NULL), _image_chooser(NULL), _tileset_chooser(NULL),
+	_image_filename(), _tileset_filename(), _tilemap_filename(), _attrmap_filename(), _palette_filename(), _tilepal_filename() {}
 
 Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
 	delete _tileset_heading;
@@ -636,6 +636,8 @@ Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
 	delete _palette;
 	delete _palette_name;
 	delete _palette_format;
+	delete _start_index_label;
+	delete _start_index;
 	delete _color_zero;
 	delete _color_zero_rgb;
 	delete _color_zero_swatch;
@@ -748,6 +750,29 @@ void Image_To_Tiles_Dialog::update_output_names() {
 	}
 }
 
+void Image_To_Tiles_Dialog::update_start_index() {
+	if (format_can_make_palettes(format())) {
+		_start_index_label->activate();
+		_start_index->activate();
+		int nx = format_palettes_size(format());
+		if (nx == 1) {
+			nx = format_palette_size(format());
+			_start_index_label->label("Start at Index:");
+		}
+		else {
+			_start_index_label->label("Start at Palette:");
+		}
+		_start_index->format(nx > 0x10 ? "%02X" : "%X");
+		if (_start_index->value() >= nx) { _start_index->value(0); }
+		_start_index->range(0, nx - 1);
+	}
+	else {
+		_start_index->deactivate();
+		_start_index_label->label("Start at Palette:");
+		_start_index->value(0);
+	}
+}
+
 void Image_To_Tiles_Dialog::update_ok_button() {
 	if (_image_filename.empty() || _tileset_filename.empty()) {
 		_ok_button->deactivate();
@@ -806,6 +831,8 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_palette = new OS_Check_Button(0, 0, 0, 0, "Palette:");
 	_palette_name = new Label(0, 0, 0, 0, "Output: " NO_FILES_DETERMINED_LABEL);
 	_palette_format = new Dropdown(0, 0, 0, 0, "Format:");
+	_start_index_label = new Label(0, 0, 0, 0, "Start at Palette:");
+	_start_index = new Default_Hex_Spinner(0, 0, 0, 0, "$");
 	_color_zero = new OS_Check_Button(0, 0, 0, 0, "Color 0: ");
 	_color_zero_rgb = new OS_Hex_Input(0, 0, 0, 0, "#");
 	_color_zero_swatch = new Fl_Button(0, 0, 0, 0);
@@ -846,6 +873,9 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_space_id->format("%03X");
 	_space_id->range(0x000, MAX_NUM_TILES-1);
 	_space_id->default_value(0x07F);
+	_start_index->format("%X");
+	_start_index->range(0x0, 0xFF);
+	_start_index->default_value(0);
 	_image_chooser->title("Read Image");
 	_image_chooser->filter("Image Files\t*.{png,bmp}\n");
 	_tileset_chooser->title("Write Tileset");
@@ -855,7 +885,7 @@ void Image_To_Tiles_Dialog::initialize_content() {
 
 int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	int wgt_h = 22, win_m = 10, wgt_m = 4;
-	int ch = (wgt_h + wgt_m) * 9 + wgt_h;
+	int ch = (wgt_h + wgt_m) * 10 + wgt_h;
 	_content->resize(win_m, dy, ww, ch);
 
 	int wgt_w = text_width(_tileset_heading->label(), 4);
@@ -921,8 +951,16 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	wgt_off = win_m + text_width(_palette_format->label(), 3);
 	wgt_w = text_width("JASC", 6) + wgt_h;
 	_palette_format->resize(wgt_off, dy, wgt_w, wgt_h);
-	wgt_off += _palette_format->w() + win_m;
+	dy += wgt_h + wgt_m;
+
+	wgt_w = text_width("Start at Palette:", 3);
+	wgt_off = win_m;
+	_start_index_label->resize(wgt_off, dy, wgt_w, wgt_h);
+	wgt_w = std::max(text_width("AA", 2), text_width("FF", 2)) + wgt_h / 2 + 4;
+	wgt_off += text_width("Start at Palette: $", 3);
+	_start_index->resize(wgt_off, dy, wgt_w, wgt_h);
 	wgt_w = _color_zero->labelsize() + 4 + text_width(_color_zero->label());
+	wgt_off += _start_index->w() + win_m;
 	_color_zero->resize(wgt_off, dy, wgt_w, wgt_h);
 	wgt_off += _color_zero->w() + 4 + text_width(_color_zero_rgb->label(), 1);
 	wgt_w = std::max(text_width("AAAAAA", 2), text_width("FFFFFF", 2));
@@ -933,6 +971,7 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	_image_filename.clear();
 	_tileset_filename.clear();
 	update_image_name();
+	update_start_index();
 	update_output_names();
 	update_ok_button();
 
@@ -978,23 +1017,31 @@ void Image_To_Tiles_Dialog::tileset_cb(Fl_Widget *, Image_To_Tiles_Dialog *itd) 
 void Image_To_Tiles_Dialog::format_cb(Dropdown *, Image_To_Tiles_Dialog *itd) {
 	Palette_Format pal_fmt = itd->default_palette_format(itd->format());
 	itd->_palette_format->value((int)pal_fmt);
+	itd->update_start_index();
 	itd->update_output_names();
+	itd->_dialog->redraw();
 }
 
 void Image_To_Tiles_Dialog::palette_cb(OS_Check_Button *, Image_To_Tiles_Dialog *itd) {
 	if (itd->palette()) {
 		itd->_palette_format->activate();
 		itd->_palette_name->activate();
+		itd->_start_index_label->activate();
+		itd->_start_index->activate();
 		itd->_color_zero->activate();
 	}
 	else {
 		itd->_palette_format->deactivate();
 		itd->_palette_name->deactivate();
+		itd->_start_index_label->deactivate();
+		itd->_start_index->deactivate();
 		itd->_color_zero->deactivate();
 		itd->_color_zero->clear();
 	}
 	itd->_palette_format->redraw();
 	itd->_palette_name->redraw();
+	itd->_start_index_label->redraw();
+	itd->_start_index->redraw();
 	itd->_color_zero->redraw();
 	itd->_color_zero->do_callback();
 }

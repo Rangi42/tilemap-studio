@@ -227,6 +227,8 @@ private:
 	OS_Check_Button *_palette;
 	Label *_palette_name;
 	Dropdown *_palette_format;
+	Label *_start_index_label;
+	Default_Hex_Spinner *_start_index;
 	OS_Check_Button *_color_zero;
 	OS_Hex_Input *_color_zero_rgb;
 	Fl_Button *_color_zero_swatch;
@@ -251,10 +253,13 @@ public:
 	inline void start_id(uint16_t n) { initialize(); _start_id->value(n); }
 	inline bool use_space(void) const { return !!_use_space->value(); }
 	inline uint16_t space_id(void) const { return (uint16_t)_space_id->value(); }
+	inline uint16_t start_index(void) const { return (uint16_t)_start_index->value(); }
+	inline void start_index(uint16_t n) { initialize(); _start_index->value(n); }
 	inline void reshow(const Fl_Widget *p) { _canceled = false; reveal(p); }
 private:
 	void update_image_name(void);
 	void update_output_names(void);
+	void update_start_index(void);
 	void update_ok_button(void);
 	void update_color_zero_swatch(void);
 	Palette_Format default_palette_format(Tilemap_Format fmt) const;
