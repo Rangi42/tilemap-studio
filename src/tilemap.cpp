@@ -621,25 +621,30 @@ void Tilemap::print_tilemap() const {
 
 void Tilemap::guess_width() {
 	size_t n = size();
-	if (n % GAME_BOY_WIDTH == 0 && n / GAME_BOY_WIDTH <= GAME_BOY_HEIGHT) {
+#define N_FITS_SIZE(w, h) n % (w) == 0 && n / (w) <= (h)
+	if (N_FITS_SIZE(GAME_BOY_WIDTH, GAME_BOY_HEIGHT)) {
 		_width = GAME_BOY_WIDTH;
 	}
-	else if (n % GAME_BOY_HEIGHT == 0 && n / GAME_BOY_HEIGHT <= GAME_BOY_WIDTH) {
+	else if (N_FITS_SIZE(GAME_BOY_HEIGHT, GAME_BOY_WIDTH)) {
 		_width = n / GAME_BOY_HEIGHT;
 	}
-	else if (n % GBA_WIDTH == 0 && n / GBA_WIDTH <= GBA_HEIGHT) {
+	else if (N_FITS_SIZE(GBA_WIDTH, GBA_HEIGHT)) {
 		_width = GBA_WIDTH;
 	}
-	else if (n % GAME_BOY_VRAM_SIZE == 0) {
+	else if (N_FITS_SIZE(GAME_BOY_VRAM_SIZE, GAME_BOY_VRAM_SIZE)) {
 		_width = GAME_BOY_VRAM_SIZE;
 	}
-	else if (n % (GAME_BOY_HEIGHT - 6) == 0 && n / (GAME_BOY_HEIGHT - 6) <= GAME_BOY_WIDTH) {
+	else if (N_FITS_SIZE(GAME_BOY_HEIGHT - 6, GAME_BOY_WIDTH)) {
 		// Game Boy screen height minus textbox height
 		_width = n / (GAME_BOY_HEIGHT - 6);
+	}
+	else if (N_FITS_SIZE(64, 64)) {
+		_width = 64;
 	}
 	else {
 		_width = 16;
 	}
+#undef N_FITS_SIZE
 }
 
 const char *Tilemap::error_message(Result result) {
