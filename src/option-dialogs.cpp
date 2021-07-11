@@ -682,7 +682,7 @@ void Image_To_Tiles_Dialog::update_image_name() {
 
 static const char *palette_names[NUM_PALETTE_FORMATS] = {"PLTE", "RGB", "JASC", "ACT", "GPL", "PNG", "BMP"};
 
-static const char *palette_exts[NUM_PALETTE_FORMATS] = {".png", ".pal", ".pal", ".act", ".gpl", ".pal.png", ".pal.bmp"};
+static const char *palette_exts[NUM_PALETTE_FORMATS] = {NULL, ".pal", ".pal", ".act", ".gpl", ".pal.png", ".pal.bmp"};
 
 void Image_To_Tiles_Dialog::update_output_names() {
 	if (_tileset_filename.empty()) {
@@ -707,7 +707,9 @@ void Image_To_Tiles_Dialog::update_output_names() {
 
 		strcpy(output_filename, tileset_filename());
 		const char *palette_ext = palette_exts[(int)palette_format()];
-		fl_filename_setext(output_filename, sizeof(output_filename), palette_ext);
+		if (palette_ext) {
+			fl_filename_setext(output_filename, sizeof(output_filename), palette_ext);
+		}
 		_palette_filename = output_filename;
 
 		strcpy(output_filename, tileset_filename());

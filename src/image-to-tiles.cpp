@@ -24,6 +24,8 @@
 #pragma warning(push)
 #pragma warning(disable : 4458)
 
+#define RANGE(x) (x).begin(), (x).end()
+
 typedef std::set<Fl_Color> Color_Set;
 
 static bool build_tilemap(const Tile *tiles, size_t n, std::vector<int> tile_palettes,
@@ -64,13 +66,6 @@ static bool build_tilemap(const Tile *tiles, size_t n, std::vector<int> tile_pal
 	return true;
 }
 
-static Fl_Color indexed_colors[16] = {
-	fl_rgb_color(0xFF), fl_rgb_color(0xEE), fl_rgb_color(0xDD), fl_rgb_color(0xCC),
-	fl_rgb_color(0xBB), fl_rgb_color(0xAA), fl_rgb_color(0x99), fl_rgb_color(0x88),
-	fl_rgb_color(0x77), fl_rgb_color(0x66), fl_rgb_color(0x55), fl_rgb_color(0x44),
-	fl_rgb_color(0x33), fl_rgb_color(0x22), fl_rgb_color(0x11), fl_rgb_color(0x00)
-};
-
 static Fl_RGB_Image *print_tileset(const Tile *tiles, const std::vector<size_t> &tileset,
 	const std::vector<Palette> &palettes, const std::vector<int> &tile_palettes, size_t nc, int tw,
 	Fl_Color blank_color, bool indexed) {
@@ -87,11 +82,11 @@ static Fl_RGB_Image *print_tileset(const Tile *tiles, const std::vector<size_t> 
 		}
 		reverse_palettes.push_back(reverse_palette);
 	}
-	size_t dp = (_countof(indexed_colors) - 1) / (nc - 1);
 
 	Fl_Image_Surface *surface = new Fl_Image_Surface(tw * TILE_SIZE, th * TILE_SIZE);
 	surface->set_current();
 
+	if (indexed) { nc = MAX_PALETTE_LENGTH; }
 	fl_rectf(0, 0, tw * TILE_SIZE, th * TILE_SIZE, indexed ? 0 : blank_color);
 	for (int i = 0; i < nt; i++) {
 		size_t ti = tileset[i];
@@ -104,7 +99,7 @@ static Fl_RGB_Image *print_tileset(const Tile *tiles, const std::vector<size_t> 
 				Fl_Color c = tile[ty * TILE_SIZE + tx];
 				if (p > -1) {
 					size_t pi = reverse_palettes[p][c];
-					c = dp && !indexed ? indexed_colors[pi * dp] : fl_rgb_color((uchar)pi);
+					c = Image::get_indexed_grayscale(pi, nc);
 				}
 				fl_color(c);
 				fl_point(x * TILE_SIZE + tx, y * TILE_SIZE + ty);
@@ -340,16 +335,16 @@ bool Main_Window::image_to_tiles() {
 
 		// Remove duplicate color sets
 		std::vector<Color_Set> cs_uniq(cs_tiles.size());
-		auto cs_uniq_last = std::copy_if(cs_tiles.begin(), cs_tiles.end(), cs_uniq.begin(), [&](const Color_Set &s) {
-			return std::find(cs_uniq.begin(), cs_uniq.end(), s) == cs_uniq.end();
+		auto cs_uniq_last = std::copy_if(RANGE(cs_tiles), cs_uniq.begin(), [&](const Color_Set &s) {
+			return std::find(RANGE(cs_uniq), s) == cs_uniq.end();
 		});
 		cs_uniq.resize(std::distance(cs_uniq.begin(), cs_uniq_last));
 
 		// Remove color sets that are proper subsets of other color sets
 		std::vector<Color_Set> cs_full(cs_uniq.size());
-		auto cs_full_last = std::copy_if(cs_uniq.begin(), cs_uniq.end(), cs_full.begin(), [&](const Color_Set &s) {
-			return !std::any_of(cs_uniq.begin(), cs_uniq.end(), [&](const Color_Set &c) {
-				return s != c && std::includes(c.begin(), c.end(), s.begin(), s.end());
+		auto cs_full_last = std::copy_if(RANGE(cs_uniq), cs_full.begin(), [&](const Color_Set &s) {
+			return !std::any_of(RANGE(cs_uniq), [&](const Color_Set &c) {
+				return s != c && std::includes(RANGE(c), RANGE(s));
 			});
 		});
 		cs_full.resize(std::distance(cs_full.begin(), cs_full_last));
@@ -360,13 +355,13 @@ bool Main_Window::image_to_tiles() {
 			Color_Set *b = NULL;
 			for (Color_Set &c : cs_opt) {
 				Color_Set d;
-				std::set_difference(s.begin(), s.end(), c.begin(), c.end(), std::inserter(d, d.begin()));
+				std::set_difference(RANGE(s), RANGE(c), std::inserter(d, d.begin()));
 				if (c.size() + d.size() <= max_colors) {
 					b = &c;
 				}
 			}
 			if (b) {
-				b->insert(s.begin(), s.end());
+				b->insert(RANGE(s));
 			}
 			else {
 				cs_opt.push_back(s);
@@ -374,14 +369,14 @@ bool Main_Window::image_to_tiles() {
 		}
 
 		// Sort color sets from most to fewest colors
-		std::stable_sort(cs_opt.begin(), cs_opt.end(), [](const Color_Set &a, const Color_Set &b) {
+		std::stable_sort(RANGE(cs_opt), [](const Color_Set &a, const Color_Set &b) {
 			return a.size() > b.size();
 		});
 
 		// Sort each palette from brightest to darkest color, padded with black, keeping color 0 first
 		for (Color_Set &s : cs_opt) {
-			Palette palette(s.begin(), s.end());
-			std::sort(palette.begin(), palette.end(), [use_color_zero, color_zero](Fl_Color a, Fl_Color b) {
+			Palette palette(RANGE(s));
+			std::sort(RANGE(palette), [use_color_zero, color_zero](Fl_Color a, Fl_Color b) {
 				if (use_color_zero) {
 					if (a == color_zero) { return true; }
 					if (b == color_zero) { return false; }
@@ -450,7 +445,7 @@ bool Main_Window::image_to_tiles() {
 			const Color_Set &s = cs_tiles[i];
 			for (size_t j = 0; j < np; j++) {
 				const Color_Set &c = cs_opt[j];
-				if (std::includes(c.begin(), c.end(), s.begin(), s.end())) {
+				if (std::includes(RANGE(c), RANGE(s))) {
 					pal = (int)j;
 					break;
 				}

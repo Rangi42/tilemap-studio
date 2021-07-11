@@ -26,7 +26,7 @@ Image::Result Image::write_png_image(const char *f, Fl_RGB_Image *img, int bpp,
 	if (!file) { return Result::IMAGE_BAD_FILE; }
 	// Calculate the bit depth
 	size_t nc = palettes ? palettes->size() * max_colors : 0;
-	if (nc > PNG_MAX_PALETTE_LENGTH) { fclose(file); return Result::IMAGE_BAD_PNG; }
+	if (nc > PNG_MAX_PALETTE_LENGTH) { fclose(file); return Result::IMAGE_BAD_PALETTE; }
 	int depth = palettes ? (nc <= 2 ? 1 : nc <= 4 ? 2 : nc <= 16 ? 4 : 8) : bpp ? bpp : 8;
 	// Create the necessary PNG structures
 	png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -111,18 +111,20 @@ Image::Result Image::write_png_image(const char *f, Fl_RGB_Image *img, int bpp,
 
 Image::Result Image::write_bmp_image(const char *f, Fl_RGB_Image *img, int bpp,
 	const std::vector<Palette> *palettes, size_t max_colors) {
-	if (palettes) {
-		// TODO
-		return write_png_image(f, img, bpp, palettes, max_colors);
-	}
 	FILE *file = fl_fopen(f, "wb");
 	if (!file) { return Result::IMAGE_BAD_FILE; }
+	// Calculate the bit depth
+	size_t nc = palettes ? palettes->size() * max_colors : bpp ? (size_t)pow(2, bpp) : 0;
+	if (nc > MAX_PALETTE_LENGTH) { fclose(file); return Result::IMAGE_BAD_PALETTE; }
+	bool has_pal = palettes || bpp;
+	size_t depth = 8 * (has_pal ? 1 : NUM_CHANNELS);
 	// Write the BMP headers
 	size_t w = img->w(), h = img->h();
 	size_t file_header_size = 14;
 	size_t info_header_size = 40;
-	size_t header_size = file_header_size + info_header_size;
-	size_t row_size = NUM_CHANNELS * w;
+	size_t pal_size = has_pal ? MAX_PALETTE_LENGTH * 4 : 0;
+	size_t header_size = file_header_size + info_header_size + pal_size;
+	size_t row_size = w * (has_pal ? 1 : NUM_CHANNELS);
 	size_t row_pad = 4 - row_size % 4; // align rows to 32-bit boundaries
 	if (row_pad == 4) { row_pad = 0; }
 	size_t data_size = (row_size + row_pad) * h;
@@ -146,7 +148,7 @@ Image::Result Image::write_bmp_image(const char *f, Fl_RGB_Image *img, int bpp,
 		LE32(w),                // image width
 		LE32(h),                // image height
 		LE16(1),                // num color planes
-		LE16(24),               // bits per pixel
+		LE16(depth),            // bits per pixel
 		LE32(0),                // compression method (RGB)
 		LE32(image_size),       // image size in bytes
 		LE32(x_ppm),            // horizontal pixels per meter
@@ -158,27 +160,73 @@ Image::Result Image::write_bmp_image(const char *f, Fl_RGB_Image *img, int bpp,
 	fwrite(&file_header, sizeof(file_header), 1, file);
 	// Write the BMP info header
 	fwrite(&info_header, sizeof(info_header), 1, file);
+	// Write the BMP color table
+	if (palettes) {
+		uchar p[4] = {};
+		for (size_t i = 0; i < palettes->size(); i++) {
+			for (size_t j = 0; j < max_colors; j++) {
+				Fl::get_color((*palettes)[i][j], p[2], p[1], p[0]);
+				fwrite(p, 1, sizeof(p), file);
+			}
+		}
+	}
+	else if (bpp) {
+		uchar p[4] = {};
+		for (size_t i = 0; i < nc; i++) {
+			Fl_Color c = Image::get_indexed_grayscale(i, nc);
+			Fl::get_color(c, p[2], p[1], p[0]);
+			fwrite(p, 1, sizeof(p), file);
+		}
+	}
+	if (has_pal) {
+		uchar p[4] = {};
+		Fl::get_color(FL_BLACK, p[2], p[1], p[0]);
+		for (size_t i = nc; i < MAX_PALETTE_LENGTH; i++) {
+			fwrite(p, 1, sizeof(p), file);
+		}
+	}
 	// Write the BGR pixels in row-major order from bottom to top
 	const char *buffer = img->data()[0];
 	int d = img->d();
 	int ld = img->ld();
 	if (!ld) { ld = (int)w * d; }
 	int pd = d > 1;
-	for (size_t i = h; i-- > 0;) {
-		for (size_t j = 0; j < w; j++) {
-			size_t px = ld * i + d * j;
-			for (size_t k = NUM_CHANNELS; k-- > 0;) {
-				fputc(buffer[px+pd*k], file);
+	if (has_pal) {
+		uchar m = (uchar)pow(2, 8 - bpp);
+		for (size_t i = h; i-- > 0;) {
+			for (size_t j = 0; j < w; j++) {
+				size_t px = ld * i + d * j;
+				uchar v = buffer[px];
+				if (!palettes) { v /= m; } // [0, 2^8-1] -> [0, 2^depth-1]
+				fputc(v, file);
+			}
+			// Pad the rows to the nearest 4 bytes
+			for (size_t j = 0; j < row_pad; j++) {
+				fputc(0, file);
 			}
 		}
-		// Pad the rows to the nearest 4 bytes
-		for (size_t j = 0; j < row_pad; j++) {
+		// Pad the pixel data to the nearest 4 bytes
+		for (size_t i = 0; i < data_pad; i++) {
 			fputc(0, file);
 		}
 	}
-	// Pad the pixel data to the nearest 4 bytes
-	for (size_t i = 0; i < data_pad; i++) {
-		fputc(0, file);
+	else {
+		for (size_t i = h; i-- > 0;) {
+			for (size_t j = 0; j < w; j++) {
+				size_t px = ld * i + d * j;
+				for (size_t k = NUM_CHANNELS; k-- > 0;) {
+					fputc(buffer[px+pd*k], file);
+				}
+			}
+			// Pad the rows to the nearest 4 bytes
+			for (size_t j = 0; j < row_pad; j++) {
+				fputc(0, file);
+			}
+		}
+		// Pad the pixel data to the nearest 4 bytes
+		for (size_t i = 0; i < data_pad; i++) {
+			fputc(0, file);
+		}
 	}
 	fclose(file);
 	return Result::IMAGE_OK;
@@ -190,6 +238,8 @@ const char *Image::error_message(Result result) {
 		return "OK.";
 	case Result::IMAGE_BAD_FILE:
 		return "Cannot open file.";
+	case Result::IMAGE_BAD_PALETTE:
+		return "Too many palette entries.";
 	case Result::IMAGE_BAD_PNG:
 		return "Cannot write PNG data.";
 	default:
@@ -212,4 +262,16 @@ bool Image::make_deimage(Fl_Widget *wgt) {
 	}
 	wgt->deimage(deimg);
 	return true;
+}
+
+static Fl_Color indexed_colors[16] = {
+	fl_rgb_color(0xFF), fl_rgb_color(0xEE), fl_rgb_color(0xDD), fl_rgb_color(0xCC),
+	fl_rgb_color(0xBB), fl_rgb_color(0xAA), fl_rgb_color(0x99), fl_rgb_color(0x88),
+	fl_rgb_color(0x77), fl_rgb_color(0x66), fl_rgb_color(0x55), fl_rgb_color(0x44),
+	fl_rgb_color(0x33), fl_rgb_color(0x22), fl_rgb_color(0x11), fl_rgb_color(0x00)
+};
+
+Fl_Color Image::get_indexed_grayscale(size_t i, size_t nc) {
+	size_t dp = (_countof(indexed_colors) - 1) / (nc - 1);
+	return dp ? indexed_colors[i * dp] : fl_rgb_color((uchar)i);
 }
