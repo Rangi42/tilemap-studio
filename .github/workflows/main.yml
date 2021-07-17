@@ -16,15 +16,7 @@ jobs:
         run: |
           sudo apt-get install -y git zlib1g-dev libpng-dev libxpm-dev libx11-dev libxft-dev libxinerama-dev libfontconfig1-dev x11proto-xext-dev libxrender-dev libxfixes-dev
 
-      - name: Cache FLTK
-        id: cache-fltk
-        uses: actions/cache@master
-        with:
-          path: lib
-          key: ${{ runner.os }}-lib-fltk
-
       - name: Checkout FLTK
-        if: steps.cache-fltk.outputs.cache-hit != 'true'
         uses: actions/checkout@master
         with:
           path: fltk
@@ -33,7 +25,6 @@ jobs:
           fetch-depth: 1
 
       - name: Install FLTK
-        if: steps.cache-fltk.outputs.cache-hit != 'true'
         working-directory: fltk
         run: |
           ./autogen.sh --prefix="$PWD/.." --with-abiversion=10306
