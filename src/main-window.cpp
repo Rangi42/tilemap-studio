@@ -668,8 +668,26 @@ bool Main_Window::maximized() const {
 	if (!GetWindowPlacement(fl_xid(this), &wp)) { return false; }
 	return wp.showCmd == SW_MAXIMIZE;
 #else
-	// TODO: get maximized state with Xlib
-	return false;
+	Atom wmState = XInternAtom(fl_display, "_NET_WM_STATE", True);
+	Atom actual;
+	int format;
+	unsigned long numItems, bytesAfter;
+	unsigned char *properties = NULL;
+	int result = XGetWindowProperty(fl_display, fl_xid(this), wmState, 0, 1024, False, AnyPropertyType, &actual, &format,
+		&numItems, &bytesAfter, &properties);
+	int numMax = 0;
+	if (result == Success && format == 32 && properties) {
+		Atom maxVert = XInternAtom(fl_display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+		Atom maxHorz = XInternAtom(fl_display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+		for (unsigned long i = 0; i < numItems; i++) {
+			Atom property = ((Atom *)properties)[i];
+			if (property == maxVert || property == maxHorz) {
+				numMax++;
+			}
+		}
+		XFree(properties);
+	}
+	return numMax == 2;
 #endif
 }
 
@@ -677,7 +695,17 @@ void Main_Window::maximize() {
 #ifdef _WIN32
 	ShowWindow(fl_xid(this), SW_MAXIMIZE);
 #else
-	// TODO: set maximized state with Xlib
+	XEvent event;
+	memset(&event, 0, sizeof(event));
+	event.xclient.type = ClientMessage;
+	event.xclient.window = fl_xid(this);
+	event.xclient.message_type = XInternAtom(fl_display, "_NET_WM_STATE", False);
+	event.xclient.format = 32;
+	event.xclient.data.l[0] = 1;
+	event.xclient.data.l[1] = XInternAtom(fl_display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+	event.xclient.data.l[2] = XInternAtom(fl_display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+	event.xclient.data.l[3] = 1;
+	XSendEvent(fl_display, DefaultRootWindow(fl_display), False, SubstructureNotifyMask | SubstructureNotifyMask, &event);
 #endif
 }
 
@@ -1924,8 +1952,8 @@ void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 		Preferences::set("h", mw->_wh);
 		Preferences::set("fullscreen", 1);
 	}
-#ifdef _WIN32
 	else if (mw->maximized()) {
+#ifdef _WIN32
 		HWND hwnd = fl_xid(mw);
 		WINDOWPLACEMENT wp;
 		wp.length = sizeof(wp);
@@ -1952,9 +1980,14 @@ void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 			Preferences::set("w", mw->w());
 			Preferences::set("h", mw->h());
 		}
+#else
+		Preferences::set("x", mw->_wx);
+		Preferences::set("y", mw->_wy);
+		Preferences::set("w", mw->_ww);
+		Preferences::set("h", mw->_wh);
+#endif
 		Preferences::set("fullscreen", 0);
 	}
-#endif
 	else {
 		Preferences::set("x", mw->x());
 		Preferences::set("y", mw->y());
