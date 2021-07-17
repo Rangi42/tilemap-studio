@@ -24,6 +24,7 @@
 #include "input.xpm"
 #include "output.xpm"
 #include "resize.xpm"
+#include "shift.xpm"
 #include "reformat.xpm"
 #include "x-flip.xpm"
 #include "y-flip.xpm"
@@ -50,6 +51,7 @@ static Fl_Pixmap BOLD_ICON(BOLD_XPM);
 static Fl_Pixmap INPUT_ICON(INPUT_XPM);
 static Fl_Pixmap OUTPUT_ICON(OUTPUT_XPM);
 static Fl_Pixmap RESIZE_ICON(RESIZE_XPM);
+static Fl_Pixmap SHIFT_ICON(SHIFT_XPM);
 static Fl_Pixmap REFORMAT_ICON(REFORMAT_XPM);
 static Fl_Pixmap X_FLIP_ICON(X_FLIP_XPM);
 static Fl_Pixmap Y_FLIP_ICON(Y_FLIP_XPM);

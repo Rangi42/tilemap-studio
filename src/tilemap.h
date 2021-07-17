@@ -36,6 +36,8 @@ public:
 	inline size_t width(void) const { return _width; }
 	void width(size_t w);
 	void resize(size_t w, size_t h, Resize_Dialog::Hor_Align ha, Resize_Dialog::Vert_Align va);
+	void shift(int dx, int dy);
+	inline bool can_shift(void) const { return size() % _width == 0; }
 	inline size_t height(void) const { return (size() + _width - 1) / _width; }
 	inline Tile_Tessera *tile(size_t x, size_t y) const { return tile(y * _width + x); }
 	inline Tile_Tessera *tile(size_t i) const { return i < _tiles.size() ? _tiles[i] : NULL; }

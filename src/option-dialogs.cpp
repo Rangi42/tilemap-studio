@@ -480,6 +480,89 @@ void Resize_Dialog::anchor_button_cb(Anchor_Button *ab, Resize_Dialog *rd) {
 	rd->_dialog->redraw();
 }
 
+Shift_Dialog::Shift_Dialog(const char *t) : Option_Dialog(220, t), _shift_x(NULL), _shift_y(NULL), _slide_x(NULL), _slide_y(NULL) {}
+
+Shift_Dialog::~Shift_Dialog() {
+	delete _shift_x;
+	delete _shift_y;
+	delete _slide_x;
+	delete _slide_y;
+}
+
+void Shift_Dialog::limit_shift(int w, int h) {
+	initialize();
+	_shift_x->range(-w, w);
+	_shift_x->value(0);
+	_shift_y->range(-h, h);
+	_shift_y->value(0);
+	_slide_x->range(-w, w);
+	_slide_x->value(0);
+	_slide_y->range(-h, h);
+	_slide_y->value(0);
+}
+
+void Shift_Dialog::initialize_content() {
+	// Populate content group
+	_shift_x = new Default_Spinner(0, 0, 0, 0, "X:");
+	_shift_y = new Default_Spinner(0, 0, 0, 0, "Y:");
+	_slide_x = new Default_Slider(0, 0, 0, 0);
+	_slide_y = new Default_Slider(0, 0, 0, 0);
+	// Initialize content group's children
+	_shift_x->default_value(0);
+	_shift_x->callback((Fl_Callback *)shift_x_cb, this);
+	_shift_y->default_value(0);
+	_shift_y->callback((Fl_Callback *)shift_y_cb, this);
+	_slide_x->color(FL_BACKGROUND_COLOR);
+	_slide_x->step(1);
+	_slide_x->default_value(0);
+	_slide_x->callback((Fl_Callback *)slide_x_cb, this);
+	_slide_y->color(FL_BACKGROUND_COLOR);
+	_slide_y->step(1);
+	_slide_y->default_value(0);
+	_slide_y->callback((Fl_Callback *)slide_y_cb, this);
+}
+
+int Shift_Dialog::refresh_content(int ww, int dy) {
+	int wgt_h = 22, win_m = 10, wgt_m = 4;
+	int ch = wgt_h + wgt_m + wgt_h;
+	_content->resize(win_m, dy, ww, ch);
+
+	int wgt_off = win_m + std::max(text_width(_shift_x->label(), 2), text_width(_shift_y->label(), 2));
+	int wgt_w = text_width("9999", 2) + wgt_h / 2 + 4;
+	int dy2 = dy + wgt_h + wgt_m;
+	_shift_x->resize(wgt_off, dy, wgt_w, wgt_h);
+	_shift_y->resize(wgt_off, dy2, wgt_w, wgt_h);
+	wgt_off += wgt_w + 6;
+	wgt_w = ww + win_m - wgt_off;
+	double sw = (wgt_h / 2.0) / wgt_w;
+	_slide_x->resize(wgt_off, dy, wgt_w, wgt_h);
+	_slide_x->slider_size(sw);
+	_slide_y->resize(wgt_off, dy2, wgt_w, wgt_h);
+	_slide_y->slider_size(sw);
+
+	return ch;
+}
+
+void Shift_Dialog::shift_x_cb(Default_Spinner *, Shift_Dialog *sd) {
+	sd->_slide_x->value(sd->_shift_x->value());
+	sd->_slide_x->redraw();
+}
+
+void Shift_Dialog::shift_y_cb(Default_Spinner *, Shift_Dialog *sd) {
+	sd->_slide_y->value(sd->_shift_y->value());
+	sd->_slide_y->redraw();
+}
+
+void Shift_Dialog::slide_x_cb(Default_Slider *, Shift_Dialog *sd) {
+	sd->_shift_x->value(sd->_slide_x->value());
+	sd->_shift_x->redraw();
+}
+
+void Shift_Dialog::slide_y_cb(Default_Slider *, Shift_Dialog *sd) {
+	sd->_shift_y->value(sd->_slide_y->value());
+	sd->_shift_y->redraw();
+}
+
 Reformat_Dialog::Reformat_Dialog(const char *t) : Option_Dialog(280, t), _format_header(NULL), _format(NULL), _force(NULL) {}
 
 Reformat_Dialog::~Reformat_Dialog() {

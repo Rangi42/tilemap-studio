@@ -93,6 +93,26 @@ void Tilemap::resize(size_t w, size_t h, Resize_Dialog::Hor_Align ha, Resize_Dia
 	_modified = true;
 }
 
+void Tilemap::shift(int dx, int dy) {
+	if (!can_shift()) { return; }
+
+	size_t n = size();
+	std::vector<Tile_Tessera *> tiles;
+	tiles.reserve(n);
+
+	int w = (int)width(), h = (int)height();
+	for (int y = 0; y < h; y++) {
+		for (int x = 0; x < w; x++) {
+			tiles.emplace_back(tile((x + w - dx) % w, (y + h - dy) % h));
+		}
+	}
+
+	clear();
+	_tiles.swap(tiles);
+	width((size_t)w);
+	_modified = true;
+}
+
 void Tilemap::clear() {
 	_tiles.clear();
 	_width = 0;

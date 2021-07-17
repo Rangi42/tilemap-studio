@@ -160,6 +160,26 @@ private:
 	static void anchor_button_cb(Anchor_Button *ab, Resize_Dialog *rd);
 };
 
+class Shift_Dialog : public Option_Dialog {
+private:
+	Default_Spinner *_shift_x, *_shift_y;
+	Default_Slider *_slide_x, *_slide_y;
+public:
+	Shift_Dialog(const char *t);
+	~Shift_Dialog();
+	inline int shift_x(void) const { return (int)_shift_x->value(); }
+	inline int shift_y(void) const { return (int)_shift_y->value(); }
+	void limit_shift(int w, int h);
+protected:
+	void initialize_content(void);
+	int refresh_content(int ww, int dy);
+private:
+	static void shift_x_cb(Default_Spinner *d, Shift_Dialog *sd);
+	static void shift_y_cb(Default_Spinner *d, Shift_Dialog *sd);
+	static void slide_x_cb(Default_Slider *d, Shift_Dialog *sd);
+	static void slide_y_cb(Default_Slider *d, Shift_Dialog *sd);
+};
+
 class Reformat_Dialog : public Option_Dialog {
 private:
 	Label *_format_header;

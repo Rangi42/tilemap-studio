@@ -232,6 +232,9 @@
     <None Include="..\res\brushed-metal.dat">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\res\shift.xpm">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="tilemap-studio.rc">

@@ -179,6 +179,7 @@
     <None Include="..\res\reload.xpm" />
     <None Include="..\res\resize.xpm" />
     <None Include="..\res\save.xpm" />
+    <None Include="..\res\shift.xpm" />
     <None Include="..\res\success.xpm" />
     <None Include="..\res\undo.xpm" />
     <None Include="..\res\warning.xpm" />

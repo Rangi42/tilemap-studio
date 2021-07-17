@@ -3311,7 +3311,7 @@ static void use_high_contrast_colors() {
 	Fl::foreground(0xFF, 0xFF, 0xFF);
 	Fl::set_color(FL_INACTIVE_COLOR, 0x00, 0x20, 0x20);
 	Fl::set_color(FL_SELECTION_COLOR, 0x00, 0xFF, 0xFF);
-	Fl::set_color(OS_TAB_COLOR, 0x00, 0x80, 0x80);
+	Fl::set_color(OS_TAB_COLOR, 0x20, 0x20, 0x20);
 	Fl_Tooltip::color(fl_rgb_color(0x00, 0x00, 0x00));
 	Fl_Tooltip::textcolor(FL_FOREGROUND_COLOR);
 }
