@@ -23,6 +23,7 @@
 #include "bold.xpm"
 #include "input.xpm"
 #include "output.xpm"
+#include "tileset-width.xpm"
 #include "resize.xpm"
 #include "shift.xpm"
 #include "reformat.xpm"
@@ -50,6 +51,7 @@ static Fl_Pixmap RAINBOW_ICON(RAINBOW_XPM);
 static Fl_Pixmap BOLD_ICON(BOLD_XPM);
 static Fl_Pixmap INPUT_ICON(INPUT_XPM);
 static Fl_Pixmap OUTPUT_ICON(OUTPUT_XPM);
+static Fl_Pixmap TILESET_WIDTH_ICON(TILESET_WIDTH_XPM);
 static Fl_Pixmap RESIZE_ICON(RESIZE_XPM);
 static Fl_Pixmap SHIFT_ICON(SHIFT_XPM);
 static Fl_Pixmap REFORMAT_ICON(REFORMAT_XPM);

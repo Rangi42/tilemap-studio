@@ -99,6 +99,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_rainbow_tiles_tb = new Toolbar_Toggle_Button(0, 0, 24, 24);
 	_bold_palettes_tb = new Toolbar_Toggle_Button(0, 0, 24, 24);
 	new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
+	_tileset_width_tb = new Toolbar_Button(0, 0, 24, 24);
+	new Fl_Box(0, 0, 4, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
 	int wgt_w = text_width("Width:", 4);
 	_width_heading = new Label(0, 0, wgt_w, 24, "Width:");
 	wgt_w = text_width("9999", 2) + 15;
@@ -497,6 +499,10 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_bold_palettes_tb->callback((Fl_Callback *)bold_palettes_tb_cb, this);
 	_bold_palettes_tb->image(BOLD_ICON);
 	_bold_palettes_tb->value(Config::bold_palettes());
+
+	_tileset_width_tb->tooltip("Tileset Width... (Ctrl+H)");
+	_tileset_width_tb->callback((Fl_Callback *)tileset_width_cb, this);
+	_tileset_width_tb->image(TILESET_WIDTH_ICON);
 
 	_width_heading->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 

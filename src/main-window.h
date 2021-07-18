@@ -48,6 +48,7 @@ private:
 	Toolbar_Button *_new_tb, *_open_tb, *_save_tb, *_print_tb, *_load_tb, *_add_tb, *_reload_tb, *_undo_tb, *_redo_tb,
 		*_zoom_in_tb, *_zoom_out_tb;
 	Toolbar_Toggle_Button *_grid_tb, *_rainbow_tiles_tb, *_bold_palettes_tb;
+	Toolbar_Button *_tileset_width_tb;
 	Default_Spinner *_tilemap_width;
 	Toolbar_Button *_resize_tb, *_shift_tb, *_reformat_tb;
 	Toolbar_Button *_image_to_tiles_tb;

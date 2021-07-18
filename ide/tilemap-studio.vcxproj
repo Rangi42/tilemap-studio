@@ -181,6 +181,7 @@
     <None Include="..\res\save.xpm" />
     <None Include="..\res\shift.xpm" />
     <None Include="..\res\success.xpm" />
+    <None Include="..\res\tileset-width.xpm" />
     <None Include="..\res\undo.xpm" />
     <None Include="..\res\warning.xpm" />
     <None Include="..\res\x-flip.xpm" />
