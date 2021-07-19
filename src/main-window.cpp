@@ -2228,6 +2228,7 @@ void Main_Window::full_screen_cb(Fl_Menu_ *m, Main_Window *mw) {
 
 void Main_Window::tilemap_width_cb(Fl_Menu_ *, Main_Window *mw) {
 	mw->_tilemap_width_dialog->group_width((size_t)mw->_tilemap_width->value());
+	mw->_tilemap_width_dialog->default_group_width((size_t)mw->_tilemap_width->value());
 	mw->_tilemap_width_dialog->show(mw);
 	if (mw->_tilemap_width_dialog->canceled()) { return; }
 	mw->_tilemap_width->default_value(mw->_tilemap_width_dialog->group_width());
@@ -2260,6 +2261,7 @@ void Main_Window::reformat_cb(Fl_Menu_ *, Main_Window *mw) {
 
 void Main_Window::tileset_width_cb(Fl_Widget *, Main_Window *mw) {
 	mw->_tileset_width_dialog->group_width((size_t)mw->_tileset_width);
+	mw->_tileset_width_dialog->limit_group_width((size_t)format_tileset_size(Config::format()));
 	mw->_tileset_width_dialog->show(mw);
 	if (mw->_tileset_width_dialog->canceled()) { return; }
 	int tw = (int)mw->_tileset_width_dialog->group_width();
@@ -2359,7 +2361,6 @@ void Main_Window::change_tab_cb(OS_Tabs *, Main_Window *mw) {
 }
 
 void Main_Window::select_tile_cb(Tile_Button *tb, Main_Window *mw) {
-	//fprintf(stderr, "callback %d\n", tb->id());//DEBUG
 	if (Fl::event_button() == FL_LEFT_MOUSE) {
 		// Left-click to select
 		mw->select_tile(tb->id());

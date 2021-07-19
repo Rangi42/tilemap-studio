@@ -671,9 +671,10 @@ Group_Width_Dialog::~Group_Width_Dialog() {
 
 void Group_Width_Dialog::initialize_content() {
 	// Populate content group
-	_group_width = new OS_Spinner(0, 0, 0, 0, "Width:");
+	_group_width = new Default_Spinner(0, 0, 0, 0, "Width:");
 	// Initialize content group's children
 	_group_width->align(FL_ALIGN_LEFT);
+	_group_width->default_value(16);
 	_group_width->range(1, 1024);
 }
 

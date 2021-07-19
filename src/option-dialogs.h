@@ -215,12 +215,14 @@ protected:
 
 class Group_Width_Dialog : public Option_Dialog {
 private:
-	OS_Spinner *_group_width;
+	Default_Spinner *_group_width;
 public:
 	Group_Width_Dialog(const char *t);
 	~Group_Width_Dialog();
 	inline size_t group_width(void) const { return (size_t)_group_width->value(); }
 	inline void group_width(size_t n) { initialize(); _group_width->value((double)n); }
+	inline void default_group_width(size_t n) { initialize(); _group_width->default_value((double)n); }
+	inline void limit_group_width(size_t n) { initialize(); _group_width->range(1, (double)n); }
 protected:
 	void initialize_content(void);
 	int refresh_content(int ww, int dy);
