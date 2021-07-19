@@ -48,7 +48,7 @@ private:
 	Toolbar_Button *_new_tb, *_open_tb, *_save_tb, *_print_tb, *_load_tb, *_add_tb, *_reload_tb, *_undo_tb, *_redo_tb,
 		*_zoom_in_tb, *_zoom_out_tb;
 	Toolbar_Toggle_Button *_grid_tb, *_rainbow_tiles_tb, *_bold_palettes_tb;
-	Toolbar_Button *_tileset_width_tb;
+	Toolbar_Button *_tileset_width_tb, *_shift_tileset_tb;
 	Default_Spinner *_tilemap_width;
 	Toolbar_Button *_resize_tb, *_shift_tb, *_reformat_tb;
 	Toolbar_Button *_image_to_tiles_tb;
@@ -65,7 +65,7 @@ private:
 	Fl_Menu_Item *_reload_tilesets_mi = NULL, *_unload_tilesets_mi = NULL;
 	Fl_Menu_Item *_undo_mi = NULL, *_redo_mi = NULL;
 	Fl_Menu_Item *_zoom_in_mi = NULL, *_zoom_out_mi = NULL;
-	Fl_Menu_Item *_tilemap_width_mi = NULL, *_resize_mi = NULL, *_shift_mi = NULL, *_reformat_mi = NULL;
+	Fl_Menu_Item *_shift_tileset_mi = NULL, *_tilemap_width_mi = NULL, *_resize_mi = NULL, *_shift_mi = NULL, *_reformat_mi = NULL;
 	// Dialogs
 	Fl_Native_File_Chooser *_tilemap_open_chooser, *_tilemap_save_chooser, *_tileset_load_chooser, *_image_print_chooser;
 	Modal_Dialog *_error_dialog, *_warning_dialog, *_success_dialog, *_unsaved_dialog, *_about_dialog;
@@ -75,6 +75,7 @@ private:
 	Print_Options_Dialog *_print_options_dialog;
 	Resize_Dialog *_resize_dialog;
 	Shift_Dialog *_shift_dialog;
+	Shift_Tileset_Dialog *_shift_tileset_dialog;
 	Reformat_Dialog *_reformat_dialog;
 	Add_Tileset_Dialog *_add_tileset_dialog;
 	Image_To_Tiles_Dialog *_image_to_tiles_dialog;
@@ -146,6 +147,7 @@ private:
 	void update_tileset_width(int tw);
 	void resize_tilemap(void);
 	void shift_tilemap(void);
+	void shift_tileset(void);
 	void reformat_tilemap(void);
 	bool save_tilemap(bool force);
 	void select_tile(uint16_t id);
@@ -198,7 +200,8 @@ private:
 	static void rainbow_tiles_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void bold_palettes_cb(Fl_Menu_ *m, Main_Window *mw);
 	// Tools menu
-	static void tileset_width_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void tileset_width_cb(Fl_Widget *w, Main_Window *mw);
+	static void shift_tileset_cb(Fl_Widget *w, Main_Window *mw);
 	static void tilemap_width_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void resize_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void shift_cb(Fl_Menu_ *m, Main_Window *mw);

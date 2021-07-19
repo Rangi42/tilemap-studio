@@ -114,7 +114,13 @@ int Hex_Spinner::handle(int event) {
 
 void Hex_Spinner::update() {
 	char s[255] = {};
-	sprintf(s, _format, _value);
+	if (_value < 0) {
+		s[0] = '-';
+		sprintf(s + 1, _format, -_value);
+	}
+	else {
+		sprintf(s, _format, _value);
+	}
 	_input.value(s);
 }
 

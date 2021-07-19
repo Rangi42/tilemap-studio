@@ -36,6 +36,10 @@ void Tileset::update_zoom() {
 	_zoomed_image = (Fl_RGB_Image *)_1x_image->copy(_1x_image->w() * z, _1x_image->h() * z);
 }
 
+void Tileset::shift(int dn) {
+	_start_id += dn;
+}
+
 bool Tileset::draw_tile(const Tile_State *ts, int x, int y, int z, bool active) const {
 	int index = (int)ts->id - _start_id + _offset;
 	int limit = (int)_num_tiles;

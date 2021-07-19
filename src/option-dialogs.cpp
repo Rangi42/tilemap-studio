@@ -563,6 +563,60 @@ void Shift_Dialog::slide_y_cb(Default_Slider *, Shift_Dialog *sd) {
 	sd->_shift_y->redraw();
 }
 
+Shift_Tileset_Dialog::Shift_Tileset_Dialog(const char *t) : Option_Dialog(220, t), _shift(NULL), _slide(NULL) {}
+
+Shift_Tileset_Dialog::~Shift_Tileset_Dialog() {
+	delete _shift;
+	delete _slide;
+}
+
+void Shift_Tileset_Dialog::limit_shift(int n) {
+	initialize();
+	_shift->range(-n, n);
+	_shift->value(0);
+	_slide->range(-n, n);
+	_slide->value(0);
+}
+
+void Shift_Tileset_Dialog::initialize_content() {
+	// Populate content group
+	_shift = new Default_Hex_Spinner(0, 0, 0, 0, "Shift: $");
+	_slide = new Default_Slider(0, 0, 0, 0);
+	// Initialize content group's children
+	_shift->format("%X");
+	_shift->default_value(0);
+	_shift->callback((Fl_Callback *)shift_cb, this);
+	_slide->color(FL_BACKGROUND_COLOR);
+	_slide->step(1);
+	_slide->default_value(0);
+	_slide->callback((Fl_Callback *)slide_cb, this);
+}
+
+int Shift_Tileset_Dialog::refresh_content(int ww, int dy) {
+	int wgt_h = 22, win_m = 10;
+	_content->resize(win_m, dy, ww, wgt_h);
+
+	int wgt_off = win_m + text_width(_shift->label(), 2);
+	int wgt_w = std::max(text_width("-AAA", 2), text_width("-FFF", 2)) + wgt_h / 2 + 4;
+	_shift->resize(wgt_off, dy, wgt_w, wgt_h);
+	wgt_off += wgt_w + 6;
+	wgt_w = ww + win_m - wgt_off;
+	_slide->resize(wgt_off, dy, wgt_w, wgt_h);
+	_slide->slider_size((wgt_h / 2.0) / wgt_w);
+
+	return wgt_h;
+}
+
+void Shift_Tileset_Dialog::shift_cb(Default_Hex_Spinner *, Shift_Tileset_Dialog *sd) {
+	sd->_slide->value(sd->_shift->value());
+	sd->_slide->redraw();
+}
+
+void Shift_Tileset_Dialog::slide_cb(Default_Slider *, Shift_Tileset_Dialog *sd) {
+	sd->_shift->value((int)sd->_slide->value());
+	sd->_shift->redraw();
+}
+
 Reformat_Dialog::Reformat_Dialog(const char *t) : Option_Dialog(280, t), _format_header(NULL), _format(NULL), _force(NULL) {}
 
 Reformat_Dialog::~Reformat_Dialog() {

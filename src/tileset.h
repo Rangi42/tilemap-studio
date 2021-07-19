@@ -41,6 +41,7 @@ public:
 	inline Result result(void) const { return _result; }
 	void clear(void);
 	void update_zoom(void);
+	void shift(int dn);
 	bool draw_tile(const Tile_State *ts, int x, int y, int z, bool active) const;
 	bool print_tile(const Tile_State *ts, int x, int y, bool active) const;
 	Result read_tiles(const char *f);

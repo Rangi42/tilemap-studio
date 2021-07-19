@@ -180,6 +180,23 @@ private:
 	static void slide_y_cb(Default_Slider *d, Shift_Dialog *sd);
 };
 
+class Shift_Tileset_Dialog : public Option_Dialog {
+private:
+	Default_Hex_Spinner *_shift;
+	Default_Slider *_slide;
+public:
+	Shift_Tileset_Dialog(const char *t);
+	~Shift_Tileset_Dialog();
+	inline int shift(void) const { return (int)_shift->value(); }
+	void limit_shift(int n);
+protected:
+	void initialize_content(void);
+	int refresh_content(int ww, int dy);
+private:
+	static void shift_cb(Default_Hex_Spinner *d, Shift_Tileset_Dialog *sd);
+	static void slide_cb(Default_Slider *d, Shift_Tileset_Dialog *sd);
+};
+
 class Reformat_Dialog : public Option_Dialog {
 private:
 	Label *_format_header;
