@@ -98,9 +98,6 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_grid_tb = new Toolbar_Toggle_Button(0, 0, 24, 24);
 	_rainbow_tiles_tb = new Toolbar_Toggle_Button(0, 0, 24, 24);
 	_bold_palettes_tb = new Toolbar_Toggle_Button(0, 0, 24, 24);
-	new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
-	_tileset_width_tb = new Toolbar_Button(0, 0, 24, 24);
-	_shift_tileset_tb = new Toolbar_Button(0, 0, 24, 24);
 	new Fl_Box(0, 0, 4, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
 	int wgt_w = text_width("Width:", 4);
 	_width_heading = new Label(0, 0, wgt_w, 24, "Width:");
@@ -110,6 +107,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_resize_tb = new Toolbar_Button(0, 0, 24, 24);
 	_shift_tb = new Toolbar_Button(0, 0, 24, 24);
 	_reformat_tb = new Toolbar_Button(0, 0, 24, 24);
+	new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
+	_tileset_width_tb = new Toolbar_Button(0, 0, 24, 24);
+	_shift_tileset_tb = new Toolbar_Button(0, 0, 24, 24);
 	new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
 	_image_to_tiles_tb = new Toolbar_Button(0, 0, 24, 24);
 	_toolbar->end();
@@ -367,12 +367,12 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 			FL_MENU_TOGGLE | (fullscreen ? FL_MENU_VALUE : 0)),
 		{},
 		OS_SUBMENU("&Tools"),
-		OS_MENU_ITEM("&Tileset Width...", FL_COMMAND + 'h', (Fl_Callback *)tileset_width_cb, this, 0),
-		OS_MENU_ITEM("Shift Ti&leset...", FL_COMMAND + 'k', (Fl_Callback *)shift_tileset_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("Tilemap &Width...", FL_COMMAND + 'd', (Fl_Callback *)tilemap_width_cb, this, 0),
 		OS_MENU_ITEM("Re&size...", FL_COMMAND + 'e', (Fl_Callback *)resize_cb, this, 0),
 		OS_MENU_ITEM("S&hift...", FL_COMMAND + 'm', (Fl_Callback *)shift_cb, this, 0),
 		OS_MENU_ITEM("Re&format...", FL_COMMAND + 'f', (Fl_Callback *)reformat_cb, this, FL_MENU_DIVIDER),
+		OS_MENU_ITEM("&Tileset Width...", FL_COMMAND + 'h', (Fl_Callback *)tileset_width_cb, this, 0),
+		OS_MENU_ITEM("Shift Ti&leset...", FL_COMMAND + 'k', (Fl_Callback *)shift_tileset_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&Image to Tiles...", FL_COMMAND + 'x', (Fl_Callback *)image_to_tiles_cb, this, 0),
 		{},
 		OS_SUBMENU("&Help"),
@@ -504,14 +504,6 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_bold_palettes_tb->image(BOLD_ICON);
 	_bold_palettes_tb->value(Config::bold_palettes());
 
-	_tileset_width_tb->tooltip("Tileset Width... (Ctrl+H)");
-	_tileset_width_tb->callback((Fl_Callback *)tileset_width_cb, this);
-	_tileset_width_tb->image(TILESET_WIDTH_ICON);
-
-	_shift_tileset_tb->tooltip("Shift Tileset... (Ctrl+K)");
-	_shift_tileset_tb->callback((Fl_Callback *)shift_tileset_cb, this);
-	_shift_tileset_tb->image(SHIFT_TILESET_ICON);
-
 	_width_heading->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 
 	_tilemap_width->default_value(GAME_BOY_WIDTH);
@@ -529,6 +521,14 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_reformat_tb->tooltip("Reformat... (Ctrl+F)");
 	_reformat_tb->callback((Fl_Callback *)reformat_cb, this);
 	_reformat_tb->image(REFORMAT_ICON);
+
+	_tileset_width_tb->tooltip("Tileset Width... (Ctrl+H)");
+	_tileset_width_tb->callback((Fl_Callback *)tileset_width_cb, this);
+	_tileset_width_tb->image(TILESET_WIDTH_ICON);
+
+	_shift_tileset_tb->tooltip("Shift Tileset... (Ctrl+K)");
+	_shift_tileset_tb->callback((Fl_Callback *)shift_tileset_cb, this);
+	_shift_tileset_tb->image(SHIFT_TILESET_ICON);
 
 	_image_to_tiles_tb->tooltip("Image to Tiles... (Ctrl+X)");
 	_image_to_tiles_tb->callback((Fl_Callback *)image_to_tiles_cb, this);
@@ -2226,28 +2226,6 @@ void Main_Window::full_screen_cb(Fl_Menu_ *m, Main_Window *mw) {
 	}
 }
 
-void Main_Window::tileset_width_cb(Fl_Widget *, Main_Window *mw) {
-	mw->_tileset_width_dialog->group_width((size_t)mw->_tileset_width);
-	mw->_tileset_width_dialog->show(mw);
-	if (mw->_tileset_width_dialog->canceled()) { return; }
-	int tw = (int)mw->_tileset_width_dialog->group_width();
-	if (tw == mw->_tileset_width) { return; }
-	if (mw->_selection.selected_multiple() && mw->_selection.from_tileset()) {
-		mw->select_tile(mw->_selection.id());
-	}
-	mw->update_tileset_width(tw);
-	mw->update_active_controls();
-	mw->redraw();
-}
-
-void Main_Window::shift_tileset_cb(Fl_Widget *, Main_Window *mw) {
-	int n = format_tileset_size(Config::format());
-	mw->_shift_tileset_dialog->limit_shift(n);
-	mw->_shift_tileset_dialog->show(mw);
-	if (mw->_shift_tileset_dialog->canceled()) { return; }
-	mw->shift_tileset();
-}
-
 void Main_Window::tilemap_width_cb(Fl_Menu_ *, Main_Window *mw) {
 	mw->_tilemap_width_dialog->group_width((size_t)mw->_tilemap_width->value());
 	mw->_tilemap_width_dialog->show(mw);
@@ -2278,6 +2256,28 @@ void Main_Window::reformat_cb(Fl_Menu_ *, Main_Window *mw) {
 	mw->_reformat_dialog->show(mw);
 	if (mw->_reformat_dialog->canceled()) { return; }
 	mw->reformat_tilemap();
+}
+
+void Main_Window::tileset_width_cb(Fl_Widget *, Main_Window *mw) {
+	mw->_tileset_width_dialog->group_width((size_t)mw->_tileset_width);
+	mw->_tileset_width_dialog->show(mw);
+	if (mw->_tileset_width_dialog->canceled()) { return; }
+	int tw = (int)mw->_tileset_width_dialog->group_width();
+	if (tw == mw->_tileset_width) { return; }
+	if (mw->_selection.selected_multiple() && mw->_selection.from_tileset()) {
+		mw->select_tile(mw->_selection.id());
+	}
+	mw->update_tileset_width(tw);
+	mw->update_active_controls();
+	mw->redraw();
+}
+
+void Main_Window::shift_tileset_cb(Fl_Widget *, Main_Window *mw) {
+	int n = format_tileset_size(Config::format());
+	mw->_shift_tileset_dialog->limit_shift(n);
+	mw->_shift_tileset_dialog->show(mw);
+	if (mw->_shift_tileset_dialog->canceled()) { return; }
+	mw->shift_tileset();
 }
 
 void Main_Window::image_to_tiles_cb(Fl_Widget *, Main_Window *mw) {
