@@ -952,8 +952,8 @@ Image_To_Tiles_Dialog::Palette_Format Image_To_Tiles_Dialog::default_palette_for
 
 void Image_To_Tiles_Dialog::initialize_content() {
 	// Populate content group
-	_tileset_heading = new Label(0, 0, 0, 0, "Tileset:");
-	_tilemap_heading = new Label(0, 0, 0, 0, "Tilemap:");
+	_tileset_heading = new Label(0, 0, 0, 0, "Tileset");
+	_tilemap_heading = new Label(0, 0, 0, 0, "Tilemap");
 	_tileset_spacer = new Spacer(0, 0, 0, 0);
 	_tilemap_spacer = new Spacer(0, 0, 0, 0);
 	_palette_spacer = new Spacer(0, 0, 0, 0);
@@ -968,7 +968,7 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_start_id = new Default_Hex_Spinner(0, 0, 0, 0, "Start at ID: $");
 	_use_space = new OS_Check_Button(0, 0, 0, 0, "Blank Spaces Use ID: ");
 	_space_id = new Default_Hex_Spinner(0, 0, 0, 0, "$");
-	_palette = new OS_Check_Button(0, 0, 0, 0, "Palette:");
+	_palette = new OS_Check_Button(0, 0, 0, 0, "Palette");
 	_palette_name = new Label(0, 0, 0, 0, "Output: " NO_FILES_DETERMINED_LABEL);
 	_palette_format = new Dropdown(0, 0, 0, 0, "Format:");
 	_start_index_label = new Label(0, 0, 0, 0, "Start at Palette:");
@@ -1024,8 +1024,8 @@ void Image_To_Tiles_Dialog::initialize_content() {
 }
 
 int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
-	int wgt_h = 22, win_m = 10, wgt_m = 4;
-	int ch = (wgt_h + wgt_m) * 10 + wgt_h;
+	int wgt_h = 22, win_m = 10, wgt_m = 4, grp_m = 6;
+	int ch = (wgt_h + wgt_m) * 10 + grp_m * 2 + wgt_h;
 	_content->resize(win_m, dy, ww, ch);
 
 	int wgt_w = text_width(_tileset_heading->label(), 4);
@@ -1050,7 +1050,7 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	_tileset->resize(wgt_off, dy, wgt_h, wgt_h);
 	wgt_off += _tileset->w();
 	_tileset_name->resize(wgt_off, dy, ww-wgt_w-wgt_h, wgt_h);
-	dy += wgt_h + wgt_m;
+	dy += wgt_h + wgt_m + grp_m;
 
 	wgt_w = text_width(_tilemap_heading->label(), 4);
 	wgt_off = win_m;
@@ -1076,7 +1076,7 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	wgt_off += _use_space->w() + text_width(_space_id->label(), 1);
 	wgt_w = std::max(text_width("AAA", 2), text_width("FFF", 2)) + wgt_h / 2 + 4;
 	_space_id->resize(wgt_off, dy, wgt_w, wgt_h);
-	dy += wgt_h + wgt_m;
+	dy += wgt_h + wgt_m + grp_m;
 
 	wgt_w = _palette->labelsize() + 4 + text_width(_palette->label(), 3);
 	wgt_off = win_m;
