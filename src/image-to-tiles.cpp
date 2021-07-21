@@ -212,10 +212,11 @@ static bool write_tilepal(const char *f, const std::vector<size_t> &tileset, con
 	if (!file) { return false; }
 
 	fputs("pertilepals: MACRO\nrept _NARG / 2\n\tdn \\2, \\1\n\tshift\n\tshift\nendr\nENDM\n", file);
+	size_t nc = 16;
 	size_t nt = tileset.size();
-	size_t np = std::max(nt, (size_t)(16 * 3));
+	size_t np = std::max(nt, (size_t)(nc * 3));
 	for (size_t i = 0; i < np; i++) {
-		if (!(i % 16)) {
+		if (!(i % nc)) {
 			fputs("\n\tpertilepals ", file);
 		}
 		if (i < nt) {
@@ -226,7 +227,7 @@ static bool write_tilepal(const char *f, const std::vector<size_t> &tileset, con
 		else {
 			fputc('0', file);
 		}
-		if (i < np - 1 && i % 16 != 15) {
+		if (i < np - 1 && i % nc != nc - 1) {
 			fputs(", ", file);
 		}
 	}
