@@ -1349,24 +1349,63 @@ void Main_Window::flood_fill(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
 	Tile_State ts(tile_id(), x_flip(), y_flip(), priority(), obp1(), palette());
 	bool a = Config::show_attributes();
-	if (fs.same(ts, a)) { return; }
-	std::queue<size_t> queue;
+	bool mf = _selection.selected_multiple() && !(a && _selection.from_tileset());
+	if (!mf && fs.same(ts, a)) { return; }
 	size_t w = _tilemap.width(), h = _tilemap.height(), n = _tilemap.size();
+	std::vector<bool> filled(n, false);
+	std::queue<size_t> queue;
 	size_t row = tt->row(), col = tt->col();
-	size_t i = row * w + col;
-	queue.push(i);
+	queue.push(row * w + col);
 	while (!queue.empty()) {
-		size_t j = queue.front();
+		size_t i = queue.front();
 		queue.pop();
-		if (j >= n) { continue; }
-		Tile_Tessera *ff = _tilemap.tile(j);
-		if (!ff->state().same(fs, a)) { continue; }
-		ff->assign(ts, a); // fill
+		if (i >= n) { continue; }
+		Tile_Tessera *ff = _tilemap.tile(i);
 		size_t r = ff->row(), c = ff->col();
-		if (c > 0) { queue.push(j-1); } // left
-		if (c < w - 1) { queue.push(j+1); } // right
-		if (r > 0) { queue.push(j-w); } // up
-		if (r < h - 1) { queue.push(j+w); } // down
+		if (!ff->state().same(fs, a) || filled[i]) { continue; }
+		if (!mf) { ff->assign(ts, a); } // fill
+		filled[i] = true;
+		if (c > 0) { queue.push(i-1); } // left
+		if (c < w - 1) { queue.push(i+1); } // right
+		if (r > 0) { queue.push(i-w); } // up
+		if (r < h - 1) { queue.push(i+w); } // down
+	}
+	if (mf) {
+		bool fts = _selection.from_tileset();
+		size_t ow = _selection.width(), oh = _selection.height();
+		size_t ox = _selection.left_col(), oy = _selection.top_row();
+		size_t tw = fts ? (size_t)tileset_width() : _tilemap.width();
+		size_t tn = (size_t)format_tileset_size(Config::format());
+		const Tilemap_State &tms = _tilemap.last_state();
+		for (size_t i = 0; i < n; i++) {
+			if (!filled[i]) { continue; }
+			Tile_Tessera *tti = _tilemap.tile(i);
+			size_t ix = tti->col();
+			while (ix < col) { ix += ow; }
+			ix = (ix - col) % ow;
+			size_t iy = tti->row();
+			while (iy < row) { iy += oh; }
+			iy = (iy - row) % oh;
+			size_t dx = x_flip() ? ow - ix - 1 : ix;
+			size_t dy = y_flip() ? oh - iy - 1 : iy;
+			size_t index = (oy + dy) * tw + ox + dx;
+			if (index >= (fts ? tn : n)) { continue; }
+			if (fts) {
+				ts.id = (uint16_t)index;
+			}
+			else {
+				ts = tms.state(index);
+				if (!a) {
+					if (x_flip()) { ts.x_flip = !ts.x_flip; }
+					if (y_flip()) { ts.y_flip = !ts.y_flip; }
+				}
+				else {
+					if (priority()) { ts.priority = true; }
+					if (obp1()) { ts.obp1 = true; }
+				}
+			}
+			tti->assign(ts, a);
+		}
 	}
 	_tilemap_scroll->redraw();
 	_tilemap.modified(true);
