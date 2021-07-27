@@ -33,7 +33,6 @@ bool starts_with(std::string_view s, std::string_view p);
 bool ends_with(std::string_view s, std::string_view p);
 bool ends_with(std::wstring_view s, std::wstring_view p);
 void trim(std::string &s, const std::string &t = whitespace);
-void remove_comment(std::string &s, char c = ';');
 void remove_dot_ext(const char *f, char *s);
 void add_dot_ext(const char *f, const char *ext, char *s);
 int text_width(const char *l, int pad);

@@ -30,13 +30,6 @@ void trim(std::string &s, const std::string &t) {
 	s.erase(p + 1);
 }
 
-void remove_comment(std::string &s, char c) {
-	size_t p = s.find(c);
-	if (p != std::string::npos) {
-		s.erase(p);
-	}
-}
-
 void remove_dot_ext(const char *f, char *s) {
 	strcpy(s, fl_filename_name(f));
 	char *dot = strchr(s, '.');
