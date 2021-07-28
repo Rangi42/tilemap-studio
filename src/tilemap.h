@@ -42,7 +42,6 @@ public:
 	inline Tile_Tessera *tile(size_t x, size_t y) const { return tile(y * _width + x); }
 	inline Tile_Tessera *tile(size_t i) const { return i < _tiles.size() ? _tiles[i] : NULL; }
 	inline void tile(size_t x, size_t y, Tile_Tessera *tt) { _tiles[y * _width + x] = tt; }
-	inline void tile(size_t i, Tile_Tessera *tt) { _tiles[i] = tt; }
 	inline Result result(void) const { return _result; }
 	inline bool modified(void) const { return _modified; }
 	inline void modified(bool m) { _modified = m; }

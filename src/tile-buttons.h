@@ -73,6 +73,9 @@ public:
 	inline void assign(const Tile_State &state, bool attr) {
 		if (attr) { attributes(state); } else { tile(state); }
 	}
+	inline void replace(const Tile_State &state, bool attr) {
+		attributes(state); if (!attr) { tile(state); }
+	}
 	inline uint16_t id(void) const { return _state.id; }
 	inline void id(uint16_t id) { _state.id = id; }
 	inline bool x_flip(void) const { return _state.x_flip; }

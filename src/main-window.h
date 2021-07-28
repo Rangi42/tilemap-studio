@@ -64,6 +64,7 @@ private:
 	Fl_Menu_Item *_close_mi = NULL, *_save_mi = NULL, *_save_as_mi = NULL, *_print_mi = NULL;
 	Fl_Menu_Item *_reload_tilesets_mi = NULL, *_unload_tilesets_mi = NULL;
 	Fl_Menu_Item *_undo_mi = NULL, *_redo_mi = NULL;
+	Fl_Menu_Item *_erase_selection_mi = NULL, *_x_flip_selection_mi = NULL, *_y_flip_selection_mi = NULL, *_select_all_mi = NULL;
 	Fl_Menu_Item *_zoom_in_mi = NULL, *_zoom_out_mi = NULL;
 	Fl_Menu_Item *_tilemap_width_mi = NULL, *_resize_mi = NULL, *_shift_mi = NULL, *_reformat_mi = NULL;
 	Fl_Menu_Item *_shift_tileset_mi = NULL;
@@ -125,11 +126,16 @@ public:
 	void update_icons(void);
 	void update_zoom(int old_zoom);
 	void update_selection_status(void);
+	void update_selection_controls(void);
 	void update_status(Tile_Tessera *tt);
-	void edit_tile(Tile_Tessera *tt);
+	void edit_tile(Tile_Tessera *tt, bool remember);
 	void flood_fill(Tile_Tessera *tt);
 	void substitute_tile(Tile_Tessera *tt);
 	void swap_tiles(Tile_Tessera *tt);
+	void erase_selection(void);
+	void x_flip_selection(void);
+	void y_flip_selection(void);
+	void select_all(void);
 	inline void new_tilemap(size_t width, size_t height) { open_tilemap(NULL, width, height); }
 	void open_tilemap(const char *filename, size_t width = 0, size_t height = 0);
 	void open_recent_tilemap(int n);
@@ -181,6 +187,10 @@ private:
 	// Edit menu
 	static void undo_cb(Fl_Widget *w, Main_Window *mw);
 	static void redo_cb(Fl_Widget *w, Main_Window *mw);
+	static void erase_selection_cb(Fl_Widget *w, Main_Window *mw);
+	static void x_flip_selection_cb(Fl_Widget *w, Main_Window *mw);
+	static void y_flip_selection_cb(Fl_Widget *w, Main_Window *mw);
+	static void select_all_cb(Fl_Widget *w, Main_Window *mw);
 	// View menu
 	static void classic_theme_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void aero_theme_cb(Fl_Menu_ *m, Main_Window *mw);

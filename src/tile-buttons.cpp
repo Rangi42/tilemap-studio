@@ -375,6 +375,7 @@ int Tile_Tessera::handle(int event) {
 			}
 			else {
 				ts.finish_selecting();
+				mw->update_selection_controls();
 			}
 		}
 		if ((Fl::event_button1() || Fl::event_button3()) && !Fl::pushed()) {
@@ -408,6 +409,7 @@ int Tile_Tessera::handle(int event) {
 				mw->clear_flips();
 			}
 			mw->update_selection_status();
+			mw->update_selection_controls();
 		}
 		return 1;
 	case FL_DRAG:
@@ -487,6 +489,7 @@ int Tile_Button::handle(int event) {
 			}
 			else {
 				ts.finish_selecting();
+				mw->update_selection_controls();
 			}
 		}
 		if ((Fl::event_button1() || Fl::event_button3()) && !Fl::pushed()) {
@@ -532,6 +535,7 @@ int Tile_Button::handle(int event) {
 		if (ts.selecting() && ts.from_tileset()) {
 			ts.finish_selecting();
 			mw->update_selection_status();
+			mw->update_selection_controls();
 		}
 		return 1;
 	case FL_DRAG:

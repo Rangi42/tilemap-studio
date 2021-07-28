@@ -303,7 +303,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		{},
 		OS_SUBMENU("Tile&set"),
 		OS_MENU_ITEM("&Load...", FL_COMMAND + 't', (Fl_Callback *)load_tileset_cb, this, 0),
-		OS_MENU_ITEM("&Add...", FL_COMMAND + 'a', (Fl_Callback *)add_tileset_cb, this, 0),
+		OS_MENU_ITEM("&Add...", FL_COMMAND + 'T', (Fl_Callback *)add_tileset_cb, this, 0),
 		OS_MENU_ITEM("R&eload", FL_COMMAND + 'r', (Fl_Callback *)reload_tilesets_cb, this, 0),
 		OS_MENU_ITEM("Load &Recent", 0, NULL, NULL, FL_SUBMENU),
 		// NUM_RECENT items with callback load_recent_tileset_cb
@@ -325,7 +325,11 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		{},
 		OS_SUBMENU("&Edit"),
 		OS_MENU_ITEM("&Undo", FL_COMMAND + 'z', (Fl_Callback *)undo_cb, this, 0),
-		OS_MENU_ITEM("&Redo", FL_COMMAND + 'y', (Fl_Callback *)redo_cb, this, 0),
+		OS_MENU_ITEM("&Redo", FL_COMMAND + 'y', (Fl_Callback *)redo_cb, this, FL_MENU_DIVIDER),
+		OS_MENU_ITEM("&Erase Selection", FL_Delete, (Fl_Callback *)erase_selection_cb, this, 0),
+		OS_MENU_ITEM("&X-Flip Selection", FL_COMMAND + 'X', (Fl_Callback *)x_flip_selection_cb, this, 0),
+		OS_MENU_ITEM("&Y-Flip Selection", FL_COMMAND + 'Y', (Fl_Callback *)y_flip_selection_cb, this, 0),
+		OS_MENU_ITEM("&Select All", FL_COMMAND + 'a', (Fl_Callback *)select_all_cb, this, 0),
 		{},
 		OS_SUBMENU("&View"),
 		OS_MENU_ITEM("&Theme", 0, NULL, NULL, FL_SUBMENU | FL_MENU_DIVIDER),
@@ -416,6 +420,10 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_unload_tilesets_mi = TS_FIND_MENU_ITEM_CB(unload_tilesets_cb);
 	_undo_mi = TS_FIND_MENU_ITEM_CB(undo_cb);
 	_redo_mi = TS_FIND_MENU_ITEM_CB(redo_cb);
+	_erase_selection_mi = TS_FIND_MENU_ITEM_CB(erase_selection_cb);
+	_x_flip_selection_mi = TS_FIND_MENU_ITEM_CB(x_flip_selection_cb);
+	_y_flip_selection_mi = TS_FIND_MENU_ITEM_CB(y_flip_selection_cb);
+	_select_all_mi = TS_FIND_MENU_ITEM_CB(select_all_cb);
 	_zoom_in_mi = TS_FIND_MENU_ITEM_CB(zoom_in_cb);
 	_zoom_out_mi = TS_FIND_MENU_ITEM_CB(zoom_out_cb);
 	_shift_tileset_mi = TS_FIND_MENU_ITEM_CB(shift_tileset_cb);
@@ -901,6 +909,19 @@ void Main_Window::update_selection_status() {
 	_tile_heading->redraw();
 }
 
+void Main_Window::update_selection_controls() {
+	if (_selection.selected_multiple() && !_selection.from_tileset()) {
+		_erase_selection_mi->activate();
+		_x_flip_selection_mi->activate();
+		_y_flip_selection_mi->activate();
+	}
+	else {
+		_erase_selection_mi->deactivate();
+		_x_flip_selection_mi->deactivate();
+		_y_flip_selection_mi->deactivate();
+	}
+}
+
 void Main_Window::update_status(Tile_Tessera *tt) {
 	if (!_tilemap.size()) {
 		_tilemap_dimensions->label("");
@@ -1018,6 +1039,7 @@ void Main_Window::update_active_controls() {
 			_redo_mi->deactivate();
 			_redo_tb->deactivate();
 		}
+		_select_all_mi->activate();
 		_tilemap_width_mi->activate();
 		_width_heading->activate();
 		_tilemap_width->activate();
@@ -1045,6 +1067,7 @@ void Main_Window::update_active_controls() {
 		_undo_tb->deactivate();
 		_redo_mi->deactivate();
 		_redo_tb->deactivate();
+		_select_all_mi->deactivate();
 		_tilemap_width_mi->deactivate();
 		_width_heading->deactivate();
 		_tilemap_width->deactivate();
@@ -1289,18 +1312,20 @@ void Main_Window::reformat_tilemap() {
 	_success_dialog->show(this);
 }
 
-void Main_Window::edit_tile(Tile_Tessera *tt) {
+void Main_Window::edit_tile(Tile_Tessera *tt, bool remember) {
 	if (!_selection.selected_multiple()) {
 		Tile_State fs = tt->state();
 		Tile_State ts(tile_id(), x_flip(), y_flip(), priority(), obp1(), palette());
 		bool a = Config::show_attributes();
 		if (fs.same(ts, a)) { return; }
+		if (remember) { _tilemap.remember(); }
 		tt->assign(ts, a);
 		tt->damage(1);
 		_tilemap.modified(true);
 		return;
 	}
 	bool a = Config::show_attributes();
+	if (remember) { _tilemap.remember(); }
 	size_t tx = tt->col(), ty = tt->row();
 	size_t ow = _selection.width(), oh = _selection.height();
 	size_t ox = _selection.left_col(), oy = _selection.top_row();
@@ -1335,8 +1360,7 @@ void Main_Window::edit_tile(Tile_Tessera *tt) {
 				if (tti && index < n) {
 					const Tile_State &ps = tms.state(index);
 					Tile_State ts(ps.id, x_flip() != ps.x_flip, y_flip() != ps.y_flip, ps.priority, ps.obp1, ps.palette);
-					tti->attributes(ts);
-					if (!a) { tti->tile(ts); }
+					tti->replace(ts, a);
 					tti->damage(1);
 				}
 			}
@@ -1351,6 +1375,7 @@ void Main_Window::flood_fill(Tile_Tessera *tt) {
 	bool a = Config::show_attributes();
 	bool mf = _selection.selected_multiple() && !(a && _selection.from_tileset());
 	if (!mf && fs.same(ts, a)) { return; }
+	_tilemap.remember();
 	size_t w = _tilemap.width(), h = _tilemap.height(), n = _tilemap.size();
 	std::vector<bool> filled(n, false);
 	std::queue<size_t> queue;
@@ -1409,26 +1434,30 @@ void Main_Window::flood_fill(Tile_Tessera *tt) {
 	}
 	_tilemap_scroll->redraw();
 	_tilemap.modified(true);
+	update_active_controls();
 }
 
 void Main_Window::substitute_tile(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
 	Tile_State ts(tile_id(), x_flip(), y_flip(), priority(), obp1(), palette());
+	_tilemap.remember();
 	bool a = Config::show_attributes();
 	size_t n = _tilemap.size();
 	for (size_t i = 0; i < n; i++) {
 		Tile_Tessera *ff = _tilemap.tile(i);
 		if (ff->state().same(fs, a)) {
 			ff->assign(ts, a);
+			ff->damage(1);
 		}
 	}
-	_tilemap_scroll->redraw();
 	_tilemap.modified(true);
+	update_active_controls();
 }
 
 void Main_Window::swap_tiles(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
 	Tile_State ts(tile_id(), x_flip(), y_flip(), priority(), obp1(), palette());
+	_tilemap.remember();
 	bool a = Config::show_attributes();
 	if (fs.same(ts, a)) { return; }
 	size_t n = _tilemap.size();
@@ -1436,13 +1465,101 @@ void Main_Window::swap_tiles(Tile_Tessera *tt) {
 		Tile_Tessera *ff = _tilemap.tile(i);
 		if (ff->state().same(fs, a)) {
 			ff->assign(ts, a);
+			ff->damage(1);
 		}
 		else if (ff->state().same(ts, a)) {
 			ff->assign(fs, a);
+			ff->damage(1);
 		}
 	}
-	_tilemap_scroll->redraw();
 	_tilemap.modified(true);
+	update_active_controls();
+}
+
+void Main_Window::erase_selection() {
+	if (!_selection.selected_multiple() || _selection.from_tileset()) { return; }
+	Tile_State ts;
+	ts.palette = format_can_edit_palettes(Config::format()) ? 0 : -1;
+	bool a = Config::show_attributes();
+	_tilemap.remember();
+	size_t ox = _selection.left_col(), oy = _selection.top_row();
+	size_t mx = ox + _selection.width(), my = oy + _selection.height();
+	for (size_t y = oy; y < my; y++) {
+		for (size_t x = ox; x < mx; x++) {
+			Tile_Tessera *tt = _tilemap.tile(x, y);
+			if (!tt) { continue; }
+			tt->replace(ts, a);
+			tt->damage(1);
+		}
+	}
+	_tilemap.modified(true);
+	update_active_controls();
+}
+
+void Main_Window::x_flip_selection() {
+	if (!_selection.selected_multiple() || _selection.from_tileset()) { return; }
+	bool a = Config::show_attributes();
+	bool f = format_can_flip(Config::format());
+	_tilemap.remember();
+	size_t ox = _selection.left_col(), oy = _selection.top_row();
+	size_t ow = _selection.width(), my = oy + _selection.height();
+	for (size_t y = oy; y < my; y++) {
+		for (size_t i = 0; i < ow / 2; i++) {
+			Tile_Tessera *tt1 = _tilemap.tile(ox+i, y);
+			Tile_Tessera *tt2 = _tilemap.tile(ox+ow-i-1, y);
+			if (!tt1 || !tt2) { continue; }
+			Tile_State ts1 = tt1->state(), ts2 = tt2->state();
+			if (f) {
+				ts1.x_flip = !ts1.x_flip;
+				ts2.x_flip = !ts2.x_flip;
+			}
+			tt1->replace(ts2, a);
+			tt2->replace(ts1, a);
+			tt1->damage(1);
+			tt2->damage(1);
+		}
+	}
+	_tilemap.modified(true);
+	update_active_controls();
+}
+
+void Main_Window::y_flip_selection() {
+	if (!_selection.selected_multiple() || _selection.from_tileset()) { return; }
+	bool a = Config::show_attributes();
+	bool f = format_can_flip(Config::format());
+	_tilemap.remember();
+	size_t ox = _selection.left_col(), oy = _selection.top_row();
+	size_t mx = ox + _selection.width(), oh = _selection.height();
+	for (size_t x = ox; x < mx; x++) {
+		for (size_t i = 0; i < oh / 2; i++) {
+			Tile_Tessera *tt1 = _tilemap.tile(x, oy+i);
+			Tile_Tessera *tt2 = _tilemap.tile(x, oy+oh-i-1);
+			if (!tt1 || !tt2) { continue; }
+			Tile_State ts1 = tt1->state(), ts2 = tt2->state();
+			if (f) {
+				ts1.y_flip = !ts1.y_flip;
+				ts2.y_flip = !ts2.y_flip;
+			}
+			tt1->replace(ts2, a);
+			tt2->replace(ts1, a);
+			tt1->damage(1);
+			tt2->damage(1);
+		}
+	}
+	_tilemap.modified(true);
+	update_active_controls();
+}
+
+void Main_Window::select_all() {
+	Tile_Tessera *tt1 = _tilemap.tile(_tilemap.width() - 1, 0);
+	Tile_Tessera *tt2 = _tilemap.tile(0, _tilemap.height() - 1);
+	if (!tt1 || !tt2 || tt1 == tt2) { return; }
+	_selection.start_selecting(tt1);
+	_selection.continue_selecting(tt2);
+	_selection.finish_selecting();
+	update_selection_status();
+	update_selection_controls();
+	redraw_overlay();
 }
 
 void Main_Window::open_tilemap(const char *filename, size_t width, size_t height) {
@@ -1667,6 +1784,7 @@ void Main_Window::select_tile(uint16_t id) {
 	}
 
 	update_selection_status();
+	update_selection_controls();
 
 	_current_tile->redraw();
 	_tiles_tab->redraw();
@@ -1679,6 +1797,10 @@ void Main_Window::highlight_tile(uint16_t id) {
 }
 
 void Main_Window::select_palette(int palette) {
+	if (!_selection.from_tileset()) {
+		_selection.select_single(_tile_buttons[tile_id()]);
+	}
+
 	if (_selected_palette) {
 		_selected_palette->clear();
 	}
@@ -2106,6 +2228,22 @@ void Main_Window::redo_cb(Fl_Widget *, Main_Window *mw) {
 	mw->redraw();
 }
 
+void Main_Window::erase_selection_cb(Fl_Widget *, Main_Window *mw) {
+	mw->erase_selection();
+}
+
+void Main_Window::x_flip_selection_cb(Fl_Widget *, Main_Window *mw) {
+	mw->x_flip_selection();
+}
+
+void Main_Window::y_flip_selection_cb(Fl_Widget *, Main_Window *mw) {
+	mw->y_flip_selection();
+}
+
+void Main_Window::select_all_cb(Fl_Widget *, Main_Window *mw) {
+	mw->select_all();
+}
+
 void Main_Window::classic_theme_cb(Fl_Menu_ *, Main_Window *mw) {
 	OS::use_classic_theme();
 	mw->_classic_theme_mi->setonly();
@@ -2422,7 +2560,6 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 	if (Fl::event_button() == FL_LEFT_MOUSE) {
 		if (!mw->_selection.selected()) { return; }
 		if (Fl::event_is_click()) {
-			mw->_tilemap.remember();
 			mw->update_active_controls();
 		}
 		if (Fl::event_shift()) {
@@ -2439,7 +2576,7 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 		}
 		else {
 			// Left-click/drag to edit
-			mw->edit_tile(tt);
+			mw->edit_tile(tt, Fl::event_is_click());
 		}
 	}
 	else if (Fl::event_button() == FL_RIGHT_MOUSE) {
