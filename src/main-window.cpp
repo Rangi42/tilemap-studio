@@ -2559,9 +2559,6 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 	if (!mw->_map_editable) { return; }
 	if (Fl::event_button() == FL_LEFT_MOUSE) {
 		if (!mw->_selection.selected()) { return; }
-		if (Fl::event_is_click()) {
-			mw->update_active_controls();
-		}
 		if (Fl::event_shift()) {
 			// Shift+left-click to flood fill
 			mw->flood_fill(tt);
@@ -2577,6 +2574,9 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 		else {
 			// Left-click/drag to edit
 			mw->edit_tile(tt, Fl::event_is_click());
+		}
+		if (Fl::event_is_click()) {
+			mw->update_active_controls();
 		}
 	}
 	else if (Fl::event_button() == FL_RIGHT_MOUSE) {
