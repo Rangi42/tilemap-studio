@@ -752,7 +752,8 @@ Image_To_Tiles_Dialog::Image_To_Tiles_Dialog(const char *t) : Option_Dialog(360,
 	_tileset(NULL), _image_name(NULL), _tileset_name(NULL), _tilemap_name(NULL), _format(NULL), _start_id(NULL), _use_space(NULL),
 	_space_id(NULL), _palette(NULL), _palette_name(NULL), _palette_format(NULL), _start_index_label(NULL), _start_index(NULL),
 	_color_zero(NULL), _color_zero_rgb(NULL), _color_zero_swatch(NULL), _image_chooser(NULL), _tileset_chooser(NULL),
-	_image_filename(), _tileset_filename(), _tilemap_filename(), _attrmap_filename(), _palette_filename(), _tilepal_filename() {}
+	_image_filename(), _tileset_filename(), _tilemap_filename(), _attrmap_filename(), _palette_filename(), _tilepal_filename(),
+	_prepared_image(false) {}
 
 Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
 	delete _tileset_heading;
@@ -1108,7 +1109,10 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	wgt_off += _color_zero_rgb->w() + wgt_m;
 	_color_zero_swatch->resize(wgt_off, dy, wgt_h, wgt_h);
 
-	_image_filename.clear();
+	if (!_prepared_image) {
+		_image_filename.clear();
+	}
+	_prepared_image = false;
 	_tileset_filename.clear();
 	update_image_name();
 	update_start_index();

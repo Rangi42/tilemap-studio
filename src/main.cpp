@@ -92,10 +92,17 @@ int main(int argc, char **argv) {
 		window.maximize();
 	}
 
-	if (argc > 1) {
+	if (argc > 2) {
 		window.open_tilemap(argv[1]);
-		if (argc > 2) {
-			window.load_tileset(argv[2]);
+		window.load_tileset(argv[2]);
+	}
+	else if (argc > 1) {
+		if (ends_with(argv[1], ".png") || ends_with(argv[1], ".PNG") ||
+			ends_with(argv[1], ".bmp") || ends_with(argv[1], ".BMP")) {
+			window.prepare_image_to_tiles_input(argv[1]);
+		}
+		else {
+			window.open_tilemap(argv[1]);
 		}
 	}
 

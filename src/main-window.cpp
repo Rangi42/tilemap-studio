@@ -1771,6 +1771,11 @@ void Main_Window::load_corresponding_tileset(const char *filename) {
 	}
 }
 
+void Main_Window::prepare_image_to_tiles_input(const char *filename) {
+	_image_to_tiles_dialog->prepare_image(filename);
+	image_to_tiles_cb(NULL, this);
+}
+
 void Main_Window::select_tile(uint16_t id) {
 	_selection.select_single(_tile_buttons[id]);
 	_current_tile->id(id);

@@ -143,6 +143,7 @@ public:
 	void add_tileset(const char *filename, int start = 0x00, int offset = 0, int length = 0);
 	void load_recent_tileset(int n);
 	void load_corresponding_tileset(const char *filename);
+	void prepare_image_to_tiles_input(const char *filename);
 private:
 	void store_recent_tilemap(void);
 	void update_recent_tilemaps(void);

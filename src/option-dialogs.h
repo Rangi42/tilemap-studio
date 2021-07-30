@@ -273,6 +273,7 @@ private:
 	Fl_Button *_color_zero_swatch;
 	Fl_Native_File_Chooser *_image_chooser, *_tileset_chooser;
 	std::string _image_filename, _tileset_filename, _tilemap_filename, _attrmap_filename, _palette_filename, _tilepal_filename;
+	bool _prepared_image;
 public:
 	Image_To_Tiles_Dialog(const char *t);
 	~Image_To_Tiles_Dialog();
@@ -295,6 +296,7 @@ public:
 	inline uint16_t start_index(void) const { return (uint16_t)_start_index->value(); }
 	inline void start_index(uint16_t n) { initialize(); _start_index->value(n); }
 	inline void reshow(const Fl_Widget *p) { _canceled = false; reveal(p); }
+	inline void prepare_image(const char *filename) { _image_filename = filename; _prepared_image = true; }
 private:
 	void update_image_name(void);
 	void update_output_names(void);
