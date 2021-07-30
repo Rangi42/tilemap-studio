@@ -1247,6 +1247,7 @@ void Main_Window::shift_tilemap() {
 		select_tile(_selection.id());
 	}
 
+	_tilemap.remember();
 	_tilemap.shift(dx, dy);
 
 	while (_tilemap_scroll->children() > 2) { // keep scrollbars
@@ -1298,7 +1299,6 @@ void Main_Window::reformat_tilemap() {
 
 	Config::format(fmt);
 	_tilemap.limit_to_format(fmt);
-	_tilemap.modified(true);
 
 	_tiles_scroll->scroll_to(0, 0);
 

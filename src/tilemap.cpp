@@ -107,9 +107,7 @@ void Tilemap::shift(int dx, int dy) {
 		}
 	}
 
-	clear();
 	_tiles.swap(tiles);
-	width((size_t)w);
 	_modified = true;
 }
 
@@ -491,6 +489,7 @@ void Tilemap::limit_to_format(Tilemap_Format fmt) {
 			tt->obp1(false);
 		}
 	}
+	_modified = true;
 }
 
 bool Tilemap::write_tiles(const char *tf, const char *af, std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt) {
