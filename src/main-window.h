@@ -137,13 +137,13 @@ public:
 	void y_flip_selection(void);
 	void select_all(void);
 	inline void new_tilemap(size_t width, size_t height) { open_tilemap(NULL, width, height); }
-	void open_tilemap(const char *filename, size_t width = 0, size_t height = 0);
+	void open_tilemap(const char *filename, size_t width = 0, size_t height = 0, bool keep_format = false);
 	void open_recent_tilemap(int n);
 	inline void load_tileset(const char *filename) { unload_tilesets_cb(NULL, this); add_tileset(filename); }
 	void add_tileset(const char *filename, int start = 0x00, int offset = 0, int length = 0);
 	void load_recent_tileset(int n);
 	void load_corresponding_tileset(const char *filename);
-	void prepare_image_to_tiles_input(const char *filename);
+	void open_tilemap_or_image_to_tiles(const char *filename);
 private:
 	void store_recent_tilemap(void);
 	void update_recent_tilemaps(void);

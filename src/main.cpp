@@ -97,13 +97,7 @@ int main(int argc, char **argv) {
 		window.load_tileset(argv[2]);
 	}
 	else if (argc > 1) {
-		if (ends_with(argv[1], ".png") || ends_with(argv[1], ".PNG") ||
-			ends_with(argv[1], ".bmp") || ends_with(argv[1], ".BMP")) {
-			window.prepare_image_to_tiles_input(argv[1]);
-		}
-		else {
-			window.open_tilemap(argv[1]);
-		}
+		window.open_tilemap_or_image_to_tiles(argv[1]);
 	}
 
 	return Fl::run();

@@ -1562,9 +1562,9 @@ void Main_Window::select_all() {
 	redraw_overlay();
 }
 
-void Main_Window::open_tilemap(const char *filename, size_t width, size_t height) {
+void Main_Window::open_tilemap(const char *filename, size_t width, size_t height, bool keep_format) {
 	if (filename) {
-		_tilemap_options_dialog->use_tilemap(filename);
+		_tilemap_options_dialog->use_tilemap(filename, keep_format);
 		_tilemap_options_dialog->show(this);
 		if (_tilemap_options_dialog->canceled()) { return; }
 	}
@@ -1771,9 +1771,15 @@ void Main_Window::load_corresponding_tileset(const char *filename) {
 	}
 }
 
-void Main_Window::prepare_image_to_tiles_input(const char *filename) {
-	_image_to_tiles_dialog->prepare_image(filename);
-	image_to_tiles_cb(NULL, this);
+void Main_Window::open_tilemap_or_image_to_tiles(const char *filename) {
+	if (ends_with(filename, ".png") || ends_with(filename, ".PNG") ||
+		ends_with(filename, ".bmp") || ends_with(filename, ".BMP")) {
+		_image_to_tiles_dialog->prepare_image(filename);
+		image_to_tiles_cb(NULL, this);
+	}
+	else {
+		open_tilemap(filename);
+	}
 }
 
 void Main_Window::select_tile(uint16_t id) {
@@ -1821,7 +1827,7 @@ void Main_Window::drag_and_drop_tilemap_cb(DnD_Receiver *dndr, Main_Window *mw) 
 	Fl_Window *top = Fl::modal();
 	if (top && top != mw) { return; }
 	std::string filename = dndr->text().substr(0, dndr->text().find('\n'));
-	mw->open_tilemap(filename.c_str());
+	mw->open_tilemap_or_image_to_tiles(filename.c_str());
 }
 
 void Main_Window::drag_and_drop_tileset_cb(DnD_Receiver *dndr, Main_Window *mw) {
