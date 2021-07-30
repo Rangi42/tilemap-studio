@@ -142,6 +142,7 @@
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\modal-dialog.cpp" />
     <ClCompile Include="..\src\option-dialogs.cpp" />
+    <ClCompile Include="..\src\palette.cpp" />
     <ClCompile Include="..\src\preferences.cpp" />
     <ClCompile Include="..\src\themes.cpp" />
     <ClCompile Include="..\src\tile-buttons.cpp" />
