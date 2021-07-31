@@ -240,7 +240,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_reformat_dialog = new Reformat_Dialog("Reformat Tilemap");
 	_add_tileset_dialog = new Add_Tileset_Dialog("Add Tileset");
 	_image_to_tiles_dialog = new Image_To_Tiles_Dialog("Image to Tiles");
-	_help_window = new Help_Window(48, 48, 500, 400, PROGRAM_NAME " Help");
+	_help_window = new Help_Window(48, 48, 700, 500, PROGRAM_NAME " Help");
 
 	// Drag-and-drop receivers
 	_tilemap_dnd_receiver = new DnD_Receiver(0, 0, 0, 0);
