@@ -821,12 +821,12 @@ void Image_To_Tiles_Dialog::update_image_name() {
 
 static const char *palette_names[NUM_PALETTE_FORMATS] = {
 	"Indexed in tileset", "Assembly (RGB)", "PaintShop Pro (JASC-PAL)", "Adobe Color Table (ACT)",
-	"Adobe Color Swatch (ACO)", "paint.net (TXT)", "GIMP (GPL)", "Fractint (MAP)",
-	"Image (PNG)", "Image (BMP)"
+	"Adobe Color Swatch (ACO)", "paint.net (TXT)", "GIMP (GPL)", "superfamiconv (JSON)",
+	"Fractint (MAP)", "Hexadecimal (HEX)", "Image (PNG)", "Image (BMP)"
 };
 
 static const char *palette_exts[NUM_PALETTE_FORMATS] = {
-	NULL, ".pal", ".pal", ".act", ".aco", ".txt", ".gpl", ".map", ".pal.png", ".pal.bmp"
+	NULL, ".pal", ".pal", ".act", ".aco", ".txt", ".gpl", ".json", ".map", ".hex", ".pal.png", ".pal.bmp"
 };
 
 void Image_To_Tiles_Dialog::update_output_names() {

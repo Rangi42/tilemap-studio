@@ -90,12 +90,12 @@ bool write_palette(const char *f, const std::vector<Palette> &palettes,
 		for (size_t i = n; i < MAX_PALETTE_LENGTH; i++) {
 			fwrite(rgb, 1, sizeof(rgb), file);
 		}
+		uchar footer[4] = {(uchar)((n & 0xff00) >> 8), (uchar)(n & 0xff), 0, 0};
+		fwrite(footer, 1, sizeof(footer), file);
 	}
 	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::ACO) {
-		fputc(0, file);
-		fputc(1, file);
-		fputc((n & 0xff00) >> 8, file);
-		fputc(n & 0xff, file);
+		uchar header[4] = {0, 1, (uchar)((n & 0xff00) >> 8), (uchar)(n & 0xff)};
+		fwrite(header, 1, sizeof(header), file);
 		uchar rgb[10] = {};
 		for (const Palette &palette : palettes) {
 			for (Fl_Color c : palette) {
@@ -126,12 +126,56 @@ bool write_palette(const char *f, const std::vector<Palette> &palettes,
 			}
 		}
 	}
+	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::JSON) {
+		fputs("{\r\n  \"palettes\":[\r\n", file);
+		bool pp = false;
+		for (const Palette &palette : palettes) {
+			fputs(pp ? "," : "    ", file);
+			fputc('[', file);
+			bool pc = false;
+			for (Fl_Color c : palette) {
+				if (pc) { fputc(',', file); }
+				uchar r, g, b;
+				Fl::get_color(c, r, g, b);
+				fprintf(file, "\r\n      \"#%02x%02x%02x\"", (int)r, (int)g, (int)b);
+				pc = true;
+			}
+			fputs("\r\n    ]", file);
+			pp = true;
+		}
+		fputs("\r\n  ],\r\n  \"palettes_native_rgb\":[\r\n", file);
+		pp = false;
+		for (const Palette &palette : palettes) {
+			fputs(pp ? "," : "    ", file);
+			fputc('[', file);
+			bool pc = false;
+			for (Fl_Color c : palette) {
+				if (pc) { fputc(',', file); }
+				uchar r, g, b;
+				Fl::get_color(c, r, g, b);
+				fprintf(file, "\r\n      [%d,%d,%d]", (int)(r / 8), (int)(g / 8), (int)(b / 8));
+				pc = true;
+			}
+			fputs("\r\n    ]", file);
+			pp = true;
+		}
+		fputs("\r\n  ]\r\n}", file);
+	}
 	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::MAP) {
 		for (const Palette &palette : palettes) {
 			for (Fl_Color c : palette) {
 				uchar r, g, b;
 				Fl::get_color(c, r, g, b);
 				fprintf(file, "%d %d %d\n", (int)r, (int)g, (int)b);
+			}
+		}
+	}
+	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::HEX) {
+		for (const Palette &palette : palettes) {
+			for (Fl_Color c : palette) {
+				uchar r, g, b;
+				Fl::get_color(c, r, g, b);
+				fprintf(file, "%02x%02x%02x\r\n", (int)r, (int)g, (int)b);
 			}
 		}
 	}
