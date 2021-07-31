@@ -753,7 +753,7 @@ Image_To_Tiles_Dialog::Image_To_Tiles_Dialog(const char *t) : Option_Dialog(360,
 	_space_id(NULL), _palette(NULL), _palette_name(NULL), _palette_format(NULL), _start_index_label(NULL), _start_index(NULL),
 	_color_zero(NULL), _color_zero_rgb(NULL), _color_zero_swatch(NULL), _image_chooser(NULL), _tileset_chooser(NULL),
 	_image_filename(), _tileset_filename(), _tilemap_filename(), _attrmap_filename(), _palette_filename(), _tilepal_filename(),
-	_prepared_image(false) {}
+	_prepared_image(false), _picked_palette(false) {}
 
 Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
 	delete _tileset_heading;
@@ -1109,6 +1109,7 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 		_image_filename.clear();
 	}
 	_prepared_image = false;
+	_picked_palette = false;
 	_tileset_filename.clear();
 	update_image_name();
 	update_start_index();
@@ -1155,8 +1156,10 @@ void Image_To_Tiles_Dialog::tileset_cb(Fl_Widget *, Image_To_Tiles_Dialog *itd) 
 }
 
 void Image_To_Tiles_Dialog::format_cb(Dropdown *, Image_To_Tiles_Dialog *itd) {
-	Palette_Format pal_fmt = itd->default_palette_format(itd->format());
-	itd->_palette_format->value((int)pal_fmt);
+	if (!itd->_picked_palette) {
+		Palette_Format pal_fmt = itd->default_palette_format(itd->format());
+		itd->_palette_format->value((int)pal_fmt);
+	}
 	itd->update_start_index();
 	itd->update_output_names();
 	itd->_dialog->redraw();
@@ -1187,6 +1190,7 @@ void Image_To_Tiles_Dialog::palette_cb(OS_Check_Button *, Image_To_Tiles_Dialog 
 }
 
 void Image_To_Tiles_Dialog::palette_format_cb(Dropdown *, Image_To_Tiles_Dialog *itd) {
+	itd->_picked_palette = true;
 	itd->update_output_names();
 }
 

@@ -271,6 +271,7 @@ private:
 	Fl_Native_File_Chooser *_image_chooser, *_tileset_chooser;
 	std::string _image_filename, _tileset_filename, _tilemap_filename, _attrmap_filename, _palette_filename, _tilepal_filename;
 	bool _prepared_image;
+	bool _picked_palette;
 public:
 	Image_To_Tiles_Dialog(const char *t);
 	~Image_To_Tiles_Dialog();
