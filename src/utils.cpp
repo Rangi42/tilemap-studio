@@ -9,8 +9,6 @@
 
 #include "utils.h"
 
-const std::string whitespace(" \f\n\r\t\v");
-
 bool starts_with(std::string_view s, std::string_view p) {
 	return !s.compare(0, p.size(), p);
 }
@@ -21,19 +19,6 @@ bool ends_with(std::string_view s, std::string_view p) {
 
 bool ends_with(std::wstring_view s, std::wstring_view p) {
 	return s.size() >= p.size() && !s.compare(s.size() - p.size(), p.size(), p);
-}
-
-void trim(std::string &s, const std::string &t) {
-	std::string::size_type p = s.find_first_not_of(t);
-	s.erase(0, p);
-	p = s.find_last_not_of(t);
-	s.erase(p + 1);
-}
-
-void remove_dot_ext(const char *f, char *s) {
-	strcpy(s, fl_filename_name(f));
-	char *dot = strchr(s, '.');
-	if (dot) { *dot = '\0'; }
 }
 
 void add_dot_ext(const char *f, const char *ext, char *s) {

@@ -31,8 +31,8 @@ static const char *palette_names[NUM_PALETTE_FORMATS] = {
 	"Pixel image (BMP)"
 };
 
-const char *palette_name(Palette_Format fmt) {
-	return palette_names[(int)fmt];
+const char *palette_name(Palette_Format pal_fmt) {
+	return palette_names[(int)pal_fmt];
 }
 
 int palette_max_name_width() {
@@ -47,8 +47,8 @@ static const char *palette_extensions[NUM_PALETTE_FORMATS] = {
 	NULL, ".pal", ".pal", ".act", ".aco", ".ase", ".txt", ".gpl", ".xml", ".json", ".map", ".hex", ".pal.png", ".pal.bmp"
 };
 
-const char *palette_extension(Palette_Format fmt) {
-	return palette_extensions[(int)fmt];
+const char *palette_extension(Palette_Format pal_fmt) {
+	return palette_extensions[(int)pal_fmt];
 }
 
 static bool write_graphic_palette(const char *f, const Palettes &palettes, size_t nc) {
