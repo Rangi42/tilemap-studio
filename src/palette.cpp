@@ -1,4 +1,5 @@
 #include <vector>
+#include <random>
 
 #pragma warning(push, 0)
 #include <FL/Fl.H>
@@ -39,6 +40,26 @@ static bool write_graphic_palette(const char *f, const std::vector<Palette> &pal
 	delete img;
 
 	return result == Image::Result::IMAGE_OK;
+}
+
+static void write_guid(FILE *file) {
+	static std::random_device rd;
+	static std::mt19937_64 gen(rd());
+	static std::uniform_int_distribution<> dis(0x0, 0xF);
+	static std::uniform_int_distribution<> dis2(0x8, 0xB);
+	// GUID version 4 variant 1: xxxxxxxx-xxxx-4xxx-Xxxx-xxxxxxxxxxxx
+	for (int i = 0; i < 36; i++) {
+		if (i == 8 || i == 13 || i == 18 || i == 23) {
+			fputc('-', file);
+		}
+		else if (i == 14) {
+			fputc('4', file);
+		}
+		else {
+			int d = i == 19 ? dis2(gen) : dis(gen);
+			fputc(d + (d < 0xA ? '0' : 'a' - 0xA), file);
+		}
+	}
 }
 
 bool write_palette(const char *f, const std::vector<Palette> &palettes,
@@ -125,6 +146,21 @@ bool write_palette(const char *f, const std::vector<Palette> &palettes,
 				fprintf(file, "% 3d % 3d % 3d\t#%02x%02x%02x\n", (int)r, (int)g, (int)b, (int)r, (int)g, (int)b);
 			}
 		}
+	}
+	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::XML) {
+		fputs("<?xml version=\"1.0\"?>\r\n<palette name=\"tiles\" guid=\"", file);
+		write_guid(file);
+		fputs("\">\r\n  <colors>\r\n", file);
+		for (const Palette &palette : palettes) {
+			fputs("    <page>\r\n", file);
+			for (Fl_Color c : palette) {
+				uchar r, g, b;
+				Fl::get_color(c, r, g, b);
+				fprintf(file, "      <color cs=\"RGB\" tints=\"%.9g,%.9g,%.9g\"/>\r\n", r / 255.0f, g / 255.0f, b / 255.0f);
+			}
+			fputs("    </page>\r\n", file);
+		}
+		fputs("  </colors>\r\n</palette>\r\n", file);
 	}
 	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::JSON) {
 		fputs("{\r\n  \"palettes\":[\r\n", file);
