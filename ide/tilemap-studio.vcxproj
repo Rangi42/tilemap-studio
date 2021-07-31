@@ -119,6 +119,7 @@
     <ClInclude Include="..\src\main-window.h" />
     <ClInclude Include="..\src\modal-dialog.h" />
     <ClInclude Include="..\src\option-dialogs.h" />
+    <ClInclude Include="..\src\palette-format.h" />
     <ClInclude Include="..\src\preferences.h" />
     <ClInclude Include="..\src\resource.h" />
     <ClInclude Include="..\src\themes.h" />
@@ -142,7 +143,7 @@
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\modal-dialog.cpp" />
     <ClCompile Include="..\src\option-dialogs.cpp" />
-    <ClCompile Include="..\src\palette.cpp" />
+    <ClCompile Include="..\src\palette-format.cpp" />
     <ClCompile Include="..\src\preferences.cpp" />
     <ClCompile Include="..\src\themes.cpp" />
     <ClCompile Include="..\src\tile-buttons.cpp" />

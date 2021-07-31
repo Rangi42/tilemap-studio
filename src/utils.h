@@ -22,6 +22,11 @@
 #define _countof(a) (sizeof(a) / sizeof(a[0]))
 #endif
 
+#define LE16(n) (uchar)((n) & 0xFFUL), (uchar)(((n) & 0xFF00UL) >> 8)
+#define LE32(n) (uchar)((n) & 0xFFUL), (uchar)(((n) & 0xFF00UL) >> 8), (uchar)(((n) & 0xFF0000UL) >> 16), (uchar)(((n) & 0xFF000000UL) >> 24)
+#define BE16(n) (uchar)(((n) & 0xFF00UL) >> 8), (uchar)((n) & 0xFFUL)
+#define BE32(n) (uchar)(((n) & 0xFF000000UL) >> 24), (uchar)(((n) & 0xFF0000UL) >> 16), (uchar)(((n) & 0xFF00UL) >> 8), (uchar)((n) & 0xFFUL)
+
 typedef uint8_t size8_t;
 typedef uint16_t size16_t;
 typedef uint32_t size32_t;

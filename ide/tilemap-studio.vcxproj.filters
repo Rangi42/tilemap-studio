@@ -75,6 +75,9 @@
     <ClInclude Include="..\src\tile-selection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\palette-format.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\help-window.cpp">
@@ -134,7 +137,7 @@
     <ClCompile Include="..\src\tile-selection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\palette.cpp">
+    <ClCompile Include="..\src\palette-format.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -14,7 +14,43 @@
 #pragma warning(push)
 #pragma warning(disable : 4458)
 
-static bool write_graphic_palette(const char *f, const std::vector<Palette> &palettes, size_t nc) {
+static const char *palette_names[NUM_PALETTE_FORMATS] = {
+	"Indexed in tileset",
+	"Assembly (RGB)",
+	"PaintShop Pro (JASC-PAL)",
+	"Adobe Color Table (ACT)",
+	"Adobe Color Swatch (ACO)",
+	"paint.net (TXT)",
+	"GIMP (GPL)",
+	"CorelDRAW (XML)",
+	"superfamiconv (JSON)",
+	"Fractint (MAP)",
+	"Hexadecimal (HEX)",
+	"Pixels (PNG)",
+	"Pixels (BMP)"
+};
+
+const char *palette_name(Palette_Format fmt) {
+	return palette_names[(int)fmt];
+}
+
+int palette_max_name_width() {
+	int mw = 0;
+	for (int i = 0; i < NUM_PALETTE_FORMATS; i++) {
+		mw = std::max(mw, text_width(palette_names[i], 6));
+	}
+	return mw;
+}
+
+static const char *palette_extensions[NUM_PALETTE_FORMATS] = {
+	NULL, ".pal", ".pal", ".act", ".aco", ".txt", ".gpl", ".xml", ".json", ".map", ".hex", ".pal.png", ".pal.bmp"
+};
+
+const char *palette_extension(Palette_Format fmt) {
+	return palette_extensions[(int)fmt];
+}
+
+static bool write_graphic_palette(const char *f, const Palettes &palettes, size_t nc) {
 	int w = (int)nc, h = (int)palettes.size();
 	if (w == 256) { w /= 16; h *= 16; }
 	Fl_Image_Surface *surface = new Fl_Image_Surface(w, h);
@@ -62,14 +98,13 @@ static void write_guid(FILE *file) {
 	}
 }
 
-bool write_palette(const char *f, const std::vector<Palette> &palettes,
-	Image_To_Tiles_Dialog::Palette_Format pal_fmt, size_t nc) {
-	if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::PLTE) {
-		// The tileset image is already written
+bool write_palette(const char *f, const Palettes &palettes, Palette_Format pal_fmt, size_t nc) {
+	if (pal_fmt == Palette_Format::INDEXED) {
+		// The indexed tileset image is already written
 		return true;
 	}
 
-	if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::PNG || pal_fmt == Image_To_Tiles_Dialog::Palette_Format::BMP) {
+	if (pal_fmt == Palette_Format::PNG || pal_fmt == Palette_Format::BMP) {
 		// The file extension determines the image format
 		return write_graphic_palette(f, palettes, nc);
 	}
@@ -78,7 +113,7 @@ bool write_palette(const char *f, const std::vector<Palette> &palettes,
 	if (!file) { return false; }
 
 	size_t n = palettes.size() * nc;
-	if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::RGB) {
+	if (pal_fmt == Palette_Format::RGB) {
 		int p = 0;
 		for (const Palette &palette : palettes) {
 			fprintf(file, "; palette %d\n", p++);
@@ -89,7 +124,7 @@ bool write_palette(const char *f, const std::vector<Palette> &palettes,
 			}
 		}
 	}
-	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::JASC) {
+	else if (pal_fmt == Palette_Format::JASC) {
 		fprintf(file, "JASC-PAL\r\n0100\r\n%zu\r\n", n);
 		for (const Palette &palette : palettes) {
 			for (Fl_Color c : palette) {
@@ -99,7 +134,7 @@ bool write_palette(const char *f, const std::vector<Palette> &palettes,
 			}
 		}
 	}
-	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::ACT) {
+	else if (pal_fmt == Palette_Format::ACT) {
 		uchar rgb[3] = {};
 		for (const Palette &palette : palettes) {
 			for (Fl_Color c : palette) {
@@ -111,11 +146,11 @@ bool write_palette(const char *f, const std::vector<Palette> &palettes,
 		for (size_t i = n; i < MAX_PALETTE_LENGTH; i++) {
 			fwrite(rgb, 1, sizeof(rgb), file);
 		}
-		uchar footer[4] = {(uchar)((n & 0xff00) >> 8), (uchar)(n & 0xff), 0, 0};
+		uchar footer[4] = {BE16(n), BE16(0)};
 		fwrite(footer, 1, sizeof(footer), file);
 	}
-	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::ACO) {
-		uchar header[4] = {0, 1, (uchar)((n & 0xff00) >> 8), (uchar)(n & 0xff)};
+	else if (pal_fmt == Palette_Format::ACO) {
+		uchar header[4] = {BE16(1), BE16(n)};
 		fwrite(header, 1, sizeof(header), file);
 		uchar rgb[10] = {};
 		for (const Palette &palette : palettes) {
@@ -126,7 +161,7 @@ bool write_palette(const char *f, const std::vector<Palette> &palettes,
 			}
 		}
 	}
-	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::TXT) {
+	else if (pal_fmt == Palette_Format::TXT) {
 		fputs("; paint.net Palette File\n", file);
 		for (const Palette &palette : palettes) {
 			for (Fl_Color c : palette) {
@@ -136,7 +171,7 @@ bool write_palette(const char *f, const std::vector<Palette> &palettes,
 			}
 		}
 	}
-	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::GPL) {
+	else if (pal_fmt == Palette_Format::GPL) {
 		const char *name = fl_filename_name(f);
 		fprintf(file, "GIMP Palette\nName: %s\nColumns: 16\n#\n", name);
 		for (const Palette &palette : palettes) {
@@ -147,7 +182,7 @@ bool write_palette(const char *f, const std::vector<Palette> &palettes,
 			}
 		}
 	}
-	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::XML) {
+	else if (pal_fmt == Palette_Format::XML) {
 		fputs("<?xml version=\"1.0\"?>\r\n<palette name=\"tiles\" guid=\"", file);
 		write_guid(file);
 		fputs("\">\r\n  <colors>\r\n", file);
@@ -162,7 +197,7 @@ bool write_palette(const char *f, const std::vector<Palette> &palettes,
 		}
 		fputs("  </colors>\r\n</palette>\r\n", file);
 	}
-	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::JSON) {
+	else if (pal_fmt == Palette_Format::JSON) {
 		fputs("{\r\n  \"palettes\":[\r\n", file);
 		bool pp = false;
 		for (const Palette &palette : palettes) {
@@ -197,7 +232,7 @@ bool write_palette(const char *f, const std::vector<Palette> &palettes,
 		}
 		fputs("\r\n  ]\r\n}", file);
 	}
-	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::MAP) {
+	else if (pal_fmt == Palette_Format::MAP) {
 		for (const Palette &palette : palettes) {
 			for (Fl_Color c : palette) {
 				uchar r, g, b;
@@ -206,7 +241,7 @@ bool write_palette(const char *f, const std::vector<Palette> &palettes,
 			}
 		}
 	}
-	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::HEX) {
+	else if (pal_fmt == Palette_Format::HEX) {
 		for (const Palette &palette : palettes) {
 			for (Fl_Color c : palette) {
 				uchar r, g, b;

@@ -819,16 +819,6 @@ void Image_To_Tiles_Dialog::update_image_name() {
 	}
 }
 
-static const char *palette_names[NUM_PALETTE_FORMATS] = {
-	"Indexed in tileset", "Assembly (RGB)", "PaintShop Pro (JASC-PAL)", "Adobe Color Table (ACT)",
-	"Adobe Color Swatch (ACO)", "paint.net (TXT)", "GIMP (GPL)", "CorelDraw (XML)", "superfamiconv (JSON)",
-	"Fractint (MAP)", "Hexadecimal (HEX)", "Image (PNG)", "Image (BMP)"
-};
-
-static const char *palette_exts[NUM_PALETTE_FORMATS] = {
-	NULL, ".pal", ".pal", ".act", ".aco", ".txt", ".gpl", ".xml", ".json", ".map", ".hex", ".pal.png", ".pal.bmp"
-};
-
 void Image_To_Tiles_Dialog::update_output_names() {
 	if (_tileset_filename.empty()) {
 		_tileset_name->label(NO_FILE_SELECTED_LABEL);
@@ -851,7 +841,7 @@ void Image_To_Tiles_Dialog::update_output_names() {
 		_attrmap_filename = output_filename;
 
 		strcpy(output_filename, tileset_filename());
-		const char *palette_ext = palette_exts[(int)palette_format()];
+		const char *palette_ext = palette_extension(palette_format());
 		if (palette_ext) {
 			fl_filename_setext(output_filename, sizeof(output_filename), palette_ext);
 		}
@@ -936,7 +926,7 @@ void Image_To_Tiles_Dialog::update_color_zero_swatch() {
 	_color_zero_swatch->redraw();
 }
 
-Image_To_Tiles_Dialog::Palette_Format Image_To_Tiles_Dialog::default_palette_format(Tilemap_Format fmt) const {
+Palette_Format Image_To_Tiles_Dialog::default_palette_format(Tilemap_Format fmt) const {
 	switch (fmt) {
 	case Tilemap_Format::GBA_4BPP:
 	case Tilemap_Format::GBA_8BPP:
@@ -1001,7 +991,7 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_palette->value(1);
 	_palette->callback((Fl_Callback *)palette_cb, this);
 	for (int i = 0; i < NUM_PALETTE_FORMATS; i++) {
-		_palette_format->add(palette_names[i]);
+		_palette_format->add(palette_name((Palette_Format)i));
 	}
 	_palette_format->value(0);
 	_palette_format->callback((Fl_Callback *)palette_format_cb, this);
@@ -1096,11 +1086,7 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	dy += wgt_h + wgt_m;
 
 	wgt_off = win_m + text_width(_palette_format->label(), 3);
-	wgt_w = 0;
-	for (int i = 0; i < NUM_PALETTE_FORMATS; i++) {
-		wgt_w = std::max(wgt_w, text_width(palette_names[i], 6));
-	}
-	wgt_w += wgt_h;
+	wgt_w = palette_max_name_width() + wgt_h;
 	_palette_format->resize(wgt_off, dy, wgt_w, wgt_h);
 	dy += wgt_h + wgt_m;
 

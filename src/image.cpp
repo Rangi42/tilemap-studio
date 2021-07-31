@@ -12,16 +12,14 @@
 #include "utils.h"
 #include "image.h"
 
-Image::Result Image::write_image(const char *f, Fl_RGB_Image *img, int bpp,
-	const std::vector<Palette> *palettes, size_t max_colors) {
+Image::Result Image::write_image(const char *f, Fl_RGB_Image *img, int bpp, const Palettes *palettes, size_t max_colors) {
 	if (ends_with(f, ".bmp") || ends_with(f, ".BMP")) {
 		return write_bmp_image(f, img, bpp, palettes, max_colors);
 	}
 	return write_png_image(f, img, bpp, palettes, max_colors);
 }
 
-Image::Result Image::write_png_image(const char *f, Fl_RGB_Image *img, int bpp,
-	const std::vector<Palette> *palettes, size_t max_colors) {
+Image::Result Image::write_png_image(const char *f, Fl_RGB_Image *img, int bpp, const Palettes *palettes, size_t max_colors) {
 	FILE *file = fl_fopen(f, "wb");
 	if (!file) { return Result::IMAGE_BAD_FILE; }
 	// Calculate the bit depth
@@ -109,8 +107,7 @@ Image::Result Image::write_png_image(const char *f, Fl_RGB_Image *img, int bpp,
 	return Result::IMAGE_OK;
 }
 
-Image::Result Image::write_bmp_image(const char *f, Fl_RGB_Image *img, int bpp,
-	const std::vector<Palette> *palettes, size_t max_colors) {
+Image::Result Image::write_bmp_image(const char *f, Fl_RGB_Image *img, int bpp, const Palettes *palettes, size_t max_colors) {
 	FILE *file = fl_fopen(f, "wb");
 	if (!file) { return Result::IMAGE_BAD_FILE; }
 	// Calculate the bit depth

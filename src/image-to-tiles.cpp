@@ -28,11 +28,6 @@
 
 typedef std::set<Fl_Color> Color_Set;
 
-extern bool write_palette(const char *f, const std::vector<Palette> &palettes,
-	Image_To_Tiles_Dialog::Palette_Format pal_fmt, size_t nc);
-
-extern bool write_tilepal(const char *f, const std::vector<size_t> &tileset, const std::vector<int> &tile_palettes);
-
 static bool build_tilemap(const Tile *tiles, size_t n, std::vector<int> tile_palettes,
 	std::vector<Tile_Tessera *> &tilemap, std::vector<size_t> &tileset, Tilemap_Format fmt, uint16_t start_id,
 	bool use_space, uint16_t space_id, Fl_Color space_color) {
@@ -71,9 +66,8 @@ static bool build_tilemap(const Tile *tiles, size_t n, std::vector<int> tile_pal
 	return true;
 }
 
-static Fl_RGB_Image *print_tileset(const Tile *tiles, const std::vector<size_t> &tileset,
-	const std::vector<Palette> &palettes, const std::vector<int> &tile_palettes, size_t nc, int tw,
-	Fl_Color blank_color, bool indexed) {
+static Fl_RGB_Image *print_tileset(const Tile *tiles, const std::vector<size_t> &tileset, const Palettes &palettes,
+	const std::vector<int> &tile_palettes, size_t nc, int tw, Fl_Color blank_color, bool indexed) {
 	int nt = (int)tileset.size();
 	tw = std::min(nt, tw);
 	int th = (nt + tw - 1) / tw;
@@ -165,13 +159,13 @@ bool Main_Window::image_to_tiles() {
 	// Build the palette
 
 	Tilemap_Format fmt = _image_to_tiles_dialog->format();
-	Image_To_Tiles_Dialog::Palette_Format pal_fmt = _image_to_tiles_dialog->palette_format();
+	Palette_Format pal_fmt = _image_to_tiles_dialog->palette_format();
 	bool make_palette = _image_to_tiles_dialog->palette() && format_can_make_palettes(fmt);
 
 	bool use_color_zero = _image_to_tiles_dialog->color_zero();
 	Fl_Color color_zero = use_color_zero ? _image_to_tiles_dialog->fl_color_zero() : 0xFFFFFF00 /* white */;
 
-	std::vector<Palette> palettes;
+	Palettes palettes;
 	std::vector<int> tile_palettes(n, make_palette ? 0 : -1);
 	size_t max_colors = (size_t)format_palette_size(fmt);
 
@@ -399,7 +393,7 @@ bool Main_Window::image_to_tiles() {
 
 	// Create the tileset file
 
-	bool indexed = make_palette && pal_fmt == Image_To_Tiles_Dialog::Palette_Format::PLTE;
+	bool indexed = make_palette && pal_fmt == Palette_Format::INDEXED;
 	Fl_RGB_Image *timg = print_tileset(tiles, tileset, palettes, tile_palettes, max_colors, tileset_width(),
 		color_zero, indexed);
 	Image::Result result = indexed ? Image::write_image(tileset_filename, timg, 0, &palettes, max_colors) :

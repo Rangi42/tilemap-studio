@@ -7,6 +7,7 @@
 #include "config.h"
 #include "utils.h"
 #include "widgets.h"
+#include "palette-format.h"
 
 #pragma warning(push, 0)
 #include <FL/Fl_Double_Window.H>
@@ -247,11 +248,7 @@ protected:
 	int refresh_content(int ww, int dy);
 };
 
-#define NUM_PALETTE_FORMATS 13
-
 class Image_To_Tiles_Dialog : public Option_Dialog {
-public:
-	enum class Palette_Format { PLTE, RGB, JASC, ACT, ACO, TXT, GPL, XML, JSON, MAP, HEX, PNG, BMP };
 private:
 	Label *_tileset_heading, * _tilemap_heading;
 	Spacer *_tileset_spacer, *_tilemap_spacer, *_palette_spacer;
