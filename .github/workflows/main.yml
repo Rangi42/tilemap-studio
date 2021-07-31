@@ -21,13 +21,13 @@ jobs:
         with:
           path: fltk
           repository: fltk/fltk
-          ref: release-1.3.6
+          ref: release-1.3.7
           fetch-depth: 1
 
       - name: Install FLTK
         working-directory: fltk
         run: |
-          ./autogen.sh --prefix="$PWD/.." --with-abiversion=10306
+          ./autogen.sh --prefix="$PWD/.." --with-abiversion=10307
           make
           make install
 

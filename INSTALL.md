@@ -18,13 +18,13 @@ If the pre-built release already works for you, you don't have to build it yours
 1. On GitHub, click the green "**Code**" button and click "**Download ZIP**". This will download **tilemap-studio-master.zip**.
 2. Unzip tilemap-studio-master.zip. This will create the **tilemap-studio-master** folder.
 3. Navigate to the tilemap-studio-master folder in Explorer.
-4. Download fltk-1.3.6-source.tar.bz2 or fltk-1.3.6-source.tar.gz from [**fltk.org**](https://www.fltk.org/software.php) to a new **tilemap-studio-master\lib** subfolder.
-5. Extract fltk-1.3.6-source.tar (you may need a program such as [7-Zip](https://www.7-zip.org/)). This will create the lib\**fltk-1.3.6** folder.
-6. Open lib\fltk-1.3.6\abi-version.ide in a text editor such as Notepad and replace "`#undef FL_ABI_VERSION`" with "`#define FL_ABI_VERSION 10306`". Save it.
-7. Open lib\fltk-1.3.6\ide\VisualC2010\fltk.sln in Visual Studio 2019. (Other versions may or may not work, I haven't tried.)
+4. Download fltk-1.3.7-source.tar.bz2 or fltk-1.3.7-source.tar.gz from [**fltk.org**](https://www.fltk.org/software.php) to a new **tilemap-studio-master\lib** subfolder.
+5. Extract fltk-1.3.7-source.tar (you may need a program such as [7-Zip](https://www.7-zip.org/)). This will create the lib\**fltk-1.3.7** folder.
+6. Open lib\fltk-1.3.7\abi-version.ide in a text editor such as Notepad and replace "`#undef FL_ABI_VERSION`" with "`#define FL_ABI_VERSION 10307`". Save it.
+7. Open lib\fltk-1.3.7\ide\VisualC2010\fltk.sln in Visual Studio 2019. (Other versions may or may not work, I haven't tried.)
 8. A "Retarget Projects" dialog will open, since fltk.sln was made for Visual Studio 2010. Click OK to upgrade the Windows SDK version and platform toolset.
 9. Go to **Build → Batch Build…**, check the projects **fltk**, **fltkimages**, **fltkpng**, **fltkjpeg**, and **fltkzlib** in the Release configuration, and click the **Build** button.
-10. Move all the .lib files from lib\fltk-1.3.6\lib\\\*.lib up to lib\\\*.lib.
+10. Move all the .lib files from lib\fltk-1.3.7\lib\\\*.lib up to lib\\\*.lib.
 11. Copy the lib\FL folder up to include\FL.
 12. Open ide\tilemap-studio.sln in Visual Studio 2019.
 13. If the Solution Configuration dropdown on the toolbar says Debug, set it to **Release**.
@@ -65,11 +65,11 @@ Run the following commands:
 git clone https://github.com/Rangi42/tilemap-studio.git
 cd tilemap-studio
 
-# Build FLTK 1.3.6 with the latest ABI enabled
+# Build FLTK 1.3.7 with the latest ABI enabled
 # (even if you already have libfltk1.3-dev installed)
-git clone --branch release-1.3.6 --depth 1 https://github.com/fltk/fltk.git
+git clone --branch release-1.3.7 --depth 1 https://github.com/fltk/fltk.git
 pushd fltk
-./autogen.sh --prefix="$PWD/.." --with-abiversion=10306
+./autogen.sh --prefix="$PWD/.." --with-abiversion=10307
 make
 make install
 popd
