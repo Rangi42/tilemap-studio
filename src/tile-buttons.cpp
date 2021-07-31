@@ -191,7 +191,7 @@ void Tile_State::draw_tile(int x, int y, int z, bool active, bool selected) {
 			}
 		}
 	}
-	uint16_t hi = (id & 0xF0) >> 4, lo = id & 0x0F, bank = (id & 0x300) >> 8;
+	uint16_t hi = HI_NYB(id), lo = LO_NYB(id), bank = (id & 0x300) >> 8;
 	char l1 = (char)(hi > 9 ? 'A' + hi - 10 : '0' + hi), l2 = (char)(lo > 9 ? 'A' + lo - 10 : '0' + lo);
 	const char buffer[3] = {l1, l2, '\0'};
 	bool r = Config::rainbow_tiles();
@@ -280,7 +280,7 @@ void Tile_State::draw_tile_1x(int x, int y, bool active, bool selected) {
 			}
 		}
 	}
-	char hi = (char)((id & 0xF0) >> 4), lo = (char)(id & 0x0F);
+	uchar hi = HI_NYB(id), lo = LO_NYB(id);
 	bool r = Config::rainbow_tiles();
 	Fl_Color bg = rainbow_bg_colors[r ? lo : 0];
 	fl_rectf(x, y, TILE_SIZE, TILE_SIZE, bg);
@@ -301,7 +301,7 @@ void Tile_State::print(int x, int y, bool active, bool selected, int palette_) {
 		}
 	}
 	if (!drawn) {
-		char hi = (char)((id & 0xF0) >> 4), lo = (char)(id & 0x0F);
+		uchar hi = HI_NYB(id), lo = LO_NYB(id);
 		bool r = Config::print_rainbow_tiles();
 		Fl_Color bg = rainbow_bg_colors[r ? lo : 0];
 		fl_rectf(x, y, TILE_SIZE, TILE_SIZE, bg);

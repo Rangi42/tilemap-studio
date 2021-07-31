@@ -265,7 +265,7 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 			int a = fgetc(file);
 			v = v | ((a & 0x03) << 8);
 			bool x_flip = !!(a & 0x04), y_flip = !!(a & 0x08);
-			int palette = (a & 0xF0) >> 4;
+			int palette = HI_NYB(a);
 			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip, false, false, palette));
 		}
 	}
@@ -321,7 +321,7 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 				for (Tile_Tessera *tt : tiles) { delete tt; }
 				return (_result = Result::TILEMAP_TOO_LONG_00);
 			}
-			int v = (b & 0xF0) >> 4, r = b & 0x0F;
+			int v = HI_NYB(b), r = LO_NYB(b);
 			for (int j = 0; j < r; j++) {
 				tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v));
 			}

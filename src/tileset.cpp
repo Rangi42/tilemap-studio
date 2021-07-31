@@ -337,10 +337,9 @@ Tileset::Result Tileset::parse_4bpp_data(size_t n, uchar *data) {
 			int py = (int)(i * TILE_SIZE + j);
 			for (int k = 0; k < TILE_SIZE / 2; k++) {
 				uchar b = data[i * BYTES_PER_4BPP_TILE + j * TILE_SIZE / 2 + k];
-				uchar hi = (uchar)((b & 0xF0) >> 4), lo = (uchar)(b & 0x0F);
-				fl_color(bpp4_colors[lo]);
+				fl_color(bpp4_colors[LO_NYB(b)]);
 				fl_point(k * 2, py);
-				fl_color(bpp4_colors[hi]);
+				fl_color(bpp4_colors[HI_NYB(b)]);
 				fl_point(k * 2 + 1, py);
 			}
 		}

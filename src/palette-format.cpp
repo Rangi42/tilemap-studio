@@ -20,14 +20,15 @@ static const char *palette_names[NUM_PALETTE_FORMATS] = {
 	"PaintShop Pro (JASC-PAL)",
 	"Adobe Color Table (ACT)",
 	"Adobe Color Swatch (ACO)",
+	"Adobe Swatch Exchange (ASE)",
 	"paint.net (TXT)",
 	"GIMP (GPL)",
 	"CorelDRAW (XML)",
 	"superfamiconv (JSON)",
 	"Fractint (MAP)",
 	"Hexadecimal (HEX)",
-	"Pixels (PNG)",
-	"Pixels (BMP)"
+	"Pixel image (PNG)",
+	"Pixel image (BMP)"
 };
 
 const char *palette_name(Palette_Format fmt) {
@@ -43,7 +44,7 @@ int palette_max_name_width() {
 }
 
 static const char *palette_extensions[NUM_PALETTE_FORMATS] = {
-	NULL, ".pal", ".pal", ".act", ".aco", ".txt", ".gpl", ".xml", ".json", ".map", ".hex", ".pal.png", ".pal.bmp"
+	NULL, ".pal", ".pal", ".act", ".aco", ".ase", ".txt", ".gpl", ".xml", ".json", ".map", ".hex", ".pal.png", ".pal.bmp"
 };
 
 const char *palette_extension(Palette_Format fmt) {
@@ -78,6 +79,10 @@ static bool write_graphic_palette(const char *f, const Palettes &palettes, size_
 	return result == Image::Result::IMAGE_OK;
 }
 
+static int hex_char(int c) {
+	return c + (c < 0xA ? '0' : 'a' - 0xA);
+}
+
 static void write_guid(FILE *file) {
 	static std::random_device rd;
 	static std::mt19937_64 gen(rd());
@@ -86,14 +91,16 @@ static void write_guid(FILE *file) {
 	// GUID version 4 variant 1: xxxxxxxx-xxxx-4xxx-Xxxx-xxxxxxxxxxxx
 	for (int i = 0; i < 36; i++) {
 		if (i == 8 || i == 13 || i == 18 || i == 23) {
-			fputc('-', file);
+			fputc('-', file); // group separator
 		}
 		else if (i == 14) {
-			fputc('4', file);
+			fputc('4', file); // version (4 bits)
+		}
+		else if (i == 19) {
+			fputc(hex_char(dis2(gen)), file); // variant (2 bits)
 		}
 		else {
-			int d = i == 19 ? dis2(gen) : dis(gen);
-			fputc(d + (d < 0xA ? '0' : 'a' - 0xA), file);
+			fputc(hex_char(dis(gen)), file);
 		}
 	}
 }
@@ -158,6 +165,42 @@ bool write_palette(const char *f, const Palettes &palettes, Palette_Format pal_f
 				Fl::get_color(c, rgb[2], rgb[4], rgb[6]);
 				rgb[3] = rgb[2]; rgb[5] = rgb[4]; rgb[7] = rgb[6];
 				fwrite(rgb, 1, sizeof(rgb), file);
+			}
+		}
+	}
+	else if (pal_fmt == Palette_Format::ASE) {
+		uchar header[12] = {
+			'A', 'S', 'E', 'F', // magic number
+			BE16(1),            // major version
+			BE16(0),            // minor version
+			BE32(n)             // num blocks
+		};
+		fwrite(header, 1, sizeof(header), file);
+		for (const Palette &palette : palettes) {
+			for (Fl_Color c : palette) {
+				uchar r, g, b;
+				Fl::get_color(c, r, g, b);
+				float rf = r / 255.0f, gf = g / 255.0f, bf = b / 255.0f;
+				uint32_t ri, gi, bi;
+				memcpy(&ri, &rf, 4); memcpy(&gi, &gf, 4); memcpy(&bi, &bf, 4);
+				uchar block[42] = {
+					BE16(1),  // block type (color entry)
+					BE32(36), // block length
+					BE16(8),  // name length
+					// block name (UTF-16 "#rrggbb")
+					0, '#',
+					0, (uchar)hex_char(HI_NYB(r)),
+					0, (uchar)hex_char(LO_NYB(r)),
+					0, (uchar)hex_char(HI_NYB(g)),
+					0, (uchar)hex_char(LO_NYB(g)),
+					0, (uchar)hex_char(HI_NYB(b)),
+					0, (uchar)hex_char(LO_NYB(b)),
+					0, 0,
+					'R', 'G', 'B', ' ',           // color model
+					BE32(ri), BE32(gi), BE32(bi), // color values
+					BE16(0)                       // color type (global)
+				};
+				fwrite(block, 1, sizeof(block), file);
 			}
 		}
 	}

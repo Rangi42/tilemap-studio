@@ -22,6 +22,8 @@
 #define _countof(a) (sizeof(a) / sizeof(a[0]))
 #endif
 
+#define HI_NYB(n) (uchar)(((n) & 0xF0) >> 4)
+#define LO_NYB(n) (uchar)((n) & 0x0F)
 #define LE16(n) (uchar)((n) & 0xFFUL), (uchar)(((n) & 0xFF00UL) >> 8)
 #define LE32(n) (uchar)((n) & 0xFFUL), (uchar)(((n) & 0xFF00UL) >> 8), (uchar)(((n) & 0xFF0000UL) >> 16), (uchar)(((n) & 0xFF000000UL) >> 24)
 #define BE16(n) (uchar)(((n) & 0xFF00UL) >> 8), (uchar)((n) & 0xFFUL)
