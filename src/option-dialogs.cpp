@@ -819,10 +819,15 @@ void Image_To_Tiles_Dialog::update_image_name() {
 	}
 }
 
-static const char *palette_names[NUM_PALETTE_FORMATS] = {"Indexed color", "Assembly (RGB)", "PaintShop Pro (JASC-PAL)",
-	"Adobe Color Table (ACT)", "GIMP (GPL)", "Image (PNG)", "Image (BMP)"};
+static const char *palette_names[NUM_PALETTE_FORMATS] = {
+	"Indexed in tileset", "Assembly (RGB)", "PaintShop Pro (JASC-PAL)", "Adobe Color Table (ACT)",
+	"Adobe Color Swatch (ACO)", "paint.net (TXT)", "GIMP (GPL)", "Fractint (MAP)",
+	"Image (PNG)", "Image (BMP)"
+};
 
-static const char *palette_exts[NUM_PALETTE_FORMATS] = {NULL, ".pal", ".pal", ".act", ".gpl", ".pal.png", ".pal.bmp"};
+static const char *palette_exts[NUM_PALETTE_FORMATS] = {
+	NULL, ".pal", ".pal", ".act", ".aco", ".txt", ".gpl", ".map", ".pal.png", ".pal.bmp"
+};
 
 void Image_To_Tiles_Dialog::update_output_names() {
 	if (_tileset_filename.empty()) {
@@ -1091,7 +1096,11 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	dy += wgt_h + wgt_m;
 
 	wgt_off = win_m + text_width(_palette_format->label(), 3);
-	wgt_w = std::max(text_width("PaintShop Pro (JASC-PAL)", 6), text_width("Adobe Color Table (ACT)", 6)) + wgt_h;
+	wgt_w = 0;
+	for (int i = 0; i < NUM_PALETTE_FORMATS; i++) {
+		wgt_w = std::max(wgt_w, text_width(palette_names[i], 6));
+	}
+	wgt_w += wgt_h;
 	_palette_format->resize(wgt_off, dy, wgt_w, wgt_h);
 	dy += wgt_h + wgt_m;
 

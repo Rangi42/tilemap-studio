@@ -116,8 +116,7 @@ const char *format_name(Tilemap_Format fmt) {
 int format_max_name_width() {
 	int mw = 0;
 	for (int i = 0; i < NUM_FORMATS; i++) {
-		int fw = text_width(format_names[i], 6);
-		if (fw > mw) { mw = fw; }
+		mw = std::max(mw, text_width(format_names[i], 6));
 	}
 	return mw;
 }

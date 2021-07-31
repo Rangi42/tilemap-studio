@@ -56,6 +56,7 @@ bool write_palette(const char *f, const std::vector<Palette> &palettes,
 	FILE *file = fl_fopen(f, "wb");
 	if (!file) { return false; }
 
+	size_t n = palettes.size() * nc;
 	if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::RGB) {
 		int p = 0;
 		for (const Palette &palette : palettes) {
@@ -68,7 +69,7 @@ bool write_palette(const char *f, const std::vector<Palette> &palettes,
 		}
 	}
 	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::JASC) {
-		fprintf(file, "JASC-PAL\r\n0100\r\n%zu\r\n", palettes.size() * nc);
+		fprintf(file, "JASC-PAL\r\n0100\r\n%zu\r\n", n);
 		for (const Palette &palette : palettes) {
 			for (Fl_Color c : palette) {
 				uchar r, g, b;
@@ -78,27 +79,59 @@ bool write_palette(const char *f, const std::vector<Palette> &palettes,
 		}
 	}
 	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::ACT) {
+		uchar rgb[3] = {};
+		for (const Palette &palette : palettes) {
+			for (Fl_Color c : palette) {
+				Fl::get_color(c, rgb[0], rgb[1], rgb[2]);
+				fwrite(rgb, 1, sizeof(rgb), file);
+			}
+		}
+		memset(rgb, 0, sizeof(rgb));
+		for (size_t i = n; i < MAX_PALETTE_LENGTH; i++) {
+			fwrite(rgb, 1, sizeof(rgb), file);
+		}
+	}
+	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::ACO) {
+		fputc(0, file);
+		fputc(1, file);
+		fputc((n & 0xff00) >> 8, file);
+		fputc(n & 0xff, file);
+		uchar rgb[10] = {};
+		for (const Palette &palette : palettes) {
+			for (Fl_Color c : palette) {
+				Fl::get_color(c, rgb[2], rgb[4], rgb[6]);
+				rgb[3] = rgb[2]; rgb[5] = rgb[4]; rgb[7] = rgb[6];
+				fwrite(rgb, 1, sizeof(rgb), file);
+			}
+		}
+	}
+	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::TXT) {
+		fputs("; paint.net Palette File\n", file);
 		for (const Palette &palette : palettes) {
 			for (Fl_Color c : palette) {
 				uchar r, g, b;
 				Fl::get_color(c, r, g, b);
-				fprintf(file, "%c%c%c", r, g, b);
+				fprintf(file, "FF%02X%02X%02X\n", (int)r, (int)g, (int)b);
 			}
-		}
-		for (size_t i = palettes.size(); i < 256; i++) {
-			fputc(0, file);
-			fputc(0, file);
-			fputc(0, file);
 		}
 	}
 	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::GPL) {
 		const char *name = fl_filename_name(f);
-		fprintf(file, "GIMP Palette\nName: %s\n", name);
+		fprintf(file, "GIMP Palette\nName: %s\nColumns: 16\n#\n", name);
 		for (const Palette &palette : palettes) {
 			for (Fl_Color c : palette) {
 				uchar r, g, b;
 				Fl::get_color(c, r, g, b);
 				fprintf(file, "% 3d % 3d % 3d\t#%02x%02x%02x\n", (int)r, (int)g, (int)b, (int)r, (int)g, (int)b);
+			}
+		}
+	}
+	else if (pal_fmt == Image_To_Tiles_Dialog::Palette_Format::MAP) {
+		for (const Palette &palette : palettes) {
+			for (Fl_Color c : palette) {
+				uchar r, g, b;
+				Fl::get_color(c, r, g, b);
+				fprintf(file, "%d %d %d\n", (int)r, (int)g, (int)b);
 			}
 		}
 	}
