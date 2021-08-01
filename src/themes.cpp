@@ -3402,55 +3402,10 @@ void OS::use_native_fonts() {
 	fl_font(OS_FONT, OS_FONT_SIZE);
 }
 
-void OS::use_native_scheme() {
-#ifdef _WIN32
-	if (is_classic_windows()) {
-		use_classic_scheme();
-	}
-	else if (is_modern_windows()) {
-		use_metro_scheme();
-	}
-	else {
-		use_aero_scheme();
-	}
-#else
-	use_greybird_scheme();
-#endif
-}
-
-void OS::use_native_colors() {
-#ifdef _WIN32
-	if (is_classic_windows()) {
-		use_classic_colors();
-	}
-	else if (is_modern_windows()) {
-		use_metro_colors();
-	}
-	else {
-		use_aero_colors();
-	}
-#else
-	use_greybird_colors();
-#endif
-}
-
 void OS::use_native_settings() {
 	Fl::visible_focus(0);
 	Fl::scrollbar_size(15);
 	Fl_Tooltip::font(OS_FONT);
 	Fl_Tooltip::size(OS_FONT_SIZE);
 	Fl_Tooltip::delay(0.5f);
-}
-
-void OS::use_native_theme() {
-#ifdef _WIN32
-	if (is_modern_windows()) {
-		use_metro_theme();
-	}
-	else {
-		use_aero_theme();
-	}
-#else
-	use_greybird_theme();
-#endif
 }

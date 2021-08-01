@@ -61,9 +61,6 @@ public:
 	inline static constexpr bool is_dark_theme(Theme t) { return t == Theme::DARK || t == Theme::HIGH_CONTRAST; }
 	inline static bool is_consolas(void) { return _is_consolas; }
 	static void use_native_fonts(void);
-	static void use_native_scheme(void);
-	static void use_native_colors(void);
-	static void use_native_theme(void);
 	static void use_native_settings(void);
 	static void use_classic_theme(void);
 	static void use_aero_theme(void);
