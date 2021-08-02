@@ -13,7 +13,7 @@
 #include "image.h"
 
 Image::Result Image::write_image(const char *f, Fl_RGB_Image *img, int bpp, const Palettes *palettes, size_t max_colors) {
-	if (ends_with(f, ".bmp") || ends_with(f, ".BMP")) {
+	if (ends_with_ignore_case(f, ".bmp")) {
 		return write_bmp_image(f, img, bpp, palettes, max_colors);
 	}
 	return write_png_image(f, img, bpp, palettes, max_colors);

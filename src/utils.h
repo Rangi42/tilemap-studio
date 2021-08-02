@@ -22,6 +22,8 @@
 #define _countof(a) (sizeof(a) / sizeof(a[0]))
 #endif
 
+#define RANGE(x) (x).begin(), (x).end()
+
 #define HI_NYB(n) (uchar)(((n) & 0xF0) >> 4)
 #define LO_NYB(n) (uchar)((n) & 0x0F)
 #define LE16(n) (uchar)((n) & 0xFFUL), (uchar)(((n) & 0xFF00UL) >> 8)
@@ -34,9 +36,8 @@ typedef uint16_t size16_t;
 typedef uint32_t size32_t;
 typedef uint64_t size64_t;
 
-bool starts_with(std::string_view s, std::string_view p);
-bool ends_with(std::string_view s, std::string_view p);
-bool ends_with(std::wstring_view s, std::wstring_view p);
+bool starts_with_ignore_case(std::string_view s, std::string_view p);
+bool ends_with_ignore_case(std::string_view s, std::string_view p);
 void add_dot_ext(const char *f, const char *ext, char *s);
 int text_width(const char *l, int pad);
 int text_width(const char *l, int pad = 0);

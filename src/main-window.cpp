@@ -1757,8 +1757,8 @@ void Main_Window::load_corresponding_tileset(const char *filename) {
 	for (int i = 0; i < 8; i++) {
 		const char *ext = extensions[i];
 		strcpy(buffer, filename);
-		if (ends_with(filename, ".tilemap.rle")) {
-			buffer[strlen(buffer)-12] = '\0';
+		if (ends_with_ignore_case(filename, ".tilemap.rle")) {
+			buffer[strlen(buffer) - strlen(".tilemap.rle")] = '\0';
 			strcat(buffer, ext);
 		}
 		else {
@@ -1772,8 +1772,7 @@ void Main_Window::load_corresponding_tileset(const char *filename) {
 }
 
 void Main_Window::open_tilemap_or_image_to_tiles(const char *filename) {
-	if (ends_with(filename, ".png") || ends_with(filename, ".PNG") ||
-		ends_with(filename, ".bmp") || ends_with(filename, ".BMP")) {
+	if (ends_with_ignore_case(filename, ".png") || ends_with_ignore_case(filename, ".bmp")) {
 		_image_to_tiles_dialog->prepare_image(filename);
 		image_to_tiles_cb(NULL, this);
 	}

@@ -118,14 +118,14 @@ bool Tileset::print_tile(const Tile_State *ts, int x, int y, bool active) const 
 
 Tileset::Result Tileset::read_tiles(const char *f) {
 	std::string s(f);
-	if (ends_with(s, ".png") || ends_with(s, ".PNG")) { return read_png_graphics(f); }
-	if (ends_with(s, ".bmp") || ends_with(s, ".BMP")) { return read_bmp_graphics(f); }
-	if (ends_with(s, ".1bpp") || ends_with(s, ".1BPP")) { return read_1bpp_graphics(f); }
-	if (ends_with(s, ".2bpp") || ends_with(s, ".2BPP")) { return read_2bpp_graphics(f); }
-	if (ends_with(s, ".4bpp") || ends_with(s, ".4BPP")) { return read_4bpp_graphics(f); }
-	if (ends_with(s, ".8bpp") || ends_with(s, ".8BPP")) { return read_8bpp_graphics(f); }
-	if (ends_with(s, ".1bpp.lz") || ends_with(s, ".1BPP.LZ")) { return read_1bpp_lz_graphics(f); }
-	if (ends_with(s, ".2bpp.lz") || ends_with(s, ".2BPP.LZ")) { return read_2bpp_lz_graphics(f); }
+	if (ends_with_ignore_case(s, ".png")) { return read_png_graphics(f); }
+	if (ends_with_ignore_case(s, ".bmp")) { return read_bmp_graphics(f); }
+	if (ends_with_ignore_case(s, ".1bpp")) { return read_1bpp_graphics(f); }
+	if (ends_with_ignore_case(s, ".2bpp")) { return read_2bpp_graphics(f); }
+	if (ends_with_ignore_case(s, ".4bpp")) { return read_4bpp_graphics(f); }
+	if (ends_with_ignore_case(s, ".8bpp")) { return read_8bpp_graphics(f); }
+	if (ends_with_ignore_case(s, ".1bpp.lz")) { return read_1bpp_lz_graphics(f); }
+	if (ends_with_ignore_case(s, ".2bpp.lz")) { return read_2bpp_lz_graphics(f); }
 	return (_result = Result::TILESET_BAD_EXT);
 }
 

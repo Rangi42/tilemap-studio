@@ -1,4 +1,6 @@
 #include <cstring>
+#include <cctype>
+#include <algorithm>
 #include <sys/stat.h>
 
 #pragma warning(push, 0)
@@ -9,16 +11,20 @@
 
 #include "utils.h"
 
-bool starts_with(std::string_view s, std::string_view p) {
-	return !s.compare(0, p.size(), p);
+static bool cmp_ignore_case(const char &a, const char &b) {
+	return tolower(a) == tolower(b);
 }
 
-bool ends_with(std::string_view s, std::string_view p) {
-	return s.size() >= p.size() && !s.compare(s.size() - p.size(), p.size(), p);
+bool starts_with_ignore_case(std::string_view s, std::string_view p) {
+	if (s.size() < p.size()) { return false; }
+	std::string_view ss = s.substr(0, p.size());
+	return std::equal(RANGE(ss), RANGE(p), cmp_ignore_case);
 }
 
-bool ends_with(std::wstring_view s, std::wstring_view p) {
-	return s.size() >= p.size() && !s.compare(s.size() - p.size(), p.size(), p);
+bool ends_with_ignore_case(std::string_view s, std::string_view p) {
+	if (s.size() < p.size()) { return false; }
+	std::string_view ss = s.substr(s.size() - p.size());
+	return std::equal(RANGE(ss), RANGE(p), cmp_ignore_case);
 }
 
 void add_dot_ext(const char *f, const char *ext, char *s) {
