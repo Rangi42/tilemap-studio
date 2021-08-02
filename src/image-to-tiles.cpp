@@ -24,8 +24,6 @@
 #pragma warning(push)
 #pragma warning(disable : 4458)
 
-#define RANGE(x) (x).begin(), (x).end()
-
 typedef std::set<Fl_Color> Color_Set;
 
 static bool build_tilemap(const Tile *tiles, size_t n, std::vector<int> tile_palettes,
@@ -126,7 +124,7 @@ bool Main_Window::image_to_tiles() {
 	const char *image_basename = fl_filename_name(image_filename);
 
 	Fl_RGB_Image *img = NULL;
-	if (ends_with(image_basename, ".bmp") || ends_with(image_basename, ".BMP")) {
+	if (ends_with_ignore_case(image_basename, ".bmp")) {
 		img = new Fl_BMP_Image(image_filename);
 	}
 	else {
