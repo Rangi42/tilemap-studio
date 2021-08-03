@@ -1,6 +1,7 @@
 #pragma warning(push, 0)
 #include <FL/fl_utf8.h>
 #include <FL/Fl_PNG_Image.H>
+#include <FL/Fl_GIF_Image.H>
 #include <FL/Fl_BMP_Image.H>
 #include <FL/Fl_Image_Surface.H>
 #include <FL/fl_draw.H>
@@ -119,6 +120,7 @@ bool Tileset::print_tile(const Tile_State *ts, int x, int y, bool active) const 
 Tileset::Result Tileset::read_tiles(const char *f) {
 	std::string s(f);
 	if (ends_with_ignore_case(s, ".png")) { return read_png_graphics(f); }
+	if (ends_with_ignore_case(s, ".gif")) { return read_gif_graphics(f); }
 	if (ends_with_ignore_case(s, ".bmp")) { return read_bmp_graphics(f); }
 	if (ends_with_ignore_case(s, ".1bpp")) { return read_1bpp_graphics(f); }
 	if (ends_with_ignore_case(s, ".2bpp")) { return read_2bpp_graphics(f); }
@@ -132,6 +134,14 @@ Tileset::Result Tileset::read_tiles(const char *f) {
 Tileset::Result Tileset::read_png_graphics(const char *f) {
 	Fl_PNG_Image *png = new Fl_PNG_Image(f);
 	return postprocess_graphics(png);
+}
+
+Tileset::Result Tileset::read_gif_graphics(const char *f) {
+	Fl_GIF_Image *gif = new Fl_GIF_Image(f);
+	if (!gif) { return (_result = Result::TILESET_BAD_FILE); }
+	Fl_RGB_Image *img = new Fl_RGB_Image(gif, FL_WHITE);
+	free(gif);
+	return postprocess_graphics(img);
 }
 
 Tileset::Result Tileset::read_bmp_graphics(const char *f) {

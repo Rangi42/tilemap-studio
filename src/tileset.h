@@ -47,6 +47,7 @@ public:
 	Result read_tiles(const char *f);
 private:
 	Result read_png_graphics(const char *f);
+	Result read_gif_graphics(const char *f);
 	Result read_bmp_graphics(const char *f);
 	Result read_1bpp_graphics(const char *f);
 	Result read_2bpp_graphics(const char *f);

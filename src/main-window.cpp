@@ -594,7 +594,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_tilemap_save_chooser->options(Fl_Native_File_Chooser::Option::SAVEAS_CONFIRM);
 
 	_tileset_load_chooser->title("Open Tileset");
-	_tileset_load_chooser->filter("Tileset Files\t*.{png,bmp,1bpp,2bpp,4bpp,8bpp,1bpp.lz,2bpp.lz}\n");
+	_tileset_load_chooser->filter("Tileset Files\t*.{png,gif,bmp,1bpp,2bpp,4bpp,8bpp,1bpp.lz,2bpp.lz}\n");
 
 	_image_print_chooser->title("Print Screenshot");
 	_image_print_chooser->filter("PNG Files\t*.png\nBMP Files\t*.bmp\n");
@@ -1751,11 +1751,12 @@ void Main_Window::load_recent_tileset(int n) {
 	load_tileset(filename);
 }
 
+static const char *tileset_extensions[9] = {".png", ".gif", ".bmp", ".1bpp", ".2bpp", ".4bpp", ".8bpp", ".1bpp.lz", ".2bpp.lz"};
+
 void Main_Window::load_corresponding_tileset(const char *filename) {
 	char buffer[FL_PATH_MAX] = {};
-	const char *extensions[8] = {".png", ".bmp", ".1bpp", ".2bpp", ".4bpp", ".8bpp", ".1bpp.lz", ".2bpp.lz"};
-	for (int i = 0; i < 8; i++) {
-		const char *ext = extensions[i];
+	for (int i = 0; i < sizeof(tileset_extensions); i++) {
+		const char *ext = tileset_extensions[i];
 		strcpy(buffer, filename);
 		if (ends_with_ignore_case(filename, ".tilemap.rle")) {
 			buffer[strlen(buffer) - strlen(".tilemap.rle")] = '\0';
@@ -1772,7 +1773,8 @@ void Main_Window::load_corresponding_tileset(const char *filename) {
 }
 
 void Main_Window::open_tilemap_or_image_to_tiles(const char *filename) {
-	if (ends_with_ignore_case(filename, ".png") || ends_with_ignore_case(filename, ".bmp")) {
+	if (ends_with_ignore_case(filename, ".png") || ends_with_ignore_case(filename, ".gif")
+		|| ends_with_ignore_case(filename, ".bmp")) {
 		_image_to_tiles_dialog->prepare_image(filename);
 		image_to_tiles_cb(NULL, this);
 	}

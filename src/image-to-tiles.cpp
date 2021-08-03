@@ -7,6 +7,7 @@
 #pragma warning(push, 0)
 #include <FL/Fl.H>
 #include <FL/Fl_PNG_Image.H>
+#include <FL/Fl_GIF_Image.H>
 #include <FL/Fl_BMP_Image.H>
 #include <FL/Fl_Image_Surface.H>
 #pragma warning(pop)
@@ -126,6 +127,13 @@ bool Main_Window::image_to_tiles() {
 	Fl_RGB_Image *img = NULL;
 	if (ends_with_ignore_case(image_basename, ".bmp")) {
 		img = new Fl_BMP_Image(image_filename);
+	}
+	else if (ends_with_ignore_case(image_basename, ".gif")) {
+		Fl_GIF_Image *gif = new Fl_GIF_Image(image_filename);
+		if (gif) {
+			img = new Fl_RGB_Image(gif, FL_WHITE);
+			free(gif);
+		}
 	}
 	else {
 		img = new Fl_PNG_Image(image_filename);
