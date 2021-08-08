@@ -77,7 +77,7 @@ Tile *get_image_tiles(Fl_RGB_Image *img, size_t &n, size_t &iw) {
 					int ox = (x * TILE_SIZE + tx) * d;
 					const uchar *px = data + oy + ox;
 					// Round color channels to 5 bits
-					uchar r = CRGB5(px[0]), g = CRGB5(px[dp]), b = CRGB5(px[dp+dp]);
+					uchar r = NORMRGB(px[0]), g = NORMRGB(px[dp]), b = NORMRGB(px[dp+dp]);
 					int ti = ty * TILE_SIZE + tx;
 					tiles[i][ti] = fl_rgb_color(r, g, b);
 				}

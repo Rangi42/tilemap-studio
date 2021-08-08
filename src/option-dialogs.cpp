@@ -784,8 +784,7 @@ Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
 Fl_Color Image_To_Tiles_Dialog::fl_color_zero() const {
 	const char *s = _color_zero_rgb->value();
 	char rgb[7] = {};
-	size_t n = strlen(s);
-	if (n < 6) {
+	if (size_t n = strlen(s); n < 6) {
 		for (size_t i = 0; i < 6 - n; i++) {
 			rgb[i] = '0';
 		}
@@ -803,7 +802,7 @@ Fl_Color Image_To_Tiles_Dialog::fl_color_zero() const {
 	buffer[1] = rgb[5];
 	uchar b = (uchar)strtoul(buffer, NULL, 16);
 
-	return fl_rgb_color(CRGB5(r), CRGB5(g), CRGB5(b));
+	return fl_rgb_color(NORMRGB(r), NORMRGB(g), NORMRGB(b));
 }
 
 void Image_To_Tiles_Dialog::update_image_name() {

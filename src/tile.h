@@ -10,7 +10,7 @@
 
 #define NUM_TILE_PIXELS (TILE_SIZE * TILE_SIZE)
 
-#define CRGB5(c) (uchar)(((c) & 0xF8) | (((c) & 0xF8) >> 5))
+#define NORMRGB(c) (uchar)(((c) & 0xF8) | (((c) & 0xF8) >> 5))
 
 typedef Fl_Color Tile[NUM_TILE_PIXELS];
 
