@@ -265,6 +265,8 @@ int Default_Hex_Spinner::handle(int event) {
 OS_Slider::OS_Slider(int x, int y, int w, int h, const char *l) : Fl_Hor_Nice_Slider(x, y, w, h, l) {
 	labelfont(OS_FONT);
 	labelsize(OS_FONT_SIZE);
+	box(OS_BG_BOX);
+	color(FL_BACKGROUND_COLOR);
 	slider(OS_BUTTON_UP_BOX);
 	slider_size(0.0);
 	align(FL_ALIGN_LEFT | FL_ALIGN_CLIP);
@@ -279,7 +281,7 @@ int OS_Slider::handle(int event) {
 
 void OS_Slider::draw() {
 	// Based on Fl_Slider::draw()
-	Fl_Boxtype b = OS::current_theme() == OS::Theme::BRUSHED_METAL && color() != FL_BACKGROUND_COLOR ? FL_NO_BOX : box();
+	Fl_Boxtype b = box();
 	if (damage() & FL_DAMAGE_ALL) { draw_box(b, active_r() ? color() : fl_inactive(color())); }
 	draw(x()+Fl::box_dx(b), y()+Fl::box_dy(b), w()-Fl::box_dw(b), h()-Fl::box_dh(b));
 }
@@ -294,8 +296,7 @@ void OS_Slider::draw(int x, int y, int w, int h) {
 	int ws = w - s;
 	int lx = x + (int)(v * ws + 0.5);
 	fl_push_clip(x, y, w, h);
-	Fl_Boxtype b = OS::current_theme() == OS::Theme::BRUSHED_METAL && color() != FL_BACKGROUND_COLOR ? FL_NO_BOX : box();
-	draw_box(b, active_r() ? color() : fl_inactive(color()));
+	draw_box(box(), active_r() ? color() : fl_inactive(color()));
 	fl_pop_clip();
 	draw_box(OS::current_theme() == OS::Theme::OCEAN || OS::current_theme() == OS::Theme::HIGH_CONTRAST ?
 		OS_BUTTON_UP_BOX : OS_SPACER_THIN_DOWN_BOX, x, y+h/2-2, w, 4, active_r() ? FL_DARK2 : fl_inactive(FL_DARK2));

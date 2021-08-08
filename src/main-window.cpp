@@ -563,11 +563,12 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_obp1_tb->callback((Fl_Callback *)obp1_cb, this);
 
 	_transparency->color(OS_TAB_COLOR);
-	int default_alpha = Preferences::get("alpha", 4);
+	_transparency->box(FL_NO_BOX);
 	_transparency->range(1, 9);
 	_transparency->step(1);
 	double alpha_steps = floor((_transparency->maximum() - _transparency->minimum()) / _transparency->step()) + 1;
 	_transparency->slider_size(1.0 / alpha_steps);
+	int default_alpha = Preferences::get("alpha", 4);
 	_transparency->default_value(_transparency->clamp(default_alpha));
 	_transparency->callback((Fl_Callback *)transparency_cb, this);
 	_transparency->do_callback();

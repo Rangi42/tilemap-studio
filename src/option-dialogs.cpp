@@ -512,11 +512,9 @@ void Shift_Dialog::initialize_content() {
 	_shift_x->callback((Fl_Callback *)shift_x_cb, this);
 	_shift_y->default_value(0);
 	_shift_y->callback((Fl_Callback *)shift_y_cb, this);
-	_slide_x->color(FL_BACKGROUND_COLOR);
 	_slide_x->step(1);
 	_slide_x->default_value(0);
 	_slide_x->callback((Fl_Callback *)slide_x_cb, this);
-	_slide_y->color(FL_BACKGROUND_COLOR);
 	_slide_y->step(1);
 	_slide_y->default_value(0);
 	_slide_y->callback((Fl_Callback *)slide_y_cb, this);
@@ -586,7 +584,6 @@ void Shift_Tileset_Dialog::initialize_content() {
 	_shift->format("%X");
 	_shift->default_value(0);
 	_shift->callback((Fl_Callback *)shift_cb, this);
-	_slide->color(FL_BACKGROUND_COLOR);
 	_slide->step(1);
 	_slide->default_value(0);
 	_slide->callback((Fl_Callback *)slide_cb, this);
