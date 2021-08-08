@@ -1226,13 +1226,10 @@ static DWORD fl_to_win_color(Fl_Color c) {
 #endif
 
 void Image_To_Tiles_Dialog::color_zero_swatch_cb(Fl_Button *, Image_To_Tiles_Dialog *itd) {
-	itd->update_color_zero_swatch();
-
 #ifdef _WIN32
-	static COLORREF customColors[16];
+	static COLORREF customColors[16] = {};
 
-	CHOOSECOLOR cc;
-	ZeroMemory(&cc, sizeof(cc));
+	CHOOSECOLOR cc = {};
 	cc.lStructSize = sizeof(cc);
 	cc.hwndOwner = fl_xid(itd->_dialog);
 	cc.lpCustColors = (LPDWORD)customColors;
@@ -1246,6 +1243,8 @@ void Image_To_Tiles_Dialog::color_zero_swatch_cb(Fl_Button *, Image_To_Tiles_Dia
 		itd->_color_zero_rgb->value(buffer);
 		itd->update_color_zero_swatch();
 	}
+#else
+	itd->update_color_zero_swatch();
 #endif
 }
 
