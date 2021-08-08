@@ -140,7 +140,7 @@ Tileset::Result Tileset::read_gif_graphics(const char *f) {
 	Fl_GIF_Image *gif = new Fl_GIF_Image(f);
 	if (!gif) { return (_result = Result::TILESET_BAD_FILE); }
 	Fl_RGB_Image *img = new Fl_RGB_Image(gif, FL_WHITE);
-	free(gif);
+	delete gif;
 	return postprocess_graphics(img);
 }
 
