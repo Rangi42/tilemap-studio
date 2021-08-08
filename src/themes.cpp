@@ -19,15 +19,14 @@
 
 bool OS::is_classic_windows() {
 	// Return true for Windows XP and below, false for Windows 7 and above
-	OSVERSIONINFOEX osvi;
+	OSVERSIONINFOEX osvi = {};
 	DWORDLONG cm = 0;
-	char op = VER_LESS_EQUAL;
-	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
 	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
 	osvi.dwMajorVersion = 5;
 	osvi.dwMinorVersion = 1;
 	osvi.wServicePackMajor = 0;
 	osvi.wServicePackMinor = 0;
+	char op = VER_LESS_EQUAL;
 	VER_SET_CONDITION(cm, VER_MAJORVERSION, op);
 	VER_SET_CONDITION(cm, VER_MINORVERSION, op);
 	VER_SET_CONDITION(cm, VER_SERVICEPACKMAJOR, op);
@@ -38,15 +37,14 @@ bool OS::is_classic_windows() {
 
 bool OS::is_modern_windows() {
 	// Return true for Windows 8 and above, false for Windows 7 and below
-	OSVERSIONINFOEX osvi;
+	OSVERSIONINFOEX osvi = {};
 	DWORDLONG cm = 0;
-	char op = VER_GREATER_EQUAL;
-	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
 	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
 	osvi.dwMajorVersion = 6;
 	osvi.dwMinorVersion = 2;
 	osvi.wServicePackMajor = 0;
 	osvi.wServicePackMinor = 0;
+	char op = VER_GREATER_EQUAL;
 	VER_SET_CONDITION(cm, VER_MAJORVERSION, op);
 	VER_SET_CONDITION(cm, VER_MINORVERSION, op);
 	VER_SET_CONDITION(cm, VER_SERVICEPACKMAJOR, op);

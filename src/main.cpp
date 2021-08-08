@@ -71,7 +71,13 @@ int main(int argc, char **argv) {
 	Fl::visual(FL_DOUBLE | FL_RGB);
 
 #ifdef _WIN32
-	OS::Theme theme = (OS::Theme)Preferences::get("theme", (int)OS::Theme::BLUE);
+	OS::Theme default_theme = OS::Theme::BLUE;
+	DWORD reg_value = 1, reg_size = sizeof(reg_value);
+	if (!RegGetValue(HKEY_CURRENT_USER, _T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"),
+		_T("AppsUseLightTheme"), RRF_RT_REG_DWORD, NULL, &reg_value, &reg_size) && reg_value == 0) {
+		default_theme = OS::Theme::DARK;
+	}
+	OS::Theme theme = (OS::Theme)Preferences::get("theme", (int)default_theme);
 #else
 	OS::Theme theme = (OS::Theme)Preferences::get("theme", (int)OS::Theme::GREYBIRD);
 #endif
