@@ -163,7 +163,6 @@ int format_bytes_per_tile(Tilemap_Format fmt) {
 }
 
 Tilemap_Format guess_format(const char *filename) {
-	fprintf(stderr, "guesing format for %s\n", filename);
 	size_t fs = file_size(filename);
 	const char *basename = fl_filename_name(filename);
 	std::string s(basename);

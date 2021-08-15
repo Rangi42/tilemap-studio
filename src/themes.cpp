@@ -2763,7 +2763,7 @@ void OS::use_dark_theme() {
 
 /******************************* Brushed Metal ********************************/
 
-static const uchar brushed_metal_png_buffer[24980] = {
+static const uchar brushed_metal_png_buffer[] = {
 #include "brushed-metal.dat"
 };
 
@@ -3348,51 +3348,51 @@ void OS::use_native_fonts() {
 		found = use_font(OS_FONT, system_font);
 	}
 	if (!found) {
-		const char *system_fonts[3] = {"Segoe UI", "Tahoma", "MS Sans Serif"};
+		const char *system_fonts[] = {"Segoe UI", "Tahoma", "MS Sans Serif"};
 		use_any_font(OS_FONT, system_fonts, _countof(system_fonts));
 	}
 	// Use common monospace font
-	const char *monospace_fonts[3] = {"Consolas", "Lucida Console", "Courier New"};
+	const char *monospace_fonts[] = {"Consolas", "Lucida Console", "Courier New"};
 	int monospace_i = use_any_font(FL_COURIER, monospace_fonts, _countof(monospace_fonts));
 	if (monospace_i == 0) { _is_consolas = true; }
 	// Use common bold monospace font
-	const char *bold_monospace_fonts[3] = {
+	const char *bold_monospace_fonts[] = {
 		"Consolas bold", "Lucida Console bold", "Courier New bold"
 	};
 	use_any_font(FL_COURIER_BOLD, bold_monospace_fonts, _countof(bold_monospace_fonts));
 	// Use common italic monospace font
-	const char *italic_monospace_fonts[3] = {
+	const char *italic_monospace_fonts[] = {
 		"Consolas italic", "Lucida Console italic", "Courier New italic"
 	};
 	use_any_font(FL_COURIER_ITALIC, italic_monospace_fonts, _countof(italic_monospace_fonts));
 	// Use common bold italic monospace font
-	const char *bold_italic_monospace_fonts[3] = {
+	const char *bold_italic_monospace_fonts[] = {
 		"Consolas bold italic", "Lucida Console bold italic", "Courier New bold italic"
 	};
 	use_any_font(FL_COURIER_BOLD_ITALIC, bold_italic_monospace_fonts, _countof(bold_italic_monospace_fonts));
 #else
 	// Use common system UI font
-	const char *system_fonts[4] = {
+	const char *system_fonts[] = {
 		"Ubuntu", "Noto Sans", "Droid Sans", "DejaVu Sans"
 	};
 	use_any_font(OS_FONT, system_fonts, _countof(system_fonts));
 	// Use common monospace font
-	const char *monospace_fonts[4] = {
+	const char *monospace_fonts[] = {
 		"Ubuntu Mono", "Noto Sans Mono", "Droid Sans Mono", "DejaVu Sans Mono"
 	};
 	use_any_font(FL_COURIER, monospace_fonts, _countof(monospace_fonts));
 	// Use common bold monospace font
-	const char *bold_monospace_fonts[4] = {
+	const char *bold_monospace_fonts[] = {
 		"Ubuntu Mono bold", "Noto Sans Mono bold", "Droid Sans Mono bold", "DejaVu Sans Mono bold"
 	};
 	use_any_font(FL_COURIER_BOLD, bold_monospace_fonts, _countof(bold_monospace_fonts));
 	// Use common italic monospace font
-	const char *italic_monospace_fonts[4] = {
+	const char *italic_monospace_fonts[] = {
 		"Ubuntu Mono italic", "Noto Sans Mono italic", "Droid Sans Mono italic", "DejaVu Sans Mono italic"
 	};
 	use_any_font(FL_COURIER_ITALIC, italic_monospace_fonts, _countof(italic_monospace_fonts));
 	// Use common bold italic monospace font
-	const char *bold_italic_monospace_fonts[4] = {
+	const char *bold_italic_monospace_fonts[] = {
 		"Ubuntu Mono bold italic", "Noto Sans Mono bold italic", "Droid Sans Mono bold italic", "DejaVu Sans Mono bold italic"
 	};
 	use_any_font(FL_COURIER_BOLD_ITALIC, bold_italic_monospace_fonts, _countof(bold_italic_monospace_fonts));

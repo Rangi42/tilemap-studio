@@ -1777,12 +1777,11 @@ void Main_Window::load_recent_tileset(int n) {
 	load_tileset(filename);
 }
 
-static const char *tileset_extensions[9] = {".png", ".gif", ".bmp", ".1bpp", ".2bpp", ".4bpp", ".8bpp", ".1bpp.lz", ".2bpp.lz"};
+static const char *tileset_extensions[] = {".png", ".gif", ".bmp", ".1bpp", ".2bpp", ".4bpp", ".8bpp", ".1bpp.lz", ".2bpp.lz"};
 
 void Main_Window::load_corresponding_tileset(const char *filename) {
 	char buffer[FL_PATH_MAX] = {};
-	for (int i = 0; i < sizeof(tileset_extensions); i++) {
-		const char *ext = tileset_extensions[i];
+	for (const char *ext : tileset_extensions) {
 		strcpy(buffer, filename);
 		if (ends_with_ignore_case(filename, ".tilemap.rle")) {
 			buffer[strlen(buffer) - strlen(".tilemap.rle")] = '\0';
