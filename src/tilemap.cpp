@@ -200,7 +200,6 @@ Tilemap::Result Tilemap::read_tiles(const std::pair<std::vector<uchar>, std::vec
 	if (tbytes.empty()) { return (_result = Result::TILEMAP_BAD_FILE); }
 
 	size_t c = tbytes.size() - 1; // disregard final sentinel element
-	if (c < 0) { return (_result = Result::TILEMAP_BAD_FILE); }
 	if (c == 0) { return (_result = Result::TILEMAP_EMPTY); }
 
 	std::vector<Tile_Tessera *> tiles;
@@ -395,9 +394,9 @@ Tilemap::Result Tilemap::read_tiles(const std::pair<std::vector<uchar>, std::vec
 		}
 	}
 
-	_tiles.swap(tiles);
-	if (size() == 0) { return (_result = Result::TILEMAP_EMPTY); }
+	if (tiles.empty()) { return (_result = Result::TILEMAP_EMPTY); }
 
+	_tiles.swap(tiles);
 	guess_width();
 
 	return (_result = Result::TILEMAP_OK);
