@@ -80,7 +80,7 @@ static bool write_graphic_palette(const char *f, const Palettes &palettes, size_
 	return result == Image::Result::IMAGE_OK;
 }
 
-static int hex_char(int c) {
+static inline int hex_char(int c) {
 	return c + (c < 0xA ? '0' : 'a' - 0xA);
 }
 

@@ -608,6 +608,9 @@ const char *Tilemap::error_message(Result result) {
 		return "File ends before RLE value.";
 	case Result::TILEMAP_TOO_SHORT_ATTRS:
 		return "File ends before attribute value.";
+	case Result::TILEMAP_INVALID:
+	case Result::ATTRMAP_INVALID:
+		return "Cannot parse file format.";
 	case Result::TILEMAP_NULL:
 		return "No file chosen.";
 	case Result::ATTRMAP_TOO_SHORT:

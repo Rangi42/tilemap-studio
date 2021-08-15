@@ -22,8 +22,8 @@ struct Tilemap_State {
 class Tilemap {
 public:
 	enum class Result { TILEMAP_OK, TILEMAP_BAD_FILE, TILEMAP_EMPTY, TILEMAP_TOO_SHORT_FF, TILEMAP_TOO_LONG_FF,
-		TILEMAP_TOO_SHORT_00, TILEMAP_TOO_LONG_00, TILEMAP_TOO_SHORT_RLE, TILEMAP_TOO_SHORT_ATTRS, TILEMAP_NULL,
-		ATTRMAP_BAD_FILE, ATTRMAP_TOO_SHORT, ATTRMAP_TOO_LONG };
+		TILEMAP_TOO_SHORT_00, TILEMAP_TOO_LONG_00, TILEMAP_TOO_SHORT_RLE, TILEMAP_TOO_SHORT_ATTRS, TILEMAP_INVALID,
+		TILEMAP_NULL, ATTRMAP_BAD_FILE, ATTRMAP_TOO_SHORT, ATTRMAP_TOO_LONG, ATTRMAP_INVALID };
 private:
 	std::vector<Tile_Tessera *> _tiles;
 	size_t _width;
@@ -59,6 +59,7 @@ public:
 	void new_tiles(size_t w, size_t h);
 	Result read_tiles(const char *tf, const char *af);
 	inline bool write_tiles(const char *tf, const char *af) { return write_tiles(tf, af, _tiles, Config::format()); }
+	Result import_tiles(const char *tf, const char *af);
 	bool export_tiles(const char *f);
 	void print_tilemap(void) const;
 	void guess_width(void);

@@ -22,6 +22,7 @@
 #include "help-window.h"
 
 #define NEW_TILEMAP_NAME "New Tilemap"
+#define IMPORTED_TILEMAP_NAME "Imported Tilemap"
 
 #define NUM_RECENT 10
 
@@ -70,8 +71,8 @@ private:
 	Fl_Menu_Item *_tilemap_width_mi = NULL, *_resize_mi = NULL, *_shift_mi = NULL, *_reformat_mi = NULL;
 	Fl_Menu_Item *_shift_tileset_mi = NULL;
 	// Dialogs
-	Fl_Native_File_Chooser *_tilemap_open_chooser, *_tilemap_save_chooser, *_tilemap_export_chooser, *_tileset_load_chooser,
-		*_image_print_chooser;
+	Fl_Native_File_Chooser *_tilemap_open_chooser, *_tilemap_save_chooser, *_tilemap_import_chooser, *_tilemap_export_chooser,
+		*_tileset_load_chooser, *_image_print_chooser;
 	Modal_Dialog *_error_dialog, *_warning_dialog, *_success_dialog, *_unsaved_dialog, *_about_dialog;
 	Tilemap_Options_Dialog *_tilemap_options_dialog;
 	New_Tilemap_Dialog *_new_tilemap_dialog;
@@ -160,6 +161,7 @@ private:
 	void shift_tileset(void);
 	void reformat_tilemap(void);
 	void save_tilemap(bool force);
+	void import_tilemap(const char *filename);
 	void setup_tilemap(const char *basename, int old_tileset_size);
 	void export_tilemap(const char *filename);
 	void select_tile(uint16_t id);
@@ -180,6 +182,7 @@ private:
 	static void close_cb(Fl_Widget *w, Main_Window *mw);
 	static void save_cb(Fl_Widget *w, Main_Window *mw);
 	static void save_as_cb(Fl_Widget *w, Main_Window *mw);
+	static void import_cb(Fl_Widget *w, Main_Window *mw);
 	static void export_cb(Fl_Widget *w, Main_Window *mw);
 	static void print_cb(Fl_Widget *w, Main_Window *mw);
 	// Tileset menu

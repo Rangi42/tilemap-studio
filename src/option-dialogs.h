@@ -55,14 +55,16 @@ private:
 	Label *_attrmap_heading;
 	Toolbar_Button *_attrmap;
 	Label_Button *_attrmap_name;
-	Fl_Native_File_Chooser *_attrmap_chooser;
+	Fl_Native_File_Chooser *_attrmap_chooser, *_attrmap_import_chooser;
 	std::string _attrmap_filename;
+	bool _importing;
 public:
 	Tilemap_Options_Dialog(const char *t);
 	~Tilemap_Options_Dialog();
 	inline Tilemap_Format format(void) const { return (Tilemap_Format)_format->value(); }
 	inline void format(Tilemap_Format fmt) { initialize(); _format->value((int)fmt); }
 	inline const char *attrmap_filename(void) const { return _attrmap_filename.c_str(); }
+	inline void importing(bool b) { _importing = b; }
 	void update_icons(void);
 	void use_tilemap(const char *filename);
 protected:

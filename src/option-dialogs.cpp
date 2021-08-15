@@ -96,7 +96,7 @@ void Option_Dialog::cancel_cb(Fl_Widget *, Option_Dialog *od) {
 
 Tilemap_Options_Dialog::Tilemap_Options_Dialog(const char *t) : Option_Dialog(280, t), _tilemap_header(NULL),
 	_format(NULL), _attrmap_heading(NULL), _attrmap(NULL), _attrmap_name(NULL), _attrmap_chooser(NULL),
-	_attrmap_filename() {}
+	_attrmap_import_chooser(NULL), _attrmap_filename(), _importing(false) {}
 
 Tilemap_Options_Dialog::~Tilemap_Options_Dialog() {
 	delete _tilemap_header;
@@ -105,6 +105,7 @@ Tilemap_Options_Dialog::~Tilemap_Options_Dialog() {
 	delete _attrmap;
 	delete _attrmap_name;
 	delete _attrmap_chooser;
+	delete _attrmap_import_chooser;
 }
 
 void Tilemap_Options_Dialog::update_icons() {
@@ -149,6 +150,7 @@ void Tilemap_Options_Dialog::initialize_content() {
 	_attrmap = new Toolbar_Button(0, 0, 0, 0);
 	_attrmap_name = new Label_Button(0, 0, 0, 0, NO_FILE_SELECTED_LABEL);
 	_attrmap_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
+	_attrmap_import_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
 	// Initialize content group's children
 	for (int i = 0; i < NUM_FORMATS; i++) {
 		_format->add(format_name((Tilemap_Format)i));
@@ -159,6 +161,8 @@ void Tilemap_Options_Dialog::initialize_content() {
 	_attrmap_name->callback((Fl_Callback *)attrmap_cb, this);
 	_attrmap_chooser->title("Open Attrmap");
 	_attrmap_chooser->filter("Attrmap Files\t*.attrmap\n");
+	_attrmap_import_chooser->title("Import Attrmap");
+	_attrmap_import_chooser->filter("Importable Files\t*.{c,csv}\n");
 }
 
 int Tilemap_Options_Dialog::refresh_content(int ww, int dy) {
@@ -188,7 +192,7 @@ void Tilemap_Options_Dialog::format_cb(Dropdown *, Tilemap_Options_Dialog *tod) 
 		tod->_attrmap_heading->activate();
 		tod->_attrmap->activate();
 		tod->_attrmap_name->activate();
-		const char *filename = tod->_attrmap_chooser->filename();
+		const char *filename = (tod->_importing ? tod->_attrmap_import_chooser : tod->_attrmap_chooser)->filename();
 		if (filename && strlen(filename)) {
 			const char *basename = fl_filename_name(filename);
 			tod->_attrmap_filename = filename;
@@ -213,14 +217,15 @@ void Tilemap_Options_Dialog::format_cb(Dropdown *, Tilemap_Options_Dialog *tod) 
 }
 
 void Tilemap_Options_Dialog::attrmap_cb(Fl_Widget *, Tilemap_Options_Dialog *tod) {
-	int status = tod->_attrmap_chooser->show();
+	Fl_Native_File_Chooser *fc = tod->_importing ? tod->_attrmap_import_chooser : tod->_attrmap_chooser;
+	int status = fc->show();
 	if (status == 1) {
 		tod->_attrmap_filename.clear();
 		tod->_attrmap_name->label(NO_FILE_SELECTED_LABEL);
 		tod->_ok_button->deactivate();
 	}
 	else {
-		const char *filename = tod->_attrmap_chooser->filename();
+		const char *filename = fc->filename();
 		const char *basename = fl_filename_name(filename);
 		tod->_attrmap_filename = filename;
 		tod->_attrmap_name->copy_label(basename);

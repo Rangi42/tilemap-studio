@@ -139,6 +139,7 @@
     <ClCompile Include="..\src\hex-spinner.cpp" />
     <ClCompile Include="..\src\image-to-tiles.cpp" />
     <ClCompile Include="..\src\image.cpp" />
+    <ClCompile Include="..\src\import-tilemap.cpp" />
     <ClCompile Include="..\src\main-window.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\modal-dialog.cpp" />

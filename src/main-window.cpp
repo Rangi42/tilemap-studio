@@ -222,6 +222,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	// Dialogs
 	_tilemap_open_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
 	_tilemap_save_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
+	_tilemap_import_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
 	_tilemap_export_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	_tileset_load_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
 	_image_print_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
@@ -299,6 +300,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		OS_MENU_ITEM("&Close", FL_COMMAND + 'w', (Fl_Callback *)close_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&Save", FL_COMMAND + 's', (Fl_Callback *)save_cb, this, 0),
 		OS_MENU_ITEM("Save &As...", FL_COMMAND + 'S', (Fl_Callback *)save_as_cb, this, FL_MENU_DIVIDER),
+		OS_MENU_ITEM("&Import...", FL_COMMAND + 'I', (Fl_Callback *)import_cb, this, 0),
 		OS_MENU_ITEM("&Export...", FL_COMMAND + 'E', (Fl_Callback *)export_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&Print...", FL_COMMAND + 'p', (Fl_Callback *)print_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("E&xit", FL_ALT + FL_F + 4, (Fl_Callback *)exit_cb, this, 0),
@@ -596,6 +598,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_tilemap_save_chooser->filter("Tilemap Files\t*.{tilemap,rle,bin,map,raw,kmp,tmap}\n");
 	_tilemap_save_chooser->preset_file("NewTilemap.tilemap");
 	_tilemap_save_chooser->options(Fl_Native_File_Chooser::Option::SAVEAS_CONFIRM);
+
+	_tilemap_import_chooser->title("Import Tilemap");
+	_tilemap_import_chooser->filter("Importable Files\t*.{c,csv}\n");
 
 	_tilemap_export_chooser->title("Export Tilemap");
 	_tilemap_export_chooser->filter("Exportable Files\t*.{c,csv}\n");
@@ -1574,6 +1579,7 @@ void Main_Window::new_tilemap(size_t width, size_t height) {
 void Main_Window::open_tilemap(const char *filename, size_t width) {
 	_tilemap_options_dialog->format(width > 0 ? Config::format() : guess_format(filename));
 	_tilemap_options_dialog->use_tilemap(filename);
+	_tilemap_options_dialog->importing(false);
 	_tilemap_options_dialog->show(this);
 	if (_tilemap_options_dialog->canceled()) { return; }
 
@@ -1702,6 +1708,40 @@ void Main_Window::save_tilemap(bool force) {
 	msg += "!";
 	_success_dialog->message(msg);
 	_success_dialog->show(this);
+}
+
+void Main_Window::import_tilemap(const char *filename) {
+	_tilemap_options_dialog->format(Tilemap_Format::PLAIN);
+	_tilemap_options_dialog->use_tilemap(filename);
+	_tilemap_options_dialog->importing(true);
+	_tilemap_options_dialog->show(this);
+	if (_tilemap_options_dialog->canceled()) { return; }
+
+	_tilemap.modified(false);
+	close_cb(NULL, this);
+
+	int old_tileset_size = format_tileset_size(Config::format());
+	Config::format(_tilemap_options_dialog->format());
+
+	const char *attrmap_filename = _tilemap_options_dialog->attrmap_filename();
+	const char *basename = fl_filename_name(filename);
+	const char *attrmap_basename = fl_filename_name(attrmap_filename);
+
+	_tilemap_file.clear();
+	_attrmap_file.clear();
+
+	Tilemap::Result result = _tilemap.import_tiles(filename, attrmap_filename);
+	if (result != Tilemap::Result::TILEMAP_OK) {
+		_tilemap.clear();
+		std::string msg = "Error reading ";
+		msg = msg + (result >= Tilemap::Result::ATTRMAP_BAD_FILE ? attrmap_basename : basename);
+		msg = msg + "!\n\n" + Tilemap::error_message(result);
+		_error_dialog->message(msg);
+		_error_dialog->show(this);
+		return;
+	}
+
+	setup_tilemap(IMPORTED_TILEMAP_NAME, old_tileset_size);
 }
 
 void Main_Window::export_tilemap(const char *filename) {
@@ -1995,6 +2035,32 @@ void Main_Window::save_as_cb(Fl_Widget *, Main_Window *mw) {
 		mw->_attrmap_file.assign("");
 	}
 	mw->save_tilemap(true);
+}
+
+void Main_Window::import_cb(Fl_Widget *, Main_Window *mw) {
+	if (mw->unsaved()) {
+		std::string msg = mw->modified_filename();
+		msg = msg + " has unsaved changes!\n\n"
+			"Import another tilemap anyway?";
+		mw->_unsaved_dialog->message(msg);
+		mw->_unsaved_dialog->show(mw);
+		if (mw->_unsaved_dialog->canceled()) { return; }
+	}
+
+	int status = mw->_tilemap_import_chooser->show();
+	if (status == 1) { return; }
+
+	const char *filename = mw->_tilemap_import_chooser->filename();
+	const char *basename = fl_filename_name(filename);
+	if (status == -1) {
+		std::string msg = "Could not import ";
+		msg = msg + basename + "!\n\n" + mw->_tilemap_import_chooser->errmsg();
+		mw->_error_dialog->message(msg);
+		mw->_error_dialog->show(mw);
+		return;
+	}
+
+	mw->import_tilemap(filename);
 }
 
 void Main_Window::export_cb(Fl_Widget *, Main_Window *mw) {
