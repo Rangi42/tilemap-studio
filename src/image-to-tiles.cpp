@@ -27,9 +27,12 @@
 
 typedef std::set<Fl_Color> Color_Set;
 
-static bool build_tilemap(const Tile *tiles, size_t n, std::vector<int> tile_palettes,
+static bool build_tilemap(const Tile *tiles, size_t n, const std::vector<int> tile_palettes,
 	std::vector<Tile_Tessera *> &tilemap, std::vector<size_t> &tileset, Tilemap_Format fmt, uint16_t start_id,
 	bool use_space, uint16_t space_id, Fl_Color space_color) {
+	size_t mn = (size_t)format_tileset_size(fmt);
+	tilemap.reserve(n);
+	tileset.reserve(mn);
 	for (size_t i = 0; i < n; i++) {
 		if (use_space && start_id + tileset.size() == space_id) {
 			size_t j = 0;
@@ -52,7 +55,6 @@ static bool build_tilemap(const Tile *tiles, size_t n, std::vector<int> tile_pal
 			}
 		}
 		if (ti == nt) {
-			size_t mn = (size_t)format_tileset_size(fmt);
 			if (nt + (size_t)start_id > mn) {
 				return false;
 			}
@@ -73,6 +75,7 @@ static Fl_RGB_Image *print_tileset(const Tile *tiles, const std::vector<size_t> 
 
 	size_t np = tile_palettes.size();
 	std::vector<std::map<Fl_Color, size_t>> reverse_palettes;
+	reverse_palettes.reserve(np);
 	for (const Palette &palette : palettes) {
 		std::map<Fl_Color, size_t> reverse_palette;
 		for (size_t i = 0; i < nc; i++) {
@@ -183,6 +186,7 @@ bool Main_Window::image_to_tiles() {
 
 		// Get the color set of each tile
 		std::vector<Color_Set> cs_tiles;
+		cs_tiles.reserve(n);
 		size_t qi = 0;
 		for (; qi < n; qi++) {
 			const Tile &tile = tiles[qi];
@@ -230,6 +234,7 @@ bool Main_Window::image_to_tiles() {
 
 		// Combine color sets as long as they fit within the color limit
 		std::vector<Color_Set> cs_opt;
+		cs_opt.reserve(cs_full.size());
 		for (Color_Set &s : cs_full) {
 			Color_Set *b = NULL;
 			for (Color_Set &c : cs_opt) {
@@ -253,6 +258,7 @@ bool Main_Window::image_to_tiles() {
 		});
 
 		// Sort each palette from brightest to darkest color, padded with black, keeping color 0 first
+		palettes.reserve(max_palettes);
 		for (Color_Set &s : cs_opt) {
 			Palette palette(RANGE(s));
 			std::sort(RANGE(palette), [use_color_zero, color_zero](Fl_Color a, Fl_Color b) {

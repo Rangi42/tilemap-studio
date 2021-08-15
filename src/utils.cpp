@@ -55,3 +55,15 @@ size_t file_size(const char *f) {
 	int r = stat64(f, &s);
 	return r ? 0 : (size_t)s.st_size;
 }
+
+size_t file_size(FILE *f) {
+#ifdef __CYGWIN__
+#define fstat64 fstat
+#elif defined(_WIN32)
+#define fileno _fileno
+#define fstat64 _fstat32i64
+#endif
+	struct stat64 s;
+	int r = fstat64(fileno(f), &s);
+	return r ? 0 : (size_t)s.st_size;
+}

@@ -153,15 +153,13 @@ Tileset::Result Tileset::read_1bpp_graphics(const char *f) {
 	FILE *file = fl_fopen(f, "rb");
 	if (!file) { return (_result = Result::TILESET_BAD_FILE); }
 
-	fseek(file, 0, SEEK_END);
-	long n = ftell(file);
-	rewind(file);
+	size_t n = file_size(file);
 	if (n % BYTES_PER_1BPP_TILE) { fclose(file); return (_result = Result::TILESET_BAD_DIMS); }
 
 	uchar *data = new uchar[n];
 	size_t r = fread(data, 1, n, file);
 	fclose(file);
-	if (r != (size_t)n) { delete [] data; return (_result = Result::TILESET_BAD_FILE); }
+	if (r != n) { delete [] data; return (_result = Result::TILESET_BAD_FILE); }
 
 	return parse_1bpp_data(n, data);
 }
@@ -170,15 +168,13 @@ Tileset::Result Tileset::read_2bpp_graphics(const char *f) {
 	FILE *file = fl_fopen(f, "rb");
 	if (!file) { return (_result = Result::TILESET_BAD_FILE); }
 
-	fseek(file, 0, SEEK_END);
-	long n = ftell(file);
-	rewind(file);
+	size_t n = file_size(file);
 	if (n % BYTES_PER_2BPP_TILE) { fclose(file); return (_result = Result::TILESET_BAD_DIMS); }
 
 	uchar *data = new uchar[n];
 	size_t r = fread(data, 1, n, file);
 	fclose(file);
-	if (r != (size_t)n) { delete [] data; return (_result = Result::TILESET_BAD_FILE); }
+	if (r != n) { delete [] data; return (_result = Result::TILESET_BAD_FILE); }
 
 	return parse_2bpp_data(n, data);
 }
@@ -187,15 +183,13 @@ Tileset::Result Tileset::read_4bpp_graphics(const char *f) {
 	FILE *file = fl_fopen(f, "rb");
 	if (!file) { return (_result = Result::TILESET_BAD_FILE); }
 
-	fseek(file, 0, SEEK_END);
-	long n = ftell(file);
-	rewind(file);
+	size_t n = file_size(file);
 	if (n % BYTES_PER_4BPP_TILE) { fclose(file); return (_result = Result::TILESET_BAD_DIMS); }
 
 	uchar *data = new uchar[n];
 	size_t r = fread(data, 1, n, file);
 	fclose(file);
-	if (r != (size_t)n) { delete [] data; return (_result = Result::TILESET_BAD_FILE); }
+	if (r != n) { delete [] data; return (_result = Result::TILESET_BAD_FILE); }
 
 	return parse_4bpp_data(n, data);
 }
@@ -204,15 +198,13 @@ Tileset::Result Tileset::read_8bpp_graphics(const char *f) {
 	FILE *file = fl_fopen(f, "rb");
 	if (!file) { return (_result = Result::TILESET_BAD_FILE); }
 
-	fseek(file, 0, SEEK_END);
-	long n = ftell(file);
-	rewind(file);
+	size_t n = file_size(file);
 	if (n % BYTES_PER_8BPP_TILE) { fclose(file); return (_result = Result::TILESET_BAD_DIMS); }
 
 	uchar *data = new uchar[n];
 	size_t r = fread(data, 1, n, file);
 	fclose(file);
-	if (r != (size_t)n) { delete [] data; return (_result = Result::TILESET_BAD_FILE); }
+	if (r != n) { delete [] data; return (_result = Result::TILESET_BAD_FILE); }
 
 	return parse_8bpp_data(n, data);
 }
@@ -485,13 +477,11 @@ static Tileset::Result decompress_lz_data(const char *f, uchar *data, size_t lim
 	FILE *file = fl_fopen(f, "rb");
 	if (!file) { return Tileset::Result::TILESET_BAD_FILE; }
 
-	fseek(file, 0, SEEK_END);
-	long n = ftell(file);
-	rewind(file);
+	size_t n = file_size(file);
 	uchar *lz_data = new uchar[n];
 	size_t r = fread(lz_data, 1, n, file);
 	fclose(file);
-	if (r != (size_t)n) { delete [] lz_data; return Tileset::Result::TILESET_BAD_FILE; }
+	if (r != n) { delete [] lz_data; return Tileset::Result::TILESET_BAD_FILE; }
 
 	size_t address = 0;
 	uchar q[2];

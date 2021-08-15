@@ -207,6 +207,7 @@ Tilemap::Result Tilemap::read_tiles(const std::pair<std::vector<uchar>, std::vec
 	Tilemap_Format fmt = Config::format();
 
 	if (fmt == Tilemap_Format::PLAIN) {
+		tiles.reserve(c);
 		for (size_t i = 0; i < c; i++) {
 			uint16_t b = tbytes[i];
 			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, b));
@@ -215,6 +216,7 @@ Tilemap::Result Tilemap::read_tiles(const std::pair<std::vector<uchar>, std::vec
 
 	else if (fmt == Tilemap_Format::GBC_ATTRS) {
 		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
+		tiles.reserve(c / 2);
 		for (size_t i = 0; i < c; i += 2) {
 			uint16_t v = tbytes[i];
 			uchar a = tbytes[i+1];
@@ -231,6 +233,7 @@ Tilemap::Result Tilemap::read_tiles(const std::pair<std::vector<uchar>, std::vec
 		size_t ac = abytes.size() - 1; // disregard final sentinel element
 		if (ac != c) { return (_result = ac < c ? Result::ATTRMAP_TOO_SHORT : Result::ATTRMAP_TOO_LONG); }
 
+		tiles.reserve(c);
 		for (size_t i = 0; i < c; i++) {
 			uint16_t v = tbytes[i];
 			uchar a = abytes[i];
@@ -243,6 +246,7 @@ Tilemap::Result Tilemap::read_tiles(const std::pair<std::vector<uchar>, std::vec
 
 	else if (fmt == Tilemap_Format::GBA_4BPP) {
 		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
+		tiles.reserve(c / 2);
 		for (size_t i = 0; i < c; i += 2) {
 			uint16_t v = tbytes[i];
 			uchar a = tbytes[i+1];
@@ -255,6 +259,7 @@ Tilemap::Result Tilemap::read_tiles(const std::pair<std::vector<uchar>, std::vec
 
 	else if (fmt == Tilemap_Format::GBA_8BPP) {
 		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
+		tiles.reserve(c / 2);
 		for (size_t i = 0; i < c; i += 2) {
 			uint16_t v = tbytes[i];
 			uchar a = tbytes[i+1];
@@ -266,6 +271,7 @@ Tilemap::Result Tilemap::read_tiles(const std::pair<std::vector<uchar>, std::vec
 
 	else if (fmt == Tilemap_Format::SGB_BORDER) {
 		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
+		tiles.reserve(c / 2);
 		for (size_t i = 0; i < c; i += 2) {
 			uint16_t v = tbytes[i];
 			uchar a = tbytes[i+1];
@@ -277,6 +283,7 @@ Tilemap::Result Tilemap::read_tiles(const std::pair<std::vector<uchar>, std::vec
 
 	else if (fmt == Tilemap_Format::SNES_ATTRS) {
 		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
+		tiles.reserve(c / 2);
 		for (size_t i = 0; i < c; i += 2) {
 			uint16_t v = tbytes[i];
 			uchar a = tbytes[i+1];
@@ -288,6 +295,7 @@ Tilemap::Result Tilemap::read_tiles(const std::pair<std::vector<uchar>, std::vec
 	}
 
 	else if (fmt == Tilemap_Format::RBY_TOWN_MAP) {
+		tiles.reserve(c);
 		for (size_t i = 0; i < c - 1; i++) {
 			uchar b = tbytes[i];
 			if (b == 0x00) {
@@ -306,6 +314,7 @@ Tilemap::Result Tilemap::read_tiles(const std::pair<std::vector<uchar>, std::vec
 	}
 
 	else if (fmt == Tilemap_Format::GSC_TOWN_MAP) {
+		tiles.reserve(c);
 		for (size_t i = 0; i < c - 1; i++) {
 			uint16_t b = tbytes[i];
 			if (b == 0xFF) {
@@ -321,6 +330,7 @@ Tilemap::Result Tilemap::read_tiles(const std::pair<std::vector<uchar>, std::vec
 	}
 
 	else if (fmt == Tilemap_Format::PC_TOWN_MAP) {
+		tiles.reserve(c);
 		for (size_t i = 0; i < c - 1; i++) {
 			uchar b = tbytes[i];
 			if (b == 0xFF) {
@@ -338,6 +348,7 @@ Tilemap::Result Tilemap::read_tiles(const std::pair<std::vector<uchar>, std::vec
 	}
 
 	else if (fmt == Tilemap_Format::SW_TOWN_MAP) {
+		tiles.reserve(c);
 		if (!(c % 2)) { return (_result = Result::TILEMAP_TOO_SHORT_00); }
 		for (size_t i = 0; i < c - 1; i += 2) {
 			uint16_t v = tbytes[i];
@@ -361,6 +372,7 @@ Tilemap::Result Tilemap::read_tiles(const std::pair<std::vector<uchar>, std::vec
 	}
 
 	else if (fmt == Tilemap_Format::POKEGEAR_CARD) {
+		tiles.reserve(c);
 		if (!(c % 2)) { return (_result = Result::TILEMAP_TOO_SHORT_FF); }
 		for (size_t i = 0; i < c - 1; i += 2) {
 			uint16_t v = tbytes[i];
