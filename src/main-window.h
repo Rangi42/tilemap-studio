@@ -61,7 +61,7 @@ private:
 	Tile_Swatch *_current_tile, *_current_attributes;
 	Status_Bar_Field *_tilemap_dimensions, *_tilemap_format, *_zoom_level, *_hover_id, *_hover_xy, *_hover_landmark;
 	// Conditional menu items
-	Fl_Menu_Item *_close_mi = NULL, *_save_mi = NULL, *_save_as_mi = NULL, *_print_mi = NULL;
+	Fl_Menu_Item *_close_mi = NULL, *_save_mi = NULL, *_save_as_mi = NULL, *_export_mi = NULL, *_print_mi = NULL;
 	Fl_Menu_Item *_reload_tilesets_mi = NULL, *_unload_tilesets_mi = NULL;
 	Fl_Menu_Item *_undo_mi = NULL, *_redo_mi = NULL;
 	Fl_Menu_Item *_erase_selection_mi = NULL, *_x_flip_selection_mi = NULL, *_y_flip_selection_mi = NULL, *_select_all_mi = NULL;
@@ -69,7 +69,8 @@ private:
 	Fl_Menu_Item *_tilemap_width_mi = NULL, *_resize_mi = NULL, *_shift_mi = NULL, *_reformat_mi = NULL;
 	Fl_Menu_Item *_shift_tileset_mi = NULL;
 	// Dialogs
-	Fl_Native_File_Chooser *_tilemap_open_chooser, *_tilemap_save_chooser, *_tileset_load_chooser, *_image_print_chooser;
+	Fl_Native_File_Chooser *_tilemap_open_chooser, *_tilemap_save_chooser, *_tilemap_export_chooser, *_tileset_load_chooser,
+		*_image_print_chooser;
 	Modal_Dialog *_error_dialog, *_warning_dialog, *_success_dialog, *_unsaved_dialog, *_about_dialog;
 	Tilemap_Options_Dialog *_tilemap_options_dialog;
 	New_Tilemap_Dialog *_new_tilemap_dialog;
@@ -158,6 +159,7 @@ private:
 	void shift_tileset(void);
 	void reformat_tilemap(void);
 	void save_tilemap(bool force);
+	void export_tilemap(const char *filename);
 	void select_tile(uint16_t id);
 	void highlight_tile(uint16_t id);
 	void select_palette(int palette);
@@ -176,6 +178,7 @@ private:
 	static void close_cb(Fl_Widget *w, Main_Window *mw);
 	static void save_cb(Fl_Widget *w, Main_Window *mw);
 	static void save_as_cb(Fl_Widget *w, Main_Window *mw);
+	static void export_cb(Fl_Widget *w, Main_Window *mw);
 	static void print_cb(Fl_Widget *w, Main_Window *mw);
 	// Tileset menu
 	static void load_tileset_cb(Fl_Widget *w, Main_Window *mw);

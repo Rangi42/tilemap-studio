@@ -222,6 +222,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	// Dialogs
 	_tilemap_open_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
 	_tilemap_save_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
+	_tilemap_export_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	_tileset_load_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
 	_image_print_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	_error_dialog = new Modal_Dialog(this, "Error", Modal_Dialog::Icon::ERROR_ICON);
@@ -298,6 +299,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		OS_MENU_ITEM("&Close", FL_COMMAND + 'w', (Fl_Callback *)close_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&Save", FL_COMMAND + 's', (Fl_Callback *)save_cb, this, 0),
 		OS_MENU_ITEM("Save &As...", FL_COMMAND + 'S', (Fl_Callback *)save_as_cb, this, FL_MENU_DIVIDER),
+		OS_MENU_ITEM("&Export...", FL_COMMAND + 'E', (Fl_Callback *)export_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&Print...", FL_COMMAND + 'p', (Fl_Callback *)print_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("E&xit", FL_ALT + FL_F + 4, (Fl_Callback *)exit_cb, this, 0),
 		{},
@@ -415,6 +417,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_close_mi = TS_FIND_MENU_ITEM_CB(close_cb);
 	_save_mi = TS_FIND_MENU_ITEM_CB(save_cb);
 	_save_as_mi = TS_FIND_MENU_ITEM_CB(save_as_cb);
+	_export_mi = TS_FIND_MENU_ITEM_CB(export_cb);
 	_print_mi = TS_FIND_MENU_ITEM_CB(print_cb);
 	_reload_tilesets_mi = TS_FIND_MENU_ITEM_CB(reload_tilesets_cb);
 	_unload_tilesets_mi = TS_FIND_MENU_ITEM_CB(unload_tilesets_cb);
@@ -593,6 +596,11 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_tilemap_save_chooser->filter("Tilemap Files\t*.{tilemap,rle,bin,map,raw,kmp,tmap}\n");
 	_tilemap_save_chooser->preset_file("NewTilemap.tilemap");
 	_tilemap_save_chooser->options(Fl_Native_File_Chooser::Option::SAVEAS_CONFIRM);
+
+	_tilemap_export_chooser->title("Export Tilemap");
+	_tilemap_export_chooser->filter("Exportable Files\t*.{c,csv}\n");
+	_tilemap_export_chooser->preset_file("ExportedTilemap.c");
+	_tilemap_export_chooser->options(Fl_Native_File_Chooser::Option::SAVEAS_CONFIRM);
 
 	_tileset_load_chooser->title("Open Tileset");
 	_tileset_load_chooser->filter("Tileset Files\t*.{png,gif,bmp,1bpp,2bpp,4bpp,8bpp,1bpp.lz,2bpp.lz}\n");
@@ -1022,6 +1030,7 @@ void Main_Window::update_active_controls() {
 		_save_mi->activate();
 		_save_tb->activate();
 		_save_as_mi->activate();
+		_export_mi->activate();
 		_print_mi->activate();
 		_print_tb->activate();
 		if (_tilemap.can_undo()) {
@@ -1062,6 +1071,7 @@ void Main_Window::update_active_controls() {
 		_save_mi->deactivate();
 		_save_tb->deactivate();
 		_save_as_mi->deactivate();
+		_export_mi->deactivate();
 		_print_mi->deactivate();
 		_print_tb->deactivate();
 		_undo_mi->deactivate();
@@ -1712,6 +1722,23 @@ void Main_Window::save_tilemap(bool force) {
 	_success_dialog->show(this);
 }
 
+void Main_Window::export_tilemap(const char *filename) {
+	const char *basename = fl_filename_name(filename);
+	if (_tilemap.export_tiles(filename)) {
+		std::string msg = "Exported ";
+		msg = msg + basename + "!";
+		_success_dialog->message(msg);
+		_success_dialog->show(this);
+	}
+	else {
+		std::string msg = "Could not write to ";
+		msg = msg + basename + "!";
+		_error_dialog->message(msg);
+		_error_dialog->show(this);
+		return;
+	}
+}
+
 void Main_Window::add_tileset(const char *filename, int start, int offset, int length) {
 	const char *basename = fl_filename_name(filename);
 	Tileset tileset(start, offset, length);
@@ -1985,6 +2012,27 @@ void Main_Window::save_as_cb(Fl_Widget *, Main_Window *mw) {
 		mw->_attrmap_file.assign("");
 	}
 	mw->save_tilemap(true);
+}
+
+void Main_Window::export_cb(Fl_Widget *, Main_Window *mw) {
+	if (!mw->_tilemap.size()) { return; }
+
+	int status = mw->_tilemap_export_chooser->show();
+	if (status == 1) { return; }
+
+	char filename[FL_PATH_MAX] = {};
+	add_dot_ext(mw->_tilemap_export_chooser->filename(), ".c", filename);
+	const char *basename = fl_filename_name(filename);
+
+	if (status == -1) {
+		std::string msg = "Could not open ";
+		msg = msg + basename + "!\n\n" + mw->_tilemap_export_chooser->errmsg();
+		mw->_error_dialog->message(msg);
+		mw->_error_dialog->show(mw);
+		return;
+	}
+
+	mw->export_tilemap(filename);
 }
 
 void Main_Window::load_tileset_cb(Fl_Widget *, Main_Window *mw) {
