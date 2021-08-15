@@ -1617,6 +1617,7 @@ void Main_Window::open_tilemap(const char *filename, size_t width, size_t height
 
 	if (Config::format() == Tilemap_Format::RBY_TOWN_MAP && _tileset_width == 16) {
 		update_tileset_width(4);
+		select_tile(_selection.id());
 	}
 
 	int n2 = format_tileset_size(Config::format());
@@ -1669,11 +1670,10 @@ void Main_Window::open_recent_tilemap(int n) {
 	}
 
 	const char *filename = _recent_tilemaps[n].c_str();
-	_tilemap.modified(false);
 	open_tilemap(filename);
 }
 
-bool Main_Window::save_tilemap(bool force) {
+void Main_Window::save_tilemap(bool force) {
 	const char *filename = _tilemap_file.c_str();
 	const char *attrmap_filename = _attrmap_file.c_str();
 	const char *basename = fl_filename_name(filename);
@@ -1684,7 +1684,7 @@ bool Main_Window::save_tilemap(bool force) {
 			msg = msg + basename + "!";
 			_error_dialog->message(msg);
 			_error_dialog->show(this);
-			return false;
+			return;
 		}
 	}
 	_tilemap.modified(false);
@@ -1710,8 +1710,6 @@ bool Main_Window::save_tilemap(bool force) {
 	msg += "!";
 	_success_dialog->message(msg);
 	_success_dialog->show(this);
-
-	return true;
 }
 
 void Main_Window::add_tileset(const char *filename, int start, int offset, int length) {
@@ -1780,6 +1778,14 @@ void Main_Window::open_tilemap_or_image_to_tiles(const char *filename) {
 		image_to_tiles_cb(NULL, this);
 	}
 	else {
+		if (unsaved()) {
+			std::string msg = modified_filename();
+			msg = msg + " has unsaved changes!\n\n"
+				"Open another tilemap anyway?";
+			_unsaved_dialog->message(msg);
+			_unsaved_dialog->show(this);
+			if (_unsaved_dialog->canceled()) { return; }
+		}
 		open_tilemap(filename);
 	}
 }
