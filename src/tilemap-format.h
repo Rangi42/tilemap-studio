@@ -1,6 +1,13 @@
 #ifndef TILEMAP_FORMAT_H
 #define TILEMAP_FORMAT_H
 
+#include <vector>
+#include <utility>
+
+#pragma warning(push, 0)
+#include <FL/fl_types.h>
+#pragma warning(pop)
+
 #define GAME_BOY_WIDTH 20
 #define GAME_BOY_HEIGHT 18
 
@@ -67,7 +74,13 @@ int format_color_depth(Tilemap_Format fmt);
 const char *format_name(Tilemap_Format fmt);
 const char *format_extension(Tilemap_Format fmt);
 int format_max_name_width(void);
+int format_bytes_per_tile(Tilemap_Format fmt);
 
 Tilemap_Format guess_format(const char *filename);
+
+class Tile_Tessera;
+
+std::pair<std::vector<uchar>, std::vector<uchar>> read_tilemap_bytes(const char *tf, const char *af);
+std::vector<uchar> make_tilemap_bytes(std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt);
 
 #endif

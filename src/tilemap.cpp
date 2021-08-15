@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cctype>
 
 #include "tilemap.h"
 #include "tileset.h"
@@ -192,247 +193,194 @@ void Tilemap::new_tiles(size_t w, size_t h) {
 	_modified = true;
 }
 
-Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
-	FILE *file = fl_fopen(tf, "rb");
-	if (!file) { return (_result = Result::TILEMAP_BAD_FILE); }
+Tilemap::Result Tilemap::read_tiles(const std::pair<std::vector<uchar>, std::vector<uchar>> &vs) {
+	auto &[tbytes, abytes] = vs;
 
-	fseek(file, 0, SEEK_END);
-	long c = ftell(file);
-	rewind(file);
-	if (c < 0) { fclose(file); return (_result = Result::TILEMAP_BAD_FILE); }
-	if (c == 0) { fclose(file); return (_result = Result::TILEMAP_EMPTY); }
+	if (tbytes.empty()) { return (_result = Result::TILEMAP_BAD_FILE); }
+
+	size_t c = tbytes.size() - 1; // disregard final sentinel element
+	if (c < 0) { return (_result = Result::TILEMAP_BAD_FILE); }
+	if (c == 0) { return (_result = Result::TILEMAP_EMPTY); }
 
 	std::vector<Tile_Tessera *> tiles;
 	Tilemap_Format fmt = Config::format();
 
 	if (fmt == Tilemap_Format::PLAIN) {
-		for (long i = 0; i < c; i++) {
-			int b = fgetc(file);
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)b));
+		for (size_t i = 0; i < c; i++) {
+			uint16_t b = tbytes[i];
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, b));
 		}
 	}
 
 	else if (fmt == Tilemap_Format::GBC_ATTRS) {
-		if (c % 2) {
-			fclose(file);
-			return (_result = Result::TILEMAP_TOO_SHORT_ATTRS);
-		}
-		for (long i = 0; i < c; i += 2) {
-			int v = fgetc(file);
-			int a = fgetc(file);
+		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
+		for (size_t i = 0; i < c; i += 2) {
+			uint16_t v = tbytes[i];
+			uchar a = tbytes[i+1];
 			if (!!(a & 0x08)) { v |= 0x100; }
 			bool x_flip = !!(a & 0x20), y_flip = !!(a & 0x40), priority = !!(a & 0x80), obp1 = !!(a & 0x10);
 			int palette = a & 0x07;
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip, priority, obp1, palette));
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, v, x_flip, y_flip, priority, obp1, palette));
 		}
 	}
 
 	else if (fmt == Tilemap_Format::GBC_ATTRMAP) {
-		FILE *attr_file = fl_fopen(af, "rb");
-		if (!attr_file) {
-			fclose(file);
-			return (_result = Result::ATTRMAP_BAD_FILE);
-		}
+		if (abytes.empty()) { return (_result = Result::ATTRMAP_BAD_FILE); }
 
-		fseek(attr_file, 0, SEEK_END);
-		long ac = ftell(attr_file);
-		rewind(attr_file);
-		if (ac != c) {
-			fclose(attr_file);
-			fclose(file);
-			return (_result = ac < 0 ? Result::ATTRMAP_BAD_FILE : ac < c ? Result::ATTRMAP_TOO_SHORT : Result::ATTRMAP_TOO_LONG);
-		}
+		size_t ac = abytes.size() - 1; // disregard final sentinel element
+		if (ac != c) { return (_result = ac < c ? Result::ATTRMAP_TOO_SHORT : Result::ATTRMAP_TOO_LONG); }
 
-		for (long i = 0; i < c; i++) {
-			int v = fgetc(file);
-			int a = fgetc(attr_file);
+		for (size_t i = 0; i < c; i++) {
+			uint16_t v = tbytes[i];
+			uchar a = abytes[i];
 			if (!!(a & 0x08)) { v |= 0x100; }
 			bool x_flip = !!(a & 0x20), y_flip = !!(a & 0x40), priority = !!(a & 0x80), obp1 = !!(a & 0x10);
 			int palette = a & 0x07;
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip, priority, obp1, palette));
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, v, x_flip, y_flip, priority, obp1, palette));
 		}
-
-		fclose(attr_file);
 	}
 
 	else if (fmt == Tilemap_Format::GBA_4BPP) {
-		if (c % 2) {
-			fclose(file);
-			return (_result = Result::TILEMAP_TOO_SHORT_ATTRS);
-		}
-		for (long i = 0; i < c; i += 2) {
-			int v = fgetc(file);
-			int a = fgetc(file);
+		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
+		for (size_t i = 0; i < c; i += 2) {
+			uint16_t v = tbytes[i];
+			uchar a = tbytes[i+1];
 			v = v | ((a & 0x03) << 8);
 			bool x_flip = !!(a & 0x04), y_flip = !!(a & 0x08);
 			int palette = HI_NYB(a);
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip, false, false, palette));
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, v, x_flip, y_flip, false, false, palette));
 		}
 	}
 
 	else if (fmt == Tilemap_Format::GBA_8BPP) {
-		if (c % 2) {
-			fclose(file);
-			return (_result = Result::TILEMAP_TOO_SHORT_ATTRS);
-		}
-		for (long i = 0; i < c; i += 2) {
-			int v = fgetc(file);
-			int a = fgetc(file);
+		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
+		for (size_t i = 0; i < c; i += 2) {
+			uint16_t v = tbytes[i];
+			uchar a = tbytes[i+1];
 			v = v | ((a & 0x03) << 8);
 			bool x_flip = !!(a & 0x04), y_flip = !!(a & 0x08);
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip, false, false, 0));
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, v, x_flip, y_flip, false, false, 0));
 		}
 	}
 
 	else if (fmt == Tilemap_Format::SGB_BORDER) {
-		if (c % 2) {
-			fclose(file);
-			return (_result = Result::TILEMAP_TOO_SHORT_ATTRS);
-		}
-		for (long i = 0; i < c; i += 2) {
-			int v = fgetc(file);
-			int a = fgetc(file);
+		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
+		for (size_t i = 0; i < c; i += 2) {
+			uint16_t v = tbytes[i];
+			uchar a = tbytes[i+1];
 			bool x_flip = !!(a & 0x40), y_flip = !!(a & 0x80);
 			int palette = (a & 0x0C) >> 2;
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip, false, false, palette));
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, v, x_flip, y_flip, false, false, palette));
 		}
 	}
 
 	else if (fmt == Tilemap_Format::SNES_ATTRS) {
-		if (c % 2) {
-			fclose(file);
-			return (_result = Result::TILEMAP_TOO_SHORT_ATTRS);
-		}
-		for (long i = 0; i < c; i += 2) {
-			int v = fgetc(file);
-			int a = fgetc(file);
+		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
+		for (size_t i = 0; i < c; i += 2) {
+			uint16_t v = tbytes[i];
+			uchar a = tbytes[i+1];
 			v = v | ((a & 0x03) << 8);
 			bool x_flip = !!(a & 0x40), y_flip = !!(a & 0x80), priority = !!(a & 0x20);
 			int palette = (a & 0x1C) >> 2;
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip, priority, false, palette));
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, v, x_flip, y_flip, priority, false, palette));
 		}
 	}
 
 	else if (fmt == Tilemap_Format::RBY_TOWN_MAP) {
-		for (long i = 0; i < c - 1; i++) {
-			int b = fgetc(file);
+		for (size_t i = 0; i < c - 1; i++) {
+			uchar b = tbytes[i];
 			if (b == 0x00) {
-				fclose(file);
 				for (Tile_Tessera *tt : tiles) { delete tt; }
 				return (_result = Result::TILEMAP_TOO_LONG_00);
 			}
-			int v = HI_NYB(b), r = LO_NYB(b);
-			for (int j = 0; j < r; j++) {
-				tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v));
+			uint16_t v = HI_NYB(b), r = LO_NYB(b);
+			for (uint16_t j = 0; j < r; j++) {
+				tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, v));
 			}
 		}
-		int b = fgetc(file);
-		if (b != 0x00) {
-			fclose(file);
+		if (tbytes[c-1] != 0x00) {
 			for (Tile_Tessera *tt : tiles) { delete tt; }
 			return (_result = Result::TILEMAP_TOO_SHORT_00);
 		}
 	}
 
 	else if (fmt == Tilemap_Format::GSC_TOWN_MAP) {
-		for (long i = 0; i < c - 1; i++) {
-			int b = fgetc(file);
+		for (size_t i = 0; i < c - 1; i++) {
+			uint16_t b = tbytes[i];
 			if (b == 0xFF) {
-				fclose(file);
 				for (Tile_Tessera *tt : tiles) { delete tt; }
 				return (_result = Result::TILEMAP_TOO_LONG_FF);
 			}
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)b));
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, b));
 		}
-		int b = fgetc(file);
-		if (b != 0xFF) {
-			fclose(file);
+		if (tbytes[c-1] != 0xFF) {
 			for (Tile_Tessera *tt : tiles) { delete tt; }
 			return (_result = Result::TILEMAP_TOO_SHORT_FF);
 		}
 	}
 
 	else if (fmt == Tilemap_Format::PC_TOWN_MAP) {
-		for (long i = 0; i < c - 1; i++) {
-			int b = fgetc(file);
+		for (size_t i = 0; i < c - 1; i++) {
+			uchar b = tbytes[i];
 			if (b == 0xFF) {
-				fclose(file);
 				for (Tile_Tessera *tt : tiles) { delete tt; }
 				return (_result = Result::TILEMAP_TOO_LONG_FF);
 			}
 			bool x_flip = !!(b & 0x40), y_flip = !!(b & 0x80);
-			int v = b & 0x3F;
-			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v, x_flip, y_flip));
+			uint16_t v = b & 0x3F;
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, v, x_flip, y_flip));
 		}
-		int b = fgetc(file);
-		if (b != 0xFF) {
-			fclose(file);
+		if (tbytes[c-1] != 0xFF) {
 			for (Tile_Tessera *tt : tiles) { delete tt; }
 			return (_result = Result::TILEMAP_TOO_SHORT_FF);
 		}
 	}
 
 	else if (fmt == Tilemap_Format::SW_TOWN_MAP) {
-		if (!(c % 2)) {
-			fclose(file);
-			return (_result = Result::TILEMAP_TOO_SHORT_00);
-		}
-		for (long i = 0; i < c - 1; i += 2) {
-			int v = fgetc(file);
+		if (!(c % 2)) { return (_result = Result::TILEMAP_TOO_SHORT_00); }
+		for (size_t i = 0; i < c - 1; i += 2) {
+			uint16_t v = tbytes[i];
 			if (v == 0x00) {
-				fclose(file);
 				for (Tile_Tessera *tt : tiles) { delete tt; }
 				return (_result = Result::TILEMAP_TOO_LONG_00);
 			}
-			int r = fgetc(file);
+			uint16_t r = tbytes[i+1];
 			if (r == 0x00) {
-				fclose(file);
 				for (Tile_Tessera *tt : tiles) { delete tt; }
 				return (_result = Result::TILEMAP_TOO_LONG_00);
 			}
-			for (int j = 0; j < r; j++) {
-				tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v));
+			for (uint16_t j = 0; j < r; j++) {
+				tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, v));
 			}
 		}
-		int b = fgetc(file);
-		if (b != 0x00) {
-			fclose(file);
+		if (tbytes[c-1] != 0x00) {
 			for (Tile_Tessera *tt : tiles) { delete tt; }
 			return (_result = Result::TILEMAP_TOO_SHORT_00);
 		}
 	}
 
 	else if (fmt == Tilemap_Format::POKEGEAR_CARD) {
-		if (!(c % 2)) {
-			fclose(file);
-			return (_result = Result::TILEMAP_TOO_SHORT_FF);
-		}
-		for (long i = 0; i < c - 1; i += 2) {
-			int v = fgetc(file);
+		if (!(c % 2)) { return (_result = Result::TILEMAP_TOO_SHORT_FF); }
+		for (size_t i = 0; i < c - 1; i += 2) {
+			uint16_t v = tbytes[i];
 			if (v == 0xFF) {
-				fclose(file);
 				for (Tile_Tessera *tt : tiles) { delete tt; }
 				return (_result = Result::TILEMAP_TOO_LONG_FF);
 			}
-			int r = fgetc(file);
+			uint16_t r = tbytes[i+1];
 			if (r == 0xFF) {
-				fclose(file);
 				for (Tile_Tessera *tt : tiles) { delete tt; }
 				return (_result = Result::TILEMAP_TOO_LONG_FF);
 			}
-			for (int j = 0; j < r; j++) {
-				tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, (uint16_t)v));
+			for (uint16_t j = 0; j < r; j++) {
+				tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, v));
 			}
 		}
-		int b = fgetc(file);
-		if (b != 0xFF) {
-			fclose(file);
+		if (tbytes[c-1] != 0xFF) {
 			for (Tile_Tessera *tt : tiles) { delete tt; }
 			return (_result = Result::TILEMAP_TOO_SHORT_FF);
 		}
 	}
-
-	fclose(file);
 
 	_tiles.swap(tiles);
 	if (size() == 0) { return (_result = Result::TILEMAP_EMPTY); }
@@ -496,135 +444,19 @@ bool Tilemap::write_tiles(const char *tf, const char *af, std::vector<Tile_Tesse
 	FILE *file = fl_fopen(tf, "wb");
 	if (!file) { return false; }
 
-	if (fmt == Tilemap_Format::PLAIN || fmt == Tilemap_Format::GSC_TOWN_MAP || fmt == Tilemap_Format::PC_TOWN_MAP) {
-		for (Tile_Tessera *tt : tiles) {
-			int v = (int)tt->id();
-			if (tt->x_flip()) { v |= 0x40; }
-			if (tt->y_flip()) { v |= 0x80; }
-			fputc(v, file);
-		}
-	}
-	else if (fmt == Tilemap_Format::GBC_ATTRS) {
-		for (Tile_Tessera *tt : tiles) {
-			int v = (int)(tt->id() & 0xFF);
-			fputc(v, file);
-			int a = 0;
-			if (tt->id() & 0x100) { a |= 0x08; }
-			if (tt->obp1())     { a |= 0x10; }
-			if (tt->priority()) { a |= 0x80; }
-			if (tt->x_flip())   { a |= 0x20; }
-			if (tt->y_flip())   { a |= 0x40; }
-			if (tt->palette() > -1) { a |= tt->palette() & 0x07; }
-			fputc(a, file);
-		}
-	}
-	else if (fmt == Tilemap_Format::GBC_ATTRMAP) {
+	std::vector<uchar> bytes = make_tilemap_bytes(tiles, fmt);
+	if (fmt == Tilemap_Format::GBC_ATTRMAP) {
 		FILE *attr_file = fl_fopen(af, "wb");
 		if (!attr_file) { fclose(file); return false; }
 
-		for (Tile_Tessera *tt : tiles) {
-			int v = (int)(tt->id() & 0xFF);
-			fputc(v, file);
-			int a = 0;
-			if (tt->id() & 0x100) { a |= 0x08; }
-			if (tt->obp1())     { a |= 0x10; }
-			if (tt->priority()) { a |= 0x80; }
-			if (tt->x_flip())   { a |= 0x20; }
-			if (tt->y_flip())   { a |= 0x40; }
-			if (tt->palette() > -1) { a |= tt->palette() & 0x07; }
-			fputc(a, attr_file);
-		}
+		size_t nb = bytes.size() / 2;
+		fwrite(bytes.data(), 1, nb, file);
+		fwrite(bytes.data() + nb, 1, nb, attr_file);
 
 		fclose(attr_file);
 	}
-	else if (fmt == Tilemap_Format::GBA_4BPP) {
-		for (Tile_Tessera *tt : tiles) {
-			int v = (int)(tt->id() & 0xFF);
-			fputc(v, file);
-			int a = (tt->id() >> 8) & 0x03;
-			if (tt->x_flip()) { a |= 0x04; }
-			if (tt->y_flip()) { a |= 0x08; }
-			if (tt->palette() > -1) { a |= (tt->palette() << 4) & 0xF0; }
-			fputc(a, file);
-		}
-	}
-	else if (fmt == Tilemap_Format::GBA_8BPP) {
-		for (Tile_Tessera *tt : tiles) {
-			int v = (int)(tt->id() & 0xFF);
-			fputc(v, file);
-			int a = (tt->id() >> 8) & 0x03;
-			if (tt->x_flip()) { a |= 0x04; }
-			if (tt->y_flip()) { a |= 0x08; }
-			fputc(a, file);
-		}
-	}
-	else if (fmt == Tilemap_Format::SGB_BORDER) {
-		for (Tile_Tessera *tt : tiles) {
-			int v = (int)(tt->id() & 0xFF);
-			fputc(v, file);
-			int a = 0x10;
-			if (tt->x_flip()) { a |= 0x40; }
-			if (tt->y_flip()) { a |= 0x80; }
-			if (tt->palette() > -1) { a |= (tt->palette() << 2) & 0x0C; }
-			fputc(a, file);
-		}
-	}
-	else if (fmt == Tilemap_Format::SNES_ATTRS) {
-		for (Tile_Tessera *tt : tiles) {
-			int v = (int)(tt->id() & 0xFF);
-			fputc(v, file);
-			int a = (tt->id() >> 8) & 0x03;
-			if (tt->priority()) { a |= 0x20; }
-			if (tt->x_flip())   { a |= 0x40; }
-			if (tt->y_flip())   { a |= 0x80; }
-			if (tt->palette() > -1) { a |= (tt->palette() << 2) & 0x1C; }
-			fputc(a, file);
-		}
-	}
-	else if (fmt == Tilemap_Format::RBY_TOWN_MAP) {
-		size_t n = tiles.size();
-		for (size_t i = 0; i < n;) {
-			Tile_Tessera *tt = tiles[i++];
-			int v = (int)tt->id(), r = 1;
-			while (i < n && (int)tiles[i]->id() == v) {
-				i++;
-				if (++r == 0x0F) { break; } // maximum nybble
-			}
-			int b = (v << 4) | r;
-			fputc(b, file);
-		}
-	}
-	else if (fmt == Tilemap_Format::SW_TOWN_MAP) {
-		size_t n = tiles.size();
-		for (size_t i = 0; i < n;) {
-			Tile_Tessera *tt = tiles[i++];
-			int v = (int)tt->id(), r = 1;
-			while (i < n && (int)tiles[i]->id() == v) {
-				i++;
-			}
-			fputc(v, file);
-			fputc(r, file);
-		}
-	}
-	else if (fmt == Tilemap_Format::POKEGEAR_CARD) {
-	size_t n = tiles.size();
-	for (size_t i = 0; i < n;) {
-		Tile_Tessera *tt = tiles[i++];
-		int v = (int)tt->id(), r = 1;
-		while (i < n && (int)tiles[i]->id() == v) {
-			i++;
-			if (++r == 0xFF) { break; } // maximum byte
-		}
-		fputc(v, file);
-		fputc(r, file);
-	}
-	}
-
-	if (fmt == Tilemap_Format::RBY_TOWN_MAP || fmt == Tilemap_Format::SW_TOWN_MAP) {
-		fputc(0x00, file);
-	}
-	else if (fmt == Tilemap_Format::GSC_TOWN_MAP || fmt == Tilemap_Format::PC_TOWN_MAP || fmt == Tilemap_Format::POKEGEAR_CARD) {
-		fputc(0xFF, file);
+	else {
+		fwrite(bytes.data(), 1, bytes.size(), file);
 	}
 
 	fclose(file);

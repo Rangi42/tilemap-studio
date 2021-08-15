@@ -5,6 +5,7 @@
 #pragma warning(pop)
 
 #include "tilemap-format.h"
+#include "tile-buttons.h"
 #include "config.h"
 #include "utils.h"
 
@@ -140,6 +141,27 @@ const char *format_extension(Tilemap_Format fmt) {
 	return format_extensions[(int)fmt];
 }
 
+int format_bytes_per_tile(Tilemap_Format fmt) {
+	switch (fmt) {
+	case Tilemap_Format::PLAIN:
+	case Tilemap_Format::GSC_TOWN_MAP:
+	case Tilemap_Format::PC_TOWN_MAP:
+	case Tilemap_Format::GBC_ATTRMAP:
+		return 1;
+	case Tilemap_Format::GBC_ATTRS:
+	case Tilemap_Format::GBA_4BPP:
+	case Tilemap_Format::GBA_8BPP:
+	case Tilemap_Format::SGB_BORDER:
+	case Tilemap_Format::SNES_ATTRS:
+		return 2;
+	case Tilemap_Format::RBY_TOWN_MAP:
+	case Tilemap_Format::SW_TOWN_MAP:
+	case Tilemap_Format::POKEGEAR_CARD:
+	default:
+		return 0;
+	}
+}
+
 Tilemap_Format guess_format(const char *filename) {
 	fprintf(stderr, "guesing format for %s\n", filename);
 	size_t fs = file_size(filename);
@@ -184,4 +206,151 @@ Tilemap_Format guess_format(const char *filename) {
 		return fmt;
 	}
 	return Tilemap_Format::PLAIN;
+}
+
+std::pair<std::vector<uchar>, std::vector<uchar>> read_tilemap_bytes(const char *tf, const char *af) {
+	std::pair<std::vector<uchar>, std::vector<uchar>> vs;
+	auto &[tbytes, abytes] = vs;
+
+	FILE *file = fl_fopen(tf, "rb");
+	if (!file) { return vs; }
+	for (int b = fgetc(file); b != EOF; b = fgetc(file)) {
+		tbytes.push_back((uchar)b);
+	}
+	tbytes.push_back(0); // sentinel that file was read OK
+	fclose(file);
+
+	if (af) {
+		FILE *attr_file = fl_fopen(af, "rb");
+		if (!attr_file) { return vs; }
+		for (int b = fgetc(attr_file); b != EOF; b = fgetc(attr_file)) {
+			abytes.push_back((uchar)b);
+		}
+		abytes.push_back(0); // sentinel that file was read OK
+		fclose(attr_file);
+	}
+
+	return vs;
+}
+
+std::vector<uchar> make_tilemap_bytes(std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt) {
+	std::vector<uchar> bytes;
+
+	if (fmt == Tilemap_Format::PLAIN || fmt == Tilemap_Format::GSC_TOWN_MAP || fmt == Tilemap_Format::PC_TOWN_MAP) {
+		for (Tile_Tessera *tt : tiles) {
+			uchar v = (uchar)tt->id();
+			if (tt->x_flip()) { v |= 0x40; }
+			if (tt->y_flip()) { v |= 0x80; }
+			bytes.push_back(v);
+		}
+	}
+	else if (fmt == Tilemap_Format::GBC_ATTRS) {
+		for (Tile_Tessera *tt : tiles) {
+			uchar v = (uchar)(tt->id() & 0xFF);
+			bytes.push_back(v);
+			uchar a = 0;
+			if (tt->id() & 0x100) { a |= 0x08; }
+			if (tt->obp1())     { a |= 0x10; }
+			if (tt->priority()) { a |= 0x80; }
+			if (tt->x_flip())   { a |= 0x20; }
+			if (tt->y_flip())   { a |= 0x40; }
+			if (tt->palette() > -1) { a |= tt->palette() & 0x07; }
+			bytes.push_back(a);
+		}
+	}
+	else if (fmt == Tilemap_Format::GBC_ATTRMAP) {
+		for (Tile_Tessera *tt : tiles) {
+			uchar v = (uchar)(tt->id() & 0xFF);
+			bytes.push_back(v);
+		}
+		for (Tile_Tessera *tt : tiles) {
+			uchar a = 0;
+			if (tt->id() & 0x100) { a |= 0x08; }
+			if (tt->obp1())     { a |= 0x10; }
+			if (tt->priority()) { a |= 0x80; }
+			if (tt->x_flip())   { a |= 0x20; }
+			if (tt->y_flip())   { a |= 0x40; }
+			if (tt->palette() > -1) { a |= tt->palette() & 0x07; }
+			bytes.push_back(a);
+		}
+	}
+	else if (fmt == Tilemap_Format::GBA_4BPP) {
+		for (Tile_Tessera *tt : tiles) {
+			uchar v = (uchar)(tt->id() & 0xFF);
+			bytes.push_back(v);
+			uchar a = (tt->id() >> 8) & 0x03;
+			if (tt->x_flip()) { a |= 0x04; }
+			if (tt->y_flip()) { a |= 0x08; }
+			if (tt->palette() > -1) { a |= (tt->palette() << 4) & 0xF0; }
+			bytes.push_back(a);
+		}
+	}
+	else if (fmt == Tilemap_Format::GBA_8BPP) {
+		for (Tile_Tessera *tt : tiles) {
+			uchar v = (uchar)(tt->id() & 0xFF);
+			bytes.push_back(v);
+			uchar a = (tt->id() >> 8) & 0x03;
+			if (tt->x_flip()) { a |= 0x04; }
+			if (tt->y_flip()) { a |= 0x08; }
+			bytes.push_back(a);
+		}
+	}
+	else if (fmt == Tilemap_Format::SGB_BORDER) {
+		for (Tile_Tessera *tt : tiles) {
+			uchar v = (uchar)(tt->id() & 0xFF);
+			bytes.push_back(v);
+			uchar a = 0x10;
+			if (tt->x_flip()) { a |= 0x40; }
+			if (tt->y_flip()) { a |= 0x80; }
+			if (tt->palette() > -1) { a |= (tt->palette() << 2) & 0x0C; }
+			bytes.push_back(a);
+		}
+	}
+	else if (fmt == Tilemap_Format::SNES_ATTRS) {
+		for (Tile_Tessera *tt : tiles) {
+			uchar v = (uchar)(tt->id() & 0xFF);
+			bytes.push_back(v);
+			uchar a = (tt->id() >> 8) & 0x03;
+			if (tt->priority()) { a |= 0x20; }
+			if (tt->x_flip())   { a |= 0x40; }
+			if (tt->y_flip())   { a |= 0x80; }
+			if (tt->palette() > -1) { a |= (tt->palette() << 2) & 0x1C; }
+			bytes.push_back(a);
+		}
+	}
+	else if (fmt == Tilemap_Format::RBY_TOWN_MAP) {
+		size_t n = tiles.size();
+		for (size_t i = 0; i < n;) {
+			Tile_Tessera *tt = tiles[i++];
+			uchar v = (uchar)tt->id(), r = 1;
+			while (i < n && (uchar)tiles[i]->id() == v) {
+				i++;
+				if (++r == 0x0F) { break; } // maximum nybble
+			}
+			uchar b = (v << 4) | r;
+			bytes.push_back(b);
+		}
+	}
+	else if (fmt == Tilemap_Format::POKEGEAR_CARD || fmt == Tilemap_Format::SW_TOWN_MAP) {
+		size_t n = tiles.size();
+		for (size_t i = 0; i < n;) {
+			Tile_Tessera *tt = tiles[i++];
+			uchar v = (uchar)tt->id(), r = 1;
+			while (i < n && (uchar)tiles[i]->id() == v) {
+				i++;
+				if (++r == 0xFF) { break; } // maximum byte
+			}
+			bytes.push_back(v);
+			bytes.push_back(r);
+		}
+	}
+
+	if (fmt == Tilemap_Format::RBY_TOWN_MAP || fmt == Tilemap_Format::SW_TOWN_MAP) {
+		bytes.push_back(0x00);
+	}
+	else if (fmt == Tilemap_Format::GSC_TOWN_MAP || fmt == Tilemap_Format::PC_TOWN_MAP || fmt == Tilemap_Format::POKEGEAR_CARD) {
+		bytes.push_back(0xFF);
+	}
+
+	return bytes;
 }
