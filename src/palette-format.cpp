@@ -15,7 +15,7 @@
 #pragma warning(disable : 4458)
 
 static const char *palette_names[NUM_PALETTE_FORMATS] = {
-	"Indexed in tileset",
+	"Indexed in tileset image",
 	"Assembly (RGB)",
 	"PaintShop Pro (JASC-PAL)",
 	"Adobe Color Table (ACT)",
@@ -26,7 +26,7 @@ static const char *palette_names[NUM_PALETTE_FORMATS] = {
 	"CorelDRAW (XML)",
 	"superfamiconv (JSON)",
 	"Fractint (MAP)",
-	"Hexadecimal (HEX)",
+	"Lospec (HEX)",
 	"Pixel image (PNG)",
 	"Pixel image (BMP)"
 };
@@ -121,6 +121,7 @@ bool write_palette(const char *f, const Palettes &palettes, Palette_Format pal_f
 
 	size_t n = palettes.size() * nc;
 	if (pal_fmt == Palette_Format::RGB) {
+		// <https://github.com/pret/pokecrystal/blob/master/macros/gfx.asm#:~:text=RGB:%20MACRO>
 		int p = 0;
 		for (const Palette &palette : palettes) {
 			fprintf(file, "; palette %d\n", p++);
@@ -132,6 +133,7 @@ bool write_palette(const char *f, const Palettes &palettes, Palette_Format pal_f
 		}
 	}
 	else if (pal_fmt == Palette_Format::JASC) {
+		// <https://www.selapa.net/swatches/colors/fileformats.php#psp_pal>
 		fprintf(file, "JASC-PAL\r\n0100\r\n%zu\r\n", n);
 		for (const Palette &palette : palettes) {
 			for (Fl_Color c : palette) {
@@ -142,6 +144,7 @@ bool write_palette(const char *f, const Palettes &palettes, Palette_Format pal_f
 		}
 	}
 	else if (pal_fmt == Palette_Format::ACT) {
+		// <https://www.adobe.com/devnet-apps/photoshop/fileformatashtml/#50577411_pgfId-1070626>
 		uchar rgb[3] = {};
 		for (const Palette &palette : palettes) {
 			for (Fl_Color c : palette) {
@@ -157,6 +160,8 @@ bool write_palette(const char *f, const Palettes &palettes, Palette_Format pal_f
 		fwrite(footer, 1, sizeof(footer), file);
 	}
 	else if (pal_fmt == Palette_Format::ACO) {
+		// <https://www.cyotek.com/blog/writing-photoshop-color-swatch-aco-files-using-csharp>
+		// <https://www.adobe.com/devnet-apps/photoshop/fileformatashtml/#50577411_pgfId-1055819>
 		uchar header[4] = {BE16(1), BE16(n)};
 		fwrite(header, 1, sizeof(header), file);
 		uchar rgb[10] = {};
@@ -169,6 +174,8 @@ bool write_palette(const char *f, const Palettes &palettes, Palette_Format pal_f
 		}
 	}
 	else if (pal_fmt == Palette_Format::ASE) {
+		// <https://www.cyotek.com/blog/writing-adobe-swatch-exchange-ase-files-using-csharp>
+		// <http://www.selapa.net/swatches/colors/fileformats.php#adobe_ase>
 		uchar header[12] = {
 			'A', 'S', 'E', 'F', // magic number
 			BE16(1),            // major version
@@ -205,6 +212,7 @@ bool write_palette(const char *f, const Palettes &palettes, Palette_Format pal_f
 		}
 	}
 	else if (pal_fmt == Palette_Format::TXT) {
+		// <https://www.getpaint.net/doc/latest/WorkingWithPalettes.html>
 		fputs("; paint.net Palette File\n", file);
 		for (const Palette &palette : palettes) {
 			for (Fl_Color c : palette) {
@@ -215,6 +223,8 @@ bool write_palette(const char *f, const Palettes &palettes, Palette_Format pal_f
 		}
 	}
 	else if (pal_fmt == Palette_Format::GPL) {
+		// <https://docs.gimp.org/2.10/en/gimp-concepts-palettes.html>
+		// <http://www.selapa.net/swatches/colors/fileformats.php#gimp_gpl>
 		const char *name = fl_filename_name(f);
 		fprintf(file, "GIMP Palette\nName: %s\nColumns: 16\n#\n", name);
 		for (const Palette &palette : palettes) {
@@ -226,6 +236,7 @@ bool write_palette(const char *f, const Palettes &palettes, Palette_Format pal_f
 		}
 	}
 	else if (pal_fmt == Palette_Format::XML) {
+		// <https://community.coreldraw.com/sdk/w/articles/177/creating-color-palettes>
 		fputs("<?xml version=\"1.0\"?>\r\n<palette name=\"tiles\" guid=\"", file);
 		write_guid(file);
 		fputs("\">\r\n  <colors>\r\n", file);
@@ -241,6 +252,7 @@ bool write_palette(const char *f, const Palettes &palettes, Palette_Format pal_f
 		fputs("  </colors>\r\n</palette>\r\n", file);
 	}
 	else if (pal_fmt == Palette_Format::JSON) {
+		// <https://github.com/Optiroc/SuperFamiconv/blob/master/src/Palette.cpp#:~:text=Palette::to_json>
 		fputs("{\r\n  \"palettes\":[\r\n", file);
 		bool pp = false;
 		for (const Palette &palette : palettes) {
@@ -276,6 +288,8 @@ bool write_palette(const char *f, const Palettes &palettes, Palette_Format pal_f
 		fputs("\r\n  ]\r\n}", file);
 	}
 	else if (pal_fmt == Palette_Format::MAP) {
+		// <http://eyecandyarchive.com/Fractint/docs/Fractint.txt#:~:text=3.2%20Palette%20Maps>
+		// <https://softologyblog.wordpress.com/2019/03/23/automatic-color-palette-creation/>
 		for (const Palette &palette : palettes) {
 			for (Fl_Color c : palette) {
 				uchar r, g, b;
@@ -285,6 +299,7 @@ bool write_palette(const char *f, const Palettes &palettes, Palette_Format pal_f
 		}
 	}
 	else if (pal_fmt == Palette_Format::HEX) {
+		// <https://lospec.com/palette-list>
 		for (const Palette &palette : palettes) {
 			for (Fl_Color c : palette) {
 				uchar r, g, b;
