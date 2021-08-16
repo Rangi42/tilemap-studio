@@ -126,6 +126,7 @@ void Modal_Dialog::refresh() {
 		h += _body->h() + 10;
 		h = std::max(h, 70);
 	}
+#ifdef _WIN32
 	if (_cancel_button) {
 		_ok_button->resize(w-btn_w-14-btn_w-10, h, btn_w, btn_h);
 		_cancel_button->resize(w-btn_w-10, h, btn_w, btn_h);
@@ -133,6 +134,12 @@ void Modal_Dialog::refresh() {
 	else {
 		_ok_button->resize(w-btn_w-10, h, btn_w, btn_h);
 	}
+#else
+	if (_cancel_button) {
+		_cancel_button->resize(w-btn_w-14-btn_w-10, h, btn_w, btn_h);
+	}
+	_ok_button->resize(w-btn_w-10, h, btn_w, btn_h);
+#endif
 	h += _ok_button->h() + 10;
 	_dialog->size_range(w, h, w, h);
 	_dialog->size(w, h);
