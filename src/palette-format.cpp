@@ -21,6 +21,7 @@ static const char *palette_names[NUM_PALETTE_FORMATS] = {
 	"Adobe Color Table (ACT)",
 	"Adobe Color Swatch (ACO)",
 	"Adobe Swatch Exchange (ASE)",
+	"Microsoft (RIFF)",
 	"paint.net (TXT)",
 	"GIMP (GPL)",
 	"CorelDRAW (XML)",
@@ -44,7 +45,7 @@ int palette_max_name_width() {
 }
 
 static const char *palette_extensions[NUM_PALETTE_FORMATS] = {
-	NULL, ".pal", ".pal", ".act", ".aco", ".ase", ".txt", ".gpl", ".xml", ".json", ".map", ".hex", ".pal.png", ".pal.bmp"
+	NULL, ".pal", ".pal", ".act", ".aco", ".ase", ".riff", ".txt", ".gpl", ".xml", ".json", ".map", ".hex", ".pal.png", ".pal.bmp"
 };
 
 const char *palette_extension(Palette_Format pal_fmt) {
@@ -208,6 +209,27 @@ bool write_palette(const char *f, const Palettes &palettes, Palette_Format pal_f
 					BE16(0)                       // color type (global)
 				};
 				fwrite(block, 1, sizeof(block), file);
+			}
+		}
+	}
+	else if (pal_fmt == Palette_Format::RIFF) {
+		// <https://www.cyotek.com/blog/writing-microsoft-riff-palette-pal-files-with-csharp>
+		// <https://worms2d.info/Palette_file>
+		uchar header[24] = {
+			'R', 'I', 'F', 'F', // chunk ID
+			LE32(16 + 4 * n),   // chunk size
+			'P', 'A', 'L', ' ', // format
+			'd', 'a', 't', 'a', // subchunk ID
+			LE32(4 + 4 * n),    // subchunk size
+			LE16(0x0300),       // version
+			LE16(n),            // num colors
+		};
+		fwrite(header, 1, sizeof(header), file);
+		uchar rgb[4] = {};
+		for (const Palette &palette : palettes) {
+			for (Fl_Color c : palette) {
+				Fl::get_color(c, rgb[0], rgb[1], rgb[2]);
+				fwrite(rgb, 1, sizeof(rgb), file);
 			}
 		}
 	}
