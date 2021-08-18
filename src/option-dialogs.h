@@ -291,8 +291,8 @@ public:
 	inline void start_id(uint16_t n) { initialize(); _start_id->value(n); }
 	inline bool use_space(void) const { return !!_use_space->value(); }
 	inline uint16_t space_id(void) const { return (uint16_t)_space_id->value(); }
-	inline uint16_t start_index(void) const { return (uint16_t)_start_index->value(); }
-	inline void start_index(uint16_t n) { initialize(); _start_index->value(n); }
+	inline uint8_t start_index(void) const { return (uint8_t)_start_index->value(); }
+	inline void start_index(uint8_t n) { initialize(); _start_index->value(n); }
 	inline void reshow(const Fl_Widget *p) { _canceled = false; reveal(p); }
 	inline void prepare_image(const char *filename) { _image_filename = filename; _prepared_image = true; }
 private:
