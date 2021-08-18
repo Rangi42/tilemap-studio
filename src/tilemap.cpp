@@ -82,9 +82,9 @@ void Tilemap::resize(size_t w, size_t h, Resize_Dialog::Hor_Align ha, Resize_Dia
 	}
 
 	if (format_can_edit_palettes(Config::format())) {
-		for (size_t i = 0; i < n; i++) {
-			if (tiles[i]->palette() == -1) {
-				tiles[i]->palette(0);
+		for (Tile_Tessera *tt : tiles) {
+			if (tt->palette() == -1) {
+				tt->palette(0);
 			}
 		}
 	}
@@ -186,8 +186,8 @@ void Tilemap::new_tiles(size_t w, size_t h) {
 		_tiles.emplace_back(new Tile_Tessera());
 	}
 	if (format_can_edit_palettes(Config::format())) {
-		for (size_t i = 0; i < n; i++) {
-			_tiles[i]->palette(0);
+		for (Tile_Tessera *tt : _tiles) {
+			tt->palette(0);
 		}
 	}
 	_width = w;

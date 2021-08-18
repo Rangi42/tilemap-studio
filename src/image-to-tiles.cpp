@@ -194,8 +194,8 @@ bool Main_Window::image_to_tiles() {
 			if (use_color_zero) {
 				s.insert(color_zero);
 			}
-			for (int j = 0; j < NUM_TILE_PIXELS; j++) {
-				s.insert(tile[j]);
+			for (Fl_Color c : tile) {
+				s.insert(c);
 			}
 			if (s.size() > max_colors) {
 				break;
@@ -274,8 +274,8 @@ bool Main_Window::image_to_tiles() {
 					palette.insert(palette.begin(), i == 0 ? color_zero : FL_BLACK);
 				}
 			}
-			for (size_t i = palette.size(); i < max_colors; i++) {
-				palette.push_back(FL_BLACK);
+			if (palette.size() < max_colors) {
+				palette.insert(palette.end(), max_colors - palette.size(), FL_BLACK);
 			}
 			palettes.push_back(palette);
 		}

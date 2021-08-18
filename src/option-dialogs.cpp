@@ -390,7 +390,7 @@ Resize_Dialog::Resize_Dialog(const char *t) : Option_Dialog(220, t), _tilemap_wi
 Resize_Dialog::~Resize_Dialog() {
 	delete _tilemap_width;
 	delete _tilemap_height;
-	for (int i = 0; i < 9; i++) { delete _anchor_buttons[i]; }
+	for (Anchor_Button *ab : _anchor_buttons) { delete ab; };
 }
 
 Resize_Dialog::Hor_Align Resize_Dialog::horizontal_anchor() const {
@@ -463,8 +463,8 @@ int Resize_Dialog::refresh_content(int ww, int dy) {
 
 void Resize_Dialog::anchor_button_cb(Anchor_Button *ab, Resize_Dialog *rd) {
 	ab->setonly();
-	for (int i = 0; i < 9; i++) {
-		rd->_anchor_buttons[i]->label(NULL);
+	for (Anchor_Button *abi : rd->_anchor_buttons) {
+		abi->label(NULL);
 	}
 	int a = ab->anchor();
 	int y = a / 3, x = a % 3;
@@ -785,9 +785,7 @@ Fl_Color Image_To_Tiles_Dialog::fl_color_zero() const {
 	const char *s = _color_zero_rgb->value();
 	char rgb[7] = {};
 	if (size_t n = strlen(s); n < 6) {
-		for (size_t i = 0; i < 6 - n; i++) {
-			rgb[i] = '0';
-		}
+		memset(rgb, '0', 6 - n);
 	}
 	strncat(rgb, s, 6);
 
@@ -1205,12 +1203,9 @@ void Image_To_Tiles_Dialog::color_zero_cb(OS_Check_Button *, Image_To_Tiles_Dial
 }
 
 void Image_To_Tiles_Dialog::color_zero_rgb_cb(OS_Hex_Input *, Image_To_Tiles_Dialog *itd) {
-	size_t n = strlen(itd->_color_zero_rgb->value());
-	if (n < 6) {
+	if (size_t n = strlen(itd->_color_zero_rgb->value()); n < 6) {
 		char buffer[7] = {};
-		for (size_t i = 0; i < 6 - n; i++) {
-			buffer[i] = '0';
-		}
+		memset(buffer, '0', 6 - n);
 		strcat(buffer, itd->_color_zero_rgb->value());
 		itd->_color_zero_rgb->value(buffer);
 	}

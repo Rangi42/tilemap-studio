@@ -1,8 +1,8 @@
 #include "tile.h"
 
 bool is_blank_tile(const Tile &tile, Fl_Color blank_color) {
-	for (int i = 0; i < NUM_TILE_PIXELS; i++) {
-		if (tile[i] != blank_color) {
+	for (Fl_Color c : tile) {
+		if (c != blank_color) {
 			return false;
 		}
 	}
