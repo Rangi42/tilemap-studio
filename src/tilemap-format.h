@@ -2,7 +2,6 @@
 #define TILEMAP_FORMAT_H
 
 #include <vector>
-#include <utility>
 
 #pragma warning(push, 0)
 #include <FL/fl_types.h>
@@ -80,7 +79,6 @@ Tilemap_Format guess_format(const char *filename);
 
 class Tile_Tessera;
 
-std::pair<std::vector<uchar>, std::vector<uchar>> read_tilemap_bytes(const char *tf, const char *af);
-std::vector<uchar> make_tilemap_bytes(std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt);
+std::vector<uchar> make_tilemap_bytes(const std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt);
 
 #endif

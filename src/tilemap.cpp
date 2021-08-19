@@ -194,12 +194,8 @@ void Tilemap::new_tiles(size_t w, size_t h) {
 	_modified = true;
 }
 
-Tilemap::Result Tilemap::read_tiles(const std::pair<std::vector<uchar>, std::vector<uchar>> &vs) {
-	auto &[tbytes, abytes] = vs;
-
-	if (tbytes.empty()) { return (_result = Result::TILEMAP_BAD_FILE); }
-
-	size_t c = tbytes.size() - 1; // disregard final sentinel element
+Tilemap::Result Tilemap::make_tiles(const std::vector<uchar> &tbytes, const std::vector<uchar> &abytes) {
+	size_t c = tbytes.size();
 	if (c == 0) { return (_result = Result::TILEMAP_EMPTY); }
 
 	std::vector<Tile_Tessera *> tiles;
@@ -227,11 +223,8 @@ Tilemap::Result Tilemap::read_tiles(const std::pair<std::vector<uchar>, std::vec
 	}
 
 	else if (fmt == Tilemap_Format::GBC_ATTRMAP) {
-		if (abytes.empty()) { return (_result = Result::ATTRMAP_BAD_FILE); }
-
-		size_t ac = abytes.size() - 1; // disregard final sentinel element
+		size_t ac = abytes.size();
 		if (ac != c) { return (_result = ac < c ? Result::ATTRMAP_TOO_SHORT : Result::ATTRMAP_TOO_LONG); }
-
 		tiles.reserve(c);
 		for (size_t i = 0; i < c; i++) {
 			uint16_t v = tbytes[i];
@@ -450,6 +443,25 @@ void Tilemap::limit_to_format(Tilemap_Format fmt) {
 		}
 	}
 	_modified = true;
+}
+
+static bool read_file_bytes(const char *f, std::vector<uchar> &bytes) {
+	FILE *file = fl_fopen(f, "rb");
+	if (!file) { return false; }
+	size_t n = file_size(file);
+	bytes.reserve(n);
+	for (int b = fgetc(file); b != EOF; b = fgetc(file)) {
+		bytes.push_back((uchar)b);
+	}
+	fclose(file);
+	return true;
+}
+
+Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
+	std::vector<uchar> tbytes, abytes;
+	if (!read_file_bytes(tf, tbytes)) { return (_result = Result::TILEMAP_BAD_FILE); }
+	if (af && !read_file_bytes(af, abytes)) { return (_result = Result::ATTRMAP_BAD_FILE); }
+	return make_tiles(tbytes, abytes);
 }
 
 bool Tilemap::write_tiles(const char *tf, const char *af, std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt) {

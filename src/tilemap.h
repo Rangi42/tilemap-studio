@@ -54,8 +54,8 @@ public:
 	void undo(void);
 	void redo(void);
 	void new_tiles(size_t w, size_t h);
-	inline Result read_tiles(const char *tf, const char *af) { return read_tiles(read_tilemap_bytes(tf, af)); }
-	Result read_tiles(const std::pair<std::vector<uchar>, std::vector<uchar>> &vs);
+	Result read_tiles(const char *tf, const char *af);
+	Result make_tiles(const std::vector<uchar> &tbytes, const std::vector<uchar> &abytes);
 	bool can_format_as(Tilemap_Format fmt);
 	void limit_to_format(Tilemap_Format fmt);
 	inline bool write_tiles(const char *tf, const char *af) { return write_tiles(tf, af, _tiles, Config::format()); }

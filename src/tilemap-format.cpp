@@ -207,36 +207,7 @@ Tilemap_Format guess_format(const char *filename) {
 	return Tilemap_Format::PLAIN;
 }
 
-std::pair<std::vector<uchar>, std::vector<uchar>> read_tilemap_bytes(const char *tf, const char *af) {
-	std::pair<std::vector<uchar>, std::vector<uchar>> vs;
-	auto &[tbytes, abytes] = vs;
-
-	FILE *file = fl_fopen(tf, "rb");
-	if (!file) { return vs; }
-	size_t tn = file_size(file);
-	tbytes.reserve(tn + 1);
-	for (int b = fgetc(file); b != EOF; b = fgetc(file)) {
-		tbytes.push_back((uchar)b);
-	}
-	tbytes.push_back(0); // sentinel that file was read OK
-	fclose(file);
-
-	if (af) {
-		FILE *attr_file = fl_fopen(af, "rb");
-		if (!attr_file) { return vs; }
-		size_t an = file_size(attr_file);
-		abytes.reserve(an + 1);
-		for (int b = fgetc(attr_file); b != EOF; b = fgetc(attr_file)) {
-			abytes.push_back((uchar)b);
-		}
-		abytes.push_back(0); // sentinel that file was read OK
-		fclose(attr_file);
-	}
-
-	return vs;
-}
-
-std::vector<uchar> make_tilemap_bytes(std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt) {
+std::vector<uchar> make_tilemap_bytes(const std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt) {
 	std::vector<uchar> bytes;
 	size_t n = tiles.size();
 
