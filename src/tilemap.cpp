@@ -460,7 +460,7 @@ static bool read_file_bytes(const char *f, std::vector<uchar> &bytes) {
 Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 	std::vector<uchar> tbytes, abytes;
 	if (!read_file_bytes(tf, tbytes)) { return (_result = Result::TILEMAP_BAD_FILE); }
-	if (af && !read_file_bytes(af, abytes)) { return (_result = Result::ATTRMAP_BAD_FILE); }
+	if (af && af[0] && !read_file_bytes(af, abytes)) { return (_result = Result::ATTRMAP_BAD_FILE); }
 	return make_tiles(tbytes, abytes);
 }
 
