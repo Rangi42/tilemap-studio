@@ -178,6 +178,56 @@ void Tilemap::redo() {
 	_future.pop_back();
 }
 
+bool Tilemap::can_format_as(Tilemap_Format fmt) {
+	int n = format_tileset_size(fmt), m = format_palettes_size(fmt);
+	bool can_flip = format_can_flip(fmt), has_priority = format_has_priority(fmt), has_obp1 = format_has_obp1(fmt);
+	for (Tile_Tessera *tt : _tiles) {
+		if (tt->id() >= n) {
+			return false;
+		}
+		if (tt->palette() >= m) {
+			return false;
+		}
+		if ((tt->x_flip() || tt->y_flip()) && !can_flip) {
+			return false;
+		}
+		if (tt->priority() && !has_priority) {
+			return false;
+		}
+		if (tt->obp1() && !has_obp1) {
+			return false;
+		}
+	}
+	return true;
+}
+
+void Tilemap::limit_to_format(Tilemap_Format fmt) {
+	int n = format_tileset_size(fmt), m = format_palettes_size(fmt);
+	bool can_flip = format_can_flip(fmt), has_priority = format_has_priority(fmt), has_obp1 = format_has_obp1(fmt);
+	for (Tile_Tessera *tt : _tiles) {
+		if (tt->id() >= n) {
+			tt->id((uint16_t)(n - 1));
+		}
+		if (tt->palette() == -1 && m > 0) {
+			tt->palette(0);
+		}
+		else if (tt->palette() >= m) {
+			tt->palette(m - 1);
+		}
+		if (!can_flip) {
+			tt->x_flip(false);
+			tt->y_flip(false);
+		}
+		if (!has_priority) {
+			tt->priority(false);
+		}
+		if (!has_obp1) {
+			tt->obp1(false);
+		}
+	}
+	_modified = true;
+}
+
 void Tilemap::new_tiles(size_t w, size_t h) {
 	clear();
 	size_t n = w * h;
@@ -393,56 +443,6 @@ Tilemap::Result Tilemap::make_tiles(const std::vector<uchar> &tbytes, const std:
 	guess_width();
 
 	return (_result = Result::TILEMAP_OK);
-}
-
-bool Tilemap::can_format_as(Tilemap_Format fmt) {
-	int n = format_tileset_size(fmt), m = format_palettes_size(fmt);
-	bool can_flip = format_can_flip(fmt), has_priority = format_has_priority(fmt), has_obp1 = format_has_obp1(fmt);
-	for (Tile_Tessera *tt : _tiles) {
-		if (tt->id() >= n) {
-			return false;
-		}
-		if (tt->palette() >= m) {
-			return false;
-		}
-		if ((tt->x_flip() || tt->y_flip()) && !can_flip) {
-			return false;
-		}
-		if (tt->priority() && !has_priority) {
-			return false;
-		}
-		if (tt->obp1() && !has_obp1) {
-			return false;
-		}
-	}
-	return true;
-}
-
-void Tilemap::limit_to_format(Tilemap_Format fmt) {
-	int n = format_tileset_size(fmt), m = format_palettes_size(fmt);
-	bool can_flip = format_can_flip(fmt), has_priority = format_has_priority(fmt), has_obp1 = format_has_obp1(fmt);
-	for (Tile_Tessera *tt : _tiles) {
-		if (tt->id() >= n) {
-			tt->id((uint16_t)(n - 1));
-		}
-		if (tt->palette() == -1 && m > 0) {
-			tt->palette(0);
-		}
-		else if (tt->palette() >= m) {
-			tt->palette(m - 1);
-		}
-		if (!can_flip) {
-			tt->x_flip(false);
-			tt->y_flip(false);
-		}
-		if (!has_priority) {
-			tt->priority(false);
-		}
-		if (!has_obp1) {
-			tt->obp1(false);
-		}
-	}
-	_modified = true;
 }
 
 static bool read_file_bytes(const char *f, std::vector<uchar> &bytes) {

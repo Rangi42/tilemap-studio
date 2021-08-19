@@ -53,11 +53,10 @@ public:
 	void remember(void);
 	void undo(void);
 	void redo(void);
-	void new_tiles(size_t w, size_t h);
-	Result read_tiles(const char *tf, const char *af);
-	Result make_tiles(const std::vector<uchar> &tbytes, const std::vector<uchar> &abytes);
 	bool can_format_as(Tilemap_Format fmt);
 	void limit_to_format(Tilemap_Format fmt);
+	void new_tiles(size_t w, size_t h);
+	Result read_tiles(const char *tf, const char *af);
 	inline bool write_tiles(const char *tf, const char *af) { return write_tiles(tf, af, _tiles, Config::format()); }
 	inline bool export_tiles(const char *f) {
 		return ends_with_ignore_case(f, ".csv") ? export_csv_tiles(f, Config::format()) : export_c_tiles(f, Config::format());
@@ -65,6 +64,7 @@ public:
 	void print_tilemap(void) const;
 	void guess_width(void);
 private:
+	Result make_tiles(const std::vector<uchar> &tbytes, const std::vector<uchar> &abytes);
 	bool export_c_tiles(const char *f, Tilemap_Format fmt);
 	bool export_csv_tiles(const char *f, Tilemap_Format fmt);
 public:
