@@ -1,7 +1,6 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
-#include <unordered_map>
 #include <vector>
 
 #pragma warning(push, 0)

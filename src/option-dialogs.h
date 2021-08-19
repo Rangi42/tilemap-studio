@@ -1,7 +1,6 @@
 #ifndef OPTION_DIALOGS_H
 #define OPTION_DIALOGS_H
 
-#include <unordered_map>
 #include <string>
 
 #include "config.h"
