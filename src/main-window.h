@@ -84,7 +84,7 @@ private:
 	Image_To_Tiles_Dialog *_image_to_tiles_dialog;
 	Help_Window *_help_window;
 	// Data
-	std::string _tilemap_file, _attrmap_file;
+	std::string _tilemap_file, _attrmap_file, _tilemap_basename;
 	std::vector<std::string> _tileset_files;
 	std::string _recent_tilemaps[NUM_RECENT], _recent_tilesets[NUM_RECENT];
 	Tilemap _tilemap;
@@ -117,7 +117,7 @@ public:
 	inline int tileset_width(void) const { return _tileset_width; }
 	inline Tile_Selection &selection(void) { return _selection; }
 	inline const char *modified_filename(void) const {
-		return unsaved() ? _tilemap_file.empty() ? NEW_TILEMAP_NAME : fl_filename_name(_tilemap_file.c_str()) : "";
+		return unsaved() ? _tilemap_file.empty() ? _tilemap_basename.c_str() : fl_filename_name(_tilemap_file.c_str()) : "";
 	}
 	inline bool map_editable(void) const { return _map_editable; }
 	inline void map_editable(bool e) { _map_editable = e; }
@@ -137,13 +137,13 @@ public:
 	void x_flip_selection(void);
 	void y_flip_selection(void);
 	void select_all(void);
-	inline void new_tilemap(size_t width, size_t height) { open_tilemap(NULL, width, height); }
-	void open_tilemap(const char *filename, size_t width = 0, size_t height = 0, bool keep_format = false);
+	void new_tilemap(size_t width, size_t height);
+	void open_tilemap(const char *filename, size_t width = 0);
 	void open_recent_tilemap(int n);
 	inline void load_tileset(const char *filename) { unload_tilesets_cb(NULL, this); add_tileset(filename); }
 	void add_tileset(const char *filename, int start = 0x00, int offset = 0, int length = 0);
 	void load_recent_tileset(int n);
-	void load_corresponding_tileset(const char *filename);
+	void load_corresponding_tileset(void);
 	void open_tilemap_or_image_to_tiles(const char *filename);
 private:
 	void store_recent_tilemap(void);
@@ -159,6 +159,7 @@ private:
 	void shift_tileset(void);
 	void reformat_tilemap(void);
 	void save_tilemap(bool force);
+	void setup_tilemap(const char *basename, int old_tileset_size);
 	void export_tilemap(const char *filename);
 	void select_tile(uint16_t id);
 	void highlight_tile(uint16_t id);

@@ -43,8 +43,8 @@
 #pragma warning(disable : 4458)
 
 Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_Window(x, y, w, h, PROGRAM_NAME),
-	_tile_buttons(), _tilemap_file(), _attrmap_file(), _tileset_files(), _recent_tilemaps(), _recent_tilesets(),
-	_tilemap(), _tilesets(), _wx(x), _wy(y), _ww(w), _wh(h) {
+	_tile_buttons(), _tilemap_file(), _attrmap_file(), _tilemap_basename(), _tileset_files(), _recent_tilemaps(),
+	_recent_tilesets(), _tilemap(), _tilesets(), _wx(x), _wy(y), _ww(w), _wh(h) {
 
 	Tile_State::tilesets(&_tilesets);
 
@@ -981,7 +981,7 @@ void Main_Window::update_status(Tile_Tessera *tt) {
 void Main_Window::update_tilemap_metadata() {
 	if (_tilemap.size()) {
 		if (_tilemap_file.empty()) {
-			_tilemap_name->label(NEW_TILEMAP_NAME);
+			_tilemap_name->label(_tilemap_basename.c_str());
 		}
 		else {
 			const char *basename = fl_filename_name(_tilemap_file.c_str());
@@ -1292,12 +1292,9 @@ void Main_Window::reformat_tilemap() {
 	Tilemap_Format fmt = _reformat_dialog->format();
 	if (Config::format() == fmt) { return; }
 
-	const char *filename = _tilemap_file.empty() ? NEW_TILEMAP_NAME : _tilemap_file.c_str();
-	const char *basename = fl_filename_name(filename);
-
 	if (!_reformat_dialog->force() && !_tilemap.can_format_as(fmt)) {
 		std::string msg = "Cannot reformat ";
-		msg = msg + basename + " \nas " + format_name(fmt) + "!";
+		msg = msg + _tilemap_basename + " \nas " + format_name(fmt) + "!";
 		_error_dialog->message(msg);
 		_error_dialog->show(this);
 		return;
@@ -1318,7 +1315,7 @@ void Main_Window::reformat_tilemap() {
 	redraw();
 
 	std::string msg = "Reformatted ";
-	msg = msg + basename + "!";
+	msg = msg + _tilemap_basename + "!";
 	_success_dialog->message(msg);
 	_success_dialog->show(this);
 }
@@ -1573,65 +1570,65 @@ void Main_Window::select_all() {
 	redraw_overlay();
 }
 
-void Main_Window::open_tilemap(const char *filename, size_t width, size_t height, bool keep_format) {
-	if (filename) {
-		_tilemap_options_dialog->use_tilemap(filename, keep_format);
-		_tilemap_options_dialog->show(this);
-		if (_tilemap_options_dialog->canceled()) { return; }
-	}
+void Main_Window::new_tilemap(size_t width, size_t height) {
+	_tilemap.modified(false);
+	close_cb(NULL, this);
+
+	int old_tileset_size = format_tileset_size(Config::format());
+	Config::format(_new_tilemap_dialog->format());
+
+	_tilemap_file.clear();
+	_attrmap_file.clear();
+
+	_tilemap.new_tiles(width, height);
+
+	setup_tilemap(NEW_TILEMAP_NAME, old_tileset_size);
+}
+
+void Main_Window::open_tilemap(const char *filename, size_t width) {
+	_tilemap_options_dialog->use_tilemap(filename, width > 0);
+	_tilemap_options_dialog->show(this);
+	if (_tilemap_options_dialog->canceled()) { return; }
 
 	_tilemap.modified(false);
 	close_cb(NULL, this);
 
-	int n1 = format_tileset_size(Config::format());
+	int old_tileset_size = format_tileset_size(Config::format());
+	Config::format(_tilemap_options_dialog->format());
 
-	const char *basename;
+	const char *attrmap_filename = _tilemap_options_dialog->attrmap_filename();
+	const char *basename = fl_filename_name(filename);
+	const char *attrmap_basename = fl_filename_name(attrmap_filename);
 
-	if (filename) {
-		const char *attrmap_filename = _tilemap_options_dialog->attrmap_filename();
+	_tilemap_file = filename;
+	_attrmap_file = attrmap_filename ? attrmap_filename : "";
 
-		_tilemap_file = filename;
-		_attrmap_file = attrmap_filename ? attrmap_filename : "";
-		basename = fl_filename_name(filename);
-		const char *attrmap_basename = fl_filename_name(attrmap_filename);
-
-		Config::format(_tilemap_options_dialog->format());
-
-		Tilemap::Result result = _tilemap.read_tiles(filename, attrmap_filename);
-		if (result != Tilemap::Result::TILEMAP_OK) {
-			_tilemap.clear();
-			std::string msg = "Error reading ";
-			msg = msg + (result >= Tilemap::Result::ATTRMAP_BAD_FILE ? attrmap_basename : basename);
-			msg = msg + "!\n\n" + Tilemap::error_message(result);
-			_error_dialog->message(msg);
-			_error_dialog->show(this);
-			return;
-		}
-
-		if (width) {
-			_tilemap.width(width);
-		}
-		else {
-			_tilemap.guess_width();
-		}
-	}
-	else {
-		_tilemap_file = "";
-		_attrmap_file = "";
-		basename = NEW_TILEMAP_NAME;
-
-		Config::format(_new_tilemap_dialog->format());
-
-		_tilemap.new_tiles(width, height);
+	Tilemap::Result result = _tilemap.read_tiles(filename, attrmap_filename);
+	if (result != Tilemap::Result::TILEMAP_OK) {
+		_tilemap.clear();
+		std::string msg = "Error reading ";
+		msg = msg + (result >= Tilemap::Result::ATTRMAP_BAD_FILE ? attrmap_basename : basename);
+		msg = msg + "!\n\n" + Tilemap::error_message(result);
+		_error_dialog->message(msg);
+		_error_dialog->show(this);
+		return;
 	}
 
+	if (width) {
+		_tilemap.width(width);
+	}
+
+	setup_tilemap(basename, old_tileset_size);
+}
+
+void Main_Window::setup_tilemap(const char *basename, int old_tileset_size) {
 	if (Config::format() == Tilemap_Format::RBY_TOWN_MAP && _tileset_width == 16) {
 		update_tileset_width(4);
 		select_tile(_selection.id());
 	}
 
-	int n2 = format_tileset_size(Config::format());
-	if (_selection.selected_multiple() && _selection.from_tileset() && n2 < n1) {
+	int tileset_size = format_tileset_size(Config::format());
+	if (_selection.selected_multiple() && _selection.from_tileset() && tileset_size < old_tileset_size) {
 		select_tile(_selection.id());
 	}
 
@@ -1645,19 +1642,17 @@ void Main_Window::open_tilemap(const char *filename, size_t width, size_t height
 	_tilemap_width->default_value(_tilemap.width());
 	tilemap_width_tb_cb(NULL, this);
 
-	// set filenames
+	_tilemap_basename = basename;
+
 	char buffer[FL_PATH_MAX] = {};
-	sprintf(buffer, PROGRAM_NAME " - %s", basename);
-	copy_label(buffer);
 	strcpy(buffer, basename);
 	fl_filename_setext(buffer, sizeof(buffer), ".png");
 	_image_print_chooser->preset_file(buffer);
 
-	// auto-load corresponding tileset
-	if (filename && Config::auto_load_tileset()) {
-		load_corresponding_tileset(filename);
-	}
+	sprintf(buffer, PROGRAM_NAME " - %s", basename);
+	copy_label(buffer);
 
+	load_corresponding_tileset();
 	store_recent_tilemap();
 	update_tilemap_metadata();
 	update_status(NULL);
@@ -1779,11 +1774,12 @@ void Main_Window::load_recent_tileset(int n) {
 
 static const char *tileset_extensions[] = {".png", ".gif", ".bmp", ".1bpp", ".2bpp", ".4bpp", ".8bpp", ".1bpp.lz", ".2bpp.lz"};
 
-void Main_Window::load_corresponding_tileset(const char *filename) {
+void Main_Window::load_corresponding_tileset() {
+	if (!Config::auto_load_tileset() || _tilemap_file.empty()) { return; }
 	char buffer[FL_PATH_MAX] = {};
 	for (const char *ext : tileset_extensions) {
-		strcpy(buffer, filename);
-		if (ends_with_ignore_case(filename, ".tilemap.rle")) {
+		strcpy(buffer, _tilemap_file.c_str());
+		if (ends_with_ignore_case(buffer, ".tilemap.rle")) {
 			buffer[strlen(buffer) - strlen(".tilemap.rle")] = '\0';
 			strcat(buffer, ext);
 		}
@@ -1965,6 +1961,7 @@ void Main_Window::close_cb(Fl_Widget *, Main_Window *mw) {
 	mw->init_sizes();
 	mw->_tilemap_file.clear();
 	mw->_attrmap_file.clear();
+	mw->_tilemap_basename.clear();
 	mw->update_tilemap_metadata();
 	mw->update_status(NULL);
 	mw->update_active_controls();

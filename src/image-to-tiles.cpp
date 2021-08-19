@@ -437,7 +437,7 @@ bool Main_Window::image_to_tiles() {
 	update_active_controls();
 	redraw();
 
-	open_tilemap(tilemap_filename, w, 0, true);
+	open_tilemap(tilemap_filename, w);
 	unload_tilesets_cb(NULL, this);
 	add_tileset(tileset_filename, start_id);
 
