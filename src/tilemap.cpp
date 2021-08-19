@@ -181,24 +181,12 @@ void Tilemap::redo() {
 bool Tilemap::can_format_as(Tilemap_Format fmt) {
 	int n = format_tileset_size(fmt), m = format_palettes_size(fmt);
 	bool can_flip = format_can_flip(fmt), has_priority = format_has_priority(fmt), has_obp1 = format_has_obp1(fmt);
-	for (Tile_Tessera *tt : _tiles) {
-		if (tt->id() >= n) {
-			return false;
-		}
-		if (tt->palette() >= m) {
-			return false;
-		}
-		if ((tt->x_flip() || tt->y_flip()) && !can_flip) {
-			return false;
-		}
-		if (tt->priority() && !has_priority) {
-			return false;
-		}
-		if (tt->obp1() && !has_obp1) {
-			return false;
-		}
-	}
-	return true;
+	return std::all_of(RANGE(_tiles), [&](const Tile_Tessera *tt) {
+		return tt->id() < n && tt->palette() < m
+			&& (can_flip || (!tt->x_flip() && !tt->y_flip()))
+			&& (has_priority || !tt->priority())
+			&& (has_obp1 || !tt->obp1());
+	});
 }
 
 void Tilemap::limit_to_format(Tilemap_Format fmt) {
