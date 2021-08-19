@@ -1320,20 +1320,17 @@ void Main_Window::reformat_tilemap() {
 	_success_dialog->show(this);
 }
 
-void Main_Window::edit_tile(Tile_Tessera *tt, bool remember) {
+void Main_Window::edit_tile(Tile_Tessera *tt) {
 	if (!_selection.selected_multiple()) {
 		Tile_State fs = tt->state();
 		Tile_State ts(tile_id(), x_flip(), y_flip(), priority(), obp1(), palette());
 		bool a = Config::show_attributes();
 		if (fs.same(ts, a)) { return; }
-		if (remember) { _tilemap.remember(); }
 		tt->assign(ts, a);
 		tt->damage(1);
-		_tilemap.modified(true);
 		return;
 	}
 	bool a = Config::show_attributes();
-	if (remember) { _tilemap.remember(); }
 	size_t tx = tt->col(), ty = tt->row();
 	size_t ow = _selection.width(), oh = _selection.height();
 	size_t ox = _selection.left_col(), oy = _selection.top_row();
@@ -1374,7 +1371,6 @@ void Main_Window::edit_tile(Tile_Tessera *tt, bool remember) {
 			}
 		}
 	}
-	_tilemap.modified(true);
 }
 
 void Main_Window::flood_fill(Tile_Tessera *tt) {
@@ -1383,7 +1379,6 @@ void Main_Window::flood_fill(Tile_Tessera *tt) {
 	bool a = Config::show_attributes();
 	bool mf = _selection.selected_multiple() && !(a && _selection.from_tileset());
 	if (!mf && fs.same(ts, a)) { return; }
-	_tilemap.remember();
 	size_t w = _tilemap.width(), h = _tilemap.height(), n = _tilemap.size();
 	std::vector<bool> filled(n, false);
 	std::queue<size_t> queue;
@@ -1440,15 +1435,11 @@ void Main_Window::flood_fill(Tile_Tessera *tt) {
 			tti->assign(ts, a);
 		}
 	}
-	_tilemap_scroll->redraw();
-	_tilemap.modified(true);
-	update_active_controls();
 }
 
 void Main_Window::substitute_tile(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
 	Tile_State ts(tile_id(), x_flip(), y_flip(), priority(), obp1(), palette());
-	_tilemap.remember();
 	bool a = Config::show_attributes();
 	size_t n = _tilemap.size();
 	for (size_t i = 0; i < n; i++) {
@@ -1458,14 +1449,11 @@ void Main_Window::substitute_tile(Tile_Tessera *tt) {
 			ff->damage(1);
 		}
 	}
-	_tilemap.modified(true);
-	update_active_controls();
 }
 
 void Main_Window::swap_tiles(Tile_Tessera *tt) {
 	Tile_State fs = tt->state();
 	Tile_State ts(tile_id(), x_flip(), y_flip(), priority(), obp1(), palette());
-	_tilemap.remember();
 	bool a = Config::show_attributes();
 	if (fs.same(ts, a)) { return; }
 	size_t n = _tilemap.size();
@@ -1480,8 +1468,6 @@ void Main_Window::swap_tiles(Tile_Tessera *tt) {
 			ff->damage(1);
 		}
 	}
-	_tilemap.modified(true);
-	update_active_controls();
 }
 
 void Main_Window::erase_selection() {
@@ -2622,25 +2608,30 @@ void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {
 	if (!mw->_map_editable) { return; }
 	if (Fl::event_button() == FL_LEFT_MOUSE) {
 		if (!mw->_selection.selected()) { return; }
+		if (Fl::event_is_click()) {
+			mw->_tilemap.remember();
+			mw->update_active_controls();
+		}
 		if (Fl::event_shift()) {
 			// Shift+left-click to flood fill
 			mw->flood_fill(tt);
+			mw->_tilemap_scroll->redraw();
 		}
 		else if (Fl::event_ctrl()) {
 			// Ctrl+left-click to replace
 			mw->substitute_tile(tt);
+			mw->_tilemap_scroll->redraw();
 		}
 		else if (Fl::event_alt()) {
 			// Alt+click to swap
 			mw->swap_tiles(tt);
+			mw->_tilemap_scroll->redraw();
 		}
 		else {
 			// Left-click/drag to edit
-			mw->edit_tile(tt, Fl::event_is_click());
+			mw->edit_tile(tt);
 		}
-		if (Fl::event_is_click()) {
-			mw->update_active_controls();
-		}
+		mw->_tilemap.modified(true);
 	}
 	else if (Fl::event_button() == FL_RIGHT_MOUSE) {
 		// Right-click to select

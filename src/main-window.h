@@ -129,7 +129,7 @@ public:
 	void update_selection_status(void);
 	void update_selection_controls(void);
 	void update_status(Tile_Tessera *tt);
-	void edit_tile(Tile_Tessera *tt, bool remember);
+	void edit_tile(Tile_Tessera *tt);
 	void flood_fill(Tile_Tessera *tt);
 	void substitute_tile(Tile_Tessera *tt);
 	void swap_tiles(Tile_Tessera *tt);
