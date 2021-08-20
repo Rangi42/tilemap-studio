@@ -66,7 +66,7 @@ public:
 	inline void format(Tilemap_Format fmt) { initialize(); _format->value((int)fmt); }
 	inline const char *attrmap_filename(void) const { return _attrmap_filename.c_str(); }
 	void update_icons(void);
-	void use_tilemap(const char *filename, bool keep_format = false);
+	void use_tilemap(const char *filename);
 protected:
 	void initialize_content(void);
 	int refresh_content(int ww, int dy);

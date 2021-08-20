@@ -112,7 +112,7 @@ void Tilemap_Options_Dialog::update_icons() {
 	Image::make_deimage(_attrmap);
 }
 
-void Tilemap_Options_Dialog::use_tilemap(const char *filename, bool keep_format) {
+void Tilemap_Options_Dialog::use_tilemap(const char *filename) {
 	initialize();
 	const char *name = fl_filename_name(filename);
 	char buffer[FL_PATH_MAX] = {};
@@ -120,7 +120,6 @@ void Tilemap_Options_Dialog::use_tilemap(const char *filename, bool keep_format)
 	strcat(buffer, ":");
 	_tilemap_header->copy_label(buffer);
 
-	format(keep_format ? Config::format() : guess_format(filename));
 	if (format_has_attrmap(format())) {
 		strcpy(buffer, filename);
 		fl_filename_setext(buffer, sizeof(buffer), ATTRMAP_EXT);
@@ -138,6 +137,7 @@ void Tilemap_Options_Dialog::use_tilemap(const char *filename, bool keep_format)
 		_attrmap_name->deactivate();
 		_attrmap_name->copy_label(NO_FILE_SELECTED_LABEL);
 	}
+
 	_ok_button->activate();
 }
 

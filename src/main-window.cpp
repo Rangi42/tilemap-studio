@@ -1572,7 +1572,8 @@ void Main_Window::new_tilemap(size_t width, size_t height) {
 }
 
 void Main_Window::open_tilemap(const char *filename, size_t width) {
-	_tilemap_options_dialog->use_tilemap(filename, width > 0);
+	_tilemap_options_dialog->format(width > 0 ? Config::format() : guess_format(filename));
+	_tilemap_options_dialog->use_tilemap(filename);
 	_tilemap_options_dialog->show(this);
 	if (_tilemap_options_dialog->canceled()) { return; }
 
