@@ -21,6 +21,8 @@
 #include "option-dialogs.h"
 #include "help-window.h"
 
+#define NEW_TILEMAP_NAME "New Tilemap"
+
 #define NUM_RECENT 10
 
 class Main_Window : public Fl_Overlay_Window {

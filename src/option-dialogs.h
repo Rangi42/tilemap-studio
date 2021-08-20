@@ -15,8 +15,6 @@
 #include <FL/Fl_Native_File_Chooser.H>
 #pragma warning(pop)
 
-#define NEW_TILEMAP_NAME "New Tilemap"
-
 #define NO_FILE_SELECTED_LABEL "No file selected"
 #define NO_FILES_SELECTED_LABEL "No file(s) selected"
 #define NO_FILES_DETERMINED_LABEL "No file(s) determined"
