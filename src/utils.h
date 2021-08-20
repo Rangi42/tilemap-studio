@@ -23,7 +23,7 @@
 #define _countof(a) (sizeof(a) / sizeof(a[0]))
 #endif
 
-#define RANGE(x) (x).begin(), (x).end()
+#define RANGE(x) std::begin(x), std::end(x)
 
 #define HI_NYB(n) (uchar)(((n) & 0xF0) >> 4)
 #define LO_NYB(n) (uchar)((n) & 0x0F)

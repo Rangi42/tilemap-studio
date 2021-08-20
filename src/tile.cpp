@@ -1,12 +1,12 @@
+#include <algorithm>
+
 #include "tile.h"
+#include "utils.h"
 
 bool is_blank_tile(const Tile &tile, Fl_Color blank_color) {
-	for (Fl_Color c : tile) {
-		if (c != blank_color) {
-			return false;
-		}
-	}
-	return true;
+	return std::all_of(RANGE(tile), [&](const Fl_Color &c) {
+		return c == blank_color;
+	});
 }
 
 bool are_identical_tiles(const Tile &t1, const Tile &t2, Tilemap_Format fmt, bool &x_flip, bool &y_flip) {

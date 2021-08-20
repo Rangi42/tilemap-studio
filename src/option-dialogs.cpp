@@ -390,7 +390,7 @@ Resize_Dialog::Resize_Dialog(const char *t) : Option_Dialog(220, t), _tilemap_wi
 Resize_Dialog::~Resize_Dialog() {
 	delete _tilemap_width;
 	delete _tilemap_height;
-	for (Anchor_Button *ab : _anchor_buttons) { delete ab; };
+	for (Anchor_Button *ab : _anchor_buttons) { delete ab; }
 }
 
 Resize_Dialog::Hor_Align Resize_Dialog::horizontal_anchor() const {
