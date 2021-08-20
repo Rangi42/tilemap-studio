@@ -1,6 +1,7 @@
 #ifndef TILEMAP_H
 #define TILEMAP_H
 
+#include <cstdio>
 #include <deque>
 #include <vector>
 
@@ -58,15 +59,13 @@ public:
 	void new_tiles(size_t w, size_t h);
 	Result read_tiles(const char *tf, const char *af);
 	inline bool write_tiles(const char *tf, const char *af) { return write_tiles(tf, af, _tiles, Config::format()); }
-	inline bool export_tiles(const char *f) {
-		return ends_with_ignore_case(f, ".csv") ? export_csv_tiles(f, Config::format()) : export_c_tiles(f, Config::format());
-	}
+	bool export_tiles(const char *f);
 	void print_tilemap(void) const;
 	void guess_width(void);
 private:
 	Result make_tiles(const std::vector<uchar> &tbytes, const std::vector<uchar> &abytes);
-	bool export_c_tiles(const char *f, Tilemap_Format fmt);
-	bool export_csv_tiles(const char *f, Tilemap_Format fmt);
+	void export_c_tiles(FILE *file, std::vector<uchar> &bytes, Tilemap_Format fmt, const char *f);
+	void export_csv_tiles(FILE *file, std::vector<uchar> &bytes, Tilemap_Format fmt);
 public:
 	static bool write_tiles(const char *tf, const char *af, std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt);
 	static const char *error_message(Result result);
