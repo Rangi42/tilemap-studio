@@ -138,6 +138,7 @@ void Tilemap_Options_Dialog::use_tilemap(const char *filename, bool keep_format)
 		_attrmap_name->deactivate();
 		_attrmap_name->copy_label(NO_FILE_SELECTED_LABEL);
 	}
+	_ok_button->activate();
 }
 
 void Tilemap_Options_Dialog::initialize_content() {
@@ -192,10 +193,12 @@ void Tilemap_Options_Dialog::format_cb(Dropdown *, Tilemap_Options_Dialog *tod) 
 			const char *basename = fl_filename_name(filename);
 			tod->_attrmap_filename = filename;
 			tod->_attrmap_name->copy_label(basename);
+			tod->_ok_button->activate();
 		}
 		else {
 			tod->_attrmap_filename.clear();
 			tod->_attrmap_name->copy_label(NO_FILE_SELECTED_LABEL);
+			tod->_ok_button->deactivate();
 		}
 	}
 	else {
@@ -204,6 +207,7 @@ void Tilemap_Options_Dialog::format_cb(Dropdown *, Tilemap_Options_Dialog *tod) 
 		tod->_attrmap->deactivate();
 		tod->_attrmap_name->deactivate();
 		tod->_attrmap_name->copy_label(NO_FILE_SELECTED_LABEL);
+		tod->_ok_button->activate();
 	}
 	tod->_dialog->redraw();
 }
@@ -213,12 +217,14 @@ void Tilemap_Options_Dialog::attrmap_cb(Fl_Widget *, Tilemap_Options_Dialog *tod
 	if (status == 1) {
 		tod->_attrmap_filename.clear();
 		tod->_attrmap_name->label(NO_FILE_SELECTED_LABEL);
+		tod->_ok_button->deactivate();
 	}
 	else {
 		const char *filename = tod->_attrmap_chooser->filename();
 		const char *basename = fl_filename_name(filename);
 		tod->_attrmap_filename = filename;
 		tod->_attrmap_name->copy_label(basename);
+		tod->_ok_button->activate();
 	}
 	tod->_dialog->redraw();
 }
