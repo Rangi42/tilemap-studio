@@ -600,7 +600,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_tilemap_save_chooser->options(Fl_Native_File_Chooser::Option::SAVEAS_CONFIRM);
 
 	_tilemap_import_chooser->title("Import Tilemap");
-	_tilemap_import_chooser->filter("Importable Files\t*.{c,csv}\n");
+	_tilemap_import_chooser->filter("Importable Files\t*.{c,csv,rmp}\n");
 
 	_tilemap_export_chooser->title("Export Tilemap");
 	_tilemap_export_chooser->filter("Exportable Files\t*.{c,csv}\n");
@@ -1711,26 +1711,43 @@ void Main_Window::save_tilemap(bool force) {
 }
 
 void Main_Window::import_tilemap(const char *filename) {
-	_tilemap_options_dialog->format(Tilemap_Format::PLAIN);
-	_tilemap_options_dialog->use_tilemap(filename);
-	_tilemap_options_dialog->importing(true);
-	_tilemap_options_dialog->show(this);
-	if (_tilemap_options_dialog->canceled()) { return; }
-
-	_tilemap.modified(false);
-	close_cb(NULL, this);
+	Tilemap::Result result = Tilemap::Result::TILEMAP_OK;
 
 	int old_tileset_size = format_tileset_size(Config::format());
-	Config::format(_tilemap_options_dialog->format());
 
-	const char *attrmap_filename = _tilemap_options_dialog->attrmap_filename();
 	const char *basename = fl_filename_name(filename);
-	const char *attrmap_basename = fl_filename_name(attrmap_filename);
+	const char *attrmap_basename = basename;
 
-	_tilemap_file.clear();
-	_attrmap_file.clear();
+	if (ends_with_ignore_case(filename, ".rmp")) {
+		_tilemap.modified(false);
+		close_cb(NULL, this);
 
-	Tilemap::Result result = _tilemap.import_tiles(filename, attrmap_filename);
+		_tilemap_file.clear();
+		_attrmap_file.clear();
+
+		result = _tilemap.import_rmp(filename);
+	}
+	else {
+		_tilemap_options_dialog->format(Tilemap_Format::PLAIN);
+		_tilemap_options_dialog->use_tilemap(filename);
+		_tilemap_options_dialog->importing(true);
+		_tilemap_options_dialog->show(this);
+		if (_tilemap_options_dialog->canceled()) { return; }
+
+		_tilemap.modified(false);
+		close_cb(NULL, this);
+
+		Config::format(_tilemap_options_dialog->format());
+
+		const char *attrmap_filename = _tilemap_options_dialog->attrmap_filename();
+		attrmap_basename = fl_filename_name(attrmap_filename);
+
+		_tilemap_file.clear();
+		_attrmap_file.clear();
+
+		result = _tilemap.import_tiles(filename, attrmap_filename);
+	}
+
 	if (result != Tilemap::Result::TILEMAP_OK) {
 		_tilemap.clear();
 		std::string msg = "Error reading ";

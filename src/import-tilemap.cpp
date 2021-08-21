@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstring>
 #include <vector>
 
 #pragma warning(push, 0)
@@ -158,6 +159,92 @@ Tilemap::Result Tilemap::import_tiles(const char *tf, const char *af) {
 		result = import_file_bytes(af, abytes, true);
 		if (result != Result::TILEMAP_OK) { return (_result = result); }
 	}
+	_modified = true;
+	return (_result = make_tiles(tbytes, abytes));
+}
+
+static bool check_read(FILE *file, uchar *expected, size_t n) {
+	std::vector<uchar> buffer(n);
+	size_t r = fread(buffer.data(), 1, n, file);
+	return r == n && (!expected || !memcmp(buffer.data(), expected, n));
+}
+
+static uint16_t read_uint16(FILE *file) {
+	int lo = fgetc(file);
+	int hi = fgetc(file);
+	return (uint16_t)(((hi & 0xFF00) >> 8) | (lo & 0xFF));
+}
+
+Tilemap::Result Tilemap::import_rmp(const char *f) {
+	std::vector<uchar> tbytes, abytes;
+
+	FILE *file = fl_fopen(f, "rb");
+	if (!file) { return Tilemap::Result::TILEMAP_BAD_FILE; }
+
+#define CHECK_READ_VALID(expected) do { \
+	if (!check_read(file, expected, sizeof(expected))) { \
+		fclose(file); \
+		return (_result = Tilemap::Result::TILEMAP_INVALID); \
+	} \
+} while (false)
+
+	// <https://github.com/chadaustin/sphere/blob/master/sphere/docs/internal/map.rmp.txt>
+
+	uchar expected_header[21] = {
+		'.', 'r', 'm', 'p', // magic number
+		LE16(1),            // version
+		0,                  // type (obsolete)
+		1,                  // num layers
+		0,                  // reserved
+		LE16(0),            // num entities
+		LE16(0),            // start x
+		LE16(0),            // start y
+		0,                  // start layer
+		0,                  // start direction (north)
+		LE16(9),            // num strings
+		LE16(0)             // num zones
+	};
+	CHECK_READ_VALID(expected_header);
+	uchar expected_unused_and_strings[235 + 9 * 2] = {0};
+	CHECK_READ_VALID(expected_unused_and_strings);
+
+	uint16_t width = read_uint16(file);
+	uint16_t height = read_uint16(file);
+
+	uchar expected_layer_header[26] = {
+		LE16(0),          // flags
+		LE32(0x3F800000), // parallax x (1.0f)
+		LE32(0x3F800000), // parallax y (1.0f)
+		LE32(0),          // scrolling x (0.0f)
+		LE32(0),          // scrolling y (0.0f)
+		LE32(0),          // num segments
+		0,                // reflective
+		0, 0, 0           // reserved
+	};
+	CHECK_READ_VALID(expected_layer_header);
+
+	uint16_t name_length = read_uint16(file);
+	fseek(file, name_length, SEEK_CUR);
+
+	size_t n = width * height * 2;
+	tbytes.resize(n);
+	if (size_t r = fread(tbytes.data(), 1, n, file); r != n) {
+		fclose(file);
+		return (_result = Tilemap::Result::TILEMAP_INVALID);
+	}
+
+	fclose(file);
+
+#undef CHECK_READ_VALID
+
+	// GBA_4BPP tile IDs must be 0x3FF or below
+	Config::format(Tilemap_Format::GBA_4BPP);
+	for (size_t i = 1; i < n; i += 2) {
+		if (tbytes[i] > 0x03) {
+			return (_result = Tilemap::Result::TILEMAP_INVALID);
+		}
+	}
+
 	_modified = true;
 	return (_result = make_tiles(tbytes, abytes));
 }

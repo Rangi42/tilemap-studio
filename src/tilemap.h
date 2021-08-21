@@ -60,6 +60,7 @@ public:
 	Result read_tiles(const char *tf, const char *af);
 	inline bool write_tiles(const char *tf, const char *af) { return write_tiles(tf, af, _tiles, Config::format()); }
 	Result import_tiles(const char *tf, const char *af);
+	Result import_rmp(const char *f);
 	bool export_tiles(const char *f);
 	void print_tilemap(void) const;
 	void guess_width(void);
