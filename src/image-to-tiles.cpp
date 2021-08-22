@@ -67,6 +67,18 @@ static bool build_tilemap(const Tile *tiles, size_t n, const std::vector<int> ti
 	return true;
 }
 
+static int fit_width(int nt, int dw) {
+	if (nt % dw == 0) { return dw; }
+	int w = 1;
+	for (int i = dw + 1; i <= 64; i++) {
+		if (nt % i == 0) { w = i; break; }
+	}
+	for (int i = dw - 1; i > 1; i--) {
+		if (nt % i == 0) { return i; }
+	}
+	return w;
+}
+
 static Fl_RGB_Image *print_tileset(const Tile *tiles, const std::vector<size_t> &tileset, const Palettes &palettes,
 	const std::vector<int> &tile_palettes, size_t nc, int tw, Fl_Color blank_color, bool indexed, uint8_t start_index) {
 	int nt = (int)tileset.size();
@@ -396,9 +408,10 @@ bool Main_Window::image_to_tiles() {
 
 	// Create the tileset file
 
+	int tw = tileset_width();
+	if (_image_to_tiles_dialog->no_extra_tiles()) { tw = fit_width((int)tileset.size(), tw); }
 	bool indexed = make_palette && pal_fmt == Palette_Format::INDEXED;
-	Fl_RGB_Image *timg = print_tileset(tiles, tileset, palettes, tile_palettes, max_colors, tileset_width(),
-		color_zero, indexed, start_index);
+	Fl_RGB_Image *timg = print_tileset(tiles, tileset, palettes, tile_palettes, max_colors, tw, color_zero, indexed, start_index);
 	Image::Result result = indexed ? Image::write_image(tileset_filename, timg, 0, &palettes, max_colors) :
 		Image::write_image(tileset_filename, timg, make_palette ? format_color_depth(fmt) : 0);
 	delete timg;

@@ -254,6 +254,7 @@ private:
 	Label * _input_heading, * _output_heading;
 	Toolbar_Button *_image, *_tileset;
 	Label_Button *_image_name, *_tileset_name;
+	OS_Check_Button *_no_extra_tiles;
 	Label *_tilemap_name;
 	Dropdown *_format;
 	Default_Hex_Spinner *_start_id;
@@ -280,6 +281,7 @@ public:
 	inline const char *attrmap_filename(void) const { return _attrmap_filename.c_str(); }
 	inline const char *palette_filename(void) const { return _palette_filename.c_str(); }
 	inline const char *tilepal_filename(void) const { return _tilepal_filename.c_str(); }
+	inline bool no_extra_tiles(void) const { return !!_no_extra_tiles->value(); }
 	inline Tilemap_Format format(void) const { return (Tilemap_Format)_format->value(); }
 	inline void format(Tilemap_Format fmt) { initialize(); _format->value((int)fmt); }
 	inline bool palette(void) const { return !!_palette->value(); }

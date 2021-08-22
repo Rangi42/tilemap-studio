@@ -757,9 +757,9 @@ int Add_Tileset_Dialog::refresh_content(int ww, int dy) {
 
 Image_To_Tiles_Dialog::Image_To_Tiles_Dialog(const char *t) : Option_Dialog(360, t), _tileset_heading(NULL), _tilemap_heading(NULL),
 	_tileset_spacer(NULL), _tilemap_spacer(NULL), _palette_spacer(NULL), _input_heading(NULL), _output_heading(NULL), _image(NULL),
-	_tileset(NULL), _image_name(NULL), _tileset_name(NULL), _tilemap_name(NULL), _format(NULL), _start_id(NULL), _use_space(NULL),
-	_space_id(NULL), _palette(NULL), _palette_name(NULL), _palette_format(NULL), _start_index_label(NULL), _start_index(NULL),
-	_color_zero(NULL), _color_zero_rgb(NULL), _color_zero_swatch(NULL), _image_chooser(NULL), _tileset_chooser(NULL),
+	_tileset(NULL), _image_name(NULL), _tileset_name(NULL), _no_extra_tiles(NULL), _tilemap_name(NULL), _format(NULL), _start_id(NULL),
+	_use_space(NULL), _space_id(NULL), _palette(NULL), _palette_name(NULL), _palette_format(NULL), _start_index_label(NULL),
+	_start_index(NULL), _color_zero(NULL), _color_zero_rgb(NULL), _color_zero_swatch(NULL), _image_chooser(NULL), _tileset_chooser(NULL),
 	_image_filename(), _tileset_filename(), _tilemap_filename(), _attrmap_filename(), _palette_filename(), _tilepal_filename(),
 	_prepared_image(false), _picked_palette(false) {}
 
@@ -775,6 +775,7 @@ Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
 	delete _tileset;
 	delete _image_name;
 	delete _tileset_name;
+	delete _no_extra_tiles;
 	delete _tilemap_name;
 	delete _format;
 	delete _start_id;
@@ -944,6 +945,7 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_tileset = new Toolbar_Button(0, 0, 0, 0);
 	_image_name = new Label_Button(0, 0, 0, 0, NO_FILE_SELECTED_LABEL);
 	_tileset_name = new Label_Button(0, 0, 0, 0, NO_FILE_SELECTED_LABEL);
+	_no_extra_tiles = new OS_Check_Button(0, 0, 0, 0, "Avoid extra blank tiles at the end");
 	_tilemap_name = new Label(0, 0, 0, 0, "Output: " NO_FILES_DETERMINED_LABEL);
 	_format = new Dropdown(0, 0, 0, 0, "Format:");
 	_start_id = new Default_Hex_Spinner(0, 0, 0, 0, "Start at ID: $");
@@ -1006,7 +1008,7 @@ void Image_To_Tiles_Dialog::initialize_content() {
 
 int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	int wgt_h = 22, win_m = 10, wgt_m = 4, grp_m = 6;
-	int ch = (wgt_h + wgt_m) * 10 + grp_m * 2 + wgt_h;
+	int ch = (wgt_h + wgt_m) * 11 + grp_m * 2 + wgt_h;
 	_content->resize(win_m, dy, ww, ch);
 
 	int wgt_w = text_width(_tileset_heading->label(), 4);
@@ -1031,10 +1033,13 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	_tileset->resize(wgt_off, dy, wgt_h, wgt_h);
 	wgt_off += _tileset->w();
 	_tileset_name->resize(wgt_off, dy, ww-wgt_w-wgt_h, wgt_h);
+	dy += wgt_h + wgt_m;
+
+	wgt_off = win_m;
+	_no_extra_tiles->resize(wgt_off, dy, ww, wgt_h);
 	dy += wgt_h + wgt_m + grp_m;
 
 	wgt_w = text_width(_tilemap_heading->label(), 4);
-	wgt_off = win_m;
 	_tilemap_heading->resize(wgt_off, dy, wgt_w, wgt_h);
 	wgt_off += _tilemap_heading->w();
 	_tilemap_spacer->resize(wgt_off, dy+wgt_h/2-1, ww-wgt_w, 2);
