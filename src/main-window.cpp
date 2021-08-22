@@ -1866,14 +1866,6 @@ void Main_Window::open_tilemap_or_image_to_tiles(const char *filename) {
 		image_to_tiles_cb(NULL, this);
 	}
 	else {
-		if (unsaved()) {
-			std::string msg = modified_filename();
-			msg = msg + " has unsaved changes!\n\n"
-				"Open another tilemap anyway?";
-			_unsaved_dialog->message(msg);
-			_unsaved_dialog->show(this);
-			if (_unsaved_dialog->canceled()) { return; }
-		}
 		open_tilemap(filename);
 	}
 }
@@ -1923,6 +1915,14 @@ void Main_Window::drag_and_drop_tilemap_cb(DnD_Receiver *dndr, Main_Window *mw) 
 	Fl_Window *top = Fl::modal();
 	if (top && top != mw) { return; }
 	std::string filename = dndr->text().substr(0, dndr->text().find('\n'));
+	if (mw->unsaved()) {
+		std::string msg = mw->modified_filename();
+		msg = msg + " has unsaved changes!\n\n"
+			"Open another tilemap anyway?";
+		mw->_unsaved_dialog->message(msg);
+		mw->_unsaved_dialog->show(mw);
+		if (mw->_unsaved_dialog->canceled()) { return; }
+	}
 	mw->open_tilemap_or_image_to_tiles(filename.c_str());
 }
 
@@ -1974,7 +1974,7 @@ void Main_Window::open_cb(Fl_Widget *, Main_Window *mw) {
 		return;
 	}
 
-	mw->open_tilemap(filename);
+	mw->open_tilemap_or_image_to_tiles(filename);
 }
 
 void Main_Window::open_recent_tilemap_cb(Fl_Menu_ *m, Main_Window *mw) {
