@@ -66,7 +66,8 @@ private:
 	Fl_Menu_Item *_close_mi = NULL, *_save_mi = NULL, *_save_as_mi = NULL, *_export_mi = NULL, *_print_mi = NULL;
 	Fl_Menu_Item *_reload_tilesets_mi = NULL, *_unload_tilesets_mi = NULL;
 	Fl_Menu_Item *_undo_mi = NULL, *_redo_mi = NULL;
-	Fl_Menu_Item *_erase_selection_mi = NULL, *_x_flip_selection_mi = NULL, *_y_flip_selection_mi = NULL, *_select_all_mi = NULL;
+	Fl_Menu_Item *_erase_selection_mi = NULL, *_x_flip_selection_mi = NULL, *_y_flip_selection_mi = NULL,
+		*_copy_selection_mi = NULL, *_select_all_mi = NULL;
 	Fl_Menu_Item *_zoom_in_mi = NULL, *_zoom_out_mi = NULL;
 	Fl_Menu_Item *_tilemap_width_mi = NULL, *_resize_mi = NULL, *_shift_mi = NULL, *_reformat_mi = NULL;
 	Fl_Menu_Item *_shift_tileset_mi = NULL;
@@ -138,6 +139,7 @@ public:
 	void erase_selection(void);
 	void x_flip_selection(void);
 	void y_flip_selection(void);
+	void copy_selection(void);
 	void select_all(void);
 	void new_tilemap(size_t width, size_t height);
 	void open_tilemap(const char *filename, size_t width = 0);
@@ -199,6 +201,7 @@ private:
 	static void erase_selection_cb(Fl_Widget *w, Main_Window *mw);
 	static void x_flip_selection_cb(Fl_Widget *w, Main_Window *mw);
 	static void y_flip_selection_cb(Fl_Widget *w, Main_Window *mw);
+	static void copy_selection_cb(Fl_Widget *w, Main_Window *mw);
 	static void select_all_cb(Fl_Widget *w, Main_Window *mw);
 	// View menu
 	static void classic_theme_cb(Fl_Menu_ *m, Main_Window *mw);

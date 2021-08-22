@@ -333,6 +333,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		OS_MENU_ITEM("&Erase Selection", FL_Delete, (Fl_Callback *)erase_selection_cb, this, 0),
 		OS_MENU_ITEM("&X Flip Selection", FL_COMMAND + 'X', (Fl_Callback *)x_flip_selection_cb, this, 0),
 		OS_MENU_ITEM("&Y Flip Selection", FL_COMMAND + 'Y', (Fl_Callback *)y_flip_selection_cb, this, 0),
+		OS_MENU_ITEM("&Copy Selection", FL_COMMAND + 'C', (Fl_Callback *)copy_selection_cb, this, 0),
 		OS_MENU_ITEM("&Select All", FL_COMMAND + 'a', (Fl_Callback *)select_all_cb, this, 0),
 		{},
 		OS_SUBMENU("&View"),
@@ -428,6 +429,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_erase_selection_mi = TS_FIND_MENU_ITEM_CB(erase_selection_cb);
 	_x_flip_selection_mi = TS_FIND_MENU_ITEM_CB(x_flip_selection_cb);
 	_y_flip_selection_mi = TS_FIND_MENU_ITEM_CB(y_flip_selection_cb);
+	_copy_selection_mi = TS_FIND_MENU_ITEM_CB(copy_selection_cb);
 	_select_all_mi = TS_FIND_MENU_ITEM_CB(select_all_cb);
 	_zoom_in_mi = TS_FIND_MENU_ITEM_CB(zoom_in_cb);
 	_zoom_out_mi = TS_FIND_MENU_ITEM_CB(zoom_out_cb);
@@ -928,11 +930,13 @@ void Main_Window::update_selection_controls() {
 		_erase_selection_mi->activate();
 		_x_flip_selection_mi->activate();
 		_y_flip_selection_mi->activate();
+		_copy_selection_mi->activate();
 	}
 	else {
 		_erase_selection_mi->deactivate();
 		_x_flip_selection_mi->deactivate();
 		_y_flip_selection_mi->deactivate();
+		_copy_selection_mi->deactivate();
 	}
 }
 
@@ -1547,6 +1551,24 @@ void Main_Window::y_flip_selection() {
 	}
 	_tilemap.modified(true);
 	update_active_controls();
+}
+
+void Main_Window::copy_selection() {
+	if (!_selection.selected_multiple() || _selection.from_tileset()) { return; }
+	size_t w = _selection.width(), h = _selection.height();
+	int z = Config::zoom();
+	Fl_Copy_Surface *surface = new Fl_Copy_Surface(w * TILE_SIZE * z, h * TILE_SIZE * z);
+	surface->set_current();
+	size_t ox = _selection.left_col(), oy = _selection.top_row();
+	for (size_t dy = 0; dy < h; dy++) {
+		for (size_t dx = 0; dx < w; dx++) {
+			if (Tile_Tessera *tt = _tilemap.tile(ox + dx, oy + dy); tt) {
+				surface->draw(tt, dx * TILE_SIZE * z, dy * TILE_SIZE * z);
+			}
+		}
+	}
+	delete surface;
+	Fl_Display_Device::display_device()->set_current();
 }
 
 void Main_Window::select_all() {
@@ -2371,6 +2393,10 @@ void Main_Window::x_flip_selection_cb(Fl_Widget *, Main_Window *mw) {
 
 void Main_Window::y_flip_selection_cb(Fl_Widget *, Main_Window *mw) {
 	mw->y_flip_selection();
+}
+
+void Main_Window::copy_selection_cb(Fl_Widget *, Main_Window *mw) {
+	mw->copy_selection();
 }
 
 void Main_Window::select_all_cb(Fl_Widget *, Main_Window *mw) {
