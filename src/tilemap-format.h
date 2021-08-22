@@ -66,6 +66,12 @@ inline constexpr bool format_has_obp1(Tilemap_Format fmt) {
 	return fmt == Tilemap_Format::GBC_ATTRS || fmt == Tilemap_Format::GBC_ATTRMAP;
 }
 
+inline constexpr bool format_uses_rgb_asm_pal(Tilemap_Format fmt) {
+	return fmt == Tilemap_Format::GBC_ATTRS || fmt == Tilemap_Format::GBC_ATTRMAP || fmt == Tilemap_Format::SGB_BORDER ||
+		fmt == Tilemap_Format::RBY_TOWN_MAP || fmt == Tilemap_Format::GSC_TOWN_MAP || fmt == Tilemap_Format::PC_TOWN_MAP ||
+		fmt == Tilemap_Format::SW_TOWN_MAP || fmt == Tilemap_Format::POKEGEAR_CARD;
+}
+
 int format_tileset_size(Tilemap_Format fmt);
 int format_palettes_size(Tilemap_Format fmt);
 int format_palette_size(Tilemap_Format fmt);

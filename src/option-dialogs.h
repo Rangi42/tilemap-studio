@@ -300,7 +300,6 @@ private:
 	void update_start_index(void);
 	void update_ok_button(void);
 	void update_color_zero_swatch(void);
-	Palette_Format default_palette_format(Tilemap_Format fmt) const;
 protected:
 	void initialize_content(void);
 	int refresh_content(int ww, int dy);

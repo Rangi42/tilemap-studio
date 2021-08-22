@@ -931,27 +931,6 @@ void Image_To_Tiles_Dialog::update_color_zero_swatch() {
 	_color_zero_swatch->redraw();
 }
 
-Palette_Format Image_To_Tiles_Dialog::default_palette_format(Tilemap_Format fmt) const {
-	switch (fmt) {
-	case Tilemap_Format::GBA_4BPP:
-	case Tilemap_Format::GBA_8BPP:
-		return Palette_Format::JASC;
-	case Tilemap_Format::GBC_ATTRS:
-	case Tilemap_Format::GBC_ATTRMAP:
-	case Tilemap_Format::SGB_BORDER:
-	case Tilemap_Format::RBY_TOWN_MAP:
-	case Tilemap_Format::GSC_TOWN_MAP:
-	case Tilemap_Format::PC_TOWN_MAP:
-	case Tilemap_Format::SW_TOWN_MAP:
-	case Tilemap_Format::POKEGEAR_CARD:
-		return Palette_Format::RGB;
-	case Tilemap_Format::PLAIN:
-	case Tilemap_Format::SNES_ATTRS:
-	default:
-		return palette_format();
-	}
-}
-
 void Image_To_Tiles_Dialog::initialize_content() {
 	// Populate content group
 	_tileset_heading = new Label(0, 0, 0, 0, "Tileset");
@@ -1162,8 +1141,7 @@ void Image_To_Tiles_Dialog::tileset_cb(Fl_Widget *, Image_To_Tiles_Dialog *itd) 
 
 void Image_To_Tiles_Dialog::format_cb(Dropdown *, Image_To_Tiles_Dialog *itd) {
 	if (!itd->_picked_palette) {
-		Palette_Format pal_fmt = itd->default_palette_format(itd->format());
-		itd->_palette_format->value((int)pal_fmt);
+		itd->_palette_format->value((int)(format_uses_rgb_asm_pal(itd->format()) ? Palette_Format::RGB : Palette_Format::INDEXED));
 	}
 	itd->update_start_index();
 	itd->update_output_names();
