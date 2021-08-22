@@ -43,7 +43,7 @@ static bool build_tilemap(const Tile *tiles, size_t n, const std::vector<int> ti
 		}
 		const Tile &tile = tiles[i];
 		if (use_space && is_blank_tile(tile, space_color)) {
-			tilemap.tile(tc++, 1, new Tile_Tessera(0, 0, 0, 0, space_id, false, false, false, false, tile_palettes[i]));
+			tilemap.tile(tc++, 0, new Tile_Tessera(0, 0, 0, 0, space_id, false, false, false, false, tile_palettes[i]));
 			continue;
 		}
 		size_t ti = 0, nt = tileset.size();
@@ -61,7 +61,7 @@ static bool build_tilemap(const Tile *tiles, size_t n, const std::vector<int> ti
 			tileset.push_back(i);
 		}
 		uint16_t id = start_id + (uint16_t)ti;
-		tilemap.tile(tc++, 1, new Tile_Tessera(0, 0, 0, 0, id, x_flip, y_flip, false, false, tile_palettes[i]));
+		tilemap.tile(tc++, 0, new Tile_Tessera(0, 0, 0, 0, id, x_flip, y_flip, false, false, tile_palettes[i]));
 	}
 	tilemap.resize(tc, 1, Resize_Dialog::Hor_Align::LEFT, Resize_Dialog::Vert_Align::TOP);
 	return true;
