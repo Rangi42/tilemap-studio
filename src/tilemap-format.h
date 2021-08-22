@@ -16,15 +16,18 @@
 #define GBA_WIDTH 30
 #define GBA_HEIGHT 20
 
+#define NDS_WIDTH 32
+#define NDS_HEADER_SIZE 0x24
+
 #define GAME_BOY_VRAM_SIZE 32
 
 #define ATTRMAP_EXT ".attrmap"
 
 #define TILEPAL_EXT ".asm"
 
-#define NUM_FORMATS 12
+#define NUM_FORMATS 13
 
-enum class Tilemap_Format { PLAIN, GBC_ATTRS, GBC_ATTRMAP, GBA_4BPP, GBA_8BPP, SGB_BORDER, SNES_ATTRS,
+enum class Tilemap_Format { PLAIN, GBC_ATTRS, GBC_ATTRMAP, GBA_4BPP, GBA_8BPP, NDS_ATTRS, SGB_BORDER, SNES_ATTRS,
 	RBY_TOWN_MAP, GSC_TOWN_MAP, PC_TOWN_MAP, SW_TOWN_MAP, POKEGEAR_CARD };
 
 inline constexpr bool format_has_landmarks(Tilemap_Format fmt) {
@@ -45,7 +48,7 @@ inline constexpr bool format_can_make_palettes(Tilemap_Format fmt) {
 
 inline constexpr bool format_can_edit_palettes(Tilemap_Format fmt) {
 	return fmt == Tilemap_Format::GBC_ATTRS || fmt == Tilemap_Format::GBC_ATTRMAP || fmt == Tilemap_Format::GBA_4BPP ||
-		fmt == Tilemap_Format::SGB_BORDER || fmt == Tilemap_Format::SNES_ATTRS;
+		fmt == Tilemap_Format::NDS_ATTRS || fmt == Tilemap_Format::SGB_BORDER || fmt == Tilemap_Format::SNES_ATTRS;
 }
 
 inline constexpr bool format_has_per_tile_palettes(Tilemap_Format fmt) {
@@ -54,8 +57,8 @@ inline constexpr bool format_has_per_tile_palettes(Tilemap_Format fmt) {
 
 inline constexpr bool format_can_flip(Tilemap_Format fmt) {
 	return fmt == Tilemap_Format::GBC_ATTRS || fmt == Tilemap_Format::GBC_ATTRMAP || fmt == Tilemap_Format::GBA_4BPP ||
-		fmt == Tilemap_Format::GBA_8BPP || fmt == Tilemap_Format::SGB_BORDER || fmt == Tilemap_Format::SNES_ATTRS ||
-		fmt == Tilemap_Format::PC_TOWN_MAP;
+		fmt == Tilemap_Format::GBA_8BPP || fmt == Tilemap_Format::NDS_ATTRS || fmt == Tilemap_Format::SGB_BORDER ||
+		fmt == Tilemap_Format::SNES_ATTRS || fmt == Tilemap_Format::PC_TOWN_MAP;
 }
 
 inline constexpr bool format_has_priority(Tilemap_Format fmt) {
@@ -85,6 +88,6 @@ Tilemap_Format guess_format(const char *filename);
 
 class Tile_Tessera;
 
-std::vector<uchar> make_tilemap_bytes(const std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt);
+std::vector<uchar> make_tilemap_bytes(const std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt, size_t width, size_t height);
 
 #endif

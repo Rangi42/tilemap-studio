@@ -14,7 +14,8 @@ static const int tileset_sizes[NUM_FORMATS] = {
 	0x200, // GBC_ATTRS - 9-bit tile IDs
 	0x200, // GBC_ATTRMAP - 9-bit tile IDs
 	0x400, // GBA_4BPP - 10-bit tile IDs
-	0x400, // GBA_4BPP - 10-bit tile IDs
+	0x400, // GBA_8BPP - 10-bit tile IDs
+	0x400, // NDS_ATTRS - 10-bit tile IDs
 	0x100, // SGB_BORDER - 8-bit tile IDs
 	0x400, // SNES_ATTRS - 10-bit tile IDs
 	0x10,  // RBY_TOWN_MAP - High nybble is reserved for run length
@@ -37,6 +38,7 @@ int format_palettes_size(Tilemap_Format fmt) {
 	case Tilemap_Format::PC_TOWN_MAP:
 		return 8;
 	case Tilemap_Format::GBA_4BPP:
+	case Tilemap_Format::NDS_ATTRS:
 		return 16;
 	case Tilemap_Format::SGB_BORDER:
 		return 4;
@@ -57,6 +59,7 @@ int format_palette_size(Tilemap_Format fmt) {
 	case Tilemap_Format::GBA_8BPP:
 		return 256;
 	case Tilemap_Format::GBA_4BPP:
+	case Tilemap_Format::NDS_ATTRS:
 	case Tilemap_Format::SNES_ATTRS:
 		return 16;
 	case Tilemap_Format::GBC_ATTRS:
@@ -79,6 +82,7 @@ int format_color_depth(Tilemap_Format fmt) {
 	case Tilemap_Format::GBA_8BPP:
 		return 8;
 	case Tilemap_Format::GBA_4BPP:
+	case Tilemap_Format::NDS_ATTRS:
 	case Tilemap_Format::SNES_ATTRS:
 		return 4;
 	case Tilemap_Format::GBC_ATTRS:
@@ -101,6 +105,7 @@ static const char *format_names[NUM_FORMATS] = {
 	"GBC tilemap + attrmap",     // GBC_ATTRMAP
 	"GBA tiles + 4bpp palettes", // GBA_4BPP
 	"GBA tiles + 8bpp palette",  // GBA_8BPP
+	"NDS tiles + attributes",    // NDS_ATTRS
 	"SGB border",                // SGB_BORDER
 	"SNES tiles + attributes",   // SNES_ATTRS
 	"RBY Town Map",              // RBY_TOWN_MAP
@@ -128,6 +133,7 @@ static const char *format_extensions[NUM_FORMATS] = {
 	".tilemap",     // GBC_ATTRMAP - e.g. pokecrystal/gfx/mobile/*.{tilemap|attrmap}
 	".bin",         // GBA_4BPP - e.g. {pokeruby|pokeemerald}/graphics/*/*.bin
 	".bin",         // GBA_8BPP - e.g. {pokeruby|pokeemerald}/graphics/*/*.bin
+	".rcsn",        // NDS_ATTRS - extracted by Tinke <https://github.com/pleonex/tinke>
 	".map",         // SGB_BORDER - e.g. pokered/gfx/{red|blue}/sgbborder.map
 	".bin",         // SNES_ATTRS
 	".rle",         // RBY_TOWN_MAP - e.g. pokered/gfx/town_map.rle
@@ -151,6 +157,7 @@ int format_bytes_per_tile(Tilemap_Format fmt) {
 	case Tilemap_Format::GBC_ATTRS:
 	case Tilemap_Format::GBA_4BPP:
 	case Tilemap_Format::GBA_8BPP:
+	case Tilemap_Format::NDS_ATTRS:
 	case Tilemap_Format::SGB_BORDER:
 	case Tilemap_Format::SNES_ATTRS:
 		return 2;
@@ -187,6 +194,9 @@ Tilemap_Format guess_format(const char *filename) {
 		fs == GAME_BOY_WIDTH * GAME_BOY_HEIGHT + 1) {
 		return Tilemap_Format::GSC_TOWN_MAP;
 	}
+	if (ends_with_ignore_case(s, ".rcsn") || ends_with_ignore_case(s, ".nscr") || fs == 0x624 || fs == 0x824) {
+		return Tilemap_Format::NDS_ATTRS;
+	}
 	if (ends_with_ignore_case(s, ".kmp") || fs % 2 ||
 		fs > GAME_BOY_VRAM_SIZE * GAME_BOY_VRAM_SIZE * 2) {
 		return Tilemap_Format::PLAIN;
@@ -207,7 +217,7 @@ Tilemap_Format guess_format(const char *filename) {
 	return Tilemap_Format::PLAIN;
 }
 
-std::vector<uchar> make_tilemap_bytes(const std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt) {
+std::vector<uchar> make_tilemap_bytes(const std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt, size_t width, size_t height) {
 	std::vector<uchar> bytes;
 	size_t n = tiles.size();
 
@@ -249,6 +259,34 @@ std::vector<uchar> make_tilemap_bytes(const std::vector<Tile_Tessera *> &tiles, 
 			if (tt->x_flip())   { a |= 0x20; }
 			if (tt->y_flip())   { a |= 0x40; }
 			if (tt->palette() > -1) { a |= tt->palette() & 0x07; }
+			bytes.push_back(a);
+		}
+	}
+	else if (fmt == Tilemap_Format::NDS_ATTRS) {
+		bytes.reserve(n * 2 + NDS_HEADER_SIZE);
+		uchar header[NDS_HEADER_SIZE] = {
+			// Generic header
+			'R', 'C', 'S', 'N', // magic number
+			0xFF, 0xFE, 0, 1,   // constant 0xFFFE0001
+			LE32(n * 2 + 0x24), // section size
+			LE16(0x10),         // header size
+			LE16(1),            // number of sub-sections
+			// Nintendo Screen Resource header
+			'N', 'R', 'C', 'S', // magic number
+			LE32(n * 2 + 0x14), // sub-section size
+			LE16(width * 8),    // width in pixels
+			LE16(height * 8),   // height in pixels
+			0, 0, 0, 0,         // padding
+			LE32(n * 2)         // screen data size
+		};
+		bytes.insert(bytes.begin(), RANGE(header));
+		for (Tile_Tessera *tt : tiles) {
+			uchar v = (uchar)(tt->id() & 0xFF);
+			bytes.push_back(v);
+			uchar a = (tt->id() >> 8) & 0x03;
+			if (tt->x_flip()) { a |= 0x04; }
+			if (tt->y_flip()) { a |= 0x08; }
+			if (tt->palette() > -1) { a |= (tt->palette() << 4) & 0xF0; }
 			bytes.push_back(a);
 		}
 	}

@@ -592,10 +592,10 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	// Configure dialogs
 
 	_tilemap_open_chooser->title("Open Tilemap");
-	_tilemap_open_chooser->filter("Tilemap Files\t*.{tilemap,rle,bin,map,raw,kmp,tmap}\n");
+	_tilemap_open_chooser->filter("Tilemap Files\t*.{tilemap,rle,bin,map,raw,kmp,tmap,rcsn,nscr}\n");
 
 	_tilemap_save_chooser->title("Save Tilemap");
-	_tilemap_save_chooser->filter("Tilemap Files\t*.{tilemap,rle,bin,map,raw,kmp,tmap}\n");
+	_tilemap_save_chooser->filter("Tilemap Files\t*.{tilemap,rle,bin,map,raw,kmp,tmap,rcsn,nscr}\n");
 	_tilemap_save_chooser->preset_file("NewTilemap.tilemap");
 	_tilemap_save_chooser->options(Fl_Native_File_Chooser::Option::SAVEAS_CONFIRM);
 
@@ -1677,7 +1677,7 @@ void Main_Window::save_tilemap(bool force) {
 	const char *basename = fl_filename_name(filename);
 
 	if (_tilemap.modified() || force) {
-		if (!_tilemap.write_tiles(filename, attrmap_filename)) {
+		if (!_tilemap.write_tiles(filename, attrmap_filename, Config::format())) {
 			std::string msg = "Could not write to ";
 			msg = msg + basename + "!";
 			_error_dialog->message(msg);

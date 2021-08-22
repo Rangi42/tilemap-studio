@@ -237,6 +237,7 @@ Tilemap::Result Tilemap::make_tiles(const std::vector<uchar> &tbytes, const std:
 	if (c == 0) { return (_result = Result::TILEMAP_EMPTY); }
 
 	std::vector<Tile_Tessera *> tiles;
+	size_t width = 0;
 	Tilemap_Format fmt = Config::format();
 
 	if (fmt == Tilemap_Format::PLAIN) {
@@ -299,6 +300,20 @@ Tilemap::Result Tilemap::make_tiles(const std::vector<uchar> &tbytes, const std:
 		}
 	}
 
+	else if (fmt == Tilemap_Format::NDS_ATTRS) {
+		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
+		tiles.reserve((c - NDS_HEADER_SIZE) / 2);
+		for (size_t i = NDS_HEADER_SIZE; i < c; i += 2) {
+			uint16_t v = tbytes[i];
+			uchar a = tbytes[i+1];
+			v = v | ((a & 0x03) << 8);
+			bool x_flip = !!(a & 0x04), y_flip = !!(a & 0x08);
+			int palette = HI_NYB(a);
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, v, x_flip, y_flip, false, false, palette));
+		}
+		width = NDS_WIDTH;
+	}
+
 	else if (fmt == Tilemap_Format::SGB_BORDER) {
 		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
 		tiles.reserve(c / 2);
@@ -309,6 +324,7 @@ Tilemap::Result Tilemap::make_tiles(const std::vector<uchar> &tbytes, const std:
 			int palette = (a & 0x0C) >> 2;
 			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, v, x_flip, y_flip, false, false, palette));
 		}
+		width = SGB_WIDTH;
 	}
 
 	else if (fmt == Tilemap_Format::SNES_ATTRS) {
@@ -341,6 +357,7 @@ Tilemap::Result Tilemap::make_tiles(const std::vector<uchar> &tbytes, const std:
 			for (Tile_Tessera *tt : tiles) { delete tt; }
 			return (_result = Result::TILEMAP_TOO_SHORT_00);
 		}
+		width = GAME_BOY_WIDTH;
 	}
 
 	else if (fmt == Tilemap_Format::GSC_TOWN_MAP) {
@@ -357,6 +374,7 @@ Tilemap::Result Tilemap::make_tiles(const std::vector<uchar> &tbytes, const std:
 			for (Tile_Tessera *tt : tiles) { delete tt; }
 			return (_result = Result::TILEMAP_TOO_SHORT_FF);
 		}
+		width = GAME_BOY_WIDTH;
 	}
 
 	else if (fmt == Tilemap_Format::PC_TOWN_MAP) {
@@ -375,6 +393,7 @@ Tilemap::Result Tilemap::make_tiles(const std::vector<uchar> &tbytes, const std:
 			for (Tile_Tessera *tt : tiles) { delete tt; }
 			return (_result = Result::TILEMAP_TOO_SHORT_FF);
 		}
+		width = GAME_BOY_WIDTH;
 	}
 
 	else if (fmt == Tilemap_Format::SW_TOWN_MAP) {
@@ -399,6 +418,7 @@ Tilemap::Result Tilemap::make_tiles(const std::vector<uchar> &tbytes, const std:
 			for (Tile_Tessera *tt : tiles) { delete tt; }
 			return (_result = Result::TILEMAP_TOO_SHORT_00);
 		}
+		width = GAME_BOY_WIDTH;
 	}
 
 	else if (fmt == Tilemap_Format::POKEGEAR_CARD) {
@@ -423,12 +443,14 @@ Tilemap::Result Tilemap::make_tiles(const std::vector<uchar> &tbytes, const std:
 			for (Tile_Tessera *tt : tiles) { delete tt; }
 			return (_result = Result::TILEMAP_TOO_SHORT_FF);
 		}
+		width = GAME_BOY_WIDTH;
 	}
 
 	if (tiles.empty()) { return (_result = Result::TILEMAP_EMPTY); }
 
 	_tiles.swap(tiles);
-	guess_width();
+	if (width > 0) { _width = width; }
+	else { guess_width(); }
 
 	return (_result = Result::TILEMAP_OK);
 }
@@ -452,11 +474,11 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 	return make_tiles(tbytes, abytes);
 }
 
-bool Tilemap::write_tiles(const char *tf, const char *af, std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt) {
+bool Tilemap::write_tiles(const char *tf, const char *af, Tilemap_Format fmt) {
 	FILE *file = fl_fopen(tf, "wb");
 	if (!file) { return false; }
 
-	std::vector<uchar> bytes = make_tilemap_bytes(tiles, fmt);
+	std::vector<uchar> bytes = make_tilemap_bytes(_tiles, fmt, width(), height());
 	if (fmt == Tilemap_Format::GBC_ATTRMAP) {
 		FILE *attr_file = fl_fopen(af, "wb");
 		if (!attr_file) { fclose(file); return false; }
@@ -480,7 +502,7 @@ bool Tilemap::export_tiles(const char *f) {
 	if (!file) { return false; }
 
 	Tilemap_Format fmt = Config::format();
-	std::vector<uchar> bytes = make_tilemap_bytes(_tiles, fmt);
+	std::vector<uchar> bytes = make_tilemap_bytes(_tiles, fmt, width(), height());
 	if (ends_with_ignore_case(f, ".csv")) {
 		export_csv_tiles(file, bytes, fmt);
 	}

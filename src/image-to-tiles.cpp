@@ -27,12 +27,12 @@
 
 typedef std::set<Fl_Color> Color_Set;
 
-static bool build_tilemap(const Tile *tiles, size_t n, const std::vector<int> tile_palettes,
-	std::vector<Tile_Tessera *> &tilemap, std::vector<size_t> &tileset, Tilemap_Format fmt, uint16_t start_id,
-	bool use_space, uint16_t space_id, Fl_Color space_color) {
+static bool build_tilemap(const Tile *tiles, size_t n, const std::vector<int> tile_palettes, Tilemap &tilemap,
+	std::vector<size_t> &tileset, Tilemap_Format fmt, uint16_t start_id, bool use_space, uint16_t space_id, Fl_Color space_color) {
 	size_t mn = (size_t)format_tileset_size(fmt);
-	tilemap.reserve(n);
+	tilemap.resize(n, 1, Resize_Dialog::Hor_Align::LEFT, Resize_Dialog::Vert_Align::TOP);
 	tileset.reserve(mn);
+	size_t tc = 0;
 	for (size_t i = 0; i < n; i++) {
 		if (use_space && start_id + tileset.size() == space_id) {
 			size_t j = 0;
@@ -43,7 +43,7 @@ static bool build_tilemap(const Tile *tiles, size_t n, const std::vector<int> ti
 		}
 		const Tile &tile = tiles[i];
 		if (use_space && is_blank_tile(tile, space_color)) {
-			tilemap.push_back(new Tile_Tessera(0, 0, 0, 0, space_id, false, false, false, false, tile_palettes[i]));
+			tilemap.tile(tc++, 1, new Tile_Tessera(0, 0, 0, 0, space_id, false, false, false, false, tile_palettes[i]));
 			continue;
 		}
 		size_t ti = 0, nt = tileset.size();
@@ -61,9 +61,9 @@ static bool build_tilemap(const Tile *tiles, size_t n, const std::vector<int> ti
 			tileset.push_back(i);
 		}
 		uint16_t id = start_id + (uint16_t)ti;
-		Tile_Tessera *tt = new Tile_Tessera(0, 0, 0, 0, id, x_flip, y_flip, false, false, tile_palettes[i]);
-		tilemap.push_back(tt);
+		tilemap.tile(tc++, 1, new Tile_Tessera(0, 0, 0, 0, id, x_flip, y_flip, false, false, tile_palettes[i]));
 	}
+	tilemap.resize(tc, 1, Resize_Dialog::Hor_Align::LEFT, Resize_Dialog::Vert_Align::TOP);
 	return true;
 }
 
@@ -344,7 +344,7 @@ bool Main_Window::image_to_tiles() {
 
 	// Build the tilemap and tileset
 
-	std::vector<Tile_Tessera *> tilemap;
+	Tilemap tilemap;
 	std::vector<size_t> tileset;
 
 	uint16_t start_id = _image_to_tiles_dialog->start_id();
@@ -352,9 +352,6 @@ bool Main_Window::image_to_tiles() {
 	uint16_t space_id = _image_to_tiles_dialog->space_id();
 
 	if (!build_tilemap(tiles, n, tile_palettes, tilemap, tileset, fmt, start_id, use_space, space_id, color_zero)) {
-		for (Tile_Tessera *tt : tilemap) {
-			delete tt;
-		}
 		delete [] tiles;
 		std::string msg = "Could not convert ";
 		msg = msg + image_basename + "!\n\nToo many unique tiles.";
@@ -373,21 +370,13 @@ bool Main_Window::image_to_tiles() {
 
 	// Create the tilemap file
 
-	if (!Tilemap::write_tiles(tilemap_filename, attrmap_filename, tilemap, fmt)) {
-		for (Tile_Tessera *tt : tilemap) {
-			delete tt;
-		}
+	if (!tilemap.write_tiles(tilemap_filename, attrmap_filename, fmt)) {
 		delete [] tiles;
 		std::string msg = "Could not write to ";
 		msg = msg + tilemap_basename + "!";
 		_error_dialog->message(msg);
 		_error_dialog->show(this);
 		return false;
-	}
-
-
-	for (Tile_Tessera *tt : tilemap) {
-		delete tt;
 	}
 
 	// Create the tilepal file

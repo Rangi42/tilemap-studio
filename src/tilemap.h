@@ -58,7 +58,7 @@ public:
 	void limit_to_format(Tilemap_Format fmt);
 	void new_tiles(size_t w, size_t h);
 	Result read_tiles(const char *tf, const char *af);
-	inline bool write_tiles(const char *tf, const char *af) { return write_tiles(tf, af, _tiles, Config::format()); }
+	bool write_tiles(const char *tf, const char *af, Tilemap_Format fmt);
 	Result import_tiles(const char *tf, const char *af);
 	Result import_rmp(const char *f);
 	bool export_tiles(const char *f);
@@ -69,7 +69,6 @@ private:
 	void export_c_tiles(FILE *file, std::vector<uchar> &bytes, Tilemap_Format fmt, const char *f);
 	void export_csv_tiles(FILE *file, std::vector<uchar> &bytes, Tilemap_Format fmt);
 public:
-	static bool write_tiles(const char *tf, const char *af, std::vector<Tile_Tessera *> &tiles, Tilemap_Format fmt);
 	static const char *error_message(Result result);
 };
 
