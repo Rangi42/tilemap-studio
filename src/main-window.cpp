@@ -752,7 +752,7 @@ void Main_Window::maximize() {
 #endif
 }
 
-void Main_Window::transparency() {
+void Main_Window::apply_transparency() {
 	double alpha = transparent() ? 0.75 : 1.0;
 #ifdef _WIN32
 	HWND hwnd = fl_xid(this);
@@ -1753,43 +1753,29 @@ void Main_Window::save_tilemap(bool force) {
 }
 
 void Main_Window::import_tilemap(const char *filename) {
-	Tilemap::Result result = Tilemap::Result::TILEMAP_OK;
-
-	int old_tileset_size = format_tileset_size(Config::format());
-
-	const char *basename = fl_filename_name(filename);
-	const char *attrmap_basename = basename;
-
-	if (ends_with_ignore_case(filename, ".rmp")) {
-		_tilemap.modified(false);
-		close_cb(NULL, this);
-
-		_tilemap_file.clear();
-		_attrmap_file.clear();
-
-		result = _tilemap.import_rmp(filename);
-	}
-	else {
+	bool importing_rmp = ends_with_ignore_case(filename, ".rmp");
+	if (!importing_rmp) {
 		_tilemap_options_dialog->format(Tilemap_Format::PLAIN);
 		_tilemap_options_dialog->use_tilemap(filename);
 		_tilemap_options_dialog->importing(true);
 		_tilemap_options_dialog->show(this);
 		if (_tilemap_options_dialog->canceled()) { return; }
-
-		_tilemap.modified(false);
-		close_cb(NULL, this);
-
-		Config::format(_tilemap_options_dialog->format());
-
-		const char *attrmap_filename = _tilemap_options_dialog->attrmap_filename();
-		attrmap_basename = fl_filename_name(attrmap_filename);
-
-		_tilemap_file.clear();
-		_attrmap_file.clear();
-
-		result = _tilemap.import_tiles(filename, attrmap_filename);
 	}
 
+	_tilemap.modified(false);
+	close_cb(NULL, this);
+
+	int old_tileset_size = format_tileset_size(Config::format());
+	Config::format(importing_rmp ? Tilemap_Format::GBA_4BPP : _tilemap_options_dialog->format());
+
+	const char *attrmap_filename = importing_rmp ? "" : _tilemap_options_dialog->attrmap_filename();
+	const char *basename = fl_filename_name(filename);
+	const char *attrmap_basename = fl_filename_name(attrmap_filename);
+
+	_tilemap_file.clear();
+	_attrmap_file.clear();
+
+	Tilemap::Result result = _tilemap.import_tiles(filename, attrmap_filename);
 	if (result != Tilemap::Result::TILEMAP_OK) {
 		_tilemap.clear();
 		std::string msg = "Error reading ";
@@ -2575,7 +2561,7 @@ void Main_Window::bold_palettes_tb_cb(Toolbar_Button *, Main_Window *mw) {
 }
 
 void Main_Window::transparent_cb(Fl_Menu_ *, Main_Window *mw) {
-	mw->transparency();
+	mw->apply_transparency();
 }
 
 void Main_Window::full_screen_cb(Fl_Menu_ *m, Main_Window *mw) {

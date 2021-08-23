@@ -109,7 +109,7 @@ public:
 	void show(void);
 	bool maximized(void) const;
 	void maximize(void);
-	void transparency(void);
+	void apply_transparency(void);
 	inline bool transparent(void) const { return _transparent_mi && !!_transparent_mi->value(); }
 	inline bool full_screen(void) const { return _full_screen_mi && !!_full_screen_mi->value(); }
 	inline bool unsaved(void) const { return _tilemap.modified(); }

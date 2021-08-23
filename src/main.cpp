@@ -92,7 +92,7 @@ int main(int argc, char **argv) {
 	Main_Window window(x, y, w, h);
 	window.show();
 	if (window.transparent()) {
-		window.transparency();
+		window.apply_transparency();
 	}
 	if (window.full_screen()) {
 		window.fullscreen();

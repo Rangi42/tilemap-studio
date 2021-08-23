@@ -60,7 +60,6 @@ public:
 	Result read_tiles(const char *tf, const char *af);
 	bool write_tiles(const char *tf, const char *af, Tilemap_Format fmt);
 	Result import_tiles(const char *tf, const char *af);
-	Result import_rmp(const char *f);
 	bool export_tiles(const char *f) const;
 	void print_tilemap(void) const;
 	void guess_width(void);
