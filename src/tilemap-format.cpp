@@ -263,6 +263,7 @@ std::vector<uchar> make_tilemap_bytes(const std::vector<Tile_Tessera *> &tiles, 
 		}
 	}
 	else if (fmt == Tilemap_Format::NDS_ATTRS) {
+		// <https://www.romhacking.net/documents/[469]nds_formats.htm#NSCR>
 		bytes.reserve(n * 2 + NDS_HEADER_SIZE);
 		uchar header[NDS_HEADER_SIZE] = {
 			// Generic header
