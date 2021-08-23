@@ -165,8 +165,11 @@ bool Main_Window::image_to_tiles() {
 
 	// Read the input image tiles
 
+	Tilemap_Format fmt = _image_to_tiles_dialog->format();
+	bool alt_norm = fmt == Tilemap_Format::NDS_ATTRS; // Tinke expects 5-bit clean channels
+
 	size_t n = 0, w = 0;
-	Tile *tiles = get_image_tiles(img, n, w);
+	Tile *tiles = get_image_tiles(img, n, w, alt_norm);
 	delete img;
 	if (!tiles || !n) {
 		delete [] tiles;
@@ -180,12 +183,12 @@ bool Main_Window::image_to_tiles() {
 
 	// Build the palette
 
-	Tilemap_Format fmt = _image_to_tiles_dialog->format();
 	Palette_Format pal_fmt = _image_to_tiles_dialog->palette_format();
 	bool make_palette = _image_to_tiles_dialog->palette() && format_can_make_palettes(fmt);
 
 	bool use_color_zero = _image_to_tiles_dialog->color_zero();
-	Fl_Color color_zero = use_color_zero ? _image_to_tiles_dialog->fl_color_zero() : 0xFFFFFF00 /* white */;
+	Fl_Color color_zero = use_color_zero ? _image_to_tiles_dialog->fl_color_zero() :
+		alt_norm ? 0xF8F8F800 : 0xFFFFFF00 /* white */;
 
 	Palettes palettes;
 	std::vector<int> tile_palettes(n, make_palette ? 0 : -1);

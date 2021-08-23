@@ -52,7 +52,7 @@ not_xy_flipped:
 	return false;
 }
 
-Tile *get_image_tiles(Fl_RGB_Image *img, size_t &n, size_t &iw) {
+Tile *get_image_tiles(Fl_RGB_Image *img, size_t &n, size_t &iw, bool alt_norm) {
 	if (!img) { return NULL; }
 
 	int w = img->w(), h = img->h();
@@ -78,6 +78,9 @@ Tile *get_image_tiles(Fl_RGB_Image *img, size_t &n, size_t &iw) {
 					const uchar *px = data + oy + ox;
 					// Round color channels to 5 bits
 					uchar r = NORMRGB(px[0]), g = NORMRGB(px[dp]), b = NORMRGB(px[dp+dp]);
+					if (alt_norm) {
+						r = ALTNORMRGB(r); g = ALTNORMRGB(g); b = ALTNORMRGB(b);
+					}
 					int ti = ty * TILE_SIZE + tx;
 					tiles[i][ti] = fl_rgb_color(r, g, b);
 				}
