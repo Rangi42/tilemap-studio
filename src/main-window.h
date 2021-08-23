@@ -46,7 +46,7 @@ private:
 		*_greybird_theme_mi = NULL, *_ocean_theme_mi = NULL, *_blue_theme_mi = NULL, *_olive_theme_mi = NULL,
 		*_rose_gold_theme_mi = NULL, *_dark_theme_mi = NULL, *_brushed_metal_theme_mi = NULL, *_high_contrast_theme_mi = NULL;
 	Fl_Menu_Item *_grid_mi = NULL, *_rainbow_tiles_mi = NULL, *_bold_palettes_mi = NULL, *_auto_tileset_mi = NULL,
-		*_full_screen_mi = NULL;
+		*_transparent_mi = NULL, *_full_screen_mi = NULL;
 	Toolbar_Button *_new_tb, *_open_tb, *_save_tb, *_print_tb, *_load_tb, *_add_tb, *_reload_tb, *_undo_tb, *_redo_tb,
 		*_zoom_in_tb, *_zoom_out_tb;
 	Toolbar_Toggle_Button *_grid_tb, *_rainbow_tiles_tb, *_bold_palettes_tb;
@@ -109,6 +109,8 @@ public:
 	void show(void);
 	bool maximized(void) const;
 	void maximize(void);
+	void transparency(void);
+	inline bool transparent(void) const { return _transparent_mi && !!_transparent_mi->value(); }
 	inline bool full_screen(void) const { return _full_screen_mi && !!_full_screen_mi->value(); }
 	inline bool unsaved(void) const { return _tilemap.modified(); }
 	inline uint16_t tile_id(void) const { return _selection.selected() ? _selection.id() : 0x000; }
@@ -222,6 +224,7 @@ private:
 	static void grid_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void rainbow_tiles_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void bold_palettes_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void transparent_cb(Fl_Menu_ *m, Main_Window *mw);
 	// Tools menu
 	static void tilemap_width_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void resize_cb(Fl_Menu_ *m, Main_Window *mw);

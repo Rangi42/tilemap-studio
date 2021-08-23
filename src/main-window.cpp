@@ -67,6 +67,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		_recent_tilesets[i] = Preferences::get_string(Fl_Preferences::Name("recent-set%d", i));
 	}
 
+	int transparent = Preferences::get("transparent", 0);
 	int fullscreen = Preferences::get("fullscreen", 0);
 
 	// Populate window
@@ -372,6 +373,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 			FL_MENU_TOGGLE | (Config::rainbow_tiles() ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&Bold Palettes", FL_COMMAND + 'b', (Fl_Callback *)bold_palettes_cb, this,
 			FL_MENU_TOGGLE | (Config::bold_palettes() ? FL_MENU_VALUE : 0) | FL_MENU_DIVIDER),
+		OS_MENU_ITEM("Tr&ansparent", FL_F + 10, (Fl_Callback *)transparent_cb, this,
+			FL_MENU_TOGGLE | (transparent ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("Full &Screen", FL_F + 11, (Fl_Callback *)full_screen_cb, this,
 			FL_MENU_TOGGLE | (fullscreen ? FL_MENU_VALUE : 0)),
 		{},
@@ -415,6 +418,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_grid_mi = TS_FIND_MENU_ITEM_CB(grid_cb);
 	_rainbow_tiles_mi = TS_FIND_MENU_ITEM_CB(rainbow_tiles_cb);
 	_bold_palettes_mi = TS_FIND_MENU_ITEM_CB(bold_palettes_cb);
+	_transparent_mi = TS_FIND_MENU_ITEM_CB(transparent_cb);
 	_full_screen_mi = TS_FIND_MENU_ITEM_CB(full_screen_cb);
 	// Conditional menu items
 	_close_mi = TS_FIND_MENU_ITEM_CB(close_cb);
@@ -745,6 +749,22 @@ void Main_Window::maximize() {
 	event.xclient.data.l[2] = XInternAtom(fl_display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
 	event.xclient.data.l[3] = 1;
 	XSendEvent(fl_display, DefaultRootWindow(fl_display), False, SubstructureNotifyMask | SubstructureNotifyMask, &event);
+#endif
+}
+
+void Main_Window::transparency() {
+	double alpha = transparent() ? 0.75 : 1.0;
+#ifdef _WIN32
+	HWND hwnd = fl_xid(this);
+	LONG_PTR exstyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+	if (!(exstyle & WS_EX_LAYERED)) {
+		SetWindowLongPtr(hwnd, GWL_EXSTYLE, exstyle | WS_EX_LAYERED);
+	}
+	SetLayeredWindowAttributes(hwnd, 0, (BYTE)(alpha * 0xFF), LWA_ALPHA);
+#else
+	Atom atom = XInternAtom(fl_display, "_NET_WM_WINDOW_OPACITY", False);
+	uint32_t opacity = (uint32_t)(UINT32_MAX * alpha);
+	XChangeProperty(fl_display, fl_xid(this), atom, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&opacity, 1);
 #endif
 }
 
@@ -2350,6 +2370,7 @@ void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 	Preferences::set("grid", Config::grid());
 	Preferences::set("rainbow", Config::rainbow_tiles());
 	Preferences::set("bold", Config::bold_palettes());
+	Preferences::set("transparent", mw->transparent());
 	Preferences::set("tileset", Config::auto_load_tileset());
 	Preferences::set("alpha", (int)mw->_transparency->value());
 	Preferences::set("print-grid", Config::print_grid());
@@ -2551,6 +2572,10 @@ void Main_Window::bold_palettes_tb_cb(Toolbar_Button *, Main_Window *mw) {
 	if (Config::bold_palettes()) { mw->_bold_palettes_mi->set(); }
 	else { mw->_bold_palettes_mi->clear(); }
 	mw->redraw();
+}
+
+void Main_Window::transparent_cb(Fl_Menu_ *, Main_Window *mw) {
+	mw->transparency();
 }
 
 void Main_Window::full_screen_cb(Fl_Menu_ *m, Main_Window *mw) {
