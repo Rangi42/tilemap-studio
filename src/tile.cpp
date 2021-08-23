@@ -52,7 +52,7 @@ not_xy_flipped:
 	return false;
 }
 
-Tile *get_image_tiles(Fl_RGB_Image *img, size_t &n, size_t &iw, bool alt_norm) {
+Tile *get_image_tiles(Fl_RGB_Image *img, size_t &n, size_t &iw, bool alt_norm, Fl_Color blank_color) {
 	if (!img) { return NULL; }
 
 	int w = img->w(), h = img->h();
@@ -67,7 +67,7 @@ Tile *get_image_tiles(Fl_RGB_Image *img, size_t &n, size_t &iw, bool alt_norm) {
 	if (!ld) { ld = img->w() * d; }
 	int dp = d > 1;
 
-	Tile *tiles = new Tile[n]();
+	Tile *tiles = new Tile[n + 1]();
 	for (int y = 0; y < h; y++) {
 		for (int x = 0; x < w; x++) {
 			int i = y * w + x;
@@ -87,6 +87,8 @@ Tile *get_image_tiles(Fl_RGB_Image *img, size_t &n, size_t &iw, bool alt_norm) {
 			}
 		}
 	}
+	// Fail-safe blank tile at the end
+	std::fill(RANGE(tiles[n]), blank_color);
 
 	return tiles;
 }

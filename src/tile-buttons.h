@@ -13,9 +13,8 @@
 
 #include "utils.h"
 #include "config.h"
-#include "tileset.h"
+#include "tile.h"
 
-#define TILE_SIZE 8
 #define TILE_SIZE_2X (TILE_SIZE * DEFAULT_ZOOM)
 
 class Tileset;

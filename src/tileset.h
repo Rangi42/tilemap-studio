@@ -6,10 +6,10 @@
 #pragma warning(pop)
 
 #include "utils.h"
-#include "tile-buttons.h"
+#include "tile.h"
 
 #define NUM_HUES 4
-#define BYTES_PER_1BPP_TILE (TILE_SIZE * TILE_SIZE / TILE_SIZE)
+#define BYTES_PER_1BPP_TILE (NUM_TILE_PIXELS / 8)
 #define BYTES_PER_2BPP_TILE (BYTES_PER_1BPP_TILE * 2)
 #define BYTES_PER_4BPP_TILE (BYTES_PER_1BPP_TILE * 4)
 #define BYTES_PER_8BPP_TILE (BYTES_PER_1BPP_TILE * 8)
