@@ -1859,11 +1859,13 @@ void Main_Window::load_corresponding_tileset() {
 	}
 }
 
-void Main_Window::open_tilemap_or_image_to_tiles(const char *filename) {
-	if (ends_with_ignore_case(filename, ".png") || ends_with_ignore_case(filename, ".gif")
-		|| ends_with_ignore_case(filename, ".bmp")) {
+void Main_Window::open_or_import_or_convert(const char *filename) {
+	if (ends_with_ignore_case(filename, ".png") || ends_with_ignore_case(filename, ".gif") || ends_with_ignore_case(filename, ".bmp")) {
 		_image_to_tiles_dialog->prepare_image(filename);
 		image_to_tiles_cb(NULL, this);
+	}
+	else if (ends_with_ignore_case(filename, ".c") || ends_with_ignore_case(filename, ".csv") || ends_with_ignore_case(filename, ".rmp")) {
+		import_tilemap(filename);
 	}
 	else {
 		open_tilemap(filename);
@@ -1923,7 +1925,7 @@ void Main_Window::drag_and_drop_tilemap_cb(DnD_Receiver *dndr, Main_Window *mw) 
 		mw->_unsaved_dialog->show(mw);
 		if (mw->_unsaved_dialog->canceled()) { return; }
 	}
-	mw->open_tilemap_or_image_to_tiles(filename.c_str());
+	mw->open_or_import_or_convert(filename.c_str());
 }
 
 void Main_Window::drag_and_drop_tileset_cb(DnD_Receiver *dndr, Main_Window *mw) {
@@ -1974,7 +1976,7 @@ void Main_Window::open_cb(Fl_Widget *, Main_Window *mw) {
 		return;
 	}
 
-	mw->open_tilemap_or_image_to_tiles(filename);
+	mw->open_or_import_or_convert(filename);
 }
 
 void Main_Window::open_recent_tilemap_cb(Fl_Menu_ *m, Main_Window *mw) {

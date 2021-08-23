@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
 		window.load_tileset(argv[2]);
 	}
 	else if (argc > 1) {
-		window.open_tilemap_or_image_to_tiles(argv[1]);
+		window.open_or_import_or_convert(argv[1]);
 	}
 
 	return Fl::run();
