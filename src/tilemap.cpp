@@ -497,7 +497,7 @@ bool Tilemap::write_tiles(const char *tf, const char *af, Tilemap_Format fmt) {
 	return true;
 }
 
-bool Tilemap::export_tiles(const char *f) {
+bool Tilemap::export_tiles(const char *f) const {
 	FILE *file = fl_fopen(f, "wb");
 	if (!file) { return false; }
 
@@ -514,7 +514,7 @@ bool Tilemap::export_tiles(const char *f) {
 	return true;
 }
 
-void Tilemap::export_c_tiles(FILE *file, std::vector<uchar> &bytes, Tilemap_Format fmt, const char *f) {
+void Tilemap::export_c_tiles(FILE *file, const std::vector<uchar> &bytes, Tilemap_Format fmt, const char *f) const {
 	const char *basename = fl_filename_name(f);
 	char name[FL_PATH_MAX] = {};
 	strcpy(name, basename);
@@ -565,7 +565,7 @@ void Tilemap::export_c_tiles(FILE *file, std::vector<uchar> &bytes, Tilemap_Form
 	}
 }
 
-void Tilemap::export_csv_tiles(FILE *file, std::vector<uchar> &bytes, Tilemap_Format fmt) {
+void Tilemap::export_csv_tiles(FILE *file, const std::vector<uchar> &bytes, Tilemap_Format fmt) const {
 	size_t rw = width() * format_bytes_per_tile(fmt);
 	size_t nb = bytes.size();
 	for (size_t i = 0; i < nb; i++) {

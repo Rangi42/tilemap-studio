@@ -1553,7 +1553,7 @@ void Main_Window::y_flip_selection() {
 	update_active_controls();
 }
 
-void Main_Window::copy_selection() {
+void Main_Window::copy_selection() const {
 	if (!_selection.selected_multiple() || _selection.from_tileset()) { return; }
 	size_t w = _selection.width(), h = _selection.height();
 	int z = Config::zoom();

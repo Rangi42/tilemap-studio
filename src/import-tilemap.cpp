@@ -37,29 +37,27 @@ static uchar get_number(FILE *file, int &c) {
 }
 
 static bool import_csv_tiles(FILE *file, std::vector<uchar> &bytes) {
-	bool state = false;
+	bool got_number = false;
 	for (int c = fgetc(file); c != EOF;) {
-		if (state) {
-			if (c == ',' || c == '\n' || c == '\r') {
-				state = false;
-			}
-			else if (!isspace(c)) {
-				return false;
-			}
+		if (isdigit(c) && !got_number) {
+			uchar v = get_number(file, c);
+			bytes.push_back(v);
+			got_number = true;
+			continue;
 		}
-		else {
-			if (isdigit(c)) {
-				uchar v = get_number(file, c);
-				bytes.push_back(v);
-				state = true;
-				continue;
+		else if (c == ',') {
+			if (got_number) {
+				got_number = false;
 			}
-			else if (c == ',') {
+			else {
 				bytes.push_back(0);
 			}
-			else if (!isspace(c)) {
-				return false;
-			}
+		}
+		else if ((c == '\n' || c == '\r') && got_number) {
+			got_number = false;
+		}
+		else if (!isspace(c)) {
+			return false;
 		}
 		c = fgetc(file);
 	}

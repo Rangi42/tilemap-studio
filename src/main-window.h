@@ -139,7 +139,7 @@ public:
 	void erase_selection(void);
 	void x_flip_selection(void);
 	void y_flip_selection(void);
-	void copy_selection(void);
+	void copy_selection(void) const;
 	void select_all(void);
 	void new_tilemap(size_t width, size_t height);
 	void open_tilemap(const char *filename, size_t width = 0);

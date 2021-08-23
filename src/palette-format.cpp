@@ -38,8 +38,8 @@ const char *palette_name(Palette_Format pal_fmt) {
 
 int palette_max_name_width() {
 	int mw = 0;
-	for (const char *palette_name : palette_names) {
-		mw = std::max(mw, text_width(palette_name, 6));
+	for (const char *pal_name : palette_names) {
+		mw = std::max(mw, text_width(pal_name, 6));
 	}
 	return mw;
 }

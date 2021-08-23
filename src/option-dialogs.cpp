@@ -874,14 +874,14 @@ void Image_To_Tiles_Dialog::update_output_names() {
 			_palette_name->label("Output: " NO_FILES_DETERMINED_LABEL);
 		}
 		else {
-			char palette_name[FL_PATH_MAX] = {};
-			strcpy(palette_name, "Output: ");
-			strcat(palette_name, fl_filename_name(palette_filename()));
+			char pal_name[FL_PATH_MAX] = {};
+			strcpy(pal_name, "Output: ");
+			strcat(pal_name, fl_filename_name(palette_filename()));
 			if (format_has_per_tile_palettes(format())) {
-				strcat(palette_name, " / ");
-				strcat(palette_name, fl_filename_name(tilepal_filename()));
+				strcat(pal_name, " / ");
+				strcat(pal_name, fl_filename_name(tilepal_filename()));
 			}
-			_palette_name->copy_label(palette_name);
+			_palette_name->copy_label(pal_name);
 		}
 	}
 	else {

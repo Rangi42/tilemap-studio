@@ -61,13 +61,13 @@ public:
 	bool write_tiles(const char *tf, const char *af, Tilemap_Format fmt);
 	Result import_tiles(const char *tf, const char *af);
 	Result import_rmp(const char *f);
-	bool export_tiles(const char *f);
+	bool export_tiles(const char *f) const;
 	void print_tilemap(void) const;
 	void guess_width(void);
 private:
 	Result make_tiles(const std::vector<uchar> &tbytes, const std::vector<uchar> &abytes);
-	void export_c_tiles(FILE *file, std::vector<uchar> &bytes, Tilemap_Format fmt, const char *f);
-	void export_csv_tiles(FILE *file, std::vector<uchar> &bytes, Tilemap_Format fmt);
+	void export_c_tiles(FILE *file, const std::vector<uchar> &bytes, Tilemap_Format fmt, const char *f) const;
+	void export_csv_tiles(FILE *file, const std::vector<uchar> &bytes, Tilemap_Format fmt) const;
 public:
 	static const char *error_message(Result result);
 };
