@@ -153,12 +153,7 @@ static uint16_t read_uint16(FILE *file) {
 }
 
 static bool import_rmp_tiles(FILE *file, std::vector<uchar> &bytes) {
-#define CHECK_READ_VALID(expected) do { \
-	if (!check_read(file, expected, sizeof(expected))) { return false; } \
-} while (false)
-
 	// <https://github.com/chadaustin/sphere/blob/master/sphere/docs/internal/map.rmp.txt>
-
 	uchar expected_header[21] = {
 		'.', 'r', 'm', 'p', // magic number
 		LE16(1),            // version
@@ -173,9 +168,9 @@ static bool import_rmp_tiles(FILE *file, std::vector<uchar> &bytes) {
 		LE16(9),            // num strings
 		LE16(0)             // num zones
 	};
-	CHECK_READ_VALID(expected_header);
+	if (!check_read(file, expected_header, sizeof(expected_header))) { return false; }
 	uchar expected_unused_and_strings[235 + 9 * 2] = {0};
-	CHECK_READ_VALID(expected_unused_and_strings);
+	if (!check_read(file, expected_unused_and_strings, sizeof(expected_unused_and_strings))) { return false; }
 
 	uint16_t width = read_uint16(file);
 	uint16_t height = read_uint16(file);
@@ -190,7 +185,7 @@ static bool import_rmp_tiles(FILE *file, std::vector<uchar> &bytes) {
 		0,                // reflective
 		0, 0, 0           // reserved
 	};
-	CHECK_READ_VALID(expected_layer_header);
+	if (!check_read(file, expected_layer_header, sizeof(expected_layer_header))) { return false; }
 
 	uint16_t name_length = read_uint16(file);
 	fseek(file, name_length, SEEK_CUR);
@@ -198,8 +193,6 @@ static bool import_rmp_tiles(FILE *file, std::vector<uchar> &bytes) {
 	size_t n = width * height * 2;
 	bytes.resize(n);
 	if (size_t r = fread(bytes.data(), 1, n, file); r != n) { return false; }
-
-#undef CHECK_READ_VALID
 
 	// GBA_4BPP tile IDs must be 0x3FF or below
 	for (size_t i = 1; i < n; i += 2) {
