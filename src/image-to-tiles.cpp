@@ -28,22 +28,22 @@
 typedef std::set<Fl_Color> Color_Set;
 
 static bool build_tilemap(const Tile *tiles, size_t n, const std::vector<int> tile_palettes, Tilemap &tilemap,
-	std::vector<size_t> &tileset, Tilemap_Format fmt, uint16_t start_id, bool use_space, uint16_t space_id, Fl_Color space_color) {
+	std::vector<size_t> &tileset, Tilemap_Format fmt, uint16_t start_id, bool use_blank, uint16_t blank_id, Fl_Color blank_color) {
 	size_t mn = (size_t)format_tileset_size(fmt);
 	tilemap.resize(n, 1, Resize_Dialog::Hor_Align::LEFT, Resize_Dialog::Vert_Align::TOP);
 	tileset.reserve(mn);
 	size_t tc = 0;
 	for (size_t i = 0; i < n; i++) {
-		if (use_space && start_id + tileset.size() == space_id) {
+		if (use_blank && start_id + tileset.size() == blank_id) {
 			size_t j = 0;
 			for (; j < n; j++) {
-				if (is_blank_tile(tiles[j], space_color)) { break; }
+				if (is_blank_tile(tiles[j], blank_color)) { break; }
 			}
 			tileset.push_back(j);
 		}
 		const Tile &tile = tiles[i];
-		if (use_space && is_blank_tile(tile, space_color)) {
-			tilemap.tile(tc++, 0, new Tile_Tessera(0, 0, 0, 0, space_id, false, false, false, false, tile_palettes[i]));
+		if (use_blank && is_blank_tile(tile, blank_color)) {
+			tilemap.tile(tc++, 0, new Tile_Tessera(0, 0, 0, 0, blank_id, false, false, false, false, tile_palettes[i]));
 			continue;
 		}
 		size_t ti = 0, nt = tileset.size();
@@ -360,10 +360,10 @@ bool Main_Window::image_to_tiles() {
 	std::vector<size_t> tileset;
 
 	uint16_t start_id = _image_to_tiles_dialog->start_id();
-	bool use_space = _image_to_tiles_dialog->use_space();
-	uint16_t space_id = _image_to_tiles_dialog->space_id();
+	bool use_blank = _image_to_tiles_dialog->use_blank();
+	uint16_t blank_id = _image_to_tiles_dialog->blank_id();
 
-	if (!build_tilemap(tiles, n, tile_palettes, tilemap, tileset, fmt, start_id, use_space, space_id, color_zero)) {
+	if (!build_tilemap(tiles, n, tile_palettes, tilemap, tileset, fmt, start_id, use_blank, blank_id, color_zero)) {
 		delete [] tiles;
 		std::string msg = "Could not convert ";
 		msg = msg + image_basename + "!\n\nToo many unique tiles.";
@@ -409,7 +409,7 @@ bool Main_Window::image_to_tiles() {
 	// Create the tileset file
 
 	int tw = tileset_width();
-	if (_image_to_tiles_dialog->no_extra_tiles()) { tw = fit_width((int)tileset.size(), tw); }
+	if (_image_to_tiles_dialog->no_extra_blank_tiles()) { tw = fit_width((int)tileset.size(), tw); }
 	bool indexed = make_palette && pal_fmt == Palette_Format::INDEXED;
 	Fl_RGB_Image *timg = print_tileset(tiles, tileset, palettes, tile_palettes, max_colors, tw, color_zero, indexed, start_index);
 	Image::Result result = indexed ? Image::write_image(tileset_filename, timg, 0, &palettes, max_colors) :

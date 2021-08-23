@@ -254,12 +254,12 @@ private:
 	Label * _input_heading, * _output_heading;
 	Toolbar_Button *_image, *_tileset;
 	Label_Button *_image_name, *_tileset_name;
-	OS_Check_Button *_no_extra_tiles;
+	OS_Check_Button *_no_extra_blank_tiles;
 	Label *_tilemap_name;
 	Dropdown *_format;
 	Default_Hex_Spinner *_start_id;
-	OS_Check_Button *_use_space;
-	Default_Hex_Spinner *_space_id;
+	OS_Check_Button *_use_blank;
+	Default_Hex_Spinner *_blank_id;
 	OS_Check_Button *_palette;
 	Label *_palette_name;
 	Dropdown *_palette_format;
@@ -281,7 +281,7 @@ public:
 	inline const char *attrmap_filename(void) const { return _attrmap_filename.c_str(); }
 	inline const char *palette_filename(void) const { return _palette_filename.c_str(); }
 	inline const char *tilepal_filename(void) const { return _tilepal_filename.c_str(); }
-	inline bool no_extra_tiles(void) const { return !!_no_extra_tiles->value(); }
+	inline bool no_extra_blank_tiles(void) const { return !!_no_extra_blank_tiles->value(); }
 	inline Tilemap_Format format(void) const { return (Tilemap_Format)_format->value(); }
 	inline void format(Tilemap_Format fmt) { initialize(); _format->value((int)fmt); }
 	inline bool palette(void) const { return !!_palette->value(); }
@@ -290,8 +290,8 @@ public:
 	Fl_Color fl_color_zero(void) const;
 	inline uint16_t start_id(void) const { return (uint16_t)_start_id->value(); }
 	inline void start_id(uint16_t n) { initialize(); _start_id->value(n); }
-	inline bool use_space(void) const { return !!_use_space->value(); }
-	inline uint16_t space_id(void) const { return (uint16_t)_space_id->value(); }
+	inline bool use_blank(void) const { return !!_use_blank->value(); }
+	inline uint16_t blank_id(void) const { return (uint16_t)_blank_id->value(); }
 	inline uint8_t start_index(void) const { return (uint8_t)_start_index->value(); }
 	inline void start_index(uint8_t n) { initialize(); _start_index->value(n); }
 	inline void reshow(const Fl_Widget *p) { _canceled = false; reveal(p); }
@@ -314,7 +314,7 @@ private:
 	static void color_zero_cb(OS_Check_Button *cb, Image_To_Tiles_Dialog *itd);
 	static void color_zero_rgb_cb(OS_Hex_Input *cb, Image_To_Tiles_Dialog *itd);
 	static void color_zero_swatch_cb(Fl_Button *w, Image_To_Tiles_Dialog *itd);
-	static void use_space_cb(OS_Check_Button *cb, Image_To_Tiles_Dialog *itd);
+	static void use_blank_cb(OS_Check_Button *cb, Image_To_Tiles_Dialog *itd);
 };
 
 #endif
