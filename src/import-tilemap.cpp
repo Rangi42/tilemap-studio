@@ -64,9 +64,21 @@ static bool import_csv_tiles(FILE *file, std::vector<uchar> &bytes) {
 	return true;
 }
 
+static void skip_c_line_comment(FILE *file) {
+	for (int c = fgetc(file); c != '\r' && c != '\n' && c != EOF; c = fgetc(file));
+}
+
+static void skip_c_block_comment(FILE *file) {
+	for (int c = fgetc(file); c != EOF; c = fgetc(file)) {
+		while (c != '*' && c != EOF) { c = fgetc(file); }
+		while (c == '*') { c = fgetc(file); }
+		if (c == '/') { return; }
+	}
+}
+
 static bool import_c_tiles(FILE *file, std::vector<uchar> &bytes) {
-	enum class State { PRELUDE, ARRAY, COMMA, MAYBE_OPEN_COMMENT, MAYBE_CLOSE_COMMENT, BLOCK_COMMENT, LINE_COMMENT };
-	State state = State::PRELUDE, state_before_comment = State::PRELUDE;
+	enum class State { PRELUDE, ARRAY, COMMA };
+	State state = State::PRELUDE;
 	for (int c = fgetc(file); c != EOF;) {
 		switch (state) {
 		case State::PRELUDE:
@@ -74,8 +86,17 @@ static bool import_c_tiles(FILE *file, std::vector<uchar> &bytes) {
 				state = State::ARRAY;
 			}
 			else if (c == '/') {
-				state_before_comment = state;
-				state = State::MAYBE_OPEN_COMMENT;
+			maybe_comment:
+				c = fgetc(file);
+				if (c == '*') {
+					skip_c_block_comment(file);
+				}
+				else if (c == '/') {
+					skip_c_line_comment(file);
+				}
+				else {
+					continue;
+				}
 			}
 			break;
 		case State::ARRAY:
@@ -83,61 +104,32 @@ static bool import_c_tiles(FILE *file, std::vector<uchar> &bytes) {
 				uchar v = get_number(file, c);
 				bytes.push_back(v);
 				state = State::COMMA;
-				continue;
 			}
-			goto not_number_or_comma_in_array;
+			else {
+				goto not_number_or_comma_in_array;
+			}
+			[[fallthrough]];
 		case State::COMMA:
 			if (c == ',') {
 				state = State::ARRAY;
 			}
 			else {
-not_number_or_comma_in_array:
-				if (c == '}') {
-					c = EOF;
-					continue;
+			not_number_or_comma_in_array:
+				if (c == '/') {
+					goto maybe_comment;
 				}
-				else if (c == '/') {
-					state_before_comment = state;
-					state = State::MAYBE_OPEN_COMMENT;
+				else if (c == '}') {
+					return true;
 				}
 				else if (!isspace(c)) {
 					return false;
 				}
 			}
 			break;
-		case State::MAYBE_OPEN_COMMENT:
-			if (c == '*') {
-				state = State::BLOCK_COMMENT;
-			}
-			else if (c == '/') {
-				state = State::LINE_COMMENT;
-			}
-			else {
-				state = state_before_comment;
-				continue;
-			}
-			break;
-		case State::MAYBE_CLOSE_COMMENT:
-			if (c == '/') {
-				state = state_before_comment;
-				break;
-			}
-			state = State::BLOCK_COMMENT;
-			[[fallthrough]];
-		case State::BLOCK_COMMENT:
-			if (c == '*') {
-				state = State::MAYBE_CLOSE_COMMENT;
-			}
-			break;
-		case State::LINE_COMMENT:
-			if (c == '\n' || c == '\r') {
-				state = state_before_comment;
-			}
-			break;
 		}
 		c = fgetc(file);
 	}
-	return true;
+	return false;
 }
 
 static bool check_read(FILE *file, uchar *expected, size_t n) {
