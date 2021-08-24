@@ -122,6 +122,8 @@ static void horizontal_gradient(int x1, int y1, int x2, int y2, Fl_Color c1, Fl_
 	}
 }
 
+static void dummy_box_frame(int, int, int, int, Fl_Color) {}
+
 /*************************** Classic (Windows 2000) ***************************/
 
 static void classic_button_up_frame(int x, int y, int w, int h, Fl_Color) {
@@ -227,6 +229,7 @@ static void use_classic_scheme() {
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, classic_radio_round_down_box, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 	Fl::set_boxtype(OS_BG_DOWN_BOX, OS_BG_BOX);
+	Fl::set_boxtype(OS_TOOLBAR_FRAME, OS_PANEL_THIN_UP_FRAME);
 }
 
 static void use_classic_colors() {
@@ -593,6 +596,7 @@ static void use_aero_scheme() {
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, OS_RADIO_ROUND_DOWN_BOX);
 	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 	Fl::set_boxtype(OS_BG_DOWN_BOX, OS_BG_BOX);
+	Fl::set_boxtype(OS_TOOLBAR_FRAME, OS_PANEL_THIN_UP_FRAME);
 }
 
 static void use_aero_colors() {
@@ -736,6 +740,7 @@ static void use_metro_scheme() {
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, OS_RADIO_ROUND_DOWN_BOX);
 	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 	Fl::set_boxtype(OS_BG_DOWN_BOX, OS_BG_BOX);
+	Fl::set_boxtype(OS_TOOLBAR_FRAME, OS_PANEL_THIN_UP_FRAME);
 }
 
 static void use_metro_colors() {
@@ -1050,6 +1055,7 @@ static void use_aqua_scheme() {
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, OS_RADIO_ROUND_DOWN_BOX);
 	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 	Fl::set_boxtype(OS_BG_DOWN_BOX, OS_BG_BOX);
+	Fl::set_boxtype(OS_TOOLBAR_FRAME, OS_PANEL_THIN_UP_FRAME);
 }
 
 static void use_aqua_colors() {
@@ -1406,6 +1412,7 @@ static void use_greybird_scheme() {
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, OS_RADIO_ROUND_DOWN_BOX);
 	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 	Fl::set_boxtype(OS_BG_DOWN_BOX, OS_BG_BOX);
+	Fl::set_boxtype(OS_TOOLBAR_FRAME, OS_PANEL_THIN_UP_FRAME);
 }
 
 static void use_greybird_colors() {
@@ -1556,6 +1563,7 @@ static void use_ocean_scheme() {
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, OS_RADIO_ROUND_DOWN_BOX);
 	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 	Fl::set_boxtype(OS_BG_DOWN_BOX, OS_BG_BOX);
+	Fl::set_boxtype(OS_TOOLBAR_FRAME, OS_PANEL_THIN_UP_FRAME);
 }
 
 static void use_ocean_colors() {
@@ -1822,6 +1830,7 @@ static void use_blue_scheme() {
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, OS_RADIO_ROUND_DOWN_BOX);
 	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 	Fl::set_boxtype(OS_BG_DOWN_BOX, OS_BG_BOX);
+	Fl::set_boxtype(OS_TOOLBAR_FRAME, OS_PANEL_THIN_UP_FRAME);
 }
 
 static void use_blue_colors() {
@@ -2249,6 +2258,7 @@ static void use_olive_scheme() {
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, OS_RADIO_ROUND_DOWN_BOX);
 	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 	Fl::set_boxtype(OS_BG_DOWN_BOX, OS_BG_BOX);
+	Fl::set_boxtype(OS_TOOLBAR_FRAME, OS_PANEL_THIN_UP_FRAME);
 }
 
 static void use_olive_colors() {
@@ -2515,6 +2525,7 @@ static void use_rose_gold_scheme() {
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, OS_RADIO_ROUND_DOWN_BOX);
 	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 	Fl::set_boxtype(OS_BG_DOWN_BOX, OS_BG_BOX);
+	Fl::set_boxtype(OS_TOOLBAR_FRAME, OS_PANEL_THIN_UP_FRAME);
 }
 
 static void use_rose_gold_colors() {
@@ -2741,6 +2752,7 @@ static void use_dark_scheme() {
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, OS_RADIO_ROUND_DOWN_BOX);
 	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 	Fl::set_boxtype(OS_BG_DOWN_BOX, OS_BG_BOX);
+	Fl::set_boxtype(OS_TOOLBAR_FRAME, OS_PANEL_THIN_UP_FRAME);
 }
 
 static void use_dark_colors() {
@@ -3152,6 +3164,7 @@ static void use_brushed_metal_scheme() {
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, OS_RADIO_ROUND_DOWN_BOX);
 	Fl::set_boxtype(OS_BG_BOX, brushed_metal_bg_box, 0, 0, 0, 0);
 	Fl::set_boxtype(OS_BG_DOWN_BOX, OS_BG_BOX);
+	Fl::set_boxtype(OS_TOOLBAR_FRAME, dummy_box_frame, 1, 1, 2, 2);
 }
 
 static void use_brushed_metal_colors() {
@@ -3200,9 +3213,7 @@ static void high_contrast_check_down_box(int x, int y, int w, int h, Fl_Color c)
 
 static void high_contrast_panel_thin_up_frame(int x, int y, int w, int h, Fl_Color) {
 	fl_color(activated_color(fl_rgb_color(0x00, 0xFF, 0xFF)));
-	fl_yxline(x, y+h-1, y, x+w-1);
-	fl_color(activated_color(fl_rgb_color(0x00, 0x80, 0x80)));
-	fl_xyline(x, y+h-1, x+w-1, y);
+	fl_rect(x, y, w, h);
 }
 
 static void high_contrast_panel_thin_up_box(int x, int y, int w, int h, Fl_Color c) {
@@ -3213,9 +3224,7 @@ static void high_contrast_panel_thin_up_box(int x, int y, int w, int h, Fl_Color
 
 static void high_contrast_spacer_thin_down_frame(int x, int y, int w, int h, Fl_Color) {
 	fl_color(activated_color(fl_rgb_color(0x00, 0x80, 0x80)));
-	fl_yxline(x, y+h-1, y, x+w-1);
-	fl_color(activated_color(fl_rgb_color(0x00, 0xFF, 0xFF)));
-	fl_xyline(x, y+h-1, x+w-1, y);
+	fl_rect(x, y, w, h);
 }
 
 static void high_contrast_spacer_thin_down_box(int x, int y, int w, int h, Fl_Color c) {
@@ -3237,23 +3246,14 @@ static void high_contrast_default_button_up_box(int x, int y, int w, int h, Fl_C
 }
 
 static void high_contrast_radio_round_down_frame(int x, int y, int w, int h, Fl_Color) {
-	// top and left outer border
-	fl_color(activated_color(fl_gray_ramp('M'-'A')));
-	fl_arc(x, y, w, h, 45.0, 225.0);
-	// bottom and right outer border
-	fl_color(activated_color(fl_gray_ramp('W'-'A')));
-	fl_arc(x, y, w, h, -135.0, 45.0);
-	// top and left inner border
-	fl_color(activated_color(fl_gray_ramp('A'-'A')));
-	fl_arc(x+1, y+1, w-2, h-2, 45.0, 225.0);
-	// bottom and right inner border
-	fl_color(activated_color(fl_gray_ramp('T'-'A')));
-	fl_arc(x+1, y+1, w-2, h-2, -135.0, 45.0);
+	fl_color(activated_color(fl_rgb_color(0x00, 0x80, 0x80)));
+	fl_arc(x, y, w, h, 0.0, 360.0);
+	fl_arc(x+1, y+1, w-2, h-2, 0.0, 360.0);
 }
 
 static void high_contrast_radio_round_down_box(int x, int y, int w, int h, Fl_Color c) {
-	fl_color(activated_color(fl_gray_ramp('W'-'A')));
-	fl_pie(x+2, y+2, w-4, h-4, 0.0, 360.0);
+	fl_color(activated_color(fl_rgb_color(0x20, 0x20, 0x20)));
+	fl_pie(x, y, w, h, 0.0, 360.0);
 	high_contrast_radio_round_down_frame(x, y, w, h, c);
 }
 
@@ -3301,6 +3301,7 @@ static void use_high_contrast_scheme() {
 	Fl::set_boxtype(FL_ROUND_DOWN_BOX, high_contrast_radio_round_down_box, 2, 2, 4, 4);
 	Fl::set_boxtype(OS_BG_BOX, FL_FLAT_BOX);
 	Fl::set_boxtype(OS_BG_DOWN_BOX, OS_BG_BOX);
+	Fl::set_boxtype(OS_TOOLBAR_FRAME, dummy_box_frame, 1, 1, 2, 2);
 }
 
 static void use_high_contrast_colors() {
