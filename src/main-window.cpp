@@ -1527,7 +1527,7 @@ void Main_Window::x_flip_selection() {
 	size_t ox = _selection.left_col(), oy = _selection.top_row();
 	size_t ow = _selection.width(), my = oy + _selection.height();
 	for (size_t y = oy; y < my; y++) {
-		for (size_t i = 0; i < ow / 2; i++) {
+		for (size_t i = 0; i < (ow + 1) / 2; i++) {
 			Tile_Tessera *tt1 = _tilemap.tile(ox+i, y);
 			Tile_Tessera *tt2 = _tilemap.tile(ox+ow-i-1, y);
 			if (!tt1 || !tt2) { continue; }
@@ -1554,7 +1554,7 @@ void Main_Window::y_flip_selection() {
 	size_t ox = _selection.left_col(), oy = _selection.top_row();
 	size_t mx = ox + _selection.width(), oh = _selection.height();
 	for (size_t x = ox; x < mx; x++) {
-		for (size_t i = 0; i < oh / 2; i++) {
+		for (size_t i = 0; i < (oh + 1) / 2; i++) {
 			Tile_Tessera *tt1 = _tilemap.tile(x, oy+i);
 			Tile_Tessera *tt2 = _tilemap.tile(x, oy+oh-i-1);
 			if (!tt1 || !tt2) { continue; }
