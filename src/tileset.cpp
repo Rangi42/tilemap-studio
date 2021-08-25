@@ -464,9 +464,8 @@ static Tileset::Result decompress_lz_data(const char *f, std::vector<uchar> &dat
 	fclose(file);
 	if (r != n) { return Tileset::Result::TILESET_BAD_FILE; }
 
-	size_t len = 0, lim = data.size();
-	size_t address = 0;
-	for (;;) {
+	size_t len = 0;
+	for (size_t address = 0, lim = data.size();;) {
 		uchar q[2];
 		int offset;
 		uchar b = lz_data[address++];
