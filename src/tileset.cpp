@@ -1,4 +1,5 @@
 #include <array>
+#include <vector>
 
 #pragma warning(push, 0)
 #include <FL/fl_types.h>
@@ -140,10 +141,9 @@ Tileset::Result Tileset::read_png_graphics(const char *f) {
 }
 
 Tileset::Result Tileset::read_gif_graphics(const char *f) {
-	Fl_GIF_Image *gif = new Fl_GIF_Image(f);
-	if (!gif) { return (_result = Result::TILESET_BAD_FILE); }
-	Fl_RGB_Image *img = new Fl_RGB_Image(gif, FL_WHITE);
-	delete gif;
+	Fl_GIF_Image gif(f);
+	if (gif.fail()) { return (_result = Result::TILESET_BAD_FILE); }
+	Fl_RGB_Image *img = new Fl_RGB_Image(&gif, FL_WHITE);
 	return postprocess_graphics(img);
 }
 
@@ -159,12 +159,12 @@ Tileset::Result Tileset::read_1bpp_graphics(const char *f) {
 	size_t n = file_size(file);
 	if (n % BYTES_PER_1BPP_TILE) { fclose(file); return (_result = Result::TILESET_BAD_DIMS); }
 
-	uchar *data = new uchar[n];
-	size_t r = fread(data, 1, n, file);
+	std::vector<uchar> data(n);
+	size_t r = fread(data.data(), 1, n, file);
 	fclose(file);
-	if (r != n) { delete [] data; return (_result = Result::TILESET_BAD_FILE); }
+	if (r != n) { return (_result = Result::TILESET_BAD_FILE); }
 
-	return parse_1bpp_data(n, data);
+	return parse_1bpp_data(data);
 }
 
 Tileset::Result Tileset::read_2bpp_graphics(const char *f) {
@@ -174,12 +174,12 @@ Tileset::Result Tileset::read_2bpp_graphics(const char *f) {
 	size_t n = file_size(file);
 	if (n % BYTES_PER_2BPP_TILE) { fclose(file); return (_result = Result::TILESET_BAD_DIMS); }
 
-	uchar *data = new uchar[n];
-	size_t r = fread(data, 1, n, file);
+	std::vector<uchar> data(n);
+	size_t r = fread(data.data(), 1, n, file);
 	fclose(file);
-	if (r != n) { delete [] data; return (_result = Result::TILESET_BAD_FILE); }
+	if (r != n) { return (_result = Result::TILESET_BAD_FILE); }
 
-	return parse_2bpp_data(n, data);
+	return parse_2bpp_data(data);
 }
 
 Tileset::Result Tileset::read_4bpp_graphics(const char *f) {
@@ -189,12 +189,12 @@ Tileset::Result Tileset::read_4bpp_graphics(const char *f) {
 	size_t n = file_size(file);
 	if (n % BYTES_PER_4BPP_TILE) { fclose(file); return (_result = Result::TILESET_BAD_DIMS); }
 
-	uchar *data = new uchar[n];
-	size_t r = fread(data, 1, n, file);
+	std::vector<uchar> data(n);
+	size_t r = fread(data.data(), 1, n, file);
 	fclose(file);
-	if (r != n) { delete [] data; return (_result = Result::TILESET_BAD_FILE); }
+	if (r != n) { return (_result = Result::TILESET_BAD_FILE); }
 
-	return parse_4bpp_data(n, data);
+	return parse_4bpp_data(data);
 }
 
 Tileset::Result Tileset::read_8bpp_graphics(const char *f) {
@@ -204,34 +204,30 @@ Tileset::Result Tileset::read_8bpp_graphics(const char *f) {
 	size_t n = file_size(file);
 	if (n % BYTES_PER_8BPP_TILE) { fclose(file); return (_result = Result::TILESET_BAD_DIMS); }
 
-	uchar *data = new uchar[n];
-	size_t r = fread(data, 1, n, file);
+	std::vector<uchar> data(n);
+	size_t r = fread(data.data(), 1, n, file);
 	fclose(file);
-	if (r != n) { delete [] data; return (_result = Result::TILESET_BAD_FILE); }
+	if (r != n) { return (_result = Result::TILESET_BAD_FILE); }
 
-	return parse_8bpp_data(n, data);
+	return parse_8bpp_data(data);
 }
 
-static Tileset::Result decompress_lz_data(const char *f, uchar *data, size_t lim, size_t &len);
+static Tileset::Result decompress_lz_data(const char *f, std::vector<uchar> &data);
 
 Tileset::Result Tileset::read_1bpp_lz_graphics(const char *f) {
-	uchar *data = new uchar[MAX_NUM_TILES * BYTES_PER_1BPP_TILE];
-	size_t n = 0;
-	if (decompress_lz_data(f, data, MAX_NUM_TILES * BYTES_PER_1BPP_TILE, n) != Result::TILESET_OK) {
-		delete [] data;
+	std::vector<uchar> data(MAX_NUM_TILES * BYTES_PER_1BPP_TILE);
+	if (decompress_lz_data(f, data) != Result::TILESET_OK) {
 		return _result;
 	}
-	return parse_1bpp_data(n, data);
+	return parse_1bpp_data(data);
 }
 
 Tileset::Result Tileset::read_2bpp_lz_graphics(const char *f) {
-	uchar *data = new uchar[MAX_NUM_TILES * BYTES_PER_2BPP_TILE];
-	size_t n = 0;
-	if (decompress_lz_data(f, data, MAX_NUM_TILES * BYTES_PER_2BPP_TILE, n) != Result::TILESET_OK) {
-		delete [] data;
+	std::vector<uchar> data(MAX_NUM_TILES * BYTES_PER_2BPP_TILE);
+	if (decompress_lz_data(f, data) != Result::TILESET_OK) {
 		return _result;
 	}
-	return parse_2bpp_data(n, data);
+	return parse_2bpp_data(data);
 }
 
 enum class Hue { WHITE, DARK, LIGHT, BLACK };
@@ -254,15 +250,14 @@ static void convert_2bpp_row(uchar b1, uchar b2, Hue *row) {
 	}
 }
 
-Tileset::Result Tileset::parse_1bpp_data(size_t n, uchar *data) {
-	n /= BYTES_PER_1BPP_TILE;
-	_num_tiles = n;
+Tileset::Result Tileset::parse_1bpp_data(const std::vector<uchar> &data) {
+	_num_tiles = data.size() / BYTES_PER_1BPP_TILE;
 
 	int limit = (int)_num_tiles - _offset;
 	if (_length > 0) { limit = std::min(limit, _length + _offset); }
-	if (_start_id + limit > MAX_NUM_TILES) { delete [] data; return (_result = Result::TILESET_TOO_LARGE); }
+	if (_start_id + limit > MAX_NUM_TILES) { return (_result = Result::TILESET_TOO_LARGE); }
 
-	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)n * TILE_SIZE);
+	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)_num_tiles * TILE_SIZE);
 	surface->set_current();
 
 	Hue row[TILE_SIZE] = {};
@@ -282,19 +277,17 @@ Tileset::Result Tileset::parse_1bpp_data(size_t n, uchar *data) {
 	delete surface;
 	Fl_Display_Device::display_device()->set_current();
 
-	delete [] data;
 	return postprocess_graphics(img);
 }
 
-Tileset::Result Tileset::parse_2bpp_data(size_t n, uchar *data) {
-	n /= BYTES_PER_2BPP_TILE;
-	_num_tiles = n;
+Tileset::Result Tileset::parse_2bpp_data(const std::vector<uchar> &data) {
+	_num_tiles = data.size() / BYTES_PER_2BPP_TILE;
 
 	int limit = (int)_num_tiles - _offset;
 	if (_length > 0) { limit = std::min(limit, _length + _offset); }
-	if (_start_id + limit > MAX_NUM_TILES) { delete [] data; return (_result = Result::TILESET_TOO_LARGE); }
+	if (_start_id + limit > MAX_NUM_TILES) { return (_result = Result::TILESET_TOO_LARGE); }
 
-	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)n * TILE_SIZE);
+	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)_num_tiles * TILE_SIZE);
 	surface->set_current();
 
 	Hue row[TILE_SIZE] = {};
@@ -315,7 +308,6 @@ Tileset::Result Tileset::parse_2bpp_data(size_t n, uchar *data) {
 	delete surface;
 	Fl_Display_Device::display_device()->set_current();
 
-	delete [] data;
 	return postprocess_graphics(img);
 }
 
@@ -326,15 +318,14 @@ static Fl_Color bpp4_colors[16] = {
 	fl_rgb_color(0x33), fl_rgb_color(0x22), fl_rgb_color(0x11), fl_rgb_color(0x00)
 };
 
-Tileset::Result Tileset::parse_4bpp_data(size_t n, uchar *data) {
-	n /= BYTES_PER_4BPP_TILE;
-	_num_tiles = n;
+Tileset::Result Tileset::parse_4bpp_data(const std::vector<uchar> &data) {
+	_num_tiles = data.size() / BYTES_PER_4BPP_TILE;
 
 	int limit = (int)_num_tiles - _offset;
 	if (_length > 0) { limit = std::min(limit, _length + _offset); }
-	if (_start_id + limit > MAX_NUM_TILES) { delete [] data; return (_result = Result::TILESET_TOO_LARGE); }
+	if (_start_id + limit > MAX_NUM_TILES) { return (_result = Result::TILESET_TOO_LARGE); }
 
-	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)n * TILE_SIZE);
+	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)_num_tiles * TILE_SIZE);
 	surface->set_current();
 
 	for (size_t i = 0; i < _num_tiles; i++) {
@@ -354,19 +345,17 @@ Tileset::Result Tileset::parse_4bpp_data(size_t n, uchar *data) {
 	delete surface;
 	Fl_Display_Device::display_device()->set_current();
 
-	delete [] data;
 	return postprocess_graphics(img);
 }
 
-Tileset::Result Tileset::parse_8bpp_data(size_t n, uchar *data) {
-	n /= BYTES_PER_8BPP_TILE;
-	_num_tiles = n;
+Tileset::Result Tileset::parse_8bpp_data(const std::vector<uchar> &data) {
+	_num_tiles = data.size() / BYTES_PER_8BPP_TILE;
 
 	int limit = (int)_num_tiles - _offset;
 	if (_length > 0) { limit = std::min(limit, _length + _offset); }
-	if (_start_id + limit > MAX_NUM_TILES) { delete [] data; return (_result = Result::TILESET_TOO_LARGE); }
+	if (_start_id + limit > MAX_NUM_TILES) { return (_result = Result::TILESET_TOO_LARGE); }
 
-	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)n * TILE_SIZE);
+	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)_num_tiles * TILE_SIZE);
 	surface->set_current();
 
 	for (size_t i = 0; i < _num_tiles; i++) {
@@ -384,7 +373,6 @@ Tileset::Result Tileset::parse_8bpp_data(size_t n, uchar *data) {
 	delete surface;
 	Fl_Display_Device::display_device()->set_current();
 
-	delete [] data;
 	return postprocess_graphics(img);
 }
 
@@ -466,26 +454,24 @@ static auto bit_flipped = ([]() constexpr {
 	return a;
 })();
 
-static Tileset::Result decompress_lz_data(const char *f, uchar *data, size_t lim, size_t &len) {
+static Tileset::Result decompress_lz_data(const char *f, std::vector<uchar> &data) {
 	FILE *file = fl_fopen(f, "rb");
 	if (!file) { return Tileset::Result::TILESET_BAD_FILE; }
 
 	size_t n = file_size(file);
-	uchar *lz_data = new uchar[n];
-	size_t r = fread(lz_data, 1, n, file);
+	std::vector<uchar> lz_data(n);
+	size_t r = fread(lz_data.data(), 1, n, file);
 	fclose(file);
-	if (r != n) { delete [] lz_data; return Tileset::Result::TILESET_BAD_FILE; }
+	if (r != n) { return Tileset::Result::TILESET_BAD_FILE; }
 
+	size_t len = 0, lim = data.size();
 	size_t address = 0;
-	uchar q[2];
-	int offset;
 	for (;;) {
+		uchar q[2];
+		int offset;
 		uchar b = lz_data[address++];
 		if (b == LZ_END) { break; }
-		if (len >= lim) {
-			delete [] lz_data;
-			return Tileset::Result::TILESET_TOO_LARGE;
-		}
+		if (len >= lim) { return Tileset::Result::TILESET_TOO_LARGE; }
 		Lz_Command cmd = (Lz_Command)((b & 0xe0) >> 5);
 		int length = 0;
 		if (cmd == Lz_Command::LZ_LONG) {
@@ -553,11 +539,10 @@ static Tileset::Result decompress_lz_data(const char *f, uchar *data, size_t lim
 			break;
 		case Lz_Command::LZ_LONG:
 		default:
-			delete [] lz_data;
 			return Tileset::Result::TILESET_BAD_CMD;
 		}
 	}
 
-	delete [] lz_data;
+	data.resize(len);
 	return Tileset::Result::TILESET_OK;
 }

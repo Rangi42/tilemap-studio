@@ -1,6 +1,8 @@
 #ifndef TILESET_H
 #define TILESET_H
 
+#include <vector>
+
 #pragma warning(push, 0)
 #include <FL/Fl_Image.H>
 #pragma warning(pop)
@@ -55,10 +57,10 @@ private:
 	Result read_8bpp_graphics(const char *f);
 	Result read_1bpp_lz_graphics(const char *f);
 	Result read_2bpp_lz_graphics(const char *f);
-	Result parse_1bpp_data(size_t n, uchar *data);
-	Result parse_2bpp_data(size_t n, uchar *data);
-	Result parse_4bpp_data(size_t n, uchar *data);
-	Result parse_8bpp_data(size_t n, uchar *data);
+	Result parse_1bpp_data(const std::vector<uchar> &data);
+	Result parse_2bpp_data(const std::vector<uchar> &data);
+	Result parse_4bpp_data(const std::vector<uchar> &data);
+	Result parse_8bpp_data(const std::vector<uchar> &data);
 	Result postprocess_graphics(Fl_RGB_Image *img);
 public:
 	static const char *error_message(Result result);

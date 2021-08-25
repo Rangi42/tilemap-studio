@@ -146,9 +146,9 @@ bool Main_Window::image_to_tiles() {
 		img = new Fl_BMP_Image(image_filename);
 	}
 	else if (ends_with_ignore_case(image_basename, ".gif")) {
-		if (Fl_GIF_Image *gif = new Fl_GIF_Image(image_filename)) {
-			img = new Fl_RGB_Image(gif, FL_WHITE);
-			delete gif;
+		Fl_GIF_Image gif(image_filename);
+		if (!gif.fail()) {
+			img = new Fl_RGB_Image(&gif, FL_WHITE);
 		}
 	}
 	else {
