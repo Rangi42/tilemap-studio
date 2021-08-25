@@ -132,60 +132,11 @@ static bool import_c_tiles(FILE *file, std::vector<uchar> &bytes) {
 	return false;
 }
 
-static bool check_read(FILE *file, uchar *expected, size_t n) {
-	std::vector<uchar> buffer(n);
-	size_t r = fread(buffer.data(), 1, n, file);
-	return r == n && (!expected || !memcmp(buffer.data(), expected, n));
-}
-
-static uint16_t read_uint16(FILE *file) {
-	int lo = fgetc(file);
-	int hi = fgetc(file);
-	return (uint16_t)(((hi & 0xFF00) >> 8) | (lo & 0xFF));
-}
-
 static bool import_rmp_tiles(FILE *file, std::vector<uchar> &bytes) {
-	// <https://github.com/chadaustin/sphere/blob/master/sphere/docs/internal/map.rmp.txt>
-	uchar expected_header[21] = {
-		'.', 'r', 'm', 'p', // magic number
-		LE16(1),            // version
-		0,                  // type (obsolete)
-		1,                  // num layers
-		0,                  // reserved
-		LE16(0),            // num entities
-		LE16(0),            // start x
-		LE16(0),            // start y
-		0,                  // start layer
-		0,                  // start direction (north)
-		LE16(9),            // num strings
-		LE16(0)             // num zones
-	};
-	if (!check_read(file, expected_header, sizeof(expected_header))) { return false; }
-	uchar expected_unused_and_strings[235 + 9 * 2] = {0};
-	if (!check_read(file, expected_unused_and_strings, sizeof(expected_unused_and_strings))) { return false; }
-
-	uint16_t width = read_uint16(file);
-	uint16_t height = read_uint16(file);
-
-	uchar expected_layer_header[26] = {
-		LE16(0),          // flags
-		LE32(0x3F800000), // parallax x (1.0f)
-		LE32(0x3F800000), // parallax y (1.0f)
-		LE32(0),          // scrolling x (0.0f)
-		LE32(0),          // scrolling y (0.0f)
-		LE32(0),          // num segments
-		0,                // reflective
-		0, 0, 0           // reserved
-	};
-	if (!check_read(file, expected_layer_header, sizeof(expected_layer_header))) { return false; }
-
-	uint16_t name_length = read_uint16(file);
-	fseek(file, name_length, SEEK_CUR);
-
-	size_t n = width * height * 2;
+	size_t n = read_rmp_size(file);
+	if (n == 0) { return false; }
 	bytes.resize(n);
-	if (size_t r = fread(bytes.data(), 1, n, file); r != n) { return false; }
-
+	if (fread(bytes.data(), 1, n, file) != n) { return false; }
 	// GBA_4BPP tile IDs must be 0x3FF or below
 	for (size_t i = 1; i < n; i += 2) {
 		if (bytes[i] > 0x03) { return false; }

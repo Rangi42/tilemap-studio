@@ -57,6 +57,7 @@ private:
 	Result read_8bpp_graphics(const char *f);
 	Result read_1bpp_lz_graphics(const char *f);
 	Result read_2bpp_lz_graphics(const char *f);
+	Result read_rts_graphics(const char *f, bool skip_rmp);
 	Result parse_1bpp_data(const std::vector<uchar> &data);
 	Result parse_2bpp_data(const std::vector<uchar> &data);
 	Result parse_4bpp_data(const std::vector<uchar> &data);

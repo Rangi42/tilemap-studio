@@ -614,7 +614,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_tilemap_export_chooser->options(Fl_Native_File_Chooser::Option::SAVEAS_CONFIRM);
 
 	_tileset_load_chooser->title("Open Tileset");
-	_tileset_load_chooser->filter("Tileset Files\t*.{png,gif,bmp,1bpp,2bpp,4bpp,8bpp,1bpp.lz,2bpp.lz}\n");
+	_tileset_load_chooser->filter("Tileset Files\t*.{png,gif,bmp,1bpp,2bpp,4bpp,8bpp,1bpp.lz,2bpp.lz,rmp,rts}\n");
 
 	_image_print_chooser->title("Print Screenshot");
 	_image_print_chooser->filter("PNG Files\t*.png\nBMP Files\t*.bmp\n");

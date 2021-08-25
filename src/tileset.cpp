@@ -132,6 +132,8 @@ Tileset::Result Tileset::read_tiles(const char *f) {
 	if (ends_with_ignore_case(s, ".8bpp")) { return read_8bpp_graphics(f); }
 	if (ends_with_ignore_case(s, ".1bpp.lz")) { return read_1bpp_lz_graphics(f); }
 	if (ends_with_ignore_case(s, ".2bpp.lz")) { return read_2bpp_lz_graphics(f); }
+	if (ends_with_ignore_case(s, ".rmp")) { return read_rts_graphics(f, true); }
+	if (ends_with_ignore_case(s, ".rts")) { return read_rts_graphics(f, false); }
 	return (_result = Result::TILESET_BAD_EXT);
 }
 
@@ -372,6 +374,47 @@ Tileset::Result Tileset::parse_8bpp_data(const std::vector<uchar> &data) {
 	Fl_RGB_Image *img = surface->image();
 	delete surface;
 	Fl_Display_Device::display_device()->set_current();
+
+	return postprocess_graphics(img);
+}
+
+Tileset::Result Tileset::read_rts_graphics(const char *f, bool skip_rmp) {
+	FILE *file = fl_fopen(f, "rb");
+	if (!file) { return (_result = Result::TILESET_BAD_FILE); }
+
+	if (skip_rmp) {
+		size_t n = read_rmp_size(file);
+		if (n == 0) { fclose(file); return (_result = Result::TILESET_BAD_FILE); }
+		fseek(file, n, SEEK_CUR);
+	}
+
+	// <https://github.com/chadaustin/sphere/blob/master/sphere/docs/internal/tileset.rts.txt>
+	uchar expected_header[6] = {
+		'.', 'r', 't', 's', // magic number
+		LE16(1),            // version
+	};
+	if (!check_read(file, expected_header, sizeof(expected_header))) { fclose(file); return (_result = Result::TILESET_BAD_FILE); }
+
+	uint16_t nt = read_uint16(file);
+
+	uchar expected_header_2[7] = {
+		LE16(TILE_SIZE), // tile width
+		LE16(TILE_SIZE), // tile height
+		LE16(32),        // tile bpp
+		0,               // compression
+	};
+	if (!check_read(file, expected_header_2, sizeof(expected_header_2))) { fclose(file); return (_result = Result::TILESET_BAD_FILE); }
+
+	fseek(file, 1 + 240, SEEK_CUR); // skip 'has obstructions' and unused
+
+	size_t n = nt * NUM_TILE_PIXELS * 4;
+	uchar *bytes = new uchar[n]();
+	if (fread(bytes, 1, n, file) != n) { delete [] bytes; fclose(file); return (_result = Result::TILESET_BAD_FILE); }
+
+	fclose(file);
+
+	Fl_RGB_Image *img = new Fl_RGB_Image(bytes, TILE_SIZE, nt * TILE_SIZE, 4);
+	img->alloc_array = 1;
 
 	return postprocess_graphics(img);
 }

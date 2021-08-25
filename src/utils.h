@@ -10,6 +10,10 @@
 #include <string_view>
 #include <algorithm>
 
+#pragma warning(push, 0)
+#include <FL/fl_types.h>
+#pragma warning(pop)
+
 #ifdef _WIN32
 #define DIR_SEP "\\"
 #else
@@ -44,5 +48,8 @@ int text_width(const char *l, int pad = 0);
 bool file_exists(const char *f);
 size_t file_size(const char *f);
 size_t file_size(FILE *f);
+bool check_read(FILE *file, uchar *expected, size_t n);
+uint16_t read_uint16(FILE *file);
+size_t read_rmp_size(FILE *file);
 
 #endif
