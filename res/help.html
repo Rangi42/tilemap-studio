@@ -53,7 +53,7 @@ R"(<html>
 </ul>
 <hr>
 <p>Usually a tilemap only uses one tileset image, which starts from tile $0:00. For these you can just use the Load Tileset function (Ctrl+T or the toolbar's tileset button with a blue arrow). For example, pokered's gfx)" DIR_SEP "town_map.rle uses gfx" DIR_SEP R"(town_map.png.</p>
-<p>Sometimes a .png tileset has redundant tiles that get eliminated when you <kbd>make</kbd> the ROM. In those cases, just load the built .1bpp, .2bpp, .4bpp, or .8bpp tileset instead. Compressed .lz files (the Pokémon GSC kind, not the GBA kind) are also supported.</p>
+<p>Sometimes a .png tileset has redundant tiles that get eliminated when you <kbd>make</kbd> the ROM. In those cases, just load the built .1bpp, .2bpp, .4bpp, or .8bpp tileset instead. Compressed .lz files (the Pokémon GSC kind, not the GBA kind) are also supported; so are NDS .rgcn/.ncgr files.</p>
 <p>Some tilemaps may also use more than one tileset. For example, pokecrystal's gfx)" DIR_SEP "pokegear" DIR_SEP "radio.tilemap.rle uses tiles from gfx" DIR_SEP "pokegear" DIR_SEP "town_map.png, gfx" DIR_SEP "pokegear" DIR_SEP "pokegear.png, and gfx" DIR_SEP "font" DIR_SEP R"(font_extra.png. For these you can use the Add Tileset function (Ctrl+A or the toolbar's tileset button with a green plus sign). This lets you load another tileset in addition to any you've already loaded, and can configure how it gets loaded:</p>
 <ul>
 <li><b>Start at ID:</b> Which tile ID to begin at, instead of $0:00.</li>

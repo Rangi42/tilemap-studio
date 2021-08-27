@@ -132,6 +132,8 @@ Tileset::Result Tileset::read_tiles(const char *f) {
 	if (ends_with_ignore_case(s, ".8bpp")) { return read_8bpp_graphics(f); }
 	if (ends_with_ignore_case(s, ".1bpp.lz")) { return read_1bpp_lz_graphics(f); }
 	if (ends_with_ignore_case(s, ".2bpp.lz")) { return read_2bpp_lz_graphics(f); }
+	if (ends_with_ignore_case(s, ".rgcn")) { return read_rgcn_graphics(f); }
+	if (ends_with_ignore_case(s, ".ncgr")) { return read_rgcn_graphics(f); }
 	if (ends_with_ignore_case(s, ".rmp")) { return read_rts_graphics(f, true); }
 	if (ends_with_ignore_case(s, ".rts")) { return read_rts_graphics(f, false); }
 	return (_result = Result::TILESET_BAD_EXT);
@@ -376,6 +378,32 @@ Tileset::Result Tileset::parse_8bpp_data(const std::vector<uchar> &data) {
 	Fl_Display_Device::display_device()->set_current();
 
 	return postprocess_graphics(img);
+}
+
+Tileset::Result Tileset::read_rgcn_graphics(const char *f) {
+	FILE *file = fl_fopen(f, "rb");
+	if (!file) { return (_result = Result::TILESET_BAD_FILE); }
+
+	// <https://www.romhacking.net/documents/%5B469%5Dnds_formats.htm#NCGR>
+	// <https://github.com/pleonex/tinke/blob/master/Plugins/Images/Images/NCGR.cs>
+	fseek(file, 16 + 4 + 4, SEEK_CUR); // skip generic header, "RAHC", sub-section size
+
+	uint16_t th = read_uint16(file);
+	uint16_t tw = read_uint16(file);
+	int depth = fgetc(file);
+	if (depth != 3 && depth != 4) { fclose(file); return (_result = Result::TILESET_BAD_FILE); }
+
+	fseek(file, 3 + 4 + 4 + 4 + 4, SEEK_CUR); // skip padding, tile form flag, tile data size, padding
+
+	bool is_8bpp = depth == 4;
+	size_t n = tw * th * (is_8bpp ? BYTES_PER_8BPP_TILE : BYTES_PER_4BPP_TILE);
+
+	std::vector<uchar> data(n);
+	size_t r = fread(data.data(), 1, n, file);
+	fclose(file);
+	if (r != n) { return (_result = Result::TILESET_BAD_FILE); }
+
+	return is_8bpp ? parse_8bpp_data(data) : parse_4bpp_data(data);
 }
 
 Tileset::Result Tileset::read_rts_graphics(const char *f, bool skip_rmp) {
