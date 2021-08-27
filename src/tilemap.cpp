@@ -300,7 +300,7 @@ Tilemap::Result Tilemap::make_tiles(const std::vector<uchar> &tbytes, const std:
 		}
 	}
 
-	else if (fmt == Tilemap_Format::NDS_ATTRS) {
+	else if (fmt == Tilemap_Format::NDS_4BPP) {
 		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
 		tiles.reserve((c - NDS_HEADER_SIZE) / 2);
 		for (size_t i = NDS_HEADER_SIZE; i < c; i += 2) {
@@ -310,6 +310,19 @@ Tilemap::Result Tilemap::make_tiles(const std::vector<uchar> &tbytes, const std:
 			bool x_flip = !!(a & 0x04), y_flip = !!(a & 0x08);
 			int palette = HI_NYB(a);
 			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, v, x_flip, y_flip, false, false, palette));
+		}
+		width = NDS_WIDTH;
+	}
+
+	else if (fmt == Tilemap_Format::NDS_8BPP) {
+		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
+		tiles.reserve((c - NDS_HEADER_SIZE) / 2);
+		for (size_t i = NDS_HEADER_SIZE; i < c; i += 2) {
+			uint16_t v = tbytes[i];
+			uchar a = tbytes[i+1];
+			v = v | ((a & 0x03) << 8);
+			bool x_flip = !!(a & 0x04), y_flip = !!(a & 0x08);
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, v, x_flip, y_flip, false, false, 0));
 		}
 		width = NDS_WIDTH;
 	}

@@ -166,7 +166,7 @@ bool Main_Window::image_to_tiles() {
 	// Read the input image tiles
 
 	Tilemap_Format fmt = _image_to_tiles_dialog->format();
-	bool alt_norm = fmt == Tilemap_Format::NDS_ATTRS; // Tinke expects 5-bit clean channels
+	bool alt_norm = fmt == Tilemap_Format::NDS_4BPP || fmt == Tilemap_Format::NDS_8BPP; // Tinke expects 5-bit clean channels
 
 	bool use_color_zero = _image_to_tiles_dialog->color_zero();
 	Fl_Color color_zero = use_color_zero ? _image_to_tiles_dialog->fl_color_zero() :
