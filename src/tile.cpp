@@ -78,17 +78,15 @@ Tile *get_image_tiles(Fl_RGB_Image *img, size_t &n, size_t &iw, bool alt_norm, F
 					const uchar *px = data + oy + ox;
 					// Round color channels to 5 bits
 					uchar r = NORMRGB(px[0]), g = NORMRGB(px[dp]), b = NORMRGB(px[dp+dp]);
-					if (alt_norm) {
-						r = ALTNORMRGB(r); g = ALTNORMRGB(g); b = ALTNORMRGB(b);
-					}
+					Fl_Color c = fl_rgb_color(r, g, b);
+					if (alt_norm) { c &= ALT_NORM_MASK; }
 					int ti = ty * TILE_SIZE + tx;
-					tiles[i][ti] = fl_rgb_color(r, g, b);
+					tiles[i][ti] = c;
 				}
 			}
 		}
 	}
-	// Fail-safe blank tile at the end
-	std::fill(RANGE(tiles[n]), blank_color);
+	std::fill(RANGE(tiles[n]), blank_color); // Fail-safe blank tile at the end
 
 	return tiles;
 }

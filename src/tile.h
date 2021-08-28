@@ -12,7 +12,7 @@
 #define NUM_TILE_PIXELS (TILE_SIZE * TILE_SIZE)
 
 #define NORMRGB(c) (uchar)(((c) & 0xF8) | (((c) & 0xF8) >> 5))
-#define ALTNORMRGB(c) (uchar)((c) & 0xF8)
+#define ALT_NORM_MASK 0xF8F8F800 // clear the low 3 bits of each color channel
 
 typedef Fl_Color Tile[NUM_TILE_PIXELS];
 

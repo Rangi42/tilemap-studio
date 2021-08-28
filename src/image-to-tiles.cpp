@@ -169,8 +169,8 @@ bool Main_Window::image_to_tiles() {
 	bool alt_norm = fmt == Tilemap_Format::NDS_4BPP || fmt == Tilemap_Format::NDS_8BPP; // Tinke expects 5-bit clean channels
 
 	bool use_color_zero = _image_to_tiles_dialog->color_zero();
-	Fl_Color color_zero = use_color_zero ? _image_to_tiles_dialog->fl_color_zero() :
-		alt_norm ? 0xF8F8F800 : 0xFFFFFF00 /* white */;
+	Fl_Color color_zero = use_color_zero ? _image_to_tiles_dialog->fl_color_zero() : 0xFFFFFF00 /* white */;
+	if (alt_norm) { color_zero &= ALT_NORM_MASK; }
 
 	size_t n = 0, w = 0;
 	Tile *tiles = get_image_tiles(img, n, w, alt_norm, color_zero);
@@ -191,7 +191,7 @@ bool Main_Window::image_to_tiles() {
 	bool make_palette = _image_to_tiles_dialog->palette() && format_can_make_palettes(fmt);
 
 	Palettes palettes;
-	std::vector<int> tile_palettes(n, make_palette ? 0 : -1);
+	std::vector<int> tile_palettes(n + 1, make_palette ? 0 : -1);
 	size_t max_colors = (size_t)format_palette_size(fmt);
 	uint8_t start_index = _image_to_tiles_dialog->start_index();
 
@@ -355,6 +355,7 @@ bool Main_Window::image_to_tiles() {
 			}
 			tile_palettes[i] = start_index + pal;
 		}
+		tile_palettes[n] = start_index; // Fail-safe blank tile at the end
 	}
 
 	// Build the tilemap and tileset
