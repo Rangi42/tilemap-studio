@@ -101,7 +101,8 @@ static Fl_RGB_Image *print_tileset(const Tile *tiles, const std::vector<size_t> 
 
 	size_t ntp = tile_palettes.size();
 	size_t ps = indexed ? MAX_PALETTE_LENGTH : nc;
-	fl_rectf(0, 0, tw * TILE_SIZE, th * TILE_SIZE, indexed ? 0 : blank_color);
+	Fl_Color extra = indexed ? Image::get_indexed_grayscale(start_index * nc, ps) : blank_color;
+	fl_rectf(0, 0, tw * TILE_SIZE, th * TILE_SIZE, extra);
 	for (int i = 0; i < nt; i++) {
 		size_t ti = tileset[i];
 		const Tile &tile = tiles[ti];
