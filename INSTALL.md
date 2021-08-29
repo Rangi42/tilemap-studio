@@ -36,7 +36,7 @@ If the pre-built release already works for you, you don't have to build it yours
 
 ### Install dependencies
 
-You need at least g++ 7 for C++17 `<string_view>` support.
+You need at least g++ 7 for C++17 support.
 
 #### Ubuntu/Debian
 

@@ -99,7 +99,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_grid_tb = new Toolbar_Toggle_Button(0, 0, 24, 24);
 	_rainbow_tiles_tb = new Toolbar_Toggle_Button(0, 0, 24, 24);
 	_bold_palettes_tb = new Toolbar_Toggle_Button(0, 0, 24, 24);
-	new Fl_Box(0, 0, 4, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
+	new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
 	int wgt_w = text_width("Width:", 4);
 	_width_heading = new Label(0, 0, wgt_w, 24, "Width:");
 	wgt_w = text_width("9999", 2) + 15;
