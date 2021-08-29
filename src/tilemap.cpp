@@ -2,7 +2,7 @@
 #include <cctype>
 
 #pragma warning(push, 0)
-#include <FL/filename.h>
+#include <FL/filename.H>
 #pragma warning(pop)
 
 #include "tilemap.h"
