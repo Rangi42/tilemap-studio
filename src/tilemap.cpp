@@ -1,6 +1,10 @@
 #include <cstdio>
 #include <cctype>
 
+#pragma warning(push, 0)
+#include <FL/filename.h>
+#pragma warning(pop)
+
 #include "tilemap.h"
 #include "tileset.h"
 #include "config.h"
@@ -21,38 +25,11 @@ void Tilemap::width(size_t w) {
 	}
 }
 
-void Tilemap::resize(size_t w, size_t h, Resize_Dialog::Hor_Align ha, Resize_Dialog::Vert_Align va) {
-	int dw = w - width(), dh = h - height();
-
-	int px, py;
-	switch (ha) {
-	case Resize_Dialog::Hor_Align::LEFT:
-		px = 0;
-		break;
-	case Resize_Dialog::Hor_Align::RIGHT:
-		px = dw;
-		break;
-	case Resize_Dialog::Hor_Align::CENTER:
-	default:
-		px = dw / 2;
-	}
-	switch (va) {
-	case Resize_Dialog::Vert_Align::TOP:
-		py = 0;
-		break;
-	case Resize_Dialog::Vert_Align::BOTTOM:
-		py = dh;
-		break;
-	case Resize_Dialog::Vert_Align::MIDDLE:
-	default:
-		py = dh / 2;
-	}
-
+void Tilemap::resize(size_t w, size_t h, int px, int py) {
 	size_t n = w * h;
 	std::vector<Tile_Tessera *> tiles;
 	tiles.reserve(n);
 	int mx = std::max(px, 0), my = std::max(py, 0), mw = std::min(w, width() + px), mh = std::min(h, height() + py);
-	size_t t = 0;
 	for (int y = 0; y < py; y++) {
 		for (int x = 0; x < (int)w; x++) {
 			tiles.emplace_back(new Tile_Tessera());
@@ -63,13 +40,8 @@ void Tilemap::resize(size_t w, size_t h, Resize_Dialog::Hor_Align ha, Resize_Dia
 			tiles.emplace_back(new Tile_Tessera());
 		}
 		for (int x = mx; x < mw; x++) {
-			if (t < size()) {
-				t++;
-				tiles.emplace_back(tile(x - px, y - py));
-			}
-			else {
-				tiles.emplace_back(new Tile_Tessera());
-			}
+			Tile_Tessera *tt = tile(x - px, y - py);
+			tiles.emplace_back(tt ? tt : new Tile_Tessera());
 		}
 		for (int x = mw; x < (int)w; x++) {
 			tiles.emplace_back(new Tile_Tessera());

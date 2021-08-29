@@ -160,7 +160,7 @@ private:
 	void update_tileset_metadata(void);
 	void update_active_controls(void);
 	void update_tileset_width(int tw);
-	void resize_tilemap(void);
+	void resize_tilemap(size_t w, size_t h, int px, int py);
 	void shift_tilemap(void);
 	void shift_tileset(void);
 	void reformat_tilemap(void);

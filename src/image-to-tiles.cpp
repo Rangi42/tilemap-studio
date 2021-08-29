@@ -30,7 +30,7 @@ typedef std::set<Fl_Color> Color_Set;
 static bool build_tilemap(const Tile *tiles, size_t n, const std::vector<int> tile_palettes, Tilemap &tilemap,
 	std::vector<size_t> &tileset, Tilemap_Format fmt, uint16_t start_id, bool use_blank, uint16_t blank_id, Fl_Color blank_color) {
 	size_t mn = (size_t)format_tileset_size(fmt);
-	tilemap.resize(n, 1, Resize_Dialog::Hor_Align::LEFT, Resize_Dialog::Vert_Align::TOP);
+	tilemap.resize(n, 1, 0, 0);
 	tileset.reserve(mn);
 	size_t tc = 0;
 	for (size_t i = 0; i < n; i++) {
@@ -63,7 +63,7 @@ static bool build_tilemap(const Tile *tiles, size_t n, const std::vector<int> ti
 		uint16_t id = start_id + (uint16_t)ti;
 		tilemap.tile(tc++, 0, new Tile_Tessera(0, 0, 0, 0, id, x_flip, y_flip, false, false, tile_palettes[i]));
 	}
-	tilemap.resize(tc, 1, Resize_Dialog::Hor_Align::LEFT, Resize_Dialog::Vert_Align::TOP);
+	tilemap.resize(tc, 1, 0, 0);
 	return true;
 }
 

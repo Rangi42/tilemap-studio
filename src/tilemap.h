@@ -8,7 +8,6 @@
 #include "config.h"
 #include "utils.h"
 #include "tile-buttons.h"
-#include "option-dialogs.h"
 
 #define MAX_HISTORY_SIZE 100
 
@@ -36,7 +35,7 @@ public:
 	inline size_t size(void) const { return _tiles.size(); }
 	inline size_t width(void) const { return _width; }
 	void width(size_t w);
-	void resize(size_t w, size_t h, Resize_Dialog::Hor_Align ha, Resize_Dialog::Vert_Align va);
+	void resize(size_t w, size_t h, int px, int py);
 	void shift(int dx, int dy);
 	inline bool can_shift(void) const { return size() % _width == 0; }
 	inline size_t height(void) const { return _width ? (size() + _width - 1) / _width : 0; }

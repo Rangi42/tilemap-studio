@@ -1252,8 +1252,7 @@ void Main_Window::update_tileset_width(int tw) {
 	}
 }
 
-void Main_Window::resize_tilemap() {
-	size_t w = _resize_dialog->tilemap_width(), h = _resize_dialog->tilemap_height();
+void Main_Window::resize_tilemap(size_t w, size_t h, int px, int py) {
 	size_t n = w * h;
 	if (_tilemap.size() == n) { return; }
 
@@ -1261,7 +1260,7 @@ void Main_Window::resize_tilemap() {
 		select_tile(_selection.id());
 	}
 
-	_tilemap.resize(w, h, _resize_dialog->horizontal_anchor(), _resize_dialog->vertical_anchor());
+	_tilemap.resize(w, h, px, py);
 
 	while (_tilemap_scroll->children() > 2) { // keep scrollbars
 		_tilemap_scroll->remove(0);
@@ -2588,10 +2587,38 @@ void Main_Window::tilemap_width_cb(Fl_Menu_ *, Main_Window *mw) {
 
 void Main_Window::resize_cb(Fl_Menu_ *, Main_Window *mw) {
 	if (!mw->_tilemap.size()) { return; }
-	mw->_resize_dialog->tilemap_size(mw->_tilemap.width(), mw->_tilemap.height());
+	size_t w = mw->_tilemap.width(), h = mw->_tilemap.height();
+	mw->_resize_dialog->tilemap_size(w, h);
 	mw->_resize_dialog->show(mw);
 	if (mw->_resize_dialog->canceled()) { return; }
-	mw->resize_tilemap();
+
+	size_t rw = mw->_resize_dialog->tilemap_width(), rh = mw->_resize_dialog->tilemap_height();
+	int dw = rw - w, dh = rh - h;
+	int px, py;
+	switch (mw->_resize_dialog->horizontal_anchor()) {
+	case Resize_Dialog::Hor_Align::LEFT:
+		px = 0;
+		break;
+	case Resize_Dialog::Hor_Align::RIGHT:
+		px = dw;
+		break;
+	case Resize_Dialog::Hor_Align::CENTER:
+	default:
+		px = dw / 2;
+	}
+	switch (mw->_resize_dialog->vertical_anchor()) {
+	case Resize_Dialog::Vert_Align::TOP:
+		py = 0;
+		break;
+	case Resize_Dialog::Vert_Align::BOTTOM:
+		py = dh;
+		break;
+	case Resize_Dialog::Vert_Align::MIDDLE:
+	default:
+		py = dh / 2;
+	}
+
+	mw->resize_tilemap(rw, rh, px, py);
 }
 
 void Main_Window::shift_cb(Fl_Menu_ *, Main_Window *mw) {
