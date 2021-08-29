@@ -69,12 +69,13 @@ private:
 	Fl_Menu_Item *_erase_selection_mi = NULL, *_x_flip_selection_mi = NULL, *_y_flip_selection_mi = NULL,
 		*_copy_selection_mi = NULL, *_select_all_mi = NULL;
 	Fl_Menu_Item *_zoom_in_mi = NULL, *_zoom_out_mi = NULL;
-	Fl_Menu_Item *_tilemap_width_mi = NULL, *_resize_mi = NULL, *_shift_mi = NULL, *_reformat_mi = NULL;
+	Fl_Menu_Item *_tilemap_width_mi = NULL, *_crop_to_selection_mi = NULL, *_resize_mi = NULL, *_shift_mi = NULL,
+		*_reformat_mi = NULL;
 	Fl_Menu_Item *_shift_tileset_mi = NULL;
 	// Dialogs
 	Fl_Native_File_Chooser *_tilemap_open_chooser, *_tilemap_save_chooser, *_tilemap_import_chooser, *_tilemap_export_chooser,
 		*_tileset_load_chooser, *_image_print_chooser;
-	Modal_Dialog *_error_dialog, *_warning_dialog, *_success_dialog, *_unsaved_dialog, *_about_dialog;
+	Modal_Dialog *_error_dialog, *_success_dialog, *_unsaved_dialog, *_about_dialog;
 	Tilemap_Options_Dialog *_tilemap_options_dialog;
 	New_Tilemap_Dialog *_new_tilemap_dialog;
 	Group_Width_Dialog *_tileset_width_dialog, *_tilemap_width_dialog;
@@ -227,6 +228,7 @@ private:
 	static void transparent_cb(Fl_Menu_ *m, Main_Window *mw);
 	// Tools menu
 	static void tilemap_width_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void crop_to_selection_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void resize_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void shift_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void reformat_cb(Fl_Menu_ *m, Main_Window *mw);

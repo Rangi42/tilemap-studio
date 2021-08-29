@@ -228,7 +228,6 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_tileset_load_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
 	_image_print_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	_error_dialog = new Modal_Dialog(this, "Error", Modal_Dialog::Icon::ERROR_ICON);
-	_warning_dialog = new Modal_Dialog(this, "Warning", Modal_Dialog::Icon::WARNING_ICON);
 	_success_dialog = new Modal_Dialog(this, "Success", Modal_Dialog::Icon::SUCCESS_ICON);
 	_unsaved_dialog = new Modal_Dialog(this, "Warning", Modal_Dialog::Icon::WARNING_ICON, true);
 	_about_dialog = new Modal_Dialog(this, "About " PROGRAM_NAME, Modal_Dialog::Icon::APP_ICON);
@@ -380,6 +379,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		{},
 		OS_SUBMENU("&Tools"),
 		OS_MENU_ITEM("Tilemap &Width...", FL_COMMAND + 'd', (Fl_Callback *)tilemap_width_cb, this, 0),
+		OS_MENU_ITEM("&Crop to Selection", FL_COMMAND + 'L', (Fl_Callback *)crop_to_selection_cb, this, 0),
 		OS_MENU_ITEM("Re&size...", FL_COMMAND + 'e', (Fl_Callback *)resize_cb, this, 0),
 		OS_MENU_ITEM("S&hift...", FL_COMMAND + 'm', (Fl_Callback *)shift_cb, this, 0),
 		OS_MENU_ITEM("Re&format...", FL_COMMAND + 'f', (Fl_Callback *)reformat_cb, this, FL_MENU_DIVIDER),
@@ -439,6 +439,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_zoom_out_mi = TS_FIND_MENU_ITEM_CB(zoom_out_cb);
 	_shift_tileset_mi = TS_FIND_MENU_ITEM_CB(shift_tileset_cb);
 	_tilemap_width_mi = TS_FIND_MENU_ITEM_CB(tilemap_width_cb);
+	_crop_to_selection_mi = TS_FIND_MENU_ITEM_CB(crop_to_selection_cb);
 	_resize_mi = TS_FIND_MENU_ITEM_CB(resize_cb);
 	_shift_mi = TS_FIND_MENU_ITEM_CB(shift_cb);
 	_reformat_mi = TS_FIND_MENU_ITEM_CB(reformat_cb);
@@ -622,7 +623,6 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_image_print_chooser->options(Fl_Native_File_Chooser::Option::SAVEAS_CONFIRM);
 
 	_error_dialog->width_range(280, 700);
-	_warning_dialog->width_range(280, 700);
 	_success_dialog->width_range(280, 700);
 	_unsaved_dialog->width_range(280, 700);
 
@@ -670,7 +670,6 @@ Main_Window::~Main_Window() {
 	delete _tileset_load_chooser;
 	delete _image_print_chooser;
 	delete _error_dialog;
-	delete _warning_dialog;
 	delete _success_dialog;
 	delete _unsaved_dialog;
 	delete _about_dialog;
@@ -951,12 +950,14 @@ void Main_Window::update_selection_controls() {
 		_x_flip_selection_mi->activate();
 		_y_flip_selection_mi->activate();
 		_copy_selection_mi->activate();
+		_crop_to_selection_mi->activate();
 	}
 	else {
 		_erase_selection_mi->deactivate();
 		_x_flip_selection_mi->deactivate();
 		_y_flip_selection_mi->deactivate();
 		_copy_selection_mi->deactivate();
+		_crop_to_selection_mi->deactivate();
 	}
 }
 
@@ -2583,6 +2584,18 @@ void Main_Window::tilemap_width_cb(Fl_Menu_ *, Main_Window *mw) {
 	if (mw->_tilemap_width_dialog->canceled()) { return; }
 	mw->_tilemap_width->default_value(mw->_tilemap_width_dialog->group_width());
 	tilemap_width_tb_cb(NULL, mw);
+}
+
+void Main_Window::crop_to_selection_cb(Fl_Menu_ *, Main_Window *mw) {
+	if (!mw->_selection.selected_multiple() || mw->_selection.from_tileset()) { return; }
+	mw->_unsaved_dialog->message("Resizing the tilemap cannot be undone!\n\nCrop to selection anyway?");
+	mw->_unsaved_dialog->show(mw);
+	if (mw->_unsaved_dialog->canceled()) { return; }
+
+	size_t rw = mw->_selection.width(), rh = mw->_selection.height();
+	int px = 0 - mw->_selection.left_col(), py = 0 - mw->_selection.top_row();
+
+	mw->resize_tilemap(rw, rh, px, py);
 }
 
 void Main_Window::resize_cb(Fl_Menu_ *, Main_Window *mw) {
