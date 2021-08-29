@@ -52,6 +52,7 @@ R"(<html>
 <li>Hold Ctrl and left-click a tile to replace every tile of that type with the selected type.</li>
 <li>Hold Alt and left-click a tile to swap every tile of that type and every tile of the selected type.</li>
 </ul>
+<p>The arrow keys, or the mouse's scrolling function if it has one, will scroll the tileset or tilemap (whichever one the cursor is over). This can be done while dragging to select a rectangle of tiles, in order to select a rectangle larger than the visible area.</p>
 <hr>
 <p>Usually a tilemap only uses one tileset image, which starts from tile $0:00. For these you can just use the Load Tileset function (Ctrl+T or the toolbar's tileset button with a blue arrow). For example, pokered's gfx)" DIR_SEP "town_map.rle uses gfx" DIR_SEP R"(town_map.png.</p>
 <p>Sometimes a .png tileset has redundant tiles that get eliminated when you <kbd>make</kbd> the ROM. In those cases, just load the built .1bpp, .2bpp, .4bpp, or .8bpp tileset instead. Compressed .lz files (the Pokémon GSC kind, not the GBA kind) are also supported; so are NDS .rgcn/.ncgr files.</p>
