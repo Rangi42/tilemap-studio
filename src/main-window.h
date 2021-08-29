@@ -147,10 +147,12 @@ public:
 	void new_tilemap(size_t width, size_t height);
 	void open_tilemap(const char *filename, size_t width = 0);
 	void open_recent_tilemap(int n);
-	inline void load_tileset(const char *filename) { unload_tilesets_cb(NULL, this); add_tileset(filename); }
-	void add_tileset(const char *filename, int start = 0x00, int offset = 0, int length = 0);
+	inline void load_tileset(const char *filename, bool warn = false) {
+		unload_tilesets_cb(NULL, this); add_tileset(filename, 0x000, 0, 0, warn);
+	}
+	void add_tileset(const char *filename, int start = 0x000, int offset = 0, int length = 0, bool quiet = false);
 	void load_recent_tileset(int n);
-	void load_corresponding_tileset(void);
+	void load_corresponding_tileset(const char *filename = NULL);
 	void open_or_import_or_convert(const char *filename);
 private:
 	void store_recent_tilemap(void);
@@ -167,7 +169,7 @@ private:
 	void reformat_tilemap(void);
 	void save_tilemap(bool force);
 	void import_tilemap(const char *filename);
-	void setup_tilemap(const char *basename, int old_tileset_size);
+	void setup_tilemap(const char *basename, int old_tileset_size, const char *tileset_filename = NULL);
 	void export_tilemap(const char *filename);
 	void select_tile(uint16_t id);
 	void highlight_tile(uint16_t id);

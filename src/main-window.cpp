@@ -1656,7 +1656,7 @@ void Main_Window::open_tilemap(const char *filename, size_t width) {
 	setup_tilemap(basename, old_tileset_size);
 }
 
-void Main_Window::setup_tilemap(const char *basename, int old_tileset_size) {
+void Main_Window::setup_tilemap(const char *basename, int old_tileset_size, const char *tileset_filename) {
 	if (Config::format() == Tilemap_Format::RBY_TOWN_MAP && _tileset_width == 16) {
 		update_tileset_width(4);
 		select_tile(_selection.id());
@@ -1687,7 +1687,7 @@ void Main_Window::setup_tilemap(const char *basename, int old_tileset_size) {
 	sprintf(buffer, PROGRAM_NAME " - %s", basename);
 	copy_label(buffer);
 
-	load_corresponding_tileset();
+	load_corresponding_tileset(tileset_filename);
 	store_recent_tilemap();
 	update_tilemap_metadata();
 	update_status(NULL);
@@ -1786,7 +1786,7 @@ void Main_Window::import_tilemap(const char *filename) {
 		return;
 	}
 
-	setup_tilemap(IMPORTED_TILEMAP_NAME, old_tileset_size);
+	setup_tilemap(IMPORTED_TILEMAP_NAME, old_tileset_size, importing_rmp ? filename : NULL);
 }
 
 void Main_Window::export_tilemap(const char *filename) {
@@ -1806,15 +1806,17 @@ void Main_Window::export_tilemap(const char *filename) {
 	}
 }
 
-void Main_Window::add_tileset(const char *filename, int start, int offset, int length) {
+void Main_Window::add_tileset(const char *filename, int start, int offset, int length, bool quiet) {
 	const char *basename = fl_filename_name(filename);
 	Tileset tileset(start, offset, length);
 	Tileset::Result result = tileset.read_tiles(filename);
 	if (result != Tileset::Result::TILESET_OK) {
-		std::string msg = "Error reading ";
-		msg = msg + basename + "!\n\n" + Tileset::error_message(result);
-		_error_dialog->message(msg);
-		_error_dialog->show(this);
+		if (!quiet) {
+			std::string msg = "Error reading ";
+			msg = msg + basename + "!\n\n" + Tileset::error_message(result);
+			_error_dialog->message(msg);
+			_error_dialog->show(this);
+		}
 		tileset.clear();
 		return;
 	}
@@ -1848,8 +1850,10 @@ static const char *tileset_extensions[] = {
 	".png", ".gif", ".bmp", ".1bpp", ".2bpp", ".4bpp", ".8bpp", ".1bpp.lz", ".2bpp.lz", ".rgcn", ".ncgr", ".rmp", ".rts"
 };
 
-void Main_Window::load_corresponding_tileset() {
-	if (!Config::auto_load_tileset() || _tilemap_file.empty()) { return; }
+void Main_Window::load_corresponding_tileset(const char *filename) {
+	if (!Config::auto_load_tileset()) { return; }
+	if (filename) { load_tileset(filename, true); return; }
+	if (_tilemap_file.empty()) { return; }
 	char buffer[FL_PATH_MAX] = {};
 	for (const char *ext : tileset_extensions) {
 		strcpy(buffer, _tilemap_file.c_str());
