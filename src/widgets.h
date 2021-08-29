@@ -190,9 +190,11 @@ public:
 class Droppable {
 private:
 	DnD_Receiver *_dnd_receiver;
+	bool _dropping;
 public:
 	Droppable();
 	inline void dnd_receiver(DnD_Receiver *dndr) { _dnd_receiver = dndr; }
+	inline bool dropping(void) const { return _dropping; }
 	int handle(int event);
 };
 

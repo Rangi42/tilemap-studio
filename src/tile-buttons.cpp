@@ -481,6 +481,8 @@ int Tile_Button::handle(int event) {
 	Tile_Selection &ts = mw->selection();
 	switch (event) {
 	case FL_ENTER:
+		// Don't interfere with dragging onto the parent Droppable|Workspace
+		if (mw->dropping()) { return 0; }
 		if (ts.selecting() && ts.from_tileset()) {
 			if (Fl::event_button1()) {
 				ts.continue_selecting(this);

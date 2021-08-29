@@ -127,6 +127,7 @@ public:
 	}
 	inline bool map_editable(void) const { return _map_editable; }
 	inline void map_editable(bool e) { _map_editable = e; }
+	inline bool dropping(void) const { return _tilemap_scroll->dropping() || _tiles_scroll->dropping() || _palettes_pane->dropping(); }
 	void draw_overlay(void);
 	int handle(int event);
 	void clear_flips(void);

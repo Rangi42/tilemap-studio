@@ -497,17 +497,22 @@ OS_Scroll::OS_Scroll(int x, int y, int w, int h, const char *l) : Fl_Scroll(x, y
 	hscrollbar.slider(OS_MINI_BUTTON_UP_BOX);
 }
 
-Droppable::Droppable() : _dnd_receiver(NULL) {}
+Droppable::Droppable() : _dnd_receiver(NULL), _dropping() {}
 
 int Droppable::handle(int event) {
 	if (_dnd_receiver) {
 		switch (event) {
 		case FL_DND_ENTER:
+			_dropping = true;
+			return 1;
 		case FL_DND_LEAVE:
-		case FL_DND_DRAG:
 		case FL_DND_RELEASE:
+			_dropping = false;
+			return 1;
+		case FL_DND_DRAG:
 			return 1;
 		case FL_PASTE:
+			_dropping = false;
 			return _dnd_receiver->handle(event);
 		}
 	}
