@@ -391,19 +391,26 @@ Tileset::Result Tileset::read_rgcn_graphics(const char *f) {
 	uint16_t th = read_uint16(file);
 	uint16_t tw = read_uint16(file);
 	int depth = fgetc(file);
-	if (depth != 3 && depth != 4) { fclose(file); return (_result = Result::TILESET_BAD_FILE); }
+
+	// Not all possible depth values can go with tilemaps
+	// <https://github.com/pleonex/tinke/blob/master/Ekona/Images/Actions.cs#:~:text=ColorFormat>
+	uint8_t bpp = 0;
+	if (depth == 8) { bpp = BYTES_PER_1BPP_TILE; }
+	else if (depth == 2) { bpp = BYTES_PER_2BPP_TILE; }
+	else if (depth == 3) { bpp = BYTES_PER_4BPP_TILE; }
+	else if (depth == 4) { bpp = BYTES_PER_8BPP_TILE; }
+	else { fclose(file); return (_result = Result::TILESET_BAD_FILE); }
 
 	fseek(file, 3 + 4 + 4 + 4 + 4, SEEK_CUR); // skip padding, tile form flag, tile data size, padding
 
-	bool is_8bpp = depth == 4;
-	size_t n = tw * th * (is_8bpp ? BYTES_PER_8BPP_TILE : BYTES_PER_4BPP_TILE);
-
+	size_t n = tw * th * bpp;
 	std::vector<uchar> data(n);
 	size_t r = fread(data.data(), 1, n, file);
 	fclose(file);
 	if (r != n) { return (_result = Result::TILESET_BAD_FILE); }
 
-	return is_8bpp ? parse_8bpp_data(data) : parse_4bpp_data(data);
+	return bpp == BYTES_PER_2BPP_TILE ? parse_2bpp_data(data) : bpp == BYTES_PER_4BPP_TILE ? parse_4bpp_data(data) :
+		bpp == BYTES_PER_8BPP_TILE ? parse_8bpp_data(data) : parse_1bpp_data(data);
 }
 
 Tileset::Result Tileset::read_rts_graphics(const char *f, bool skip_rmp) {
