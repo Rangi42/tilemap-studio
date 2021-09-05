@@ -16,20 +16,21 @@
 
 static const char *palette_names[NUM_PALETTE_FORMATS] = {
 	"Indexed in tileset image",
+	"Pixel image (PNG)",
+	"Pixel image (BMP)",
 	"Assembly (RGB)",
 	"PaintShop Pro (JASC-PAL)",
 	"Adobe Color Table (ACT)",
 	"Adobe Color Swatch (ACO)",
 	"Adobe Swatch Exchange (ASE)",
+	"Animator Pro (COL)",
 	"Microsoft (RIFF)",
 	"paint.net (TXT)",
 	"GIMP (GPL)",
 	"CorelDRAW (XML)",
 	"superfamiconv (JSON)",
 	"Fractint (MAP)",
-	"Lospec (HEX)",
-	"Pixel image (PNG)",
-	"Pixel image (BMP)"
+	"Lospec (HEX)"
 };
 
 const char *palette_name(Palette_Format pal_fmt) {
@@ -45,7 +46,8 @@ int palette_max_name_width() {
 }
 
 static const char *palette_extensions[NUM_PALETTE_FORMATS] = {
-	NULL, ".pal", ".pal", ".act", ".aco", ".ase", ".riff", ".txt", ".gpl", ".xml", ".json", ".map", ".hex", ".pal.png", ".pal.bmp"
+	NULL, ".pal.png", ".pal.bmp", ".pal", ".pal", ".act", ".aco", ".ase",
+	".col", ".riff", ".txt", ".gpl", ".xml", ".json", ".map", ".hex"
 };
 
 const char *palette_extension(Palette_Format pal_fmt) {
@@ -54,7 +56,7 @@ const char *palette_extension(Palette_Format pal_fmt) {
 
 static bool write_graphic_palette(const char *f, const Palettes &palettes, size_t nc) {
 	int w = (int)nc, h = (int)palettes.size();
-	if (w == 256) { w /= 16; h *= 16; }
+	if (w % 16 == 0) { w /= 16; h *= 16; }
 	Fl_Image_Surface *surface = new Fl_Image_Surface(w, h);
 	surface->set_current();
 
@@ -210,6 +212,26 @@ bool write_palette(const char *f, const Palettes &palettes, Palette_Format pal_f
 				};
 				fwrite(block, 1, sizeof(block), file);
 			}
+		}
+	}
+	else if (pal_fmt == Palette_Format::COL) {
+		// <https://www.fileformat.info/format/animator-col/corion.htm>
+		uchar header[8] = {
+			LE32(8 + MAX_PALETTE_LENGTH * 3), // file size
+			LE16(0xB123),                     // magic number
+			LE16(0),                          // version
+		};
+		fwrite(header, 1, sizeof(header), file);
+		uchar rgb[3] = {};
+		for (const Palette &palette : palettes) {
+			for (Fl_Color c : palette) {
+				Fl::get_color(c, rgb[0], rgb[1], rgb[2]);
+				fwrite(rgb, 1, sizeof(rgb), file);
+			}
+		}
+		memset(rgb, 0, sizeof(rgb));
+		for (size_t i = n; i < MAX_PALETTE_LENGTH; i++) {
+			fwrite(rgb, 1, sizeof(rgb), file);
 		}
 	}
 	else if (pal_fmt == Palette_Format::RIFF) {

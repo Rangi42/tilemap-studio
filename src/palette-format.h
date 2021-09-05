@@ -12,9 +12,9 @@ typedef std::vector<Palette> Palettes;
 
 #define MAX_PALETTE_LENGTH 256
 
-#define NUM_PALETTE_FORMATS 15
+#define NUM_PALETTE_FORMATS 16
 
-enum class Palette_Format { INDEXED, RGB, JASC, ACT, ACO, ASE, RIFF, TXT, GPL, XML, JSON, MAP, HEX, PNG, BMP };
+enum class Palette_Format { INDEXED, PNG, BMP, RGB, JASC, ACT, ACO, ASE, COL, RIFF, TXT, GPL, XML, JSON, MAP, HEX };
 
 const char *palette_name(Palette_Format pal_fmt);
 const char *palette_extension(Palette_Format pal_fmt);
