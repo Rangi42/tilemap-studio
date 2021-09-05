@@ -491,19 +491,21 @@ bool Tilemap::export_tiles(const char *f) const {
 	if (ends_with_ignore_case(f, ".csv")) {
 		export_csv_tiles(file, bytes, fmt);
 	}
-	else {
+	else if (ends_with_ignore_case(f, ".c") || ends_with_ignore_case(f, ".h")) {
 		export_c_tiles(file, bytes, fmt, f);
+	}
+	else {
+		export_asm_tiles(file, bytes, fmt, f);
 	}
 
 	fclose(file);
 	return true;
 }
 
-void Tilemap::export_c_tiles(FILE *file, const std::vector<uchar> &bytes, Tilemap_Format fmt, const char *f) const {
+static void escape_filename(char *name, size_t len, const char *f) {
 	const char *basename = fl_filename_name(f);
-	char name[FL_PATH_MAX] = {};
 	strcpy(name, basename);
-	fl_filename_setext(name, sizeof(name), NULL);
+	fl_filename_setext(name, len, NULL);
 	size_t n = strlen(name);
 	for (size_t i = 0; i < n; i++) {
 		if (!isalnum(name[i])) {
@@ -516,7 +518,11 @@ void Tilemap::export_c_tiles(FILE *file, const std::vector<uchar> &bytes, Tilema
 		}
 		name[0] = '_';
 	}
+}
 
+void Tilemap::export_c_tiles(FILE *file, const std::vector<uchar> &bytes, Tilemap_Format fmt, const char *f) const {
+	char name[FL_PATH_MAX] = {};
+	escape_filename(name, sizeof(name), f);
 	fprintf(file, "/*\n Tilemap: %zu x %zu, %s\n Exported by " PROGRAM_NAME "\n*/\n\n",
 		width(), height(), format_name(fmt));
 	if (fmt == Tilemap_Format::GBC_ATTRMAP) {
@@ -547,6 +553,44 @@ void Tilemap::export_c_tiles(FILE *file, const std::vector<uchar> &bytes, Tilema
 		}
 		fputs("\n};\n\n", file);
 		fprintf(file, "unsigned int %s_len = %zu;\n", name, nb);
+	}
+}
+
+void Tilemap::export_asm_tiles(FILE *file, const std::vector<uchar> &bytes, Tilemap_Format fmt, const char *f) const {
+	char name[FL_PATH_MAX] = {};
+	escape_filename(name, sizeof(name), f);
+	fprintf(file, "; Tilemap: %zu x %zu, %s\n; Exported by " PROGRAM_NAME "\n\n",
+		width(), height(), format_name(fmt));
+	size_t rw = width() * format_bytes_per_tile(fmt);
+	if (rw == 0) { rw = 16; }
+	if (fmt == Tilemap_Format::GBC_ATTRMAP) {
+		size_t nb = bytes.size() / 2;
+		fprintf(file, "%s_Tilemap::", name);
+		for (size_t i = 0; i < nb; i++) {
+			if (i % rw == 0) fputs("\n\tdb", file);
+			fprintf(file, " $%02x", bytes[i]);
+			if (i < nb - 1 && i % rw != rw - 1) fputc(',', file);
+		}
+		fputs("\n.end::\n\n", file);
+		fprintf(file, "%s_Attrmap::", name);
+		for (size_t i = 0; i < nb; i++) {
+			if (i % rw == 0) fputs("\n\tdb", file);
+			fprintf(file, " $%02x", bytes[nb+i]);
+			if (i < nb - 1 && i % rw != rw - 1) fputc(',', file);
+		}
+		fputs("\n.end::\n\n", file);
+		fprintf(file, "%s_LEN EQU %zu\n", name, nb);
+	}
+	else {
+		size_t nb = bytes.size();
+		fprintf(file, "%s_Tilemap::", name);
+		for (size_t i = 0; i < nb; i++) {
+			if (i % rw == 0) fputs("\n\tdb ", file);
+			fprintf(file, " $%02x", bytes[i]);
+			if (i < nb - 1 && i % rw != rw - 1) fputc(',', file);
+		}
+		fputs("\n\n", file);
+		fprintf(file, "%s_LEN EQU %zu\n", name, nb);
 	}
 }
 

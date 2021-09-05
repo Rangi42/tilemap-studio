@@ -65,6 +65,7 @@ public:
 private:
 	Result make_tiles(const std::vector<uchar> &tbytes, const std::vector<uchar> &abytes);
 	void export_c_tiles(FILE *file, const std::vector<uchar> &bytes, Tilemap_Format fmt, const char *f) const;
+	void export_asm_tiles(FILE *file, const std::vector<uchar> &bytes, Tilemap_Format fmt, const char *f) const;
 	void export_csv_tiles(FILE *file, const std::vector<uchar> &bytes, Tilemap_Format fmt) const;
 public:
 	static const char *error_message(Result result);
