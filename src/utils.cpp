@@ -101,7 +101,7 @@ size_t read_rmp_size(FILE *file) {
 
 	fseek(file, 235, SEEK_CUR); // skip unused
 
-	uchar expected_strings[9 * 2] = {0};
+	uchar expected_strings[9 * 2] = {};
 	if (!check_read(file, expected_strings, sizeof(expected_strings))) { return 0; }
 
 	uint16_t width = read_uint16(file);

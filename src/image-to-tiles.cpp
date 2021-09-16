@@ -136,7 +136,9 @@ static double luminance(Fl_Color c) {
 	return 0.299 * (double)r + 0.587 * (double)g + 0.114 * (double)b;
 }
 
-bool Main_Window::image_to_tiles() {
+Image_to_Tiles_Result Main_Window::image_to_tiles() {
+	Image_to_Tiles_Result output = {};
+
 	// Open the input image
 
 	const char *image_filename = _image_to_tiles_dialog->image_filename();
@@ -161,7 +163,7 @@ bool Main_Window::image_to_tiles() {
 		msg = msg + image_basename + "!\n\nCannot open file.";
 		_error_dialog->message(msg);
 		_error_dialog->show(this);
-		return false;
+		return output;
 	}
 
 	// Read the input image tiles
@@ -183,7 +185,7 @@ bool Main_Window::image_to_tiles() {
 			STRINGIFY(TILE_SIZE) "x" STRINGIFY(TILE_SIZE) " tile grid.";
 		_error_dialog->message(msg);
 		_error_dialog->show(this);
-		return false;
+		return output;
 	}
 
 	// Build the palette
@@ -231,7 +233,7 @@ bool Main_Window::image_to_tiles() {
 				") has more than " + std::to_string(max_colors) + " colors.";
 			_error_dialog->message(msg);
 			_error_dialog->show(this);
-			return false;
+			return output;
 		}
 
 		// Remove duplicate color sets
@@ -317,7 +319,7 @@ bool Main_Window::image_to_tiles() {
 			msg = msg + palette_basename + "!";
 			_error_dialog->message(msg);
 			_error_dialog->show(this);
-			return false;
+			return output;
 		}
 
 		// Check that the palettes fit within the palette limit
@@ -330,7 +332,7 @@ bool Main_Window::image_to_tiles() {
 				std::to_string(np) + " palettes were written to " + palette_basename + ".";
 			_error_dialog->message(msg);
 			_error_dialog->show(this);
-			return false;
+			return output;
 		}
 		else if (max_palettes == 1 && palettes[0].size() > max_colors) {
 			delete [] tiles;
@@ -340,7 +342,7 @@ bool Main_Window::image_to_tiles() {
 				std::to_string(np) + " palettes were written to " + palette_basename + ".";
 			_error_dialog->message(msg);
 			_error_dialog->show(this);
-			return false;
+			return output;
 		}
 
 		// Associate tiles with palettes
@@ -374,7 +376,7 @@ bool Main_Window::image_to_tiles() {
 		msg = msg + image_basename + "!\n\nToo many unique tiles.";
 		_error_dialog->message(msg);
 		_error_dialog->show(this);
-		return false;
+		return output;
 	}
 
 	// Get the output filenames
@@ -393,7 +395,7 @@ bool Main_Window::image_to_tiles() {
 		msg = msg + tilemap_basename + "!";
 		_error_dialog->message(msg);
 		_error_dialog->show(this);
-		return false;
+		return output;
 	}
 
 	// Create the tilepal file
@@ -407,7 +409,7 @@ bool Main_Window::image_to_tiles() {
 			msg = msg + tilepal_basename + "!";
 			_error_dialog->message(msg);
 			_error_dialog->show(this);
-			return false;
+			return output;
 		}
 	}
 
@@ -426,7 +428,7 @@ bool Main_Window::image_to_tiles() {
 		msg = msg + tileset_basename + "!\n\n" + Image::error_message(result);
 		_error_dialog->message(msg);
 		_error_dialog->show(this);
-		return false;
+		return output;
 	}
 
 	delete [] tiles;
@@ -438,17 +440,16 @@ bool Main_Window::image_to_tiles() {
 	_success_dialog->message(msg);
 	_success_dialog->show(this);
 
-	// Open the tilemap and load the tileset
+	// Return the output data
 
-	Config::format(fmt);
-	update_active_controls();
-	redraw();
-
-	open_tilemap(tilemap_filename, w);
-	unload_tilesets_cb(NULL, this);
-	add_tileset(tileset_filename, start_id);
-
-	return true;
+	output.tileset_filename = tileset_filename;
+	output.tilemap_filename = tilemap_filename;
+	output.attrmap_filename = attrmap_filename;
+	output.fmt = fmt;
+	output.width = w;
+	output.start_id = start_id;
+	output.success = true;
+	return output;
 }
 
 #pragma warning(pop)

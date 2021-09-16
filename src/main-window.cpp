@@ -1618,8 +1618,8 @@ void Main_Window::new_tilemap(size_t width, size_t height) {
 	setup_tilemap(NEW_TILEMAP_NAME, old_tileset_size);
 }
 
-void Main_Window::open_tilemap(const char *filename, size_t width) {
-	_tilemap_options_dialog->format(width > 0 ? Config::format() : guess_format(filename));
+void Main_Window::open_tilemap(const char *filename) {
+	_tilemap_options_dialog->format(guess_format(filename));
 	_tilemap_options_dialog->use_tilemap(filename);
 	_tilemap_options_dialog->importing(false);
 	_tilemap_options_dialog->show(this);
@@ -1647,10 +1647,6 @@ void Main_Window::open_tilemap(const char *filename, size_t width) {
 		_error_dialog->message(msg);
 		_error_dialog->show(this);
 		return;
-	}
-
-	if (width) {
-		_tilemap.width(width);
 	}
 
 	setup_tilemap(basename, old_tileset_size);
@@ -1869,6 +1865,46 @@ void Main_Window::load_corresponding_tileset(const char *filename) {
 			return;
 		}
 	}
+}
+
+void Main_Window::open_converted_tilemap(Image_to_Tiles_Result output) {
+	_tilemap.modified(false);
+	close_cb(NULL, this);
+
+	unload_tilesets();
+
+	const char *tilemap_basename = fl_filename_name(output.tilemap_filename);
+	const char *attrmap_basename = fl_filename_name(output.attrmap_filename);
+
+	Config::format(output.fmt);
+	update_active_controls();
+	redraw();
+
+	_tilemap_file = output.tilemap_filename;
+	if (format_has_attrmap(output.fmt)) {
+		_attrmap_file = output.attrmap_filename;
+	}
+	else {
+		output.attrmap_filename = NULL;
+		_attrmap_file = "";
+	}
+
+	Tilemap::Result result = _tilemap.read_tiles(output.tilemap_filename, output.attrmap_filename);
+	if (result != Tilemap::Result::TILEMAP_OK) {
+		_tilemap.clear();
+		std::string msg = "Error reading ";
+		msg = msg + (result >= Tilemap::Result::ATTRMAP_BAD_FILE ? attrmap_basename : tilemap_basename);
+		msg = msg + "!\n\n" + Tilemap::error_message(result);
+		_error_dialog->message(msg);
+		_error_dialog->show(this);
+		return;
+	}
+
+	_tilemap.width(output.width);
+
+	setup_tilemap(tilemap_basename, format_tileset_size(output.fmt));
+	add_tileset(output.tileset_filename, output.start_id);
+
 }
 
 void Main_Window::open_or_import_or_convert(const char *filename) {
@@ -2214,12 +2250,7 @@ void Main_Window::unload_tilesets_cb(Fl_Widget *w, Main_Window *mw) {
 		if (mw->_unsaved_dialog->canceled()) { return; }
 	}
 
-	for (Tileset &t : mw->_tilesets) {
-		t.clear();
-	}
-	mw->_tilesets.clear();
-	mw->_tileset_files.clear();
-	mw->update_tileset_metadata();
+	mw->unload_tilesets();
 	mw->update_active_controls();
 	mw->redraw();
 }
@@ -2683,10 +2714,23 @@ void Main_Window::image_to_tiles_cb(Fl_Widget *, Main_Window *mw) {
 	}
 	mw->_image_to_tiles_dialog->show(mw);
 	if (mw->_image_to_tiles_dialog->canceled()) { return; }
-	while (!mw->image_to_tiles()) {
+
+	Image_to_Tiles_Result result;
+	for (result = mw->image_to_tiles(); !result.success; result = mw->image_to_tiles()) {
 		mw->_image_to_tiles_dialog->reshow(mw);
 		if (mw->_image_to_tiles_dialog->canceled()) { return; }
 	}
+
+	const char *tilemap_basename = fl_filename_name(result.tilemap_filename);
+	if (mw->unsaved()) {
+		std::string msg = mw->modified_filename();
+		msg = msg + " has unsaved changes!\n\n"
+			"Open " + tilemap_basename + " anyway?";
+		mw->_unsaved_dialog->message(msg);
+		mw->_unsaved_dialog->show(mw);
+		if (mw->_unsaved_dialog->canceled()) { return; }
+	}
+	mw->open_converted_tilemap(result);
 }
 
 void Main_Window::help_cb(Fl_Widget *, Main_Window *mw) {
