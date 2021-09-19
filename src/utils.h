@@ -9,6 +9,7 @@
 #include <string>
 #include <string_view>
 #include <algorithm>
+#include <fstream>
 
 #pragma warning(push, 0)
 #include <FL/fl_types.h>
@@ -48,6 +49,7 @@ int text_width(const char *l, int pad = 0);
 bool file_exists(const char *f);
 size_t file_size(const char *f);
 size_t file_size(FILE *f);
+void open_ifstream(std::ifstream &ifs, const char *f);
 bool check_read(FILE *file, uchar *expected, size_t n);
 uint16_t read_uint16(FILE *file);
 size_t read_rmp_size(FILE *file);

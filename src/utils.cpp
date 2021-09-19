@@ -69,6 +69,18 @@ size_t file_size(FILE *f) {
 	return r ? 0 : (size_t)s.st_size;
 }
 
+void open_ifstream(std::ifstream &ifs, const char *f) {
+#ifdef _WIN32
+	int n = MultiByteToWideChar(CP_UTF8, 0, f, -1, NULL, 0);
+	wchar_t *wf = new wchar_t[n];
+	MultiByteToWideChar(CP_UTF8, 0, f, -1, wf, n);
+	ifs.open(wf);
+	delete [] wf;
+#else
+	ifs.open(f);
+#endif
+}
+
 bool check_read(FILE *file, uchar *expected, size_t n) {
 	std::vector<uchar> buffer(n);
 	size_t r = fread(buffer.data(), 1, n, file);

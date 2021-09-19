@@ -607,10 +607,10 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_tilemap_save_chooser->options(Fl_Native_File_Chooser::Option::SAVEAS_CONFIRM);
 
 	_tilemap_import_chooser->title("Import Tilemap");
-	_tilemap_import_chooser->filter("Importable Files\t*.{c,csv,rmp}\n");
+	_tilemap_import_chooser->filter("Importable Files\t*.{c,asm,inc,csv,rmp}\n");
 
 	_tilemap_export_chooser->title("Export Tilemap");
-	_tilemap_export_chooser->filter("Exportable Files\t*.{c,asm,csv}\n");
+	_tilemap_export_chooser->filter("Exportable Files\t*.{c,asm,inc,csv}\n");
 	_tilemap_export_chooser->preset_file("ExportedTilemap.c");
 	_tilemap_export_chooser->options(Fl_Native_File_Chooser::Option::SAVEAS_CONFIRM);
 
