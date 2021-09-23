@@ -71,11 +71,9 @@ size_t file_size(FILE *f) {
 
 void open_ifstream(std::ifstream &ifs, const char *f) {
 #ifdef _WIN32
-	int n = MultiByteToWideChar(CP_UTF8, 0, f, -1, NULL, 0);
-	wchar_t *wf = new wchar_t[n];
-	MultiByteToWideChar(CP_UTF8, 0, f, -1, wf, n);
+	wchar_t wf[FL_PATH_MAX] = {};
+	fl_utf8towc(f, strlen(f), wf, sizeof(wf));
 	ifs.open(wf);
-	delete [] wf;
 #else
 	ifs.open(f);
 #endif
