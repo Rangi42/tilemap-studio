@@ -71,7 +71,7 @@ private:
 	// GUI outputs
 	Label *_width_heading, *_tileset_name, *_tilemap_name, *_tile_heading;
 	Tile_Swatch *_current_tile, *_current_attributes;
-	Status_Bar_Field *_tilemap_dimensions, *_tilemap_format, *_zoom_level, *_hover_id, *_hover_xy, *_hover_landmark;
+	Label *_tilemap_dimensions, *_tilemap_format, *_zoom_level, *_hover_id, *_hover_xy, *_hover_landmark;
 	// Conditional menu items
 	Fl_Menu_Item *_close_mi = NULL, *_save_mi = NULL, *_save_as_mi = NULL, *_export_mi = NULL, *_print_mi = NULL;
 	Fl_Menu_Item *_reload_tilesets_mi = NULL, *_unload_tilesets_mi = NULL;

@@ -121,17 +121,17 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	// Initialize status bar
 	_status_bar = new Toolbar(wx, h-23, ww, 23);
 	wh -= _status_bar->h();
-	_zoom_level = new Status_Bar_Field(0, 0, text_width("Zoom: 10x", 4), 21, "Zoom: 2x");
+	_zoom_level = new Label(0, 0, text_width("Zoom: 10x", 4), 21, "Zoom: 2x");
 	new Spacer(0, 0, 2, 21);
-	_tilemap_dimensions = new Status_Bar_Field(0, 0, text_width("Tilemap: 9999 x 9999", 4), 21, "");
+	_tilemap_dimensions = new Label(0, 0, text_width("Tilemap: 9999 x 9999", 4), 21, "");
 	new Spacer(0, 0, 2, 21);
-	_tilemap_format = new Status_Bar_Field(0, 0, format_max_name_width() + 4, 21, "");
+	_tilemap_format = new Label(0, 0, format_max_name_width() + 4, 21, "");
 	new Spacer(0, 0, 2, 21);
-	_hover_id = new Status_Bar_Field(0, 0, text_width("ID: $A:AA", 4), 21, "");
+	_hover_id = new Label(0, 0, text_width("ID: $A:AA", 4), 21, "");
 	new Spacer(0, 0, 2, 21);
-	_hover_xy = new Status_Bar_Field(0, 0, text_width("X/Y (9999, 9999)", 4), 21, "");
+	_hover_xy = new Label(0, 0, text_width("X/Y (9999, 9999)", 4), 21, "");
 	new Spacer(0, 0, 2, 21);
-	_hover_landmark = new Status_Bar_Field(0, 0, text_width("Landmark (199, 199)", 4), 21, "");
+	_hover_landmark = new Label(0, 0, text_width("Landmark (199, 199)", 4), 21, "");
 	_status_bar->end();
 	begin();
 

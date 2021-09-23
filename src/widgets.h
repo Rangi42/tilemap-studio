@@ -244,14 +244,4 @@ public:
 	Toolbar_Radio_Button(int x, int y, int w, int h, const char *l = NULL);
 };
 
-class Status_Bar_Field : public Fl_Box {
-private:
-	const char *_default_label;
-public:
-	Status_Bar_Field(int x, int y, int w, int h, const char *l = NULL);
-	~Status_Bar_Field();
-	inline const char *default_label(void) const { return _default_label; }
-	inline void reset_label(void) { copy_label(_default_label); }
-};
-
 #endif

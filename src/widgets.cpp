@@ -685,12 +685,3 @@ Toolbar_Radio_Button::Toolbar_Radio_Button(int x, int y, int w, int h, const cha
 	Toolbar_Button(x, y, w, h, l) {
 	type(FL_RADIO_BUTTON);
 }
-
-Status_Bar_Field::Status_Bar_Field(int x, int y, int w, int h, const char *l) : Fl_Box(x, y, w, h, l),
-	_default_label(l) {
-	labelfont(OS_FONT);
-	labelsize(OS_FONT_SIZE);
-	align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
-}
-
-Status_Bar_Field::~Status_Bar_Field() { delete _default_label; }
