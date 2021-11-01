@@ -4,7 +4,7 @@ A tilemap editor for Game Boy, GBC, GBA, NDS, or SNES projects. Specifically mea
 
 Inspired by tools like [Tilemap Creator](https://github.com/erandis-vol/Tilemap-Creator), [NTME](https://www.pokecommunity.com/showthread.php?t=149454), [GSC Town Map Editor](https://hax.iimarckus.org/topic/97/) and [Karteneditor](https://i.imgur.com/70jDfdM.png), but implemented with C++ and [FLTK](http://www.fltk.org/), and with support for multi-platform tilemaps as well as Pokémon-specific formats.
 
-Latest release: [**4.0.0**](https://github.com/Rangi42/tilemap-studio/releases/tag/v4.0.0)
+Latest release: [**4.0.1**](https://github.com/Rangi42/tilemap-studio/releases/tag/v4.0.1)
 
 Follow the steps in [INSTALL.md](INSTALL.md) to install the release copy of Tilemap Studio, or the longer instructions to build it yourself from source.
 
