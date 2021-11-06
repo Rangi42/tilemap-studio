@@ -80,7 +80,7 @@ private:
 		*_copy_selection_mi = NULL, *_select_all_mi = NULL;
 	Fl_Menu_Item *_zoom_in_mi = NULL, *_zoom_out_mi = NULL;
 	Fl_Menu_Item *_tilemap_width_mi = NULL, *_crop_to_selection_mi = NULL, *_resize_mi = NULL, *_shift_mi = NULL,
-		*_reformat_mi = NULL;
+		*_transpose_mi = NULL, *_reformat_mi = NULL;
 	Fl_Menu_Item *_shift_tileset_mi = NULL;
 	// Dialogs
 	Fl_Native_File_Chooser *_tilemap_open_chooser, *_tilemap_save_chooser, *_tilemap_import_chooser, *_tilemap_export_chooser,
@@ -181,6 +181,7 @@ private:
 	void resize_tilemap(size_t w, size_t h, int px, int py);
 	void shift_tilemap(void);
 	void shift_tileset(void);
+	void transpose_tilemap(void);
 	void reformat_tilemap(void);
 	void save_tilemap(bool force);
 	void import_tilemap(const char *filename);
@@ -248,6 +249,7 @@ private:
 	static void crop_to_selection_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void resize_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void shift_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void transpose_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void reformat_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void tileset_width_cb(Fl_Widget *w, Main_Window *mw);
 	static void shift_tileset_cb(Fl_Widget *w, Main_Window *mw);

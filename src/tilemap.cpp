@@ -68,7 +68,7 @@ void Tilemap::resize(size_t w, size_t h, int px, int py) {
 }
 
 void Tilemap::shift(int dx, int dy) {
-	if (!can_shift()) { return; }
+	if (!is_rectangular()) { return; }
 
 	size_t n = size();
 	std::vector<Tile_Tessera *> tiles;
@@ -82,6 +82,26 @@ void Tilemap::shift(int dx, int dy) {
 	}
 
 	_tiles.swap(tiles);
+	_modified = true;
+}
+
+void Tilemap::transpose() {
+	if (!is_rectangular()) { return; }
+
+	size_t n = size();
+	std::vector<Tile_Tessera *> tiles;
+	tiles.reserve(n);
+
+	size_t w = width(), h = height();
+	for (size_t x = 0; x < w; x++) {
+		for (size_t y = 0; y < h; y++) {
+			tiles.emplace_back(tile(x, y));
+		}
+	}
+
+	clear();
+	_tiles.swap(tiles);
+	width(h);
 	_modified = true;
 }
 

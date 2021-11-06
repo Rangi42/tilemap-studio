@@ -37,7 +37,8 @@ public:
 	void width(size_t w);
 	void resize(size_t w, size_t h, int px, int py);
 	void shift(int dx, int dy);
-	inline bool can_shift(void) const { return size() % _width == 0; }
+	void transpose(void);
+	inline bool is_rectangular(void) const { return size() % _width == 0; }
 	inline size_t height(void) const { return _width ? (size() + _width - 1) / _width : 0; }
 	inline Tile_Tessera *tile(size_t x, size_t y) const { return tile(y * _width + x); }
 	inline Tile_Tessera *tile(size_t i) const { return i < _tiles.size() ? _tiles[i] : NULL; }

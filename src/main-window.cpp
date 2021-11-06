@@ -382,6 +382,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		OS_MENU_ITEM("&Crop to Selection", FL_COMMAND + 'L', (Fl_Callback *)crop_to_selection_cb, this, 0),
 		OS_MENU_ITEM("Re&size...", FL_COMMAND + 'e', (Fl_Callback *)resize_cb, this, 0),
 		OS_MENU_ITEM("S&hift...", FL_COMMAND + 'm', (Fl_Callback *)shift_cb, this, 0),
+		OS_MENU_ITEM("Trans&pose", FL_COMMAND + 'R', (Fl_Callback *)transpose_cb, this, 0),
 		OS_MENU_ITEM("Re&format...", FL_COMMAND + 'f', (Fl_Callback *)reformat_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&Tileset Width...", FL_COMMAND + 'h', (Fl_Callback *)tileset_width_cb, this, 0),
 		OS_MENU_ITEM("Shift Ti&leset...", FL_COMMAND + 'k', (Fl_Callback *)shift_tileset_cb, this, FL_MENU_DIVIDER),
@@ -442,6 +443,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_crop_to_selection_mi = TS_FIND_MENU_ITEM_CB(crop_to_selection_cb);
 	_resize_mi = TS_FIND_MENU_ITEM_CB(resize_cb);
 	_shift_mi = TS_FIND_MENU_ITEM_CB(shift_cb);
+	_transpose_mi = TS_FIND_MENU_ITEM_CB(transpose_cb);
 	_reformat_mi = TS_FIND_MENU_ITEM_CB(reformat_cb);
 #undef TS_FIND_MENU_ITEM_CB
 
@@ -1085,13 +1087,15 @@ void Main_Window::update_active_controls() {
 		_tilemap_width->activate();
 		_resize_mi->activate();
 		_resize_tb->activate();
-		if (_tilemap.can_shift()) {
+		if (_tilemap.is_rectangular()) {
 			_shift_mi->activate();
 			_shift_tb->activate();
+			_transpose_mi->activate();
 		}
 		else {
 			_shift_mi->deactivate();
 			_shift_tb->deactivate();
+			_transpose_mi->deactivate();
 		}
 		_reformat_mi->activate();
 		_reformat_tb->activate();
@@ -1116,6 +1120,7 @@ void Main_Window::update_active_controls() {
 		_resize_tb->deactivate();
 		_shift_mi->deactivate();
 		_shift_tb->deactivate();
+		_transpose_mi->deactivate();
 		_reformat_mi->deactivate();
 		_reformat_tb->deactivate();
 	}
@@ -1314,6 +1319,32 @@ void Main_Window::shift_tileset() {
 		t.shift(dn);
 	}
 
+	redraw();
+}
+
+void Main_Window::transpose_tilemap() {
+	if (_tilemap.size() == 1) { return; }
+
+	if (_selection.selected_multiple() && !_selection.from_tileset()) {
+		select_tile(_selection.id());
+	}
+
+	_tilemap.transpose();
+
+	while (_tilemap_scroll->children() > 2) { // keep scrollbars
+		_tilemap_scroll->remove(0);
+	}
+	size_t n = _tilemap.size();
+	for (size_t i = 0; i < n; i++) {
+		Tile_Tessera *tt = _tilemap.tile(i);
+		tt->callback((Fl_Callback *)change_tile_cb, this);
+		_tilemap_scroll->add(tt);
+	}
+
+	_tilemap_width->default_value(_tilemap.width());
+	tilemap_width_tb_cb(NULL, this);
+	update_status(NULL);
+	update_active_controls();
 	redraw();
 }
 
@@ -2677,6 +2708,14 @@ void Main_Window::shift_cb(Fl_Menu_ *, Main_Window *mw) {
 	mw->shift_tilemap();
 }
 
+void Main_Window::transpose_cb(Fl_Menu_ *, Main_Window *mw) {
+	if (!mw->_tilemap.size()) { return; }
+	mw->_unsaved_dialog->message("Transposing the tilemap cannot be undone!\n\nTranspose it anyway?");
+	mw->_unsaved_dialog->show(mw);
+	if (mw->_unsaved_dialog->canceled()) { return; }
+	mw->transpose_tilemap();
+}
+
 void Main_Window::reformat_cb(Fl_Menu_ *, Main_Window *mw) {
 	if (!mw->_tilemap.size()) { return; }
 	mw->_reformat_dialog->format(Config::format());
@@ -2757,13 +2796,15 @@ void Main_Window::tilemap_width_tb_cb(OS_Spinner *, Main_Window *mw) {
 	mw->_tilemap_scroll->scroll_to(0, 0);
 	mw->_tilemap.reposition_tiles(sx, sy);
 	mw->_tilemap_scroll->redraw();
-	if (mw->_tilemap.can_shift()) {
+	if (mw->_tilemap.is_rectangular()) {
 		mw->_shift_mi->activate();
 		mw->_shift_tb->activate();
+		mw->_transpose_mi->activate();
 	}
 	else {
 		mw->_shift_mi->deactivate();
 		mw->_shift_tb->deactivate();
+		mw->_transpose_mi->deactivate();
 	}
 	mw->update_status(NULL);
 }
