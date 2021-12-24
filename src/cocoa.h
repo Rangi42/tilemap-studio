@@ -10,5 +10,6 @@ bool cocoa_is_maximized(const Fl_Window *w);
 void cocoa_maximize(const Fl_Window *w);
 bool cocoa_is_fullscreen(const Fl_Window *w);
 void cocoa_fullscreen(const Fl_Window *w, bool state);
+bool cocoa_is_dark_mode();
 
 #endif

@@ -19,6 +19,8 @@
 #define MAKE_WSTR_HELPER(x) L ## x
 #define MAKE_WSTR(x) MAKE_WSTR_HELPER(x)
 
+#elif defined(__APPLE__)
+#include "cocoa.h"
 #endif
 
 static void use_theme(OS::Theme theme) {
@@ -79,8 +81,9 @@ int main(int argc, char **argv) {
 	}
 	OS::Theme theme = (OS::Theme)Preferences::get("theme", (int)default_theme);
 #elif defined(__APPLE__)
-	// TODO: Query dark theme preferences
-	OS::Theme theme = (OS::Theme)Preferences::get("theme", (int)OS::Theme::AQUA);
+	OS::Theme default_theme = OS::Theme::AQUA;
+	if (cocoa_is_dark_mode()) default_theme = OS::Theme::DARK;
+	OS::Theme theme = (OS::Theme)Preferences::get("theme", (int)default_theme);
 #else
 	OS::Theme theme = (OS::Theme)Preferences::get("theme", (int)OS::Theme::GREYBIRD);
 #endif

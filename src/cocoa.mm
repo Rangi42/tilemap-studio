@@ -27,3 +27,9 @@ void cocoa_fullscreen(const Fl_Window *w, bool state) {
 		[fl_xid(w) toggleFullScreen:nil];
 	}
 }
+
+bool cocoa_is_dark_mode() {
+	NSString *dark = @"Dark";
+	NSString *osxMode = [[NSUserDefaults standardUserDefaults] stringForKey:@"AppleInterfaceStyle"];
+	return [osxMode isEqualToString:dark];
+}
