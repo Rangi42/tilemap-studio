@@ -15,6 +15,10 @@
 #include <FL/fl_types.h>
 #pragma warning(pop)
 
+#if defined(__unix__)
+#define __X11__
+#endif
+
 #ifdef _WIN32
 #define DIR_SEP "\\"
 #else

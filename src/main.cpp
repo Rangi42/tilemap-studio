@@ -78,6 +78,9 @@ int main(int argc, char **argv) {
 		default_theme = OS::Theme::DARK;
 	}
 	OS::Theme theme = (OS::Theme)Preferences::get("theme", (int)default_theme);
+#elif defined(__APPLE__)
+	// TODO: Query dark theme preferences
+	OS::Theme theme = (OS::Theme)Preferences::get("theme", (int)OS::Theme::AQUA);
 #else
 	OS::Theme theme = (OS::Theme)Preferences::get("theme", (int)OS::Theme::GREYBIRD);
 #endif

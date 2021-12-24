@@ -6,7 +6,7 @@
 #pragma warning(push, 0)
 #include <FL/Fl.H>
 #include <FL/Fl_Overlay_Window.H>
-#include <FL/Fl_Menu_Bar.H>
+#include <FL/Fl_Sys_Menu_Bar.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Toggle_Button.H>
 #include <FL/Fl_Multi_Label.H>
@@ -31,7 +31,9 @@
 
 #ifdef _WIN32
 #include "resource.h"
-#else
+#elif defined(__APPLE__)
+#include "cocoa.h"
+#elif defined(__X11__)
 #include <unistd.h>
 #include <X11/xpm.h>
 #include "app-icon.xpm"
@@ -75,7 +77,11 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	int wx = 0, wy = 0, ww = w, wh = h;
 
 	// Initialize menu bar
-	_menu_bar = new Fl_Menu_Bar(wx, wy, ww, 21);
+#ifdef __APPLE__
+	_menu_bar = new Fl_Sys_Menu_Bar(wx, wy, ww, 0);
+#else
+	_menu_bar = new Fl_Sys_Menu_Bar(wx, wy, ww, 21);
+#endif
 	wy += _menu_bar->h();
 	wh -= _menu_bar->h();
 
@@ -262,7 +268,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	// Configure window icon
 #ifdef _WIN32
 	icon((const void *)LoadIcon(fl_display, MAKEINTRESOURCE(IDI_ICON1)));
-#else
+#elif defined(__X11__)
 	fl_open_display();
 	XpmCreatePixmapFromData(fl_display, DefaultRootWindow(fl_display), (char **)&APP_ICON_XPM, &_icon_pixmap, &_icon_mask, NULL);
 	icon((const void *)_icon_pixmap);
@@ -302,8 +308,12 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		OS_MENU_ITEM("Save &As...", FL_COMMAND + 'S', (Fl_Callback *)save_as_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&Import...", FL_COMMAND + 'I', (Fl_Callback *)import_cb, this, 0),
 		OS_MENU_ITEM("&Export...", FL_COMMAND + 'E', (Fl_Callback *)export_cb, this, FL_MENU_DIVIDER),
+#ifdef __APPLE__
+		OS_MENU_ITEM("&Print...", FL_COMMAND + 'p', (Fl_Callback *)print_cb, this, 0),
+#else
 		OS_MENU_ITEM("&Print...", FL_COMMAND + 'p', (Fl_Callback *)print_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("E&xit", FL_ALT + FL_F + 4, (Fl_Callback *)exit_cb, this, 0),
+#endif
 		{},
 		OS_SUBMENU("Tile&set"),
 		OS_MENU_ITEM("&Load...", FL_COMMAND + 't', (Fl_Callback *)load_tileset_cb, this, 0),
@@ -372,10 +382,17 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 			FL_MENU_TOGGLE | (Config::rainbow_tiles() ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("&Bold Palettes", FL_COMMAND + 'b', (Fl_Callback *)bold_palettes_cb, this,
 			FL_MENU_TOGGLE | (Config::bold_palettes() ? FL_MENU_VALUE : 0) | FL_MENU_DIVIDER),
+#ifdef __APPLE__
+		OS_MENU_ITEM("Tr&ansparent", FL_COMMAND + FL_SHIFT + 'o', (Fl_Callback *)transparent_cb, this,
+			FL_MENU_TOGGLE | (transparent ? FL_MENU_VALUE : 0)),
+		OS_MENU_ITEM("Full &Screen", FL_COMMAND + FL_SHIFT + 'f', (Fl_Callback *)full_screen_cb, this,
+			FL_MENU_TOGGLE | (fullscreen ? FL_MENU_VALUE : 0)),
+#else
 		OS_MENU_ITEM("Tr&ansparent", FL_F + 10, (Fl_Callback *)transparent_cb, this,
 			FL_MENU_TOGGLE | (transparent ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("Full &Screen", FL_F + 11, (Fl_Callback *)full_screen_cb, this,
 			FL_MENU_TOGGLE | (fullscreen ? FL_MENU_VALUE : 0)),
+#endif
 		{},
 		OS_SUBMENU("&Tools"),
 		OS_MENU_ITEM("Tilemap &Width...", FL_COMMAND + 'd', (Fl_Callback *)tilemap_width_cb, this, 0),
@@ -389,12 +406,24 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		OS_MENU_ITEM("&Image to Tiles...", FL_COMMAND + 'x', (Fl_Callback *)image_to_tiles_cb, this, 0),
 		{},
 		OS_SUBMENU("&Help"),
+#ifdef __APPLE__
+		OS_MENU_ITEM("&Help", FL_F + 1, (Fl_Callback *)help_cb, this, 0),
+#else
 		OS_MENU_ITEM("&Help", FL_F + 1, (Fl_Callback *)help_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&About", FL_COMMAND + '/', (Fl_Callback *)about_cb, this, 0),
+#endif
 		{},
 		{}
 	};
 	_menu_bar->copy(menu_items);
+
+	// Initialize macOS application menu
+	Fl_Mac_App_Menu::about = "About " PROGRAM_NAME;
+	Fl_Mac_App_Menu::hide = "Hide " PROGRAM_NAME;
+	Fl_Mac_App_Menu::quit = "Quit " PROGRAM_NAME;
+	fl_mac_set_about((Fl_Callback *)about_cb, this);
+	fl_open_display();
+	_menu_bar->update();
 
 	// Initialize menu bar items
 	int first_recent_tilemap_i = _menu_bar->find_index((Fl_Callback *)open_recent_tilemap_cb);
@@ -447,6 +476,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_reformat_mi = TS_FIND_MENU_ITEM_CB(reformat_cb);
 #undef TS_FIND_MENU_ITEM_CB
 
+#ifndef __APPLE__
+	// Create a multi-label to offset menu entries that don't have a checkbox or radio button
 	for (int i = 0, md = 0; i < _menu_bar->size(); i++) {
 		Fl_Menu_Item *mi = (Fl_Menu_Item *)&_menu_bar->menu()[i];
 		if (md > 0 && mi->label() && !mi->checkbox() && !mi->radio()) {
@@ -462,6 +493,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		if (mi->submenu()) { md++; }
 		else if (!mi->label()) { md--; }
 	}
+#endif
 
 	// Configure toolbar buttons
 
@@ -695,7 +727,7 @@ void Main_Window::show() {
 	HANDLE small_icon = LoadImage(GetModuleHandle(0), MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON,
 		GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CXSMICON), 0);
 	SendMessage(hwnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(small_icon));
-#else
+#elif defined(__X11__)
 	// Fix for X11 icon alpha mask <https://www.mail-archive.com/fltk@easysw.com/msg02863.html>
 	XWMHints *hints = XGetWMHints(fl_display, fl_xid(this));
 	hints->flags |= IconMaskHint;
@@ -711,7 +743,9 @@ bool Main_Window::maximized() const {
 	wp.length = sizeof(wp);
 	if (!GetWindowPlacement(fl_xid(this), &wp)) { return false; }
 	return wp.showCmd == SW_MAXIMIZE;
-#else
+#elif defined(__APPLE__)
+	return cocoa_is_maximized(this);
+#elif defined(__X11__)
 	Atom wmState = XInternAtom(fl_display, "_NET_WM_STATE", True);
 	Atom actual;
 	int format;
@@ -738,7 +772,9 @@ bool Main_Window::maximized() const {
 void Main_Window::maximize() {
 #ifdef _WIN32
 	ShowWindow(fl_xid(this), SW_MAXIMIZE);
-#else
+#elif defined(__APPLE__)
+	cocoa_maximize(this);
+#elif defined(__X11__)
 	XEvent event;
 	memset(&event, 0, sizeof(event));
 	event.xclient.type = ClientMessage;
@@ -762,7 +798,9 @@ void Main_Window::apply_transparency() {
 		SetWindowLongPtr(hwnd, GWL_EXSTYLE, exstyle | WS_EX_LAYERED);
 	}
 	SetLayeredWindowAttributes(hwnd, 0, (BYTE)(alpha * 0xFF), LWA_ALPHA);
-#else
+#elif defined(__APPLE__)
+	cocoa_set_window_transparency(this, alpha);
+#elif defined(__X11__)
 	Atom atom = XInternAtom(fl_display, "_NET_WM_WINDOW_OPACITY", False);
 	uint32_t opacity = (uint32_t)(UINT32_MAX * alpha);
 	XChangeProperty(fl_display, fl_xid(this), atom, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&opacity, 1);
@@ -819,27 +857,34 @@ void Main_Window::store_recent_tilemap() {
 void Main_Window::update_recent_tilemaps() {
 	int last = -1;
 	for (int i = 0; i < NUM_RECENT; i++) {
+#ifndef __APPLE__
 		Fl_Multi_Label *ml = (Fl_Multi_Label *)_recent_tilemap_mis[i]->label();
 		if (ml->labelb[0]) {
 			delete [] ml->labelb;
 			ml->labelb = "";
 		}
+#endif
 		if (_recent_tilemaps[i].empty()) {
 			_recent_tilemap_mis[i]->hide();
 		}
 		else {
 			const char *basename = fl_filename_name(_recent_tilemaps[i].c_str());
+#ifndef __APPLE__
 			char *label = new char[FL_PATH_MAX]();
 			strcpy(label, OS_MENU_ITEM_PREFIX);
 			strcat(label, basename);
 			strcat(label, OS_MENU_ITEM_SUFFIX);
 			ml->labelb = label;
+#else
+			_recent_tilemap_mis[i]->label(basename);
+#endif
 			_recent_tilemap_mis[i]->show();
 			last = i;
 		}
 		_recent_tilemap_mis[i]->flags &= ~FL_MENU_DIVIDER;
 	}
 	_recent_tilemap_mis[last]->flags |= FL_MENU_DIVIDER;
+	_menu_bar->update();
 }
 
 void Main_Window::store_recent_tileset() {
@@ -858,27 +903,34 @@ void Main_Window::store_recent_tileset() {
 void Main_Window::update_recent_tilesets() {
 	int last = -1;
 	for (int i = 0; i < NUM_RECENT; i++) {
+#ifndef __APPLE__
 		Fl_Multi_Label *ml = (Fl_Multi_Label *)_recent_tileset_mis[i]->label();
 		if (ml->labelb && ml->labelb[0]) {
 			delete [] ml->labelb;
 			ml->labelb = "";
 		}
+#endif
 		if (_recent_tilesets[i].empty()) {
 			_recent_tileset_mis[i]->hide();
 		}
 		else {
 			const char *basename = fl_filename_name(_recent_tilesets[i].c_str());
+#ifndef __APPLE__
 			char *label = new char[FL_PATH_MAX]();
 			strcpy(label, OS_MENU_ITEM_PREFIX);
 			strcat(label, basename);
 			strcat(label, OS_MENU_ITEM_SUFFIX);
 			ml->labelb = label;
+#else
+			_recent_tileset_mis[i]->label(basename);
+#endif
 			_recent_tileset_mis[i]->show();
 			last = i;
 		}
 		_recent_tileset_mis[i]->flags &= ~FL_MENU_DIVIDER;
 	}
 	_recent_tileset_mis[last]->flags |= FL_MENU_DIVIDER;
+	_menu_bar->update();
 }
 
 void Main_Window::update_icons() {
@@ -1243,6 +1295,8 @@ void Main_Window::update_active_controls() {
 		_priority_tb->hide();
 		_obp1_tb->hide();
 	}
+
+	_menu_bar->update();
 }
 
 void Main_Window::update_tileset_width(int tw) {
@@ -2069,6 +2123,7 @@ void Main_Window::clear_recent_tilemaps_cb(Fl_Menu_ *, Main_Window *mw) {
 		mw->_recent_tilemaps[i].clear();
 		mw->_recent_tilemap_mis[i]->hide();
 	}
+	mw->_menu_bar->update();
 }
 
 void Main_Window::load_recent_tileset_cb(Fl_Menu_ *m, Main_Window *mw) {
@@ -2082,6 +2137,7 @@ void Main_Window::clear_recent_tilesets_cb(Fl_Menu_ *, Main_Window *mw) {
 		mw->_recent_tilesets[i].clear();
 		mw->_recent_tileset_mis[i]->hide();
 	}
+	mw->_menu_bar->update();
 }
 
 void Main_Window::close_cb(Fl_Widget *, Main_Window *mw) {
@@ -2639,7 +2695,8 @@ void Main_Window::full_screen_cb(Fl_Menu_ *m, Main_Window *mw) {
 		mw->fullscreen();
 	}
 	else {
-		mw->fullscreen_off(mw->_wx, mw->_wy, mw->_ww, mw->_wh);
+		mw->fullscreen_off();
+		mw->resize(mw->_wx, mw->_wy, mw->_ww, mw->_wh);
 	}
 }
 

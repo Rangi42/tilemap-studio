@@ -1,10 +1,19 @@
+OS_MAC :=
+ifeq ($(shell uname -s),Darwin)
+OS_MAC := 1
+endif
+
 DESTDIR =
 PREFIX = /usr/local
 
 tilemapstudio = tilemapstudio
 tilemapstudiod = tilemapstudiod
 
+ifdef OS_MAC
+CXX ?= clang++
+else
 CXX ?= g++
+endif
 LD = $(CXX)
 RM = rm -rf
 
@@ -15,7 +24,10 @@ debugdir = tmp/debug
 bindir = bin
 
 CXXFLAGS = -std=c++17 -I$(srcdir) -I$(resdir) $(shell fltk-config --use-images --cxxflags)
-LDFLAGS = $(shell fltk-config --use-images --ldflags) $(shell pkg-config --libs libpng xpm)
+LDFLAGS = $(shell fltk-config --use-images --ldflags)
+ifndef OS_MAC
+LDFLAGS += $(shell pkg-config --libs libpng xpm)
+endif
 
 RELEASEFLAGS = -DNDEBUG -O3 -flto -march=native
 DEBUGFLAGS = -DDEBUG -D_DEBUG -O0 -g -ggdb3 -Wall -Wextra -pedantic -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter
@@ -24,6 +36,13 @@ COMMON = $(wildcard $(srcdir)/*.h) $(wildcard $(resdir)/*.xpm)
 SOURCES = $(wildcard $(srcdir)/*.cpp)
 OBJECTS = $(SOURCES:$(srcdir)/%.cpp=$(tmpdir)/%.o)
 DEBUGOBJECTS = $(SOURCES:$(srcdir)/%.cpp=$(debugdir)/%.o)
+
+ifdef OS_MAC
+SOURCES_MAC = $(wildcard $(srcdir)/*.mm)
+OBJECTS += $(SOURCES_MAC:$(srcdir)/%.mm=$(tmpdir)/%.o)
+DEBUGOBJECTS += $(SOURCES_MAC:$(srcdir)/%.mm=$(debugdir)/%.o)
+endif
+
 TARGET = $(bindir)/$(tilemapstudio)
 DEBUGTARGET = $(bindir)/$(tilemapstudiod)
 DESKTOP = "$(DESTDIR)$(PREFIX)/share/applications/Tilemap Studio.desktop"
@@ -45,11 +64,11 @@ debug: $(DEBUGTARGET)
 
 $(TARGET): $(OBJECTS)
 	@mkdir -p $(@D)
-	$(LD) -o $@ $^ $(LDFLAGS)
+	$(LD) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 $(DEBUGTARGET): $(DEBUGOBJECTS)
 	@mkdir -p $(@D)
-	$(LD) -o $@ $^ $(LDFLAGS)
+	$(LD) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 $(tmpdir)/%.o: $(srcdir)/%.cpp $(COMMON)
 	@mkdir -p $(@D)
@@ -58,6 +77,16 @@ $(tmpdir)/%.o: $(srcdir)/%.cpp $(COMMON)
 $(debugdir)/%.o: $(srcdir)/%.cpp $(COMMON)
 	@mkdir -p $(@D)
 	$(CXX) -c $(CXXFLAGS) -o $@ $<
+
+ifdef OS_MAC
+$(tmpdir)/%.o: $(srcdir)/%.mm $(COMMON)
+	@mkdir -p $(@D)
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
+
+$(debugdir)/%.o: $(srcdir)/%.mm $(COMMON)
+	@mkdir -p $(@D)
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
+endif
 
 clean:
 	$(RM) $(TARGET) $(DEBUGTARGET) $(OBJECTS) $(DEBUGOBJECTS)
