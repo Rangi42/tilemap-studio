@@ -86,26 +86,33 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	wh -= _menu_bar->h();
 
 	// Initialize toolbar
+#ifdef __APPLE__
+#define SEPARATE_TOOLBAR_BUTTONS new Fl_Box(0, 0, 12, 36);
+	_toolbar = new Toolbar(wx, wy, w, 38);
+	new Fl_Box(0, 0, 6, 36);
+#else
+#define SEPARATE_TOOLBAR_BUTTONS new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24)
 	_toolbar = new Toolbar(wx, wy, w, 26);
+#endif
 	_new_tb = new Toolbar_Button(0, 0, 24, 24);
 	_open_tb = new Toolbar_Button(0, 0, 24, 24);
 	_save_tb = new Toolbar_Button(0, 0, 24, 24);
 	_print_tb = new Toolbar_Button(0, 0, 24, 24);
-	new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
+	SEPARATE_TOOLBAR_BUTTONS;
 	_load_tb = new Toolbar_Button(0, 0, 24, 24);
 	_add_tb = new Toolbar_Button(0, 0, 24, 24);
 	_reload_tb = new Toolbar_Button(0, 0, 24, 24);
-	new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
+	SEPARATE_TOOLBAR_BUTTONS;
 	_undo_tb = new Toolbar_Button(0, 0, 24, 24);
 	_redo_tb = new Toolbar_Button(0, 0, 24, 24);
-	new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
+	SEPARATE_TOOLBAR_BUTTONS;
 	_zoom_out_tb = new Toolbar_Button(0, 0, 24, 24);
 	_zoom_in_tb = new Toolbar_Button(0, 0, 24, 24);
-	new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
+	SEPARATE_TOOLBAR_BUTTONS;
 	_grid_tb = new Toolbar_Toggle_Button(0, 0, 24, 24);
 	_rainbow_tiles_tb = new Toolbar_Toggle_Button(0, 0, 24, 24);
 	_bold_palettes_tb = new Toolbar_Toggle_Button(0, 0, 24, 24);
-	new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
+	SEPARATE_TOOLBAR_BUTTONS;
 	int wgt_w = text_width("Width:", 4);
 	_width_heading = new Label(0, 0, wgt_w, 24, "Width:");
 	wgt_w = text_width("9999", 2) + 15;
@@ -114,15 +121,16 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_resize_tb = new Toolbar_Button(0, 0, 24, 24);
 	_shift_tb = new Toolbar_Button(0, 0, 24, 24);
 	_reformat_tb = new Toolbar_Button(0, 0, 24, 24);
-	new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
+	SEPARATE_TOOLBAR_BUTTONS;
 	_tileset_width_tb = new Toolbar_Button(0, 0, 24, 24);
 	_shift_tileset_tb = new Toolbar_Button(0, 0, 24, 24);
-	new Fl_Box(0, 0, 2, 24); new Spacer(0, 0, 2, 24); new Fl_Box(0, 0, 2, 24);
+	SEPARATE_TOOLBAR_BUTTONS;
 	_image_to_tiles_tb = new Toolbar_Button(0, 0, 24, 24);
 	_toolbar->end();
 	wy += _toolbar->h();
 	wh -= _toolbar->h();
 	begin();
+#undef SEPARATE_TOOLBAR_BUTTONS
 
 	// Initialize status bar
 	_status_bar = new Toolbar(wx, h-23, ww, 23);
