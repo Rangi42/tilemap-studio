@@ -6,6 +6,7 @@ endif
 DESTDIR =
 PREFIX = /usr/local
 
+APPNAME = Tilemap Studio
 tilemapstudio = tilemapstudio
 tilemapstudiod = tilemapstudiod
 
@@ -45,9 +46,8 @@ endif
 
 TARGET = $(bindir)/$(tilemapstudio)
 DEBUGTARGET = $(bindir)/$(tilemapstudiod)
-DESKTOP = "$(DESTDIR)$(PREFIX)/share/applications/Tilemap Studio.desktop"
 
-.PHONY: all $(tilemapstudio) $(tilemapstudiod) release debug clean install uninstall
+.PHONY: all $(tilemapstudio) $(tilemapstudiod) release debug clean appdir install uninstall
 
 .SUFFIXES: .o .cpp
 
@@ -91,6 +91,27 @@ endif
 clean:
 	$(RM) $(TARGET) $(DEBUGTARGET) $(OBJECTS) $(DEBUGOBJECTS)
 
+ifdef OS_MAC
+APPDIR = "$(bindir)/$(APPNAME).app"
+CONTENTS = $(APPDIR)/Contents
+
+appdir: release
+	rm -rf $(APPDIR)
+	install -d $(CONTENTS)/macOS $(CONTENTS)/Resources
+	install -m755 $(TARGET) $(CONTENTS)/macOS/tilemapstudio
+	install -m644 $(resdir)/app.icns $(CONTENTS)/Resources/AppIcon.icns
+	install -m644 $(resdir)/Info.plist $(CONTENTS)/Info.plist
+	printf 'APPL????' > $(CONTENTS)/PkgInfo
+
+install: appdir
+	cp -av $(APPDIR) "/Applications/$(APPNAME).app"
+	rm -rf $(APPDIR)
+
+uninstall:
+	rm -rf "/Applications/$(APPNAME).app"
+else
+DESKTOP = "$(DESTDIR)$(PREFIX)/share/applications/$(APPNAME).desktop"
+
 install: release
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	cp $(TARGET) $(DESTDIR)$(PREFIX)/bin/$(tilemapstudio)
@@ -99,7 +120,7 @@ install: release
 	cp $(resdir)/app-icon.xpm $(DESTDIR)$(PREFIX)/share/pixmaps/tilemapstudio16.xpm
 	mkdir -p $(DESTDIR)$(PREFIX)/share/applications
 	echo "[Desktop Entry]" > $(DESKTOP)
-	echo "Name=Tilemap Studio" >> $(DESKTOP)
+	echo "Name=$(APPNAME)" >> $(DESKTOP)
 	echo "Comment=Edit Game Boy, Color, and Advance tilemaps" >> $(DESKTOP)
 	echo "Icon=$(PREFIX)/share/pixmaps/tilemapstudio48.xpm" >> $(DESKTOP)
 	echo "Exec=$(PREFIX)/bin/$(tilemapstudio)" >> $(DESKTOP)
@@ -111,3 +132,4 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/share/pixmaps/tilemapstudio48.xpm
 	rm -f $(DESTDIR)$(PREFIX)/share/pixmaps/tilemapstudio16.xpm
 	rm -f $(DESKTOP)
+endif
