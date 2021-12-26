@@ -4,6 +4,7 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Window.H>
+#include <FL/x.H>
 #pragma warning(pop)
 
 #include "version.h"
@@ -22,6 +23,14 @@
 #elif defined(__APPLE__)
 #include "cocoa.h"
 #endif
+
+static Main_Window *window = nullptr;
+
+void open_dragged_cb(const char *filename) {
+	if (window) {
+		window->drag_and_drop_tilemap(filename);
+	}
+}
 
 static void use_theme(OS::Theme theme) {
 	OS::use_native_fonts();
@@ -95,25 +104,26 @@ int main(int argc, char **argv) {
 	int x = Preferences::get("x", 48), y = Preferences::get("y", 48);
 #endif
 	int w = Preferences::get("w", 647), h = Preferences::get("h", 406);
-	Main_Window window(x, y, w, h);
-	window.show();
-	if (window.transparent()) {
-		window.apply_transparency();
+	window = new Main_Window(x, y, w, h);
+	window->show();
+	if (window->transparent()) {
+		window->apply_transparency();
 	}
-	if (window.full_screen()) {
-		window.fullscreen();
+	if (window->full_screen()) {
+		window->fullscreen();
 	}
 	else if (Preferences::get("maximized")) {
-		window.maximize();
+		window->maximize();
 	}
 
 	if (argc > 2) {
-		window.open_tilemap(argv[1]);
-		window.load_tileset(argv[2]);
+		window->open_tilemap(argv[1]);
+		window->load_tileset(argv[2]);
 	}
 	else if (argc > 1) {
-		window.open_or_import_or_convert(argv[1]);
+		window->open_or_import_or_convert(argv[1]);
 	}
+	fl_open_callback(open_dragged_cb);
 
 	return Fl::run();
 }

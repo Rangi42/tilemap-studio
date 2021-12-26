@@ -169,6 +169,7 @@ public:
 	void load_corresponding_tileset(const char *filename = NULL);
 	void open_converted_tilemap(Image_to_Tiles_Result output);
 	void open_or_import_or_convert(const char *filename);
+	void drag_and_drop_tilemap(const char *filename);
 private:
 	void store_recent_tilemap(void);
 	void update_recent_tilemaps(void);
@@ -195,6 +196,7 @@ private:
 	// Drag-and-drop
 	static void drag_and_drop_tilemap_cb(DnD_Receiver *dndr, Main_Window *mw);
 	static void drag_and_drop_tileset_cb(DnD_Receiver *dndr, Main_Window *mw);
+	static void common_drop_tilemap_cb(const char *filename, Main_Window *mw);
 	// Window
 	static void exit_cb(Fl_Widget *w, Main_Window *mw);
 	// Tilemap menu

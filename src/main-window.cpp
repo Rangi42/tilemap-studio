@@ -2013,6 +2013,18 @@ void Main_Window::open_or_import_or_convert(const char *filename) {
 	}
 }
 
+void Main_Window::drag_and_drop_tilemap(const char *filename) {
+	if (unsaved()) {
+		std::string msg = modified_filename();
+		msg = msg + " has unsaved changes!\n\n"
+			"Open another tilemap anyway?";
+		_unsaved_dialog->message(msg);
+		_unsaved_dialog->show(this);
+		if (_unsaved_dialog->canceled()) { return; }
+	}
+	open_or_import_or_convert(filename);
+}
+
 void Main_Window::select_tile(uint16_t id) {
 	_selection.select_single(_tile_buttons[id]);
 	_current_tile->id(id);
@@ -2058,15 +2070,7 @@ void Main_Window::drag_and_drop_tilemap_cb(DnD_Receiver *dndr, Main_Window *mw) 
 	Fl_Window *top = Fl::modal();
 	if (top && top != mw) { return; }
 	std::string filename = dndr->text().substr(0, dndr->text().find('\n'));
-	if (mw->unsaved()) {
-		std::string msg = mw->modified_filename();
-		msg = msg + " has unsaved changes!\n\n"
-			"Open another tilemap anyway?";
-		mw->_unsaved_dialog->message(msg);
-		mw->_unsaved_dialog->show(mw);
-		if (mw->_unsaved_dialog->canceled()) { return; }
-	}
-	mw->open_or_import_or_convert(filename.c_str());
+	mw->drag_and_drop_tilemap(filename.c_str());
 }
 
 void Main_Window::drag_and_drop_tileset_cb(DnD_Receiver *dndr, Main_Window *mw) {
