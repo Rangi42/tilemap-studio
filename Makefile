@@ -47,7 +47,7 @@ endif
 TARGET = $(bindir)/$(tilemapstudio)
 DEBUGTARGET = $(bindir)/$(tilemapstudiod)
 
-.PHONY: all $(tilemapstudio) $(tilemapstudiod) release debug clean appdir install uninstall
+.PHONY: all $(tilemapstudio) $(tilemapstudiod) release debug clean appdir appdmg install uninstall
 
 .SUFFIXES: .o .cpp
 
@@ -93,6 +93,7 @@ clean:
 
 ifdef OS_MAC
 APPDIR = "$(bindir)/$(APPNAME).app"
+APPDMG = "$(bindir)/$(APPNAME).dmg"
 CONTENTS = $(APPDIR)/Contents
 
 appdir: release
@@ -103,8 +104,27 @@ appdir: release
 	install -m644 $(resdir)/Info.plist $(CONTENTS)/Info.plist
 	printf 'APPL????' > $(CONTENTS)/PkgInfo
 
+appdmg: appdir
+	rm -f $(APPDMG)
+	rm -rf $(APPDMG).dir/
+	mkdir -p $(APPDMG).dir
+	cp -a $(APPDIR) $(APPDMG).dir/
+	create-dmg \
+	  --volname "$(APPNAME)" \
+	  --volicon $(resdir)/app.icns \
+	  --window-pos 200 120 \
+	  --window-size 800 400 \
+	  --icon-size 100 \
+	  --icon "$(APPNAME).app" 200 190 \
+	  --hide-extension "$(APPNAME).app" \
+	  --app-drop-link 600 185 \
+	  $(APPDMG) $(APPDMG).dir/
+	rm -rf $(APPDMG).dir/
+
 install: appdir
+	rm -rf "/Applications/$(APPNAME).app"
 	cp -av $(APPDIR) "/Applications/$(APPNAME).app"
+# Remove admin-owned files if ran as "sudo"
 	rm -rf $(APPDIR)
 
 uninstall:
