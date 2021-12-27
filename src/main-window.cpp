@@ -505,63 +505,63 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 
 	// Configure toolbar buttons
 
-	_new_tb->tooltip("New Tilemap... (Ctrl+N)");
+	_new_tb->tooltip("New Tilemap... (" COMMAND_KEY_PLUS "N)");
 	_new_tb->callback((Fl_Callback *)new_cb, this);
 	_new_tb->image(NEW_ICON);
 	_new_tb->take_focus();
 
-	_open_tb->tooltip("Open Tilemap... (Ctrl+O)");
+	_open_tb->tooltip("Open Tilemap... (" COMMAND_KEY_PLUS "O)");
 	_open_tb->callback((Fl_Callback *)open_cb, this);
 	_open_tb->image(OPEN_ICON);
 
-	_save_tb->tooltip("Save Tilemap (Ctrl+S)");
+	_save_tb->tooltip("Save Tilemap (" COMMAND_KEY_PLUS "S)");
 	_save_tb->callback((Fl_Callback *)save_cb, this);
 	_save_tb->image(SAVE_ICON);
 
-	_print_tb->tooltip("Print Tilemap (Ctrl+P)");
+	_print_tb->tooltip("Print Tilemap (" COMMAND_KEY_PLUS "P)");
 	_print_tb->callback((Fl_Callback *)print_cb, this);
 	_print_tb->image(PRINT_ICON);
 
-	_load_tb->tooltip("Load Tileset... (Ctrl+T)");
+	_load_tb->tooltip("Load Tileset... (" COMMAND_KEY_PLUS "T)");
 	_load_tb->callback((Fl_Callback *)load_tileset_cb, this);
 	_load_tb->image(LOAD_ICON);
 
-	_add_tb->tooltip("Add Tileset... (Ctrl+A)");
+	_add_tb->tooltip("Add Tileset... (" COMMAND_KEY_PLUS "A)");
 	_add_tb->callback((Fl_Callback *)add_tileset_cb, this);
 	_add_tb->image(ADD_ICON);
 
-	_reload_tb->tooltip("Reload Tilesets (Ctrl+R)");
+	_reload_tb->tooltip("Reload Tilesets (" COMMAND_KEY_PLUS "R)");
 	_reload_tb->callback((Fl_Callback *)reload_tilesets_cb, this);
 	_reload_tb->image(RELOAD_ICON);
 
-	_undo_tb->tooltip("Undo (Ctrl+Z)");
+	_undo_tb->tooltip("Undo (" COMMAND_KEY_PLUS "Z)");
 	_undo_tb->callback((Fl_Callback *)undo_cb, this);
 	_undo_tb->image(UNDO_ICON);
 
-	_redo_tb->tooltip("Redo (Ctrl+Y)");
+	_redo_tb->tooltip("Redo (" COMMAND_KEY_PLUS "Y)");
 	_redo_tb->callback((Fl_Callback *)redo_cb, this);
 	_redo_tb->image(REDO_ICON);
 
-	_zoom_in_tb->tooltip("Zoom In (Ctrl+=)");
+	_zoom_in_tb->tooltip("Zoom In (" COMMAND_KEY_PLUS "=)");
 	_zoom_in_tb->callback((Fl_Callback *)zoom_in_cb, this);
 	_zoom_in_tb->image(ZOOM_IN_ICON);
 	_zoom_in_tb->shortcut(FL_COMMAND + '+');
 
-	_zoom_out_tb->tooltip("Zoom Out (Ctrl+-)");
+	_zoom_out_tb->tooltip("Zoom Out (" COMMAND_KEY_PLUS "-)");
 	_zoom_out_tb->callback((Fl_Callback *)zoom_out_cb, this);
 	_zoom_out_tb->image(ZOOM_OUT_ICON);
 
-	_grid_tb->tooltip("Grid (Ctrl+G)");
+	_grid_tb->tooltip("Grid (" COMMAND_KEY_PLUS "G)");
 	_grid_tb->callback((Fl_Callback *)grid_tb_cb, this);
 	_grid_tb->image(GRID_ICON);
 	_grid_tb->value(Config::grid());
 
-	_rainbow_tiles_tb->tooltip("Rainbow Tiles (Ctrl+I)");
+	_rainbow_tiles_tb->tooltip("Rainbow Tiles (" COMMAND_KEY_PLUS "I)");
 	_rainbow_tiles_tb->callback((Fl_Callback *)rainbow_tiles_tb_cb, this);
 	_rainbow_tiles_tb->image(RAINBOW_ICON);
 	_rainbow_tiles_tb->value(Config::rainbow_tiles());
 
-	_bold_palettes_tb->tooltip("Bold Palettes (Ctrl+B)");
+	_bold_palettes_tb->tooltip("Bold Palettes (" COMMAND_KEY_PLUS "B)");
 	_bold_palettes_tb->callback((Fl_Callback *)bold_palettes_tb_cb, this);
 	_bold_palettes_tb->image(BOLD_ICON);
 	_bold_palettes_tb->value(Config::bold_palettes());
@@ -572,27 +572,27 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_tilemap_width->range(1, 1024);
 	_tilemap_width->callback((Fl_Callback *)tilemap_width_tb_cb, this);
 
-	_resize_tb->tooltip("Resize... (Ctrl+E)");
+	_resize_tb->tooltip("Resize... (" COMMAND_KEY_PLUS "E)");
 	_resize_tb->callback((Fl_Callback *)resize_cb, this);
 	_resize_tb->image(RESIZE_ICON);
 
-	_shift_tb->tooltip("Shift... (Ctrl+M)");
+	_shift_tb->tooltip("Shift... (" COMMAND_KEY_PLUS "M)");
 	_shift_tb->callback((Fl_Callback *)shift_cb, this);
 	_shift_tb->image(SHIFT_ICON);
 
-	_reformat_tb->tooltip("Reformat... (Ctrl+F)");
+	_reformat_tb->tooltip("Reformat... (" COMMAND_KEY_PLUS "F)");
 	_reformat_tb->callback((Fl_Callback *)reformat_cb, this);
 	_reformat_tb->image(REFORMAT_ICON);
 
-	_tileset_width_tb->tooltip("Tileset Width... (Ctrl+H)");
+	_tileset_width_tb->tooltip("Tileset Width... (" COMMAND_KEY_PLUS "H)");
 	_tileset_width_tb->callback((Fl_Callback *)tileset_width_cb, this);
 	_tileset_width_tb->image(TILESET_WIDTH_ICON);
 
-	_shift_tileset_tb->tooltip("Shift Tileset... (Ctrl+K)");
+	_shift_tileset_tb->tooltip("Shift Tileset... (" COMMAND_KEY_PLUS "K)");
 	_shift_tileset_tb->callback((Fl_Callback *)shift_tileset_cb, this);
 	_shift_tileset_tb->image(SHIFT_TILESET_ICON);
 
-	_image_to_tiles_tb->tooltip("Image to Tiles... (Ctrl+X)");
+	_image_to_tiles_tb->tooltip("Image to Tiles... (" COMMAND_KEY_PLUS "X)");
 	_image_to_tiles_tb->callback((Fl_Callback *)image_to_tiles_cb, this);
 	_image_to_tiles_tb->image(INPUT_ICON);
 
