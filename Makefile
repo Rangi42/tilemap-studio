@@ -24,8 +24,8 @@ tmpdir = tmp
 debugdir = tmp/debug
 bindir = bin
 
-CXXFLAGS = -std=c++17 -I$(srcdir) -I$(resdir) $(shell fltk-config --use-images --cxxflags)
-LDFLAGS = $(shell fltk-config --use-images --ldflags)
+CXXFLAGS := -std=c++17 -I$(srcdir) -I$(resdir) $(shell fltk-config --use-images --cxxflags) $(CXXFLAGS)
+LDFLAGS := $(shell fltk-config --use-images --ldflags) $(LDFLAGS)
 ifndef OS_MAC
 LDFLAGS += $(shell pkg-config --libs libpng xpm)
 endif
@@ -56,10 +56,10 @@ all: $(tilemapstudio)
 $(tilemapstudio): release
 $(tilemapstudiod): debug
 
-release: CXXFLAGS += $(RELEASEFLAGS)
+release: CXXFLAGS := $(RELEASEFLAGS) $(CXXFLAGS)
 release: $(TARGET)
 
-debug: CXXFLAGS += $(DEBUGFLAGS)
+debug: CXXFLAGS := $(DEBUGFLAGS) $(CXXFLAGS)
 debug: $(DEBUGTARGET)
 
 $(TARGET): $(OBJECTS)
