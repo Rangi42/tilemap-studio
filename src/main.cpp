@@ -116,12 +116,22 @@ int main(int argc, char **argv) {
 		window->maximize();
 	}
 
-	if (argc > 2) {
-		window->open_tilemap(argv[1]);
-		window->load_tileset(argv[2]);
+	int argi = 1;
+#ifdef __APPLE__
+	// Ignore the "-psn_*" parameter passed by some older macOS versions
+	// See https://stackoverflow.com/questions/10242115/os-x-strange-psn-command-line-parameter-when-launched-from-finder
+	while (argi < argc) {
+		if (memcmp(argv[argi], "-psn_", 4) != 0) break;
+		argi++;
 	}
-	else if (argc > 1) {
-		window->open_or_import_or_convert(argv[1]);
+#endif
+
+	if (argc - argi >= 2) {
+		window->open_tilemap(argv[argi+0]);
+		window->load_tileset(argv[argi+1]);
+	}
+	else if (argc - argi >= 1) {
+		window->open_or_import_or_convert(argv[argi]);
 	}
 	fl_open_callback(open_dragged_cb);
 
