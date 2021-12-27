@@ -30,7 +30,7 @@ ifndef OS_MAC
 LDFLAGS += $(shell pkg-config --libs libpng xpm)
 endif
 
-RELEASEFLAGS = -DNDEBUG -O3 -flto -march=native
+RELEASEFLAGS = -DNDEBUG -O3 -flto
 DEBUGFLAGS = -DDEBUG -D_DEBUG -O0 -g -ggdb3 -Wall -Wextra -pedantic -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter
 
 COMMON = $(wildcard $(srcdir)/*.h) $(wildcard $(resdir)/*.xpm) $(resdir)/help.html
