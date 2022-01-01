@@ -194,6 +194,10 @@ void Tile_State::draw_tile(int x, int y, int z, bool active, bool selected) {
 	uint16_t hi = HI_NYB(id), lo = LO_NYB(id), bank = (id & 0x300) >> 8;
 	char l1 = (char)(hi > 9 ? 'A' + hi - 10 : '0' + hi), l2 = (char)(lo > 9 ? 'A' + lo - 10 : '0' + lo);
 	const char buffer[] = {l1, l2, '\0'};
+	if (bank & 1) {
+		hi ^= 8;
+		lo ^= 8;
+	}
 	bool r = Config::rainbow_tiles();
 	Fl_Color bg = rainbow_bg_colors[r ? lo : 0];
 	int s = TILE_SIZE * z;
