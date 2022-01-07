@@ -67,16 +67,19 @@ cd tilemap-studio
 
 # Build FLTK 1.3.7 with the latest ABI enabled
 # (even if you already have libfltk1.3-dev installed)
-git clone --branch release-1.3.7 --depth 1 https://github.com/fltk/fltk.git
-pushd fltk
-./autogen.sh --prefix="$PWD/.." --with-abiversion=10307
+mkdir -p lib
+pushd lib
+wget https://www.fltk.org/pub/fltk/1.3.8/fltk-1.3.8-source.tar.bz2
+tar xf fltk-1.3.8-source.tar.bz2
+cd fltk-1.3.8
+./configure --prefix="$(realpath "$PWD/..")" --with-abiversion=10308
 make
 make install
 popd
 
 # Build Tilemap Studio
 # ("export PATH" is needed if bin/fltk-config is not already in your PATH)
-export PATH="$PWD/bin:$PATH"
+export PATH="$PWD/lib/bin:$PATH"
 make
 
 # Install Tilemap Studio

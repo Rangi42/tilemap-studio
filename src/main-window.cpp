@@ -434,12 +434,14 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_menu_bar->copy(menu_items);
 
 	// Initialize macOS application menu
+#ifdef __APPLE__
 	Fl_Mac_App_Menu::about = "About " PROGRAM_NAME;
 	Fl_Mac_App_Menu::hide = "Hide " PROGRAM_NAME;
 	Fl_Mac_App_Menu::quit = "Quit " PROGRAM_NAME;
 	fl_mac_set_about((Fl_Callback *)about_cb, this);
 	fl_open_display();
 	_menu_bar->update();
+#endif
 
 	// Initialize menu bar items
 	int first_recent_tilemap_i = _menu_bar->find_index((Fl_Callback *)open_recent_tilemap_cb);
