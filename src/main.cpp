@@ -106,6 +106,7 @@ int main(int argc, char **argv) {
 	int w = Preferences::get("w", 647), h = Preferences::get("h", 406);
 	window = new Main_Window(x, y, w, h);
 	window->show();
+	OS::update_macos_appearance(window);
 	if (window->transparent()) {
 		window->apply_transparency();
 	}
