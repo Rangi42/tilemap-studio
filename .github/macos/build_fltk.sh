@@ -20,6 +20,6 @@ cd "fltk-$version"
 	--enable-localjpeg \
 	--enable-localpng \
 	--disable-localzlib
-make install
+make DIRS='$(IMAGEDIRS) src $(CAIRODIR)' install
 cd ..
 rm -rf "fltk-$version"
