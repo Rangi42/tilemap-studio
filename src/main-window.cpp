@@ -348,7 +348,11 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		OS_SUBMENU("&Edit"),
 		OS_MENU_ITEM("&Undo", FL_COMMAND + 'z', (Fl_Callback *)undo_cb, this, 0),
 		OS_MENU_ITEM("&Redo", FL_COMMAND + 'y', (Fl_Callback *)redo_cb, this, FL_MENU_DIVIDER),
+#ifdef __APPLE__
+		OS_MENU_ITEM("&Erase Selection", FL_COMMAND + NSBackspaceCharacter, (Fl_Callback *)erase_selection_cb, this, 0),
+#else
 		OS_MENU_ITEM("&Erase Selection", FL_Delete, (Fl_Callback *)erase_selection_cb, this, 0),
+#endif
 		OS_MENU_ITEM("&X Flip Selection", FL_COMMAND + 'X', (Fl_Callback *)x_flip_selection_cb, this, 0),
 		OS_MENU_ITEM("&Y Flip Selection", FL_COMMAND + 'Y', (Fl_Callback *)y_flip_selection_cb, this, 0),
 		OS_MENU_ITEM("&Copy Selection", FL_COMMAND + 'C', (Fl_Callback *)copy_selection_cb, this, 0),
@@ -983,6 +987,7 @@ void Main_Window::update_zoom(int old_zoom) {
 		_zoom_in_mi->activate();
 		_zoom_in_tb->activate();
 	}
+	_menu_bar->update();
 	Tile_State::update_zoom();
 	int px = _tilemap_scroll->xposition(), py = _tilemap_scroll->yposition();
 	tilemap_width_tb_cb(NULL, this);
@@ -1021,6 +1026,7 @@ void Main_Window::update_selection_controls() {
 		_copy_selection_mi->deactivate();
 		_crop_to_selection_mi->deactivate();
 	}
+	_menu_bar->update();
 }
 
 void Main_Window::update_status(Tile_Tessera *tt) {
@@ -2875,6 +2881,7 @@ void Main_Window::tilemap_width_tb_cb(OS_Spinner *, Main_Window *mw) {
 		mw->_shift_tb->deactivate();
 		mw->_transpose_mi->deactivate();
 	}
+	mw->_menu_bar->update();
 	mw->update_status(NULL);
 }
 

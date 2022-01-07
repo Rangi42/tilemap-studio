@@ -1,6 +1,24 @@
 #ifndef COCOA_H
 #define COCOA_H
 
+// From $SDKROOT/System/Library/Frameworks/AppKit.framework/Versions/C/Headers/NSText.h
+#ifdef __OBJC__
+#import <AppKit/NSText.h>
+#else
+enum {
+    NSEnterCharacter                = 0x0003,
+    NSBackspaceCharacter            = 0x0008,
+    NSTabCharacter                  = 0x0009,
+    NSNewlineCharacter              = 0x000a,
+    NSFormFeedCharacter             = 0x000c,
+    NSCarriageReturnCharacter       = 0x000d,
+    NSBackTabCharacter              = 0x0019,
+    NSDeleteCharacter               = 0x007f,
+    NSLineSeparatorCharacter        = 0x2028,
+    NSParagraphSeparatorCharacter   = 0x2029
+};
+#endif
+
 #pragma warning(push, 0)
 #include <FL/Fl_Window.H>
 #pragma warning(pop)
