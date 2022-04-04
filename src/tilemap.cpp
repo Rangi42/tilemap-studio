@@ -357,6 +357,19 @@ Tilemap::Result Tilemap::make_tiles(const std::vector<uchar> &tbytes, const std:
 		}
 	}
 
+	else if (fmt == Tilemap_Format::GENESIS) {
+		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
+		tiles.reserve(c / 2);
+		for (size_t i = 0; i < c; i += 2) {
+			uchar a = tbytes[i];
+			uint16_t v = tbytes[i+1];
+			v = v | ((a & 0x07) << 8);
+			bool x_flip = !!(a & 0x08), y_flip = !!(a & 0x10), priority = !!(a & 0x80);
+			int palette = (a & 0x60) >> 5;
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, v, x_flip, y_flip, priority, false, palette));
+		}
+	}
+
 	else if (fmt == Tilemap_Format::RBY_TOWN_MAP) {
 		tiles.reserve(c);
 		for (size_t i = 0; i < c - 1; i++) {

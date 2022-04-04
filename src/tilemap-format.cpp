@@ -19,6 +19,7 @@ static const int tileset_sizes[NUM_FORMATS] = {
 	0x400, // NDS_8BPP - 10-bit tile IDs
 	0x100, // SGB_BORDER - 8-bit tile IDs
 	0x400, // SNES_ATTRS - 10-bit tile IDs
+	0x800, // GENESIS - 11-bit tile IDs
 	0x800, // TG16 - 11-bit tile IDs
 	0x10,  // RBY_TOWN_MAP - High nybble is reserved for run length
 	0xFF,  // GSC_TOWN_MAP - $FF is reserved for the end marker
@@ -41,6 +42,7 @@ int format_palettes_size(Tilemap_Format fmt) {
 		return 8;
 	case Tilemap_Format::GBA_4BPP:
 	case Tilemap_Format::NDS_4BPP:
+	case Tilemap_Format::GENESIS:
 	case Tilemap_Format::TG16:
 		return 16;
 	case Tilemap_Format::SGB_BORDER:
@@ -70,6 +72,7 @@ int format_palette_size(Tilemap_Format fmt) {
 		return 16;
 	case Tilemap_Format::GBC_ATTRS:
 	case Tilemap_Format::GBC_ATTRMAP:
+	case Tilemap_Format::GENESIS:
 	case Tilemap_Format::SGB_BORDER:
 	case Tilemap_Format::GSC_TOWN_MAP:
 	case Tilemap_Format::PC_TOWN_MAP:
@@ -91,6 +94,7 @@ int format_color_depth(Tilemap_Format fmt) {
 	case Tilemap_Format::GBA_4BPP:
 	case Tilemap_Format::NDS_4BPP:
 	case Tilemap_Format::SNES_ATTRS:
+	case Tilemap_Format::GENESIS:
 	case Tilemap_Format::TG16:
 		return 4;
 	case Tilemap_Format::GBC_ATTRS:
@@ -108,21 +112,22 @@ int format_color_depth(Tilemap_Format fmt) {
 }
 
 static const char *format_names[NUM_FORMATS] = {
-	"Plain tiles",               // PLAIN
-	"GBC tiles + attributes",    // GBC_ATTRS
-	"GBC tilemap + attrmap",     // GBC_ATTRMAP
-	"GBA tiles + 4bpp palettes", // GBA_4BPP
-	"GBA tiles + 8bpp palette",  // GBA_8BPP
-	"NDS tiles + 4bpp palettes", // NDS_4BPP
-	"NDS tiles + 8bpp palette",  // NDS_8BPP
-	"SGB border",                // SGB_BORDER
-	"SNES tiles + attributes",   // SNES_ATTRS
-	"TG16 tiles + palettes",     // TG16
-	"RBY Town Map",              // RBY_TOWN_MAP
-	"GSC Town Map",              // GSC_TOWN_MAP
-	"PC Town Map",               // PC_TOWN_MAP
-	"SW Town Map",               // SW_TOWN_MAP
-	"Pok\xc3\xa9gear card",      // POKEGEAR_CARD
+	"Plain tiles",                // PLAIN
+	"GBC tiles + attributes",     // GBC_ATTRS
+	"GBC tilemap + attrmap",      // GBC_ATTRMAP
+	"GBA tiles + 4bpp palettes",  // GBA_4BPP
+	"GBA tiles + 8bpp palette",   // GBA_8BPP
+	"NDS tiles + 4bpp palettes",  // NDS_4BPP
+	"NDS tiles + 8bpp palette",   // NDS_8BPP
+	"SGB border",                 // SGB_BORDER
+	"SNES tiles + attributes",    // SNES_ATTRS
+	"Genesis tiles + attributes", // GENESIS
+	"TG16 tiles + palettes",      // TG16
+	"RBY Town Map",               // RBY_TOWN_MAP
+	"GSC Town Map",               // GSC_TOWN_MAP
+	"PC Town Map",                // PC_TOWN_MAP
+	"SW Town Map",                // SW_TOWN_MAP
+	"Pok\xc3\xa9gear card",       // POKEGEAR_CARD
 };
 
 const char *format_name(Tilemap_Format fmt) {
@@ -147,6 +152,7 @@ static const char *format_extensions[NUM_FORMATS] = {
 	".rcsn",        // NDS_8BPP - extracted by Tinke <https://github.com/pleonex/tinke>
 	".map",         // SGB_BORDER - e.g. pokered/gfx/{red|blue}/sgbborder.map
 	".bin",         // SNES_ATTRS
+	".bin",         // GENESIS <http://dreamjam.co.uk/emuviews/txt/genvdp.txt>
 	".map",         // TG16 <https://www.chibiakumas.com/6502/pcengine.php>
 	".rle",         // RBY_TOWN_MAP - e.g. pokered/gfx/town_map.rle
 	".bin",         // GSC_TOWN_MAP - e.g. pokecrystal/gfx/pokegear/*.bin
@@ -173,6 +179,7 @@ int format_bytes_per_tile(Tilemap_Format fmt) {
 	case Tilemap_Format::NDS_8BPP:
 	case Tilemap_Format::SGB_BORDER:
 	case Tilemap_Format::SNES_ATTRS:
+	case Tilemap_Format::GENESIS:
 	case Tilemap_Format::TG16:
 		return 2;
 	case Tilemap_Format::RBY_TOWN_MAP:
@@ -226,7 +233,7 @@ Tilemap_Format guess_format(const char *filename) {
 	Tilemap_Format fmt = Config::format();
 	if (fmt == Tilemap_Format::SGB_BORDER || fmt == Tilemap_Format::GBC_ATTRS || fmt == Tilemap_Format::GBA_4BPP ||
 		fmt == Tilemap_Format::GBA_8BPP || fmt == Tilemap_Format::NDS_4BPP || fmt == Tilemap_Format::NDS_8BPP ||
-		fmt == Tilemap_Format::SNES_ATTRS || fmt == Tilemap_Format::TG16) {
+		fmt == Tilemap_Format::SNES_ATTRS || fmt == Tilemap_Format::GENESIS || fmt == Tilemap_Format::TG16) {
 		return fmt;
 	}
 	return Tilemap_Format::PLAIN;
@@ -310,6 +317,19 @@ std::vector<uchar> make_tilemap_bytes(const std::vector<Tile_Tessera *> &tiles, 
 			if (tt->y_flip()) { a |= 0x08; }
 			if (tt->palette() > -1) { a |= (tt->palette() << 4) & 0xF0; }
 			bytes.push_back(a);
+		}
+	}
+	else if (fmt == Tilemap_Format::GENESIS) {
+		bytes.reserve(n * 2);
+		for (Tile_Tessera *tt : tiles) {
+			uchar a = (tt->id() >> 8) & 0x07;
+			if (tt->priority()) { a |= 0x80; }
+			if (tt->x_flip())   { a |= 0x08; }
+			if (tt->y_flip())   { a |= 0x10; }
+			if (tt->palette() > -1) { a |= (tt->palette() << 5) & 0x60; }
+			bytes.push_back(a);
+			uchar v = (uchar)(tt->id() & 0xFF);
+			bytes.push_back(v);
 		}
 	}
 	else if (fmt == Tilemap_Format::TG16) {
