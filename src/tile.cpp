@@ -9,7 +9,7 @@ bool is_blank_tile(const Tile &tile, Fl_Color blank_color) {
 	});
 }
 
-bool are_identical_tiles(const Tile &t1, const Tile &t2, Tilemap_Format fmt, bool &x_flip, bool &y_flip) {
+bool are_identical_tiles(const Tile &t1, const Tile &t2, bool allow_flip, bool &x_flip, bool &y_flip) {
 	for (int i = 0; i < NUM_TILE_PIXELS; i++) {
 		if (t1[i] != t2[i]) {
 			goto not_identical;
@@ -17,7 +17,7 @@ bool are_identical_tiles(const Tile &t1, const Tile &t2, Tilemap_Format fmt, boo
 	}
 	return true;
 not_identical:
-	if (format_can_flip(fmt)) {
+	if (allow_flip) {
 		for (int y = 0; y < TILE_SIZE; y++) {
 			for (int x = 0; x < TILE_SIZE; x++) {
 				if (t1[y*TILE_SIZE+x] != t2[y*TILE_SIZE+TILE_SIZE-x-1]) {

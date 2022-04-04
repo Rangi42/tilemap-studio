@@ -27,11 +27,12 @@
 
 typedef std::set<Fl_Color> Color_Set;
 
-static bool build_tilemap(const Tile *tiles, size_t n, const std::vector<int> tile_palettes, Tilemap &tilemap,
-	std::vector<size_t> &tileset, Tilemap_Format fmt, uint16_t start_id, bool use_blank, uint16_t blank_id, Fl_Color blank_color) {
+static bool build_tilemap(const Tile *tiles, size_t n, const std::vector<int> tile_palettes, Tilemap &tilemap, std::vector<size_t> &tileset,
+	Tilemap_Format fmt, bool allow_unique, bool allow_flip, uint16_t start_id, bool use_blank, uint16_t blank_id, Fl_Color blank_color) {
 	size_t mn = (size_t)format_tileset_size(fmt);
 	tilemap.resize(n, 1, 0, 0);
 	tileset.reserve(mn);
+	allow_flip &= format_can_flip(fmt);
 	size_t tc = 0;
 	for (size_t i = 0; i < n; i++) {
 		if (use_blank && start_id + tileset.size() == blank_id) {
@@ -50,7 +51,7 @@ static bool build_tilemap(const Tile *tiles, size_t n, const std::vector<int> ti
 		bool x_flip = false, y_flip = false;
 		for (; ti < nt; ti++) {
 			size_t j = tileset[ti];
-			if (are_identical_tiles(tile, tiles[j], fmt, x_flip, y_flip)) {
+			if (allow_unique && are_identical_tiles(tile, tiles[j], allow_flip, x_flip, y_flip)) {
 				break;
 			}
 		}
@@ -366,11 +367,13 @@ Image_to_Tiles_Result Main_Window::image_to_tiles() {
 	Tilemap tilemap;
 	std::vector<size_t> tileset;
 
+	bool allow_unique = _image_to_tiles_dialog->unique_tiles();
+	bool allow_flip = _image_to_tiles_dialog->flip_tiles();
 	uint16_t start_id = _image_to_tiles_dialog->start_id();
 	bool use_blank = _image_to_tiles_dialog->use_blank();
 	uint16_t blank_id = _image_to_tiles_dialog->blank_id();
 
-	if (!build_tilemap(tiles, n, tile_palettes, tilemap, tileset, fmt, start_id, use_blank, blank_id, color_zero)) {
+	if (!build_tilemap(tiles, n, tile_palettes, tilemap, tileset, fmt, allow_unique, allow_flip, start_id, use_blank, blank_id, color_zero)) {
 		delete [] tiles;
 		std::string msg = "Could not convert ";
 		msg = msg + image_basename + "!\n\nToo many unique tiles.";
