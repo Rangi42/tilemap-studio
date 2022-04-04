@@ -345,6 +345,18 @@ Tilemap::Result Tilemap::make_tiles(const std::vector<uchar> &tbytes, const std:
 		}
 	}
 
+	else if (fmt == Tilemap_Format::TG16) {
+		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
+		tiles.reserve(c / 2);
+		for (size_t i = 0; i < c; i += 2) {
+			uint16_t v = tbytes[i];
+			uchar a = tbytes[i+1];
+			v = v | ((a & 0x07) << 8);
+			int palette = HI_NYB(a);
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, v, false, false, false, false, palette));
+		}
+	}
+
 	else if (fmt == Tilemap_Format::RBY_TOWN_MAP) {
 		tiles.reserve(c);
 		for (size_t i = 0; i < c - 1; i++) {

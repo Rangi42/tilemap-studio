@@ -20,7 +20,7 @@
 #define MAX_NUM_PALETTES 16
 
 #define DEFAULT_TILES_PER_ROW 16
-#define MAX_NUM_TILES 1024
+#define MAX_NUM_TILES 0x800 // TG16
 
 struct Tile_State;
 
