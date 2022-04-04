@@ -77,6 +77,7 @@ public:
 	}
 	inline uint16_t id(void) const { return _state.id; }
 	inline void id(uint16_t id) { _state.id = id; }
+	void shift_id(int d, int n);
 	inline bool x_flip(void) const { return _state.x_flip; }
 	inline void x_flip(bool x_flip) { _state.x_flip = x_flip; }
 	inline bool y_flip(void) const { return _state.y_flip; }

@@ -328,6 +328,13 @@ void Tile_State::print(int x, int y, bool active, bool selected, int palette_) {
 	}
 }
 
+void Tile_Thing::shift_id(int d, int n) {
+	while (d < 0) {
+		d += n;
+	}
+	_state.id = (uint16_t)((_state.id + d) % n);
+}
+
 Tile_Swatch::Tile_Swatch(int x, int y, int w, int h) : Tile_Thing(), Fl_Box(x, y, w, h), _attributes() {
 	user_data(NULL);
 	box(OS_SPACER_THIN_DOWN_FRAME);

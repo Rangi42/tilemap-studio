@@ -77,10 +77,10 @@ private:
 	Fl_Menu_Item *_reload_tilesets_mi = NULL, *_unload_tilesets_mi = NULL;
 	Fl_Menu_Item *_undo_mi = NULL, *_redo_mi = NULL;
 	Fl_Menu_Item *_erase_selection_mi = NULL, *_x_flip_selection_mi = NULL, *_y_flip_selection_mi = NULL,
-		*_copy_selection_mi = NULL, *_select_all_mi = NULL;
+		*_shift_selected_ids_mi = NULL, *_copy_selection_mi = NULL, *_select_all_mi = NULL;
 	Fl_Menu_Item *_zoom_in_mi = NULL, *_zoom_out_mi = NULL;
 	Fl_Menu_Item *_tilemap_width_mi = NULL, *_crop_to_selection_mi = NULL, *_resize_mi = NULL, *_shift_mi = NULL,
-		*_transpose_mi = NULL, *_reformat_mi = NULL;
+		*_transpose_mi = NULL, *_shift_tile_ids_mi = NULL, *_reformat_mi = NULL;
 	Fl_Menu_Item *_shift_tileset_mi = NULL;
 	// Dialogs
 	Fl_Native_File_Chooser *_tilemap_open_chooser, *_tilemap_save_chooser, *_tilemap_import_chooser, *_tilemap_export_chooser,
@@ -92,7 +92,7 @@ private:
 	Print_Options_Dialog *_print_options_dialog;
 	Resize_Dialog *_resize_dialog;
 	Shift_Dialog *_shift_dialog;
-	Shift_Tileset_Dialog *_shift_tileset_dialog;
+	Shift_Tileset_Dialog *_shift_tileset_dialog, *_shift_tile_ids_dialog;
 	Reformat_Dialog *_reformat_dialog;
 	Add_Tileset_Dialog *_add_tileset_dialog;
 	Image_To_Tiles_Dialog *_image_to_tiles_dialog;
@@ -153,6 +153,7 @@ public:
 	void erase_selection(void);
 	void x_flip_selection(void);
 	void y_flip_selection(void);
+	void shift_selected_ids(int d, int n);
 	void copy_selection(void) const;
 	void select_all(void);
 	void new_tilemap(size_t width, size_t height);
@@ -182,6 +183,7 @@ private:
 	void shift_tilemap(void);
 	void shift_tileset(void);
 	void transpose_tilemap(void);
+	void shift_tile_ids(void);
 	void reformat_tilemap(void);
 	void save_tilemap(bool force);
 	void import_tilemap(const char *filename);
@@ -219,11 +221,12 @@ private:
 	// Edit menu
 	static void undo_cb(Fl_Widget *w, Main_Window *mw);
 	static void redo_cb(Fl_Widget *w, Main_Window *mw);
-	static void erase_selection_cb(Fl_Widget *w, Main_Window *mw);
-	static void x_flip_selection_cb(Fl_Widget *w, Main_Window *mw);
-	static void y_flip_selection_cb(Fl_Widget *w, Main_Window *mw);
-	static void copy_selection_cb(Fl_Widget *w, Main_Window *mw);
-	static void select_all_cb(Fl_Widget *w, Main_Window *mw);
+	static void erase_selection_cb(Fl_Menu_ *w, Main_Window *mw);
+	static void x_flip_selection_cb(Fl_Menu_ *w, Main_Window *mw);
+	static void y_flip_selection_cb(Fl_Menu_ *w, Main_Window *mw);
+	static void shift_selected_ids_cb(Fl_Menu_ *w, Main_Window *mw);
+	static void copy_selection_cb(Fl_Menu_ *w, Main_Window *mw);
+	static void select_all_cb(Fl_Menu_ *w, Main_Window *mw);
 	// View menu
 	static void classic_theme_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void aero_theme_cb(Fl_Menu_ *m, Main_Window *mw);
@@ -250,6 +253,7 @@ private:
 	static void resize_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void shift_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void transpose_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void shift_tile_ids_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void reformat_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void tileset_width_cb(Fl_Widget *w, Main_Window *mw);
 	static void shift_tileset_cb(Fl_Widget *w, Main_Window *mw);
