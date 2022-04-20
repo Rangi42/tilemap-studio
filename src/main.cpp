@@ -4,6 +4,7 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Window.H>
+#include <FL/x.H>
 #pragma warning(pop)
 
 #include "version.h"
@@ -19,7 +20,17 @@
 #define MAKE_WSTR_HELPER(x) L ## x
 #define MAKE_WSTR(x) MAKE_WSTR_HELPER(x)
 
+#elif defined(__APPLE__)
+#include "cocoa.h"
 #endif
+
+static Main_Window *window = nullptr;
+
+void open_dragged_cb(const char *filename) {
+	if (window) {
+		window->drag_and_drop_tilemap(filename);
+	}
+}
 
 static void use_theme(OS::Theme theme) {
 	OS::use_native_fonts();
@@ -78,6 +89,10 @@ int main(int argc, char **argv) {
 		default_theme = OS::Theme::DARK;
 	}
 	OS::Theme theme = (OS::Theme)Preferences::get("theme", (int)default_theme);
+#elif defined(__APPLE__)
+	OS::Theme default_theme = OS::Theme::AQUA;
+	if (cocoa_is_dark_mode()) default_theme = OS::Theme::DARK;
+	OS::Theme theme = (OS::Theme)Preferences::get("theme", (int)default_theme);
 #else
 	OS::Theme theme = (OS::Theme)Preferences::get("theme", (int)OS::Theme::GREYBIRD);
 #endif
@@ -89,25 +104,37 @@ int main(int argc, char **argv) {
 	int x = Preferences::get("x", 48), y = Preferences::get("y", 48);
 #endif
 	int w = Preferences::get("w", 647), h = Preferences::get("h", 406);
-	Main_Window window(x, y, w, h);
-	window.show();
-	if (window.transparent()) {
-		window.apply_transparency();
+	window = new Main_Window(x, y, w, h);
+	window->show();
+	OS::update_macos_appearance(window);
+	if (window->transparent()) {
+		window->apply_transparency();
 	}
-	if (window.full_screen()) {
-		window.fullscreen();
+	if (window->full_screen()) {
+		window->fullscreen();
 	}
 	else if (Preferences::get("maximized")) {
-		window.maximize();
+		window->maximize();
 	}
 
-	if (argc > 2) {
-		window.open_tilemap(argv[1]);
-		window.load_tileset(argv[2]);
+	int argi = 1;
+#ifdef __APPLE__
+	// Ignore the "-psn_*" parameter passed by some older macOS versions
+	// See https://stackoverflow.com/questions/10242115/os-x-strange-psn-command-line-parameter-when-launched-from-finder
+	while (argi < argc) {
+		if (memcmp(argv[argi], "-psn_", 4) != 0) break;
+		argi++;
 	}
-	else if (argc > 1) {
-		window.open_or_import_or_convert(argv[1]);
+#endif
+
+	if (argc - argi >= 2) {
+		window->open_tilemap(argv[argi+0]);
+		window->load_tileset(argv[argi+1]);
 	}
+	else if (argc - argi >= 1) {
+		window->open_or_import_or_convert(argv[argi]);
+	}
+	fl_open_callback(open_dragged_cb);
 
 	return Fl::run();
 }

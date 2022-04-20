@@ -313,7 +313,7 @@ void Print_Options_Dialog::initialize() {
 	_export_button->tooltip("Export (Enter)");
 	_export_button->callback((Fl_Callback *)close_cb, this);
 	_copy_button->shortcut(FL_COMMAND + 'c');
-	_copy_button->tooltip("Copy (Ctrl+C)");
+	_copy_button->tooltip("Copy (" COMMAND_KEY_PLUS "C)");
 	_copy_button->callback((Fl_Callback *)copy_cb, this);
 	_cancel_button->shortcut(FL_Escape);
 	_cancel_button->tooltip("Cancel (Esc)");

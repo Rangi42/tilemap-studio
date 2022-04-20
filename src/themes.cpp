@@ -3326,6 +3326,8 @@ void OS::use_high_contrast_theme() {
 
 #ifdef _WIN32
 OS::Theme OS::_current_theme = is_classic_windows() ? Theme::CLASSIC : is_modern_windows() ? Theme::METRO : Theme::AERO;
+#elif defined(__APPLE__)
+OS::Theme OS::_current_theme = Theme::AQUA;
 #else
 OS::Theme OS::_current_theme = Theme::GREYBIRD;
 #endif
@@ -3369,6 +3371,32 @@ void OS::use_native_fonts() {
 	// Use common bold italic monospace font
 	const char *bold_italic_monospace_fonts[] = {
 		"Consolas bold italic", "Lucida Console bold italic", "Courier New bold italic"
+	};
+	use_any_font(FL_COURIER_BOLD_ITALIC, bold_italic_monospace_fonts, _countof(bold_italic_monospace_fonts));
+#elif defined(__APPLE__)
+	// Use system UI font
+	const char *system_fonts[4] = {
+		"San Francisco", "Helvetica Neue", "Lucida Grande", "Helvetica"
+	};
+	use_any_font(OS_FONT, system_fonts, _countof(system_fonts));
+	// Use common monospace font
+	const char *monospace_fonts[4] = {
+		"SF Mono", "Menlo", "Monaco", "Courier"
+	};
+	use_any_font(FL_COURIER, monospace_fonts, _countof(monospace_fonts));
+	// Use common bold monospace font
+	const char *bold_monospace_fonts[4] = {
+		"SF Mono bold", "Menlo bold", "Monaco bold", "Courier bold"
+	};
+	use_any_font(FL_COURIER_BOLD, bold_monospace_fonts, _countof(bold_monospace_fonts));
+	// Use common italic monospace font
+	const char *italic_monospace_fonts[4] = {
+		"SF Mono italic", "Menlo italic", "Monaco italic", "Courier italic"
+	};
+	use_any_font(FL_COURIER_ITALIC, italic_monospace_fonts, _countof(italic_monospace_fonts));
+	// Use common bold italic monospace font
+	const char *bold_italic_monospace_fonts[4] = {
+		"SF Mono bold italic", "Menlo bold italic", "Monaco bold italic", "Courier bold italic"
 	};
 	use_any_font(FL_COURIER_BOLD_ITALIC, bold_italic_monospace_fonts, _countof(bold_italic_monospace_fonts));
 #else

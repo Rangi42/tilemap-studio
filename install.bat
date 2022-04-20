@@ -29,6 +29,7 @@ mkdir "%INSTALLDIR%" >nul 2>&1
 copy /b /y %SOURCEFILE% "%INSTALLPATH%" >nul
 
 reg add "HKCR\.tilemap" /ve /f /d "Tilemap Studio" >nul
+reg add "HKCR\.map" /ve /f /d "Tilemap Studio" >nul
 reg add "HKCR\.rle" /ve /f /d "Tilemap Studio" >nul
 reg add "HKCR\Tilemap Studio" /ve /f /d "Tilemap File" >nul
 rem reg add "HKCR\Tilemap Studio\DefaultIcon" /ve /f /d "%%SystemRoot%%\system32\imageres.dll,127" >nul
