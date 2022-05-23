@@ -845,7 +845,9 @@ void Main_Window::update_recent_tilemaps() {
 		}
 		_recent_tilemap_mis[i]->flags &= ~FL_MENU_DIVIDER;
 	}
-	_recent_tilemap_mis[last]->flags |= FL_MENU_DIVIDER;
+	if (last > -1) {
+		_recent_tilemap_mis[last]->flags |= FL_MENU_DIVIDER;
+	}
 }
 
 void Main_Window::store_recent_tileset() {
@@ -884,7 +886,9 @@ void Main_Window::update_recent_tilesets() {
 		}
 		_recent_tileset_mis[i]->flags &= ~FL_MENU_DIVIDER;
 	}
-	_recent_tileset_mis[last]->flags |= FL_MENU_DIVIDER;
+	if (last > -1) {
+		_recent_tileset_mis[last]->flags |= FL_MENU_DIVIDER;
+	}
 }
 
 void Main_Window::update_icons() {
