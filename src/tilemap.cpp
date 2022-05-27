@@ -655,6 +655,13 @@ void Tilemap::print_tilemap() const {
 	}
 }
 
+static size_t sqrt(size_t n) {
+	for (size_t r = 1; r <= n / 2; r++) {
+		if (r * r == n) { return r; }
+	}
+	return 0;
+}
+
 void Tilemap::guess_width() {
 	size_t n = size();
 #define N_FITS_SIZE(w, h) n % (w) == 0 && n / (w) <= (h)
@@ -676,6 +683,9 @@ void Tilemap::guess_width() {
 	}
 	else if (N_FITS_SIZE(64, 64)) {
 		_width = 64;
+	}
+	else if (size_t r = sqrt(n); r > 0) {
+		_width = r;
 	}
 	else {
 		_width = 16;
