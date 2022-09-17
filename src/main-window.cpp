@@ -1643,9 +1643,9 @@ void Main_Window::shift_selected_ids(int d, int n) {
 	if (d == 0) { return; }
 	_tilemap.remember();
 	size_t ox = _selection.left_col(), oy = _selection.top_row();
-	size_t ow = ox + _selection.width(), oh = _selection.height();
-	for (size_t y = oy; y < oh; y++) {
-		for (size_t x = ox; x < ow; x++) {
+	size_t mx = ox + _selection.width(), my = oy + _selection.height();
+	for (size_t y = oy; y < oy + my; y++) {
+		for (size_t x = ox; x < ox + mx; x++) {
 			Tile_Tessera *tt = _tilemap.tile(x, y);
 			if (!tt) { continue; }
 			tt->shift_id(d, n);
@@ -1658,13 +1658,13 @@ void Main_Window::shift_selected_ids(int d, int n) {
 
 void Main_Window::copy_selection() const {
 	if (!_selection.selected_multiple() || _selection.from_tileset()) { return; }
-	size_t w = _selection.width(), h = _selection.height();
+	size_t ow = _selection.width(), oh = _selection.height();
 	int z = Config::zoom();
-	Fl_Copy_Surface *surface = new Fl_Copy_Surface(w * TILE_SIZE * z, h * TILE_SIZE * z);
+	Fl_Copy_Surface *surface = new Fl_Copy_Surface(ow * TILE_SIZE * z, oh * TILE_SIZE * z);
 	surface->set_current();
 	size_t ox = _selection.left_col(), oy = _selection.top_row();
-	for (size_t dy = 0; dy < h; dy++) {
-		for (size_t dx = 0; dx < w; dx++) {
+	for (size_t dy = 0; dy < oh; dy++) {
+		for (size_t dx = 0; dx < ow; dx++) {
 			if (Tile_Tessera *tt = _tilemap.tile(ox + dx, oy + dy); tt) {
 				surface->draw(tt, dx * TILE_SIZE * z, dy * TILE_SIZE * z);
 			}
@@ -2719,10 +2719,10 @@ void Main_Window::crop_to_selection_cb(Fl_Menu_ *, Main_Window *mw) {
 	mw->_unsaved_dialog->show(mw);
 	if (mw->_unsaved_dialog->canceled()) { return; }
 
-	size_t rw = mw->_selection.width(), rh = mw->_selection.height();
+	size_t ow = mw->_selection.width(), oh = mw->_selection.height();
 	int px = 0 - mw->_selection.left_col(), py = 0 - mw->_selection.top_row();
 
-	mw->resize_tilemap(rw, rh, px, py);
+	mw->resize_tilemap(ow, oh, px, py);
 }
 
 void Main_Window::resize_cb(Fl_Menu_ *, Main_Window *mw) {
