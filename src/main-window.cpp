@@ -1767,7 +1767,9 @@ void Main_Window::setup_tilemap(const char *basename, int old_tileset_size, cons
 	copy_label(buffer);
 
 	load_corresponding_tileset(tileset_filename);
-	store_recent_tilemap();
+	if (!_tilemap_file.empty()) {
+		store_recent_tilemap();
+	}
 	update_tilemap_metadata();
 	update_status(NULL);
 	update_active_controls();
