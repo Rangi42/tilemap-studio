@@ -9,11 +9,6 @@
 #include "image.h"
 #include "option-dialogs.h"
 
-// Avoid "warning C4458: declaration of 'i' hides class member"
-// due to Fl_Window's Fl_X *i
-#pragma warning(push)
-#pragma warning(disable : 4458)
-
 static const char *palette_names[NUM_PALETTE_FORMATS] = {
 	"Indexed in tileset image",
 	"Pixel image (PNG)",
@@ -124,7 +119,7 @@ bool write_palette(const char *f, const Palettes &palettes, Palette_Format pal_f
 
 	size_t n = palettes.size() * nc;
 	if (pal_fmt == Palette_Format::RGB) {
-		// <https://github.com/pret/pokecrystal/blob/master/macros/gfx.asm#:~:text=RGB:%20MACRO>
+		// <https://github.com/pret/pokecrystal/blob/master/macros/gfx.asm#:~:text=MACRO%20RGB>
 		int p = 0;
 		for (const Palette &palette : palettes) {
 			fprintf(file, "; palette %d\n", p++);
@@ -361,7 +356,7 @@ bool write_tilepal(const char *f, const std::vector<size_t> &tileset, const std:
 	FILE *file = fl_fopen(f, "wb");
 	if (!file) { return false; }
 
-	fputs("pertilepals: MACRO\nrept _NARG / 2\n\tdn \\2, \\1\n\tshift\n\tshift\nendr\nENDM\n", file);
+	fputs("MACRO pertilepals\nrept _NARG / 2\n\tdn \\2, \\1\n\tshift 2\nendr\nENDM\n", file);
 	size_t nc = 16;
 	size_t nt = tileset.size();
 	size_t np = std::max(nt, (size_t)(nc * 3));
@@ -389,5 +384,3 @@ bool write_tilepal(const char *f, const std::vector<size_t> &tileset, const std:
 	fclose(file);
 	return true;
 }
-
-#pragma warning(pop)

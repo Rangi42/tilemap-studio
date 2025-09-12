@@ -345,6 +345,31 @@ Tilemap::Result Tilemap::make_tiles(const std::vector<uchar> &tbytes, const std:
 		}
 	}
 
+	else if (fmt == Tilemap_Format::TG16) {
+		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
+		tiles.reserve(c / 2);
+		for (size_t i = 0; i < c; i += 2) {
+			uint16_t v = tbytes[i];
+			uchar a = tbytes[i+1];
+			v = v | ((a & 0x07) << 8);
+			int palette = HI_NYB(a);
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, v, false, false, false, false, palette));
+		}
+	}
+
+	else if (fmt == Tilemap_Format::GENESIS) {
+		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
+		tiles.reserve(c / 2);
+		for (size_t i = 0; i < c; i += 2) {
+			uchar a = tbytes[i];
+			uint16_t v = tbytes[i+1];
+			v = v | ((a & 0x07) << 8);
+			bool x_flip = !!(a & 0x08), y_flip = !!(a & 0x10), priority = !!(a & 0x80);
+			int palette = (a & 0x60) >> 5;
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, v, x_flip, y_flip, priority, false, palette));
+		}
+	}
+
 	else if (fmt == Tilemap_Format::RBY_TOWN_MAP) {
 		tiles.reserve(c);
 		for (size_t i = 0; i < c - 1; i++) {
@@ -630,6 +655,13 @@ void Tilemap::print_tilemap() const {
 	}
 }
 
+static size_t sqrt(size_t n) {
+	for (size_t r = 1; r <= n / 2; r++) {
+		if (r * r == n) { return r; }
+	}
+	return 0;
+}
+
 void Tilemap::guess_width() {
 	size_t n = size();
 #define N_FITS_SIZE(w, h) n % (w) == 0 && n / (w) <= (h)
@@ -651,6 +683,9 @@ void Tilemap::guess_width() {
 	}
 	else if (N_FITS_SIZE(64, 64)) {
 		_width = 64;
+	}
+	else if (size_t r = sqrt(n); r > 0) {
+		_width = r;
 	}
 	else {
 		_width = 16;

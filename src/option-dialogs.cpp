@@ -4,6 +4,7 @@
 #pragma warning(push, 0)
 #include <FL/Enumerations.H>
 #include <FL/Fl_Double_Window.H>
+#include <FL/platform.H>
 #pragma warning(pop)
 
 #include "preferences.h"
@@ -76,12 +77,15 @@ void Option_Dialog::refresh() {
 }
 
 void Option_Dialog::reveal(const Fl_Widget *p) {
+	Fl_Window *prev_grab = Fl::grab();
+	Fl::grab(NULL);
 	int x = p->x() + (p->w() - _dialog->w()) / 2;
 	int y = p->y() + (p->h() - _dialog->h()) / 2;
 	_dialog->position(x, y);
 	_ok_button->take_focus();
 	_dialog->show();
 	while (_dialog->shown()) { Fl::wait(); }
+	Fl::grab(prev_grab);
 }
 
 void Option_Dialog::close_cb(Fl_Widget *, Option_Dialog *od) {
@@ -363,12 +367,15 @@ void Print_Options_Dialog::refresh() {
 void Print_Options_Dialog::show(const Fl_Widget *p) {
 	initialize();
 	refresh();
+	Fl_Window *prev_grab = Fl::grab();
+	Fl::grab(NULL);
 	int x = p->x() + (p->w() - _dialog->w()) / 2;
 	int y = p->y() + (p->h() - _dialog->h()) / 2;
 	_dialog->position(x, y);
 	_export_button->take_focus();
 	_dialog->show();
 	while (_dialog->shown()) { Fl::wait(); }
+	Fl::grab(prev_grab);
 }
 
 void Print_Options_Dialog::close_cb(Fl_Widget *, Print_Options_Dialog *pd) {
@@ -757,11 +764,11 @@ int Add_Tileset_Dialog::refresh_content(int ww, int dy) {
 
 Image_To_Tiles_Dialog::Image_To_Tiles_Dialog(const char *t) : Option_Dialog(360, t), _tileset_heading(NULL), _tilemap_heading(NULL),
 	_tileset_spacer(NULL), _tilemap_spacer(NULL), _palette_spacer(NULL), _input_heading(NULL), _output_heading(NULL), _image(NULL),
-	_tileset(NULL), _image_name(NULL), _tileset_name(NULL), _no_extra_blank_tiles(NULL), _tilemap_name(NULL), _format(NULL),
-	_start_id(NULL), _use_blank(NULL), _blank_id(NULL), _palette(NULL), _palette_name(NULL), _palette_format(NULL), _start_index_label(NULL),
-	_start_index(NULL), _color_zero(NULL), _color_zero_rgb(NULL), _color_zero_swatch(NULL), _image_chooser(NULL), _tileset_chooser(NULL),
-	_image_filename(), _tileset_filename(), _tilemap_filename(), _attrmap_filename(), _palette_filename(), _tilepal_filename(),
-	_prepared_image(false), _picked_palette(false) {}
+	_tileset(NULL), _image_name(NULL), _tileset_name(NULL), _unique_tiles(NULL), _flip_tiles(NULL), _no_extra_blank_tiles(NULL),
+	_tilemap_name(NULL), _format(NULL), _start_id(NULL), _use_blank(NULL), _blank_id(NULL), _palette(NULL), _palette_name(NULL),
+	_palette_format(NULL), _start_index_label(NULL), _start_index(NULL), _color_zero(NULL), _color_zero_rgb(NULL), _color_zero_swatch(NULL),
+	_image_chooser(NULL), _tileset_chooser(NULL), _image_filename(), _tileset_filename(), _tilemap_filename(), _attrmap_filename(),
+	_palette_filename(), _tilepal_filename(), _prepared_image(false), _picked_palette(false) {}
 
 Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
 	delete _tileset_heading;
@@ -775,6 +782,8 @@ Image_To_Tiles_Dialog::~Image_To_Tiles_Dialog() {
 	delete _tileset;
 	delete _image_name;
 	delete _tileset_name;
+	delete _unique_tiles;
+	delete _flip_tiles;
 	delete _no_extra_blank_tiles;
 	delete _tilemap_name;
 	delete _format;
@@ -893,6 +902,19 @@ void Image_To_Tiles_Dialog::update_output_names() {
 	}
 }
 
+void Image_To_Tiles_Dialog::update_flip_tiles() {
+	if (format_can_flip(format()) && unique_tiles()) {
+		if (!_flip_tiles->active()) {
+			_flip_tiles->value(1);
+		}
+		_flip_tiles->activate();
+	}
+	else {
+		_flip_tiles->deactivate();
+		_flip_tiles->value(0);
+	}
+}
+
 void Image_To_Tiles_Dialog::update_start_index() {
 	if (format_can_make_palettes(format())) {
 		_start_index_label->activate();
@@ -945,6 +967,8 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	_tileset = new Toolbar_Button(0, 0, 0, 0);
 	_image_name = new Label_Button(0, 0, 0, 0, NO_FILE_SELECTED_LABEL);
 	_tileset_name = new Label_Button(0, 0, 0, 0, NO_FILE_SELECTED_LABEL);
+	_unique_tiles = new OS_Check_Button(0, 0, 0, 0, "Unique tiles");
+	_flip_tiles = new OS_Check_Button(0, 0, 0, 0, "Flip tiles");
 	_no_extra_blank_tiles = new OS_Check_Button(0, 0, 0, 0, "Avoid extra blank tiles at the end");
 	_tilemap_name = new Label(0, 0, 0, 0, "Output: " NO_FILES_DETERMINED_LABEL);
 	_format = new Dropdown(0, 0, 0, 0, "Format:");
@@ -979,6 +1003,9 @@ void Image_To_Tiles_Dialog::initialize_content() {
 	for (int i = 0; i < NUM_PALETTE_FORMATS; i++) {
 		_palette_format->add(palette_name((Palette_Format)i));
 	}
+	_unique_tiles->value(1);
+	_unique_tiles->callback((Fl_Callback *)unique_tiles_cb, this);
+	_flip_tiles->value(1);
 	_palette_format->value(0);
 	_palette_format->callback((Fl_Callback *)palette_format_cb, this);
 	_color_zero->callback((Fl_Callback *)color_zero_cb, this);
@@ -1008,7 +1035,7 @@ void Image_To_Tiles_Dialog::initialize_content() {
 
 int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	int wgt_h = 22, win_m = 10, wgt_m = 4, grp_m = 6;
-	int ch = (wgt_h + wgt_m) * 11 + grp_m * 2 + wgt_h;
+	int ch = (wgt_h + wgt_m) * 12 + grp_m * 2 + wgt_h;
 	_content->resize(win_m, dy, ww, ch);
 
 	int wgt_w = text_width(_tileset_heading->label(), 4);
@@ -1033,6 +1060,14 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	_tileset->resize(wgt_off, dy, wgt_h, wgt_h);
 	wgt_off += _tileset->w();
 	_tileset_name->resize(wgt_off, dy, ww-wgt_w-wgt_h, wgt_h);
+	dy += wgt_h + wgt_m;
+
+	wgt_off = win_m;
+	wgt_w = text_width(_unique_tiles->label(), 2) + wgt_h;
+	_unique_tiles->resize(wgt_off, dy, wgt_w, wgt_h);
+	wgt_off += _unique_tiles->w() + win_m;
+	wgt_w = text_width(_flip_tiles->label(), 2) + wgt_h;
+	_flip_tiles->resize(wgt_off, dy, wgt_w, wgt_h);
 	dy += wgt_h + wgt_m;
 
 	wgt_off = win_m;
@@ -1101,6 +1136,7 @@ int Image_To_Tiles_Dialog::refresh_content(int ww, int dy) {
 	_picked_palette = false;
 	_tileset_filename.clear();
 	update_image_name();
+	update_flip_tiles();
 	update_start_index();
 	update_output_names();
 	update_ok_button();
@@ -1144,10 +1180,15 @@ void Image_To_Tiles_Dialog::tileset_cb(Fl_Widget *, Image_To_Tiles_Dialog *itd) 
 	itd->_dialog->redraw();
 }
 
+void Image_To_Tiles_Dialog::unique_tiles_cb(OS_Check_Button *, Image_To_Tiles_Dialog *itd) {
+	itd->update_flip_tiles();
+}
+
 void Image_To_Tiles_Dialog::format_cb(Dropdown *, Image_To_Tiles_Dialog *itd) {
 	if (!itd->_picked_palette) {
 		itd->_palette_format->value((int)(format_uses_rgb_asm_pal(itd->format()) ? Palette_Format::RGB : Palette_Format::INDEXED));
 	}
+	itd->update_flip_tiles();
 	itd->update_start_index();
 	itd->update_output_names();
 	itd->_dialog->redraw();

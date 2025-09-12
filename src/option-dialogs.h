@@ -254,7 +254,7 @@ private:
 	Label * _input_heading, * _output_heading;
 	Toolbar_Button *_image, *_tileset;
 	Label_Button *_image_name, *_tileset_name;
-	OS_Check_Button *_no_extra_blank_tiles;
+	OS_Check_Button *_unique_tiles, *_flip_tiles, *_no_extra_blank_tiles;
 	Label *_tilemap_name;
 	Dropdown *_format;
 	Default_Hex_Spinner *_start_id;
@@ -281,6 +281,8 @@ public:
 	inline const char *attrmap_filename(void) const { return _attrmap_filename.c_str(); }
 	inline const char *palette_filename(void) const { return _palette_filename.c_str(); }
 	inline const char *tilepal_filename(void) const { return _tilepal_filename.c_str(); }
+	inline bool unique_tiles(void) const { return !!_unique_tiles->value(); }
+	inline bool flip_tiles(void) const { return !!_flip_tiles->value(); }
 	inline bool no_extra_blank_tiles(void) const { return !!_no_extra_blank_tiles->value(); }
 	inline Tilemap_Format format(void) const { return (Tilemap_Format)_format->value(); }
 	inline void format(Tilemap_Format fmt) { initialize(); _format->value((int)fmt); }
@@ -299,6 +301,7 @@ public:
 private:
 	void update_image_name(void);
 	void update_output_names(void);
+	void update_flip_tiles(void);
 	void update_start_index(void);
 	void update_ok_button(void);
 	void update_color_zero_swatch(void);
@@ -308,6 +311,7 @@ protected:
 private:
 	static void image_cb(Fl_Widget *w, Image_To_Tiles_Dialog *itd);
 	static void tileset_cb(Fl_Widget *w, Image_To_Tiles_Dialog *itd);
+	static void unique_tiles_cb(OS_Check_Button *cb, Image_To_Tiles_Dialog *itd);
 	static void format_cb(Dropdown *dd, Image_To_Tiles_Dialog *itd);
 	static void palette_cb(OS_Check_Button *cb, Image_To_Tiles_Dialog *itd);
 	static void palette_format_cb(Dropdown *dd, Image_To_Tiles_Dialog *itd);

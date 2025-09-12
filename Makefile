@@ -24,10 +24,12 @@ tmpdir = tmp
 debugdir = tmp/debug
 bindir = bin
 
-CXXFLAGS := -std=c++17 -I$(srcdir) -I$(resdir) $(shell fltk-config --use-images --cxxflags) $(CXXFLAGS)
-LDFLAGS := $(shell fltk-config --use-images --ldflags) $(LDFLAGS)
+fltk-config = $(bindir)/fltk-config
+
+CXXFLAGS := -std=c++17 -I$(srcdir) -I$(resdir) $(shell $(fltk-config) --use-images --cxxflags) $(CXXFLAGS)
+LDFLAGS := $(shell $(fltk-config) --use-images --ldstaticflags) $(LDFLAGS)
 ifndef OS_MAC
-LDFLAGS += $(shell pkg-config --libs libpng xpm)
+LDFLAGS += $(shell pkg-config --libs xpm)
 endif
 
 RELEASEFLAGS = -DNDEBUG -O3 -flto

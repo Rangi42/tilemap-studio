@@ -79,7 +79,10 @@ int main(int argc, char **argv) {
 #ifdef _WIN32
 	SetCurrentProcessExplicitAppUserModelID(MAKE_WSTR(PROGRAM_AUTHOR) L"." MAKE_WSTR(PROGRAM_NAME));
 #endif
+	Fl::keyboard_screen_scaling(0);
 	Fl::visual(FL_DOUBLE | FL_RGB);
+	Fl_Image::scaling_algorithm(FL_RGB_SCALING_NEAREST);
+	fl_contrast_level(50);
 
 #ifdef _WIN32
 	OS::Theme default_theme = OS::Theme::BLUE;

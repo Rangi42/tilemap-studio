@@ -357,44 +357,45 @@ Dropdown::Dropdown(int x, int y, int w, int h, const char *l) : Fl_Choice(x, y, 
 
 void Dropdown::draw() {
 	// Based on Fl_Choice::draw()
-	Fl_Boxtype bb = OS::current_theme() == OS::Theme::OCEAN || OS::current_theme() == OS::Theme::HIGH_CONTRAST ?
-		OS_INPUT_THIN_DOWN_BOX : OS::current_theme() == OS::Theme::OLIVE ? OS_SWATCH_BOX : FL_DOWN_BOX;
-	int dx = Fl::box_dx(bb);
-	int dy = Fl::box_dy(bb);
+	Fl_Boxtype btype = OS::current_theme() == OS::Theme::OCEAN || OS::current_theme() == OS::Theme::HIGH_CONTRAST ?
+		OS_INPUT_THIN_DOWN_BOX : OS::current_theme() == OS::Theme::OLIVE ? OS_SWATCH_BOX : Fl::scheme() ? FL_UP_BOX : FL_DOWN_BOX;
+	int dx = Fl::box_dx(btype);
+	int dy = Fl::box_dy(btype);
 	int H = h() - 2 * dy;
 	int W = std::min(H, 20);
 	int X = x() + w() - W - std::max(dx, dy);
 	int Y = y() + dy;
-	int w1 = std::max((W - 4) / 3, 1);
-	int x1 = X + (W - 2 * w1 - 1) / 2;
-	int y1 = Y + (H - w1 - 1) / 2;
+	Fl_Rect ab(X, Y, W, H);
+	int active = active_r();
+	Fl_Color arrow_color = active ? labelcolor() : fl_inactive(labelcolor());
+	Fl_Color box_color = color();
+	if (!Fl::scheme()) {
+		box_color = fl_contrast(textcolor(), FL_BACKGROUND2_COLOR) == textcolor() ? FL_BACKGROUND2_COLOR : fl_lighter(color());
+	}
+	draw_box(btype, box_color);
 	if (Fl::scheme()) {
-		draw_box(FL_UP_BOX, color());
-		fl_color(active_r() ? labelcolor() : fl_inactive(labelcolor()));
-		x1 = x() + w() - 13 - dx;
-		y1 = y() + h() / 2;
-		fl_polygon(x1, y1 - 2, x1 + 3, y1 - 5, x1 + 6, y1 - 2);
-		fl_polygon(x1, y1 + 2, x1 + 3, y1 + 5, x1 + 6, y1 + 2);
-		fl_color(active_r() ? fl_darker(color()) : fl_inactive(fl_darker(color())));
-		fl_yxline(x1 - 7, y1 - 8, y1 + 8);
-		fl_color(active_r() ? fl_lighter(color()) : fl_inactive(fl_lighter(color())));
-		fl_yxline(x1 - 6, y1 - 8, y1 + 8);
+		int x1 = x() + w() - W - 1;
+		int y1 = y() + 3;
+		int y2 = y() + h() - 3;
+		fl_color(active ? fl_darker(color()) : fl_inactive(fl_darker(color())));
+		fl_yxline(x1, y1, y2);
+		fl_color(active ? fl_lighter(color()) : fl_inactive(fl_lighter(color())));
+		fl_yxline(x1 + 1, y1, y2);
 	}
 	else {
-		draw_box(bb, fl_contrast(textcolor(), FL_BACKGROUND2_COLOR) == textcolor() ? FL_BACKGROUND2_COLOR : fl_lighter(color()));
 		draw_box(OS_MINI_BUTTON_UP_BOX, X, Y, W, H, color());
-		fl_color(active_r() ? labelcolor() : fl_inactive(labelcolor()));
-		fl_polygon(x1, y1, x1 + w1, y1 + w1, x1 + 2 * w1, y1);
+		ab.inset(OS_MINI_BUTTON_UP_BOX);
+		ab.inset(OS_MINI_BUTTON_UP_BOX);
 	}
+	fl_draw_arrow(ab, FL_ARROW_CHOICE, FL_ORIENT_NONE, arrow_color);
 	W += 2 * dx;
 	if (mvalue()) {
 		Fl_Menu_Item m = *mvalue();
-		if (active_r()) { m.activate(); }
+		if (active) { m.activate(); }
 		else { m.deactivate(); }
 		int xx = x() + dx, yy = y() + dy + 1, ww = w() - W, hh = H - 2;
+		fl_push_clip(xx, yy, ww, hh);
 		if (Fl::scheme()) {
-			ww += x1 - X - 5;
-			fl_push_clip(xx, yy, ww-4, hh);
 			Fl_Label l;
 			l.value = m.text;
 			l.image = 0;
@@ -403,20 +404,19 @@ void Dropdown::draw() {
 			l.font = m.labelsize_ || m.labelfont_ ? m.labelfont_ : textfont();
 			l.size = m.labelsize_ ? m.labelsize_ : textsize();
 			l.color= m.labelcolor_ ? m.labelcolor_ : textcolor();
+			l.h_margin_ = l.v_margin_ = l.spacing = 0;
 			if (!m.active()) l.color = fl_inactive((Fl_Color)l.color);
 			fl_draw_shortcut = 2; // hack value to make '&' disappear
-			l.draw(xx+3, yy, ww, hh, FL_ALIGN_LEFT);
+			l.draw(xx+3, yy, ww>6 ? ww-6 : 0, hh, FL_ALIGN_LEFT);
 			fl_draw_shortcut = 0;
-			fl_pop_clip();
 			if (Fl::focus() == this) { draw_focus(box(), xx, yy, ww, hh); }
 		}
 		else {
-			fl_push_clip(xx, yy, ww, hh);
 			fl_draw_shortcut = 2; // hack value to make '&' disappear
 			m.draw(xx, yy, ww, hh, this, Fl::focus() == this);
 			fl_draw_shortcut = 0;
-			fl_pop_clip();
 		}
+		fl_pop_clip();
 	}
 	draw_label();
 }

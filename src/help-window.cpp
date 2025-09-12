@@ -56,6 +56,12 @@ void Help_Window::show(const Fl_Widget *p) {
 	Fl::grab(prev_grab);
 }
 
+void Help_Window::redraw() {
+	if (!_window) { return; }
+	_body->textsize(_body->textsize()); // roundabout way of calling private function format()
+	_window->redraw();
+}
+
 void Help_Window::close_cb(Fl_Widget *, Help_Window *hw) {
 	hw->_window->hide();
 }

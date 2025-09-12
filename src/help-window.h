@@ -28,6 +28,7 @@ private:
 	void refresh(void);
 public:
 	void show(const Fl_Widget *p);
+	void redraw(void);
 private:
 	static void close_cb(Fl_Widget *w, Help_Window *hw);
 };

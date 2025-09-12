@@ -45,13 +45,13 @@ int Hex_Input::handle_key() {
 	}
 	Fl::compose_reset();
 	char a = Fl::event_text()[0];
-	int ip = std::min(position(), mark());
+	int ip = std::min(insert_position(), mark());
 	if (isxdigit((unsigned char)a) || (!ip && (a == '+' || a == '-'))) {
 		if (readonly()) {
 			fl_beep();
 		}
 		else {
-			replace(position(), mark(), &a, 1);
+			replace(insert_position(), mark(), &a, 1);
 		}
 	}
 	return 1;

@@ -194,6 +194,10 @@ void Tile_State::draw_tile(int x, int y, int z, bool active, bool selected) {
 	uint16_t hi = HI_NYB(id), lo = LO_NYB(id), bank = (id & 0x300) >> 8;
 	char l1 = (char)(hi > 9 ? 'A' + hi - 10 : '0' + hi), l2 = (char)(lo > 9 ? 'A' + lo - 10 : '0' + lo);
 	const char buffer[] = {l1, l2, '\0'};
+	if (bank & 1) {
+		hi ^= 8;
+		lo ^= 8;
+	}
 	bool r = Config::rainbow_tiles();
 	Fl_Color bg = rainbow_bg_colors[r ? lo : 0];
 	int s = TILE_SIZE * z;
@@ -322,6 +326,13 @@ void Tile_State::print(int x, int y, bool active, bool selected, int palette_) {
 			palette_digits_image.draw(x+1, y+dy, 5, 7, 5 * palette_, 0);
 		}
 	}
+}
+
+void Tile_Thing::shift_id(int d, int n) {
+	while (d < 0) {
+		d += n;
+	}
+	_state.id = (uint16_t)((_state.id + d) % n);
 }
 
 Tile_Swatch::Tile_Swatch(int x, int y, int w, int h) : Tile_Thing(), Fl_Box(x, y, w, h), _attributes() {
