@@ -65,7 +65,7 @@ public:
 #endif
 	inline static void update_macos_appearance(Fl_Window *window) {
 #ifdef __APPLE__
-		cocoa_set_appearance(window, is_dark_theme(current_theme()) ? COCOA_APPEARANCE_DARK_AQUA : COCOA_APPEARANCE_AQUA);
+		cocoa_set_appearance(window, is_dark_theme(current_theme()));
 #endif
 	}
 	inline static Theme current_theme(void) { return _current_theme; }

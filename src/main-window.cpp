@@ -349,7 +349,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		OS_MENU_ITEM("&Undo", FL_COMMAND + 'z', (Fl_Callback *)undo_cb, this, 0),
 		OS_MENU_ITEM("&Redo", FL_COMMAND + 'y', (Fl_Callback *)redo_cb, this, FL_MENU_DIVIDER),
 #ifdef __APPLE__
-		OS_MENU_ITEM("&Erase Selection", FL_COMMAND + NSBackspaceCharacter, (Fl_Callback *)erase_selection_cb, this, 0),
+		OS_MENU_ITEM("&Erase Selection", FL_COMMAND + '\b', (Fl_Callback *)erase_selection_cb, this, 0),
 #else
 		OS_MENU_ITEM("&Erase Selection", FL_Delete, (Fl_Callback *)erase_selection_cb, this, 0),
 #endif
