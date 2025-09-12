@@ -37,7 +37,7 @@ jobs:
           make
 
   build-mac:
-    runs-on: macos-11
+    runs-on: macos-13
     env:
       MACOSX_DEPLOYMENT_TARGET: "10.13"
       CFLAGS: -O3 -pipe -flto
