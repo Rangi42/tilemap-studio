@@ -1,3 +1,5 @@
+#include <cstring>
+
 #pragma warning(push, 0)
 #include <FL/Fl_Preferences.H>
 #include <FL/filename.H>
@@ -13,8 +15,6 @@
 #else
 #include <unistd.h>
 #endif
-
-#include <cstring>
 
 Fl_Preferences *Preferences::_preferences = NULL;
 
@@ -98,3 +98,4 @@ std::string Preferences::get_string(const char *key) {
 void Preferences::set_string(const char *key, const std::string &value) {
 	_preferences->set(key, value.c_str());
 }
+
