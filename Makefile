@@ -94,6 +94,7 @@ clean:
 	$(RM) $(TARGET) $(DEBUGTARGET) $(OBJECTS) $(DEBUGOBJECTS)
 
 ifdef OS_MAC
+
 APPDIR = "$(bindir)/$(APPNAME).app"
 APPDMG = "$(bindir)/$(APPNAME).dmg"
 CONTENTS = $(APPDIR)/Contents
@@ -112,15 +113,15 @@ appdmg: appdir
 	mkdir -p $(APPDMG).dir
 	cp -a $(APPDIR) $(APPDMG).dir/
 	create-dmg \
-	  --volname "$(APPNAME)" \
-	  --volicon $(resdir)/app.icns \
-	  --window-pos 200 120 \
-	  --window-size 800 400 \
-	  --icon-size 100 \
-	  --icon "$(APPNAME).app" 200 190 \
-	  --hide-extension "$(APPNAME).app" \
-	  --app-drop-link 600 185 \
-	  $(APPDMG) $(APPDMG).dir/
+		--volname "$(APPNAME)" \
+		--volicon $(resdir)/app.icns \
+		--window-pos 200 120 \
+		--window-size 800 400 \
+		--icon-size 100 \
+		--icon "$(APPNAME).app" 200 190 \
+		--hide-extension "$(APPNAME).app" \
+		--app-drop-link 600 185 \
+		$(APPDMG) $(APPDMG).dir/
 	rm -rf $(APPDMG).dir/
 
 install: appdir
@@ -131,7 +132,9 @@ install: appdir
 
 uninstall:
 	rm -rf "/Applications/$(APPNAME).app"
-else
+
+else # not OS_MAC
+
 DESKTOP = "$(DESTDIR)$(PREFIX)/share/applications/$(APPNAME).desktop"
 
 install: release
@@ -154,4 +157,5 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/share/pixmaps/tilemapstudio48.xpm
 	rm -f $(DESTDIR)$(PREFIX)/share/pixmaps/tilemapstudio16.xpm
 	rm -f $(DESKTOP)
-endif
+
+endif # OS_MAC

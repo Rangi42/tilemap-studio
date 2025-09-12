@@ -93,8 +93,8 @@ int main(int argc, char **argv) {
 	}
 	OS::Theme theme = (OS::Theme)Preferences::get("theme", (int)default_theme);
 #elif defined(__APPLE__)
-	OS::Theme default_theme = OS::Theme::AQUA;
-	if (cocoa_is_dark_mode()) default_theme = OS::Theme::DARK;
+	setenv("LANG", "en_US.UTF-8", 1);
+	OS::Theme default_theme = cocoa_is_dark_mode() ? OS::Theme::DARK : OS::Theme::AQUA;
 	OS::Theme theme = (OS::Theme)Preferences::get("theme", (int)default_theme);
 #else
 	OS::Theme theme = (OS::Theme)Preferences::get("theme", (int)OS::Theme::GREYBIRD);

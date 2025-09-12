@@ -40,7 +40,6 @@
 				<key>public.filename-extension</key>
 				<array>
 					<string>tilemap</string>
-					<string>map</string>
 					<string>rle</string>
 				</array>
 			</dict>
