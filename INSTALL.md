@@ -18,14 +18,14 @@ If the pre-built release already works for you, you don't have to build it yours
 1. On GitHub, click the green "**Code**" button and click "**Download ZIP**". This will download **tilemap-studio-master.zip**.
 2. Unzip tilemap-studio-master.zip. This will create the **tilemap-studio-master** folder.
 3. Navigate to the tilemap-studio-master folder in Explorer.
-4. Download fltk-1.4.1-source.tar.bz2 or fltk-1.4.1-source.tar.gz from [**fltk.org**](https://www.fltk.org/software.php) to a new **tilemap-studio-master\lib** subfolder.
-5. Extract fltk-1.4.1-source.tar (you may need a program such as [7-Zip](https://www.7-zip.org/)). This will create the lib\\**fltk-1.4.1** folder.
-6. Open Visual Studio, select **Open a local folder**, and open the lib\fltk-1.4.1 folder. This will automatically generate the CMake project with a configuration named **x64-Debug** by default.
+4. Download fltk-1.4.4-source.tar.bz2 or fltk-1.4.4-source.tar.gz from [**fltk.org**](https://www.fltk.org/software.php) to a new **tilemap-studio-master\lib** subfolder.
+5. Extract fltk-1.4.4-source.tar (you may need a program such as [7-Zip](https://www.7-zip.org/)). This will create the lib\\**fltk-1.4.4** folder.
+6. Open Visual Studio, select **Open a local folder**, and open the lib\fltk-1.4.4 folder. This will automatically generate the CMake project with a configuration named **x64-Debug** by default.
 7. From the Configuration dropdown, select **Manage Configurations...**, click the green plus sign to add a new configuration, and select **x86-Release** from the list. Set the **Configuration type** to **Release**, set the **Toolset** to **msvc_x86_x64**, and uncheck the **FLTK_GRAPHICS_GDIPLUS** option in the list of CMake variables.
 8. Set the active Configuration to **x86-Release**.
 9. In the **Solution Explorer**, switch to the **CMake Targets View**, right-click on **fltk_images**, and select **Build fltk_images**. This will also build the other required libraries: fltk, fltk_png, and fltk_z.
-10. Move all the .lib files from lib\fltk-1.4.1\out\build\x86-Release\lib\\\*.lib up to lib\\\*.lib.
-11. Copy the lib\fltk-1.4.1\\**FL** folder to a new include\\**FL** folder. Also copy lib\fltk-1.4.1\out\build\x86-Release\FL\fl_config.h into include\FL.
+10. Move all the .lib files from lib\fltk-1.4.4\out\build\x86-Release\lib\\\*.lib up to lib\\\*.lib.
+11. Copy the lib\fltk-1.4.4\\**FL** folder to a new include\\**FL** folder. Also copy lib\fltk-1.4.4\out\build\x86-Release\FL\fl_config.h into include\FL.
 12. Open ide\tilemap-studio.sln in Visual Studio 2019.
 13. If the Solution Configuration dropdown on the toolbar says Debug, set it to **Release**.
 14. Go to **Build → Build Solution** or press F7 to build the project. This will create bin\Release\\**tilemapstudio.exe**.
@@ -67,8 +67,8 @@ Run the following commands:
 git clone https://github.com/Rangi42/tilemap-studio.git
 cd tilemap-studio
 
-# Build FLTK 1.4.1
-git clone --branch release-1.4.1 --depth 1 https://github.com/fltk/fltk.git lib/fltk
+# Build FLTK 1.4.4
+git clone --branch release-1.4.4 --depth 1 https://github.com/fltk/fltk.git lib/fltk
 pushd lib/fltk
 cmake -D CMAKE_INSTALL_PREFIX="$(realpath "$PWD/../..")" -D CMAKE_BUILD_TYPE=Release -D FLTK_GRAPHICS_CAIRO=1 -D FLTK_BACKEND_WAYLAND=0 -D FLTK_USE_SYSTEM_LIBPNG=0 -D FLTK_USE_SYSTEM_ZLIB=0
 make
