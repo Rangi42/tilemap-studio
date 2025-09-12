@@ -52,7 +52,6 @@ jobs:
 
       - name: Build
         run: |
-          export PATH="$PWD/lib/bin:$PATH"
           make -j$(getconf _NPROCESSORS_ONLN)
 
       - name: Install create-dmg
