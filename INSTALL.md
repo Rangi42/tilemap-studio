@@ -46,7 +46,7 @@ Run the following commands:
 
 ```bash
 sudo apt install make g++ git autoconf
-sudo apt install zlib1g-dev libpng-dev libxpm-dev libx11-dev libxft-dev libxinerama-dev libfontconfig1-dev x11proto-xext-dev libxrender-dev libxfixes-dev libcairo2-dev libpango1.0-dev
+sudo apt install zlib1g-dev libpng-dev libxpm-dev libx11-dev libxft-dev libxinerama-dev libfontconfig1-dev x11proto-xext-dev libxrender-dev libxfixes-dev libcairo2-dev libpango1.0-dev libwayland-dev libglew-dev libdecor-0-dev
 ```
 
 #### Fedora
