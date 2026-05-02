@@ -340,8 +340,8 @@ int Default_Slider::handle(int event, int x, int y, int w, int h) {
 
 HTML_View::HTML_View(int x, int y, int w, int h, const char *l) : Fl_Help_View(x, y, w, h, l) {
 	box(OS_INPUT_THIN_DOWN_BOX);
-	// TODO: scrollbar_.slider(OS_MINI_BUTTON_UP_BOX);
-	// TODO: hscrollbar_.slider(OS_MINI_BUTTON_UP_BOX);
+	scrollbar()->slider(OS_MINI_BUTTON_UP_BOX);
+	hscrollbar()->slider(OS_MINI_BUTTON_UP_BOX);
 	textsize(16);
 }
 

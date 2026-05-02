@@ -21,15 +21,24 @@ jobs:
         with:
           path: lib/fltk
           repository: fltk/fltk
-          ref: release-1.4.4
+          ref: release-1.4.5
           fetch-depth: 1
 
       - name: Install FLTK
         working-directory: lib/fltk
         run: |
-          cmake -D CMAKE_INSTALL_PREFIX="$(realpath "$PWD/../..")" -D CMAKE_BUILD_TYPE=Release -D FLTK_GRAPHICS_CAIRO=1 -D FLTK_BACKEND_WAYLAND=0 -D FLTK_USE_SYSTEM_LIBPNG=0 -D FLTK_USE_SYSTEM_ZLIB=0 -D FLTK_BUILD_GL=0 -D FLTK_BUILD_TEST=0
-          make
-          make install
+          cmake -B build \
+            -D CMAKE_INSTALL_PREFIX="$(realpath "$PWD/../..")" \
+            -D CMAKE_BUILD_TYPE=Release \
+            -D FLTK_ABI_VERSION=10405 \
+            -D FLTK_BUILD_GL=0 \
+            -D FLTK_BUILD_TEST=0 \
+            -D FLTK_GRAPHICS_CAIRO=1 \
+            -D FLTK_BACKEND_WAYLAND=0 \
+            -D FLTK_USE_SYSTEM_LIBPNG=0 \
+            -D FLTK_USE_SYSTEM_ZLIB=0
+          cmake --build build
+          cmake --install build
 
       - name: Build
         run: |

@@ -98,4 +98,3 @@ std::string Preferences::get_string(const char *key) {
 void Preferences::set_string(const char *key, const std::string &value) {
 	_preferences->set(key, value.c_str());
 }
-
