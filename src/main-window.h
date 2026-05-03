@@ -5,7 +5,7 @@
 
 #pragma warning(push, 0)
 #include <FL/Fl_Overlay_Window.H>
-#include <FL/Fl_Menu_Bar.H>
+#include <FL/Fl_Sys_Menu_Bar.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Native_File_Chooser.H>
 #include <FL/platform.H>
@@ -40,7 +40,7 @@ struct Image_to_Tiles_Result {
 class Main_Window : public Fl_Overlay_Window {
 private:
 	// GUI containers
-	Fl_Menu_Bar *_menu_bar;
+	Fl_Sys_Menu_Bar *_menu_bar;
 	Toolbar *_toolbar;
 	Fl_Group *_main_group, *_left_group, *_right_group;
 	Bounded_Group *_top_group;
@@ -111,7 +111,7 @@ private:
 	bool _map_editable = false;
 	// Window size cache
 	int _wx, _wy, _ww, _wh;
-#ifndef _WIN32
+#ifdef __X11__
 	// Window icons
 	Pixmap _icon_pixmap, _icon_mask;
 #endif
@@ -169,6 +169,7 @@ public:
 	void load_corresponding_tileset(const char *filename = NULL);
 	void open_converted_tilemap(Image_to_Tiles_Result output);
 	void open_or_import_or_convert(const char *filename);
+	void drag_and_drop_tilemap(const char *filename);
 private:
 	void store_recent_tilemap(void);
 	void update_recent_tilemaps(void);
@@ -196,6 +197,7 @@ private:
 	// Drag-and-drop
 	static void drag_and_drop_tilemap_cb(DnD_Receiver *dndr, Main_Window *mw);
 	static void drag_and_drop_tileset_cb(DnD_Receiver *dndr, Main_Window *mw);
+	static void common_drop_tilemap_cb(const char *filename, Main_Window *mw);
 	// Window
 	static void exit_cb(Fl_Widget *w, Main_Window *mw);
 	// Tilemap menu
