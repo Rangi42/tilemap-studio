@@ -376,6 +376,9 @@ Image_to_Tiles_Result Main_Window::image_to_tiles() {
 		_error_dialog->show(this);
 		return output;
 	}
+	if (fmt == Tilemap_Format::FEGBA_4BPP) {
+		tilemap.width(w);
+	}
 
 	// Get the output filenames
 

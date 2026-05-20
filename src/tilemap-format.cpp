@@ -14,6 +14,7 @@ static const int tileset_sizes[NUM_FORMATS] = {
 	0x200, // GBC_ATTRS - 9-bit tile IDs
 	0x200, // GBC_ATTRMAP - 9-bit tile IDs
 	0x400, // GBA_4BPP - 10-bit tile IDs
+	0x400, // FEGBA_4BPP - 10-bit tile IDs
 	0x400, // GBA_8BPP - 10-bit tile IDs
 	0x400, // NDS_4BPP - 10-bit tile IDs
 	0x400, // NDS_8BPP - 10-bit tile IDs
@@ -41,6 +42,7 @@ int format_palettes_size(Tilemap_Format fmt) {
 	case Tilemap_Format::PC_TOWN_MAP:
 		return 8;
 	case Tilemap_Format::GBA_4BPP:
+	case Tilemap_Format::FEGBA_4BPP:
 	case Tilemap_Format::NDS_4BPP:
 	case Tilemap_Format::GENESIS:
 	case Tilemap_Format::TG16:
@@ -66,6 +68,7 @@ int format_palette_size(Tilemap_Format fmt) {
 	case Tilemap_Format::NDS_8BPP:
 		return 256;
 	case Tilemap_Format::GBA_4BPP:
+	case Tilemap_Format::FEGBA_4BPP:
 	case Tilemap_Format::NDS_4BPP:
 	case Tilemap_Format::SNES_ATTRS:
 	case Tilemap_Format::TG16:
@@ -92,6 +95,7 @@ int format_color_depth(Tilemap_Format fmt) {
 	case Tilemap_Format::NDS_8BPP:
 		return 8;
 	case Tilemap_Format::GBA_4BPP:
+	case Tilemap_Format::FEGBA_4BPP:
 	case Tilemap_Format::NDS_4BPP:
 	case Tilemap_Format::SNES_ATTRS:
 	case Tilemap_Format::GENESIS:
@@ -116,6 +120,7 @@ static const char *format_names[NUM_FORMATS] = {
 	"GBC tiles + attributes",     // GBC_ATTRS
 	"GBC tilemap + attrmap",      // GBC_ATTRMAP
 	"GBA tiles + 4bpp palettes",  // GBA_4BPP
+	"FEGBA struct",               // FEGBA_4BPP
 	"GBA tiles + 8bpp palette",   // GBA_8BPP
 	"NDS tiles + 4bpp palettes",  // NDS_4BPP
 	"NDS tiles + 8bpp palette",   // NDS_8BPP
@@ -147,6 +152,7 @@ static const char *format_extensions[NUM_FORMATS] = {
 	".bin",         // GBC_ATTRS - e.g. pokecrystal/gfx/mobile/*.bin
 	".tilemap",     // GBC_ATTRMAP - e.g. pokecrystal/gfx/mobile/*.{tilemap|attrmap}
 	".bin",         // GBA_4BPP - e.g. {pokeruby|pokeemerald}/graphics/*/*.bin
+	".bin",         // FEGBA_4BPP - e.g. {fireemblem8u|fireemblem6j}/graphics/*/*.bin
 	".bin",         // GBA_8BPP - e.g. {pokeruby|pokeemerald}/graphics/*/*.bin
 	".rcsn",        // NDS_4BPP - extracted by Tinke <https://github.com/pleonex/tinke>
 	".rcsn",        // NDS_8BPP - extracted by Tinke <https://github.com/pleonex/tinke>
@@ -174,6 +180,7 @@ int format_bytes_per_tile(Tilemap_Format fmt) {
 		return 1;
 	case Tilemap_Format::GBC_ATTRS:
 	case Tilemap_Format::GBA_4BPP:
+	case Tilemap_Format::FEGBA_4BPP:
 	case Tilemap_Format::GBA_8BPP:
 	case Tilemap_Format::NDS_4BPP:
 	case Tilemap_Format::NDS_8BPP:
@@ -232,6 +239,7 @@ Tilemap_Format guess_format(const char *filename) {
 	}
 	Tilemap_Format fmt = Config::format();
 	if (fmt == Tilemap_Format::SGB_BORDER || fmt == Tilemap_Format::GBC_ATTRS || fmt == Tilemap_Format::GBA_4BPP ||
+		fmt == Tilemap_Format::FEGBA_4BPP ||
 		fmt == Tilemap_Format::GBA_8BPP || fmt == Tilemap_Format::NDS_4BPP || fmt == Tilemap_Format::NDS_8BPP ||
 		fmt == Tilemap_Format::SNES_ATTRS || fmt == Tilemap_Format::GENESIS || fmt == Tilemap_Format::TG16) {
 		return fmt;
@@ -317,6 +325,25 @@ std::vector<uchar> make_tilemap_bytes(const std::vector<Tile_Tessera *> &tiles, 
 			if (tt->y_flip()) { a |= 0x08; }
 			if (tt->palette() > -1) { a |= (tt->palette() << 4) & 0xF0; }
 			bytes.push_back(a);
+		}
+	}
+	else if (fmt == Tilemap_Format::FEGBA_4BPP) {
+		bytes.reserve(2 + n * 2);
+		uchar w = width - 1, h = height - 1;
+		bytes.push_back(w);
+		bytes.push_back(h);
+		for (ssize_t row = h; row >= 0; --row) {
+			size_t base_index = row * width;
+			for (size_t i = 0; i < width; i++) {
+				Tile_Tessera *tt = tiles.at(base_index + i);
+				uchar v = (uchar)(tt->id() & 0xFF);
+				bytes.push_back(v);
+				uchar a = (tt->id() >> 8) & 0x03;
+				if (tt->x_flip()) { a |= 0x04; }
+				if (tt->y_flip()) { a |= 0x08; }
+				if (tt->palette() > -1) { a |= (tt->palette() << 4) & 0xF0; }
+				bytes.push_back(a);
+			}
 		}
 	}
 	else if (fmt == Tilemap_Format::GENESIS) {

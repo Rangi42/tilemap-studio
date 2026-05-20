@@ -280,6 +280,29 @@ Tilemap::Result Tilemap::make_tiles(const std::vector<uchar> &tbytes, const std:
 		}
 	}
 
+	else if (fmt == Tilemap_Format::FEGBA_4BPP) {
+		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
+		width = 1 + tbytes[0];
+		size_t actual_tiles_count = (c - 2) / 2;
+		size_t expected_tiles_count = (1 + tbytes[1]) * width;
+		if (actual_tiles_count != expected_tiles_count) {
+			return (_result = Result::TILEMAP_INVALID);
+		}
+		tiles.reserve(actual_tiles_count);
+		for (ssize_t row = tbytes[1]; row >= 0; --row) {
+			size_t base_index = 2 + row * width * 2;
+			for (size_t col = 0; col < width; ++col) {
+				size_t i = base_index + 2 * col;
+				uint16_t v = tbytes[i];
+				uchar a = tbytes[i+1];
+				v = v | ((a & 0x03) << 8);
+				bool x_flip = !!(a & 0x04), y_flip = !!(a & 0x08);
+				int palette = HI_NYB(a);
+				tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, v, x_flip, y_flip, false, false, palette));
+			}
+		}
+	}
+
 	else if (fmt == Tilemap_Format::GBA_8BPP) {
 		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
 		tiles.reserve(c / 2);
@@ -505,6 +528,8 @@ Tilemap::Result Tilemap::read_tiles(const char *tf, const char *af) {
 }
 
 bool Tilemap::write_tiles(const char *tf, const char *af, Tilemap_Format fmt) {
+	if (fmt == Tilemap_Format::FEGBA_4BPP && (width() > 256 || height() > 256 || size() != (width() * height()))) { return false; }
+
 	FILE *file = fl_fopen(tf, "wb");
 	if (!file) { return false; }
 
