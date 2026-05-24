@@ -26,6 +26,8 @@ static const int tileset_sizes[NUM_FORMATS] = {
 	0x40,  // PC_TOWN_MAP - High two bits are reserved for X/Y flip
 	0x100, // SW_TOWN_MAP - 8-bit tile IDs (but $00 is reserved for the end marker)
 	0xFF,  // POKEGEAR_CARD - $FF is reserved for the end marker
+	0x200, // WONDERSWAN - 9 bit tile IDs
+	0x400, // WONDERSWAN_COLOR - 9 bit tile IDs + bank bit
 };
 
 int format_tileset_size(Tilemap_Format fmt) {
@@ -44,6 +46,8 @@ int format_palettes_size(Tilemap_Format fmt) {
 	case Tilemap_Format::NDS_4BPP:
 	case Tilemap_Format::GENESIS:
 	case Tilemap_Format::TG16:
+	case Tilemap_Format::WONDERSWAN:
+	case Tilemap_Format::WONDERSWAN_COLOR:
 		return 16;
 	case Tilemap_Format::SGB_BORDER:
 		return 4;
@@ -69,6 +73,8 @@ int format_palette_size(Tilemap_Format fmt) {
 	case Tilemap_Format::NDS_4BPP:
 	case Tilemap_Format::SNES_ATTRS:
 	case Tilemap_Format::TG16:
+	case Tilemap_Format::WONDERSWAN:
+	case Tilemap_Format::WONDERSWAN_COLOR:
 		return 16;
 	case Tilemap_Format::GBC_ATTRS:
 	case Tilemap_Format::GBC_ATTRMAP:
@@ -96,6 +102,8 @@ int format_color_depth(Tilemap_Format fmt) {
 	case Tilemap_Format::SNES_ATTRS:
 	case Tilemap_Format::GENESIS:
 	case Tilemap_Format::TG16:
+	case Tilemap_Format::WONDERSWAN:
+	case Tilemap_Format::WONDERSWAN_COLOR:
 		return 4;
 	case Tilemap_Format::GBC_ATTRS:
 	case Tilemap_Format::GBC_ATTRMAP:
@@ -112,22 +120,24 @@ int format_color_depth(Tilemap_Format fmt) {
 }
 
 static const char *format_names[NUM_FORMATS] = {
-	"Plain tiles",                // PLAIN
-	"GBC tiles + attributes",     // GBC_ATTRS
-	"GBC tilemap + attrmap",      // GBC_ATTRMAP
-	"GBA tiles + 4bpp palettes",  // GBA_4BPP
-	"GBA tiles + 8bpp palette",   // GBA_8BPP
-	"NDS tiles + 4bpp palettes",  // NDS_4BPP
-	"NDS tiles + 8bpp palette",   // NDS_8BPP
-	"SGB border",                 // SGB_BORDER
-	"SNES tiles + attributes",    // SNES_ATTRS
-	"Genesis tiles + attributes", // GENESIS
-	"TG16 tiles + palettes",      // TG16
-	"RBY Town Map",               // RBY_TOWN_MAP
-	"GSC Town Map",               // GSC_TOWN_MAP
-	"PC Town Map",                // PC_TOWN_MAP
-	"SW Town Map",                // SW_TOWN_MAP
-	"Pok\xc3\xa9gear card",       // POKEGEAR_CARD
+	"Plain tiles",                   // PLAIN
+	"GBC tiles + attributes",        // GBC_ATTRS
+	"GBC tilemap + attrmap",         // GBC_ATTRMAP
+	"GBA tiles + 4bpp palettes",     // GBA_4BPP
+	"GBA tiles + 8bpp palette",      // GBA_8BPP
+	"NDS tiles + 4bpp palettes",     // NDS_4BPP
+	"NDS tiles + 8bpp palette",      // NDS_8BPP
+	"SGB border",                    // SGB_BORDER
+	"SNES tiles + attributes",       // SNES_ATTRS
+	"Genesis tiles + attributes",    // GENESIS
+	"TG16 tiles + palettes",         // TG16
+	"RBY Town Map",                  // RBY_TOWN_MAP
+	"GSC Town Map",                  // GSC_TOWN_MAP
+	"PC Town Map",                   // PC_TOWN_MAP
+	"SW Town Map",                   // SW_TOWN_MAP
+	"Pok\xc3\xa9gear card",          // POKEGEAR_CARD
+	"Wonderswan tiles",              // WONDERSWAN
+	"Wonderswan Color tiles",        // WONDERSWAN_COLOR
 };
 
 const char *format_name(Tilemap_Format fmt) {
@@ -159,6 +169,8 @@ static const char *format_extensions[NUM_FORMATS] = {
 	".bin",         // PC_TOWN_MAP - e.g. polishedcrystal/gfx/town_map/*.bin
 	".tilemap.rle", // SW_TOWN_MAP - e.g. pokegold-spaceworld/gfx/trainer_gear/town_map.tilemap.rle
 	".tilemap.rle", // POKEGEAR_CARD - e.g. pokecrystal/gfx/pokegear/*.tilemap.rle
+	".bin",         // WONDERSWAN
+	".bin",         // WONDERSWAN COLOR
 };
 
 const char *format_extension(Tilemap_Format fmt) {
@@ -181,6 +193,8 @@ int format_bytes_per_tile(Tilemap_Format fmt) {
 	case Tilemap_Format::SNES_ATTRS:
 	case Tilemap_Format::GENESIS:
 	case Tilemap_Format::TG16:
+	case Tilemap_Format::WONDERSWAN:
+	case Tilemap_Format::WONDERSWAN_COLOR:
 		return 2;
 	case Tilemap_Format::RBY_TOWN_MAP:
 	case Tilemap_Format::SW_TOWN_MAP:
@@ -391,6 +405,24 @@ std::vector<uchar> make_tilemap_bytes(const std::vector<Tile_Tessera *> &tiles, 
 			}
 			bytes.push_back(v);
 			bytes.push_back(r);
+		}
+	}
+	else if (fmt == Tilemap_Format::WONDERSWAN || fmt == Tilemap_Format::WONDERSWAN_COLOR) {
+		bytes.reserve(n * 2);
+		for (Tile_Tessera* tt : tiles) {
+
+			// lower 8 bits of the tile number
+			uchar v = (uchar)(tt->id() & 0xFF);
+			bytes.push_back(v);
+			uchar a = 0;
+			// top 9th bit of the tile number
+			if (tt->id() & 0x100) { a |= 0x01; }
+			// tile numbers >= $200 use the next tile bank (color only)
+			if (tt->id() & 0x200 && fmt == Tilemap_Format::WONDERSWAN_COLOR) { a |= 0x020; }
+			if (tt->x_flip()) { a |= 0x40; }
+			if (tt->y_flip()) { a |= 0x80; }
+			if (tt->palette() > -1) { a |= (tt->palette() & 0xf) << 1; }
+			bytes.push_back(a);
 		}
 	}
 

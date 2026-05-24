@@ -476,6 +476,24 @@ Tilemap::Result Tilemap::make_tiles(const std::vector<uchar> &tbytes, const std:
 		width = GAME_BOY_WIDTH;
 	}
 
+	else if (fmt == Tilemap_Format::WONDERSWAN || fmt == Tilemap_Format::WONDERSWAN_COLOR) {
+		if (c % 2) { return (_result = Result::TILEMAP_TOO_SHORT_ATTRS); }
+		tiles.reserve(c / 2);
+		for (size_t i = 0; i < c; i += 2) {
+			// lower 8 bits of tile number
+			uint16_t v = tbytes[i];
+			// attributes
+			uchar a = tbytes[i + 1];
+			// 9th bit of tile number
+			if (!!(a & 0x01)) { v |= 0x100; }
+			// tile bank (color only) 
+			if (!!(a & 0x20) && fmt == Tilemap_Format::WONDERSWAN_COLOR) { v |= 0x200; }
+			bool x_flip = !!(a & 0x40), y_flip = !!(a & 0x80), priority = false, obp1 = false;
+			int palette = (a >> 1) & 0x0f;
+			tiles.emplace_back(new Tile_Tessera(0, 0, 0, 0, v, x_flip, y_flip, priority, obp1, palette));
+		}
+	}
+
 	if (tiles.empty()) { return (_result = Result::TILEMAP_EMPTY); }
 
 	_tiles.swap(tiles);
