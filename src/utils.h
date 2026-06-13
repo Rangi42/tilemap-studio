@@ -13,6 +13,11 @@
 
 #pragma warning(push, 0)
 #include <FL/fl_types.h>
+#ifndef _WIN32
+#include <FL/platform.H>
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#endif
 #pragma warning(pop)
 
 #ifdef _WIN32
