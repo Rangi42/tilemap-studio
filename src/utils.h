@@ -14,9 +14,9 @@
 #pragma warning(push, 0)
 #include <FL/fl_types.h>
 #ifndef _WIN32
-#include <FL/platform.H>
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
+#  ifdef FLTK_USE_X11
+#  include <FL/x11.H>
+#  endif
 #endif
 #pragma warning(pop)
 
