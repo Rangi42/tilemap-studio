@@ -1128,11 +1128,21 @@ void Main_Window::update_tilemap_metadata() {
 }
 
 void Main_Window::update_tileset_metadata() {
+	// On the Colors tab this heading shows the palette's identity instead of the tileset's; when only
+	// the tileset's own colors are shown (no palette loaded/created yet) it falls through to the tileset.
+	if (_left_tabs && _left_tabs->value() == _colors_tab) {
+		if (!_palette_file.empty()) {
+			_tileset_name->copy_label(fl_filename_name(_palette_file.c_str()));
+			return;
+		}
+		if (!_palette_colors.empty()) {
+			_tileset_name->copy_label("(Unsaved)"); // newly created, not yet written to a file
+			return;
+		}
+	}
 	if (!_tilesets.empty()) {
 		if (_tilesets.size() == 1) {
-			std::string &f = _tileset_files.front();
-			const char *basename = fl_filename_name(f.c_str());
-			_tileset_name->label(basename);
+			_tileset_name->copy_label(fl_filename_name(_tileset_files.front().c_str()));
 		}
 		else {
 			char buffer[FL_PATH_MAX] = {};
@@ -1385,6 +1395,8 @@ void Main_Window::update_active_controls() {
 		_priority_tb->hide();
 		_obp1_tb->hide();
 	}
+
+	update_tileset_metadata(); // heading tracks the active tab (palette name on Colors, else tileset)
 }
 
 void Main_Window::update_palette_swatches(void) {
