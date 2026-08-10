@@ -69,7 +69,8 @@ private:
 	Tile_Button *_tile_buttons[MAX_NUM_TILES];
 	Palette_Button *_palette_buttons[MAX_NUM_PALETTES];
 	Default_Slider *_transparency;
-	Default_Spinner *_palette_spinner;
+	Default_Spinner *_palette_spinner, *_palette_clone_spinner;
+	OS_Button *_palette_clone_button;
 	Palette_Swatches *_palette_swatches;
 	// GUI outputs
 	Label *_width_heading, *_tileset_name, *_tilemap_name, *_tile_heading;
@@ -78,7 +79,7 @@ private:
 	// Conditional menu items
 	Fl_Menu_Item *_close_mi = NULL, *_save_mi = NULL, *_save_as_mi = NULL, *_export_mi = NULL, *_print_mi = NULL;
 	Fl_Menu_Item *_reload_tilesets_mi = NULL, *_unload_tilesets_mi = NULL;
-	Fl_Menu_Item *_reload_palette_mi = NULL, *_unload_palette_mi = NULL;
+	Fl_Menu_Item *_save_palette_mi = NULL, *_save_palette_as_mi = NULL, *_reload_palette_mi = NULL, *_unload_palette_mi = NULL;
 	Fl_Menu_Item *_undo_mi = NULL, *_redo_mi = NULL;
 	Fl_Menu_Item *_erase_selection_mi = NULL, *_x_flip_selection_mi = NULL, *_y_flip_selection_mi = NULL,
 		*_shift_selected_ids_mi = NULL, *_copy_selection_mi = NULL, *_select_all_mi = NULL;
@@ -88,7 +89,7 @@ private:
 	Fl_Menu_Item *_shift_tileset_mi = NULL;
 	// Dialogs
 	Fl_Native_File_Chooser *_tilemap_open_chooser, *_tilemap_save_chooser, *_tilemap_import_chooser, *_tilemap_export_chooser,
-		*_tileset_load_chooser, *_palette_load_chooser, *_image_print_chooser;
+		*_tileset_load_chooser, *_palette_load_chooser, *_palette_save_chooser, *_image_print_chooser;
 	Modal_Dialog *_error_dialog, *_success_dialog, *_unsaved_dialog, *_about_dialog;
 	Tilemap_Options_Dialog *_tilemap_options_dialog;
 	New_Tilemap_Dialog *_new_tilemap_dialog;
@@ -111,6 +112,7 @@ private:
 	std::string _palette_file;
 	Palette_Format _palette_format = (Palette_Format)-1;
 	bool _palette_writable = false;
+	bool _palette_modified = false;
 	int _tileset_width = 16;
 	Tile_Selection _selection;
 	Palette_Button *_selected_palette = NULL;
@@ -172,6 +174,8 @@ public:
 		for (Tileset &t : _tilesets) { t.clear(); } _tilesets.clear(); _tileset_files.clear(); update_tileset_metadata();
 	}
 	void add_tileset(const char *filename, int start = 0x000, int offset = 0, int length = 0, bool quiet = false);
+	void new_palette(Palette_Format fmt);
+	bool save_palette(const char *filename);
 	void load_palette(const char *filename);
 	void load_recent_palette(int n);
 	void load_recent_tileset(int n);
@@ -229,9 +233,13 @@ private:
 	static void clear_recent_tilesets_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void unload_tilesets_cb(Fl_Widget *w, Main_Window *mw);
 	static void auto_load_tileset_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void new_palette_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void load_palette_cb(Fl_Widget *w, Main_Window *mw);
 	static void load_recent_palette_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void clear_recent_palettes_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void save_palette_cb(Fl_Widget *w, Main_Window *mw);
+	static void save_palette_as_cb(Fl_Widget *w, Main_Window *mw);
+	static void clone_palette_cb(Fl_Widget *w, Main_Window *mw);
 	static void reload_palette_cb(Fl_Widget *w, Main_Window *mw);
 	static void unload_palette_cb(Fl_Widget *w, Main_Window *mw);
 	// Edit menu
