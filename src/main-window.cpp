@@ -137,9 +137,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_main_group = new Fl_Group(wx, wy, ww, wh);
 	wx += win_m; ww -= win_m * 2;
 	wy += win_m; wh -= win_m * 2;
-	// Left group. Widen it if needed so the three tab labels (Tiles/Palettes/Colors) fit to the left of
+	// Left group. Widened to allow for three tab labels (Tiles/Palettes/Colors) fit to the left of
 	// the tile-info controls (_top_group) that share the tab-bar band, instead of overlapping them.
-	// pad 5 -> +10px/label, matching Fl_Tabs' own EXTRASPACE, plus one small gap so they don't touch.
 	int top_group_w = std::max(text_width("Map: 999x999", 3), text_width("Set: 999x999", 3)) + wgt_m * 2 + wgt_h * 3;
 	int tab_labels_w = text_width("Tiles", 5) + text_width("Palettes", 5) + text_width("Colors", 5);
 	int left_group_w = std::max(283, tab_labels_w + top_group_w + wgt_m * 2);
