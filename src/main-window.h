@@ -45,14 +45,14 @@ private:
 	Fl_Group *_main_group, *_left_group, *_right_group;
 	Bounded_Group *_top_group;
 	OS_Tabs *_left_tabs;
-	OS_Tab *_tiles_tab, *_palettes_tab;
-	Workspace *_tiles_scroll;
+	OS_Tab *_tiles_tab, *_palettes_tab, *_colors_tab;
+	Workspace *_tiles_scroll, *_colors_scroll;
 	Workpane *_palettes_pane;
 	Workspace *_tilemap_scroll;
 	Toolbar *_status_bar;
 	// GUI inputs
 	DnD_Receiver *_tilemap_dnd_receiver, *_tileset_dnd_receiver;
-	Fl_Menu_Item *_recent_tilemap_mis[NUM_RECENT], *_recent_tileset_mis[NUM_RECENT];
+	Fl_Menu_Item *_recent_tilemap_mis[NUM_RECENT], *_recent_tileset_mis[NUM_RECENT], *_recent_palette_mis[NUM_RECENT];
 	Fl_Menu_Item *_classic_theme_mi = NULL, *_aero_theme_mi = NULL, *_metro_theme_mi = NULL, *_aqua_theme_mi = NULL,
 		*_greybird_theme_mi = NULL, *_ocean_theme_mi = NULL, *_blue_theme_mi = NULL, *_olive_theme_mi = NULL,
 		*_rose_gold_theme_mi = NULL, *_dark_theme_mi = NULL, *_brushed_metal_theme_mi = NULL, *_high_contrast_theme_mi = NULL;
@@ -69,6 +69,8 @@ private:
 	Tile_Button *_tile_buttons[MAX_NUM_TILES];
 	Palette_Button *_palette_buttons[MAX_NUM_PALETTES];
 	Default_Slider *_transparency;
+	Default_Spinner *_palette_spinner;
+	Palette_Swatches *_palette_swatches;
 	// GUI outputs
 	Label *_width_heading, *_tileset_name, *_tilemap_name, *_tile_heading;
 	Tile_Swatch *_current_tile, *_current_attributes;
@@ -76,6 +78,7 @@ private:
 	// Conditional menu items
 	Fl_Menu_Item *_close_mi = NULL, *_save_mi = NULL, *_save_as_mi = NULL, *_export_mi = NULL, *_print_mi = NULL;
 	Fl_Menu_Item *_reload_tilesets_mi = NULL, *_unload_tilesets_mi = NULL;
+	Fl_Menu_Item *_reload_palette_mi = NULL, *_unload_palette_mi = NULL;
 	Fl_Menu_Item *_undo_mi = NULL, *_redo_mi = NULL;
 	Fl_Menu_Item *_erase_selection_mi = NULL, *_x_flip_selection_mi = NULL, *_y_flip_selection_mi = NULL,
 		*_shift_selected_ids_mi = NULL, *_copy_selection_mi = NULL, *_select_all_mi = NULL;
@@ -85,7 +88,7 @@ private:
 	Fl_Menu_Item *_shift_tileset_mi = NULL;
 	// Dialogs
 	Fl_Native_File_Chooser *_tilemap_open_chooser, *_tilemap_save_chooser, *_tilemap_import_chooser, *_tilemap_export_chooser,
-		*_tileset_load_chooser, *_image_print_chooser;
+		*_tileset_load_chooser, *_palette_load_chooser, *_image_print_chooser;
 	Modal_Dialog *_error_dialog, *_success_dialog, *_unsaved_dialog, *_about_dialog;
 	Tilemap_Options_Dialog *_tilemap_options_dialog;
 	New_Tilemap_Dialog *_new_tilemap_dialog;
@@ -101,9 +104,13 @@ private:
 	// Data
 	std::string _tilemap_file, _attrmap_file, _tilemap_basename;
 	std::vector<std::string> _tileset_files;
-	std::string _recent_tilemaps[NUM_RECENT], _recent_tilesets[NUM_RECENT];
+	std::string _recent_tilemaps[NUM_RECENT], _recent_tilesets[NUM_RECENT], _recent_palettes[NUM_RECENT];
 	Tilemap _tilemap;
 	std::vector<Tileset> _tilesets;
+	Palettes _palette_colors;
+	std::string _palette_file;
+	Palette_Format _palette_format = (Palette_Format)-1;
+	bool _palette_writable = false;
 	int _tileset_width = 16;
 	Tile_Selection _selection;
 	Palette_Button *_selected_palette = NULL;
@@ -165,6 +172,8 @@ public:
 		for (Tileset &t : _tilesets) { t.clear(); } _tilesets.clear(); _tileset_files.clear(); update_tileset_metadata();
 	}
 	void add_tileset(const char *filename, int start = 0x000, int offset = 0, int length = 0, bool quiet = false);
+	void load_palette(const char *filename);
+	void load_recent_palette(int n);
 	void load_recent_tileset(int n);
 	void load_corresponding_tileset(const char *filename = NULL);
 	void open_converted_tilemap(Image_to_Tiles_Result output);
@@ -174,9 +183,12 @@ private:
 	void update_recent_tilemaps(void);
 	void store_recent_tileset(void);
 	void update_recent_tilesets(void);
+	void store_recent_palette(void);
+	void update_recent_palettes(void);
 	void update_tilemap_metadata(void);
 	void update_tileset_metadata(void);
 	void update_active_controls(void);
+	void update_palette_swatches(void);
 	void update_tileset_width(int tw);
 	void resize_tilemap(size_t w, size_t h, int px, int py);
 	void shift_tilemap(void);
@@ -217,6 +229,11 @@ private:
 	static void clear_recent_tilesets_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void unload_tilesets_cb(Fl_Widget *w, Main_Window *mw);
 	static void auto_load_tileset_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void load_palette_cb(Fl_Widget *w, Main_Window *mw);
+	static void load_recent_palette_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void clear_recent_palettes_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void reload_palette_cb(Fl_Widget *w, Main_Window *mw);
+	static void unload_palette_cb(Fl_Widget *w, Main_Window *mw);
 	// Edit menu
 	static void undo_cb(Fl_Widget *w, Main_Window *mw);
 	static void redo_cb(Fl_Widget *w, Main_Window *mw);
@@ -275,6 +292,8 @@ private:
 	static void change_tab_cb(OS_Tabs *ts, Main_Window *mw);
 	static void select_tile_cb(Tile_Button *tb, Main_Window *mw);
 	static void select_palette_cb(Palette_Button *pb, Main_Window *mw);
+	static void palette_spinner_cb(OS_Spinner *os, Main_Window *mw);
+	static void edit_swatch_cb(Palette_Swatches *ps, Main_Window *mw);
 	// Tilemap
 	static void change_tile_cb(Tile_Tessera *tt, Main_Window *mw);
 };

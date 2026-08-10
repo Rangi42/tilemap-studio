@@ -5,11 +5,11 @@
 #include <FL/Fl_RGB_Image.H>
 #pragma warning(pop)
 
-#include "config.h"
-#include "tileset.h"
-
 #define TILE_SIZE 8
 #define NUM_TILE_PIXELS (TILE_SIZE * TILE_SIZE)
+
+#include "config.h"
+#include "tileset.h"
 
 #define NORMRGB(c) (uchar)(((c) & 0xF8) | (((c) & 0xF8) >> 5))
 #define ALT_NORM_MASK 0xF8F8F800 // clear the low 3 bits of each color channel

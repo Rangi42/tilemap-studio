@@ -1,7 +1,10 @@
 #include <array>
 #include <vector>
+#include <cstring>
+#include <zlib.h>
 
 #pragma warning(push, 0)
+#include <FL/Fl.H>
 #include <FL/fl_types.h>
 #include <FL/fl_utf8.h>
 #include <FL/Fl_PNG_Image.H>
@@ -17,7 +20,8 @@
 #include "config.h"
 
 Tileset::Tileset(int start_id, int offset, int length) : _1x_image(NULL), _2x_image(NULL), _zoomed_image(NULL),
-	_num_tiles(0), _start_id(start_id), _offset(offset), _length(length), _result(Result::TILESET_NULL) {}
+	_num_tiles(0), _start_id(start_id), _offset(offset), _length(length), _result(Result::TILESET_NULL),
+	_color_indices(), _has_color_indices(false) {}
 
 Tileset::~Tileset() {}
 
@@ -33,6 +37,42 @@ void Tileset::clear() {
 	_offset = 0;
 	_length = 0;
 	_result = Result::TILESET_NULL;
+	_color_indices.clear();
+	_color_indices.shrink_to_fit();
+	_has_color_indices = false;
+}
+
+const uchar *Tileset::tile_color_indices(int index) const {
+	if (!_has_color_indices || index < 0 || (size_t)index >= _color_indices.size()) { return NULL; }
+	return _color_indices[index].data();
+}
+
+size_t Tileset::color_palette(Palette &pal, size_t n) const {
+	pal.assign(n, FL_BLACK);
+	if (!_has_color_indices || !_1x_image || n == 0) { return 0; }
+	const uchar *data = (const uchar *)_1x_image->data()[0];
+	int d = _1x_image->d(), ld = _1x_image->ld();
+	int w = _1x_image->w(), h = _1x_image->h();
+	if (!ld) { ld = w * d; }
+	int wt = w / TILE_SIZE;
+	if (wt <= 0) { return 0; }
+	std::vector<bool> seen(n, false);
+	size_t found = 0;
+	for (int y = 0; y < h && found < n; y++) {
+		for (int x = 0; x < w; x++) {
+			size_t t = (size_t)(x / TILE_SIZE) + (size_t)(y / TILE_SIZE) * wt;
+			size_t k = (size_t)(y % TILE_SIZE) * TILE_SIZE + (x % TILE_SIZE);
+			if (t >= _color_indices.size()) { continue; }
+			uchar ci = _color_indices[t][k];
+			if (ci >= n || seen[ci]) { continue; }
+			const uchar *px = data + (size_t)y * ld + (size_t)x * d;
+			uchar r = px[0], g = d > 1 ? px[1] : px[0], b = d > 2 ? px[2] : px[0];
+			pal[ci] = fl_rgb_color(r, g, b);
+			seen[ci] = true;
+			if (++found == n) { break; }
+		}
+	}
+	return found;
 }
 
 void Tileset::update_zoom() {
@@ -55,6 +95,12 @@ bool Tileset::draw_tile(const Tile_State *ts, int x, int y, int z, bool active) 
 	if (!active) {
 		fl_rectf(x, y, s, s, FL_INACTIVE_COLOR);
 		return true;
+	}
+
+	const Palettes *ps = Tile_State::palette_set();
+	if (ts->palette >= 0 && ps && (size_t)ts->palette < ps->size() && _has_color_indices) {
+		const uchar *idx = tile_color_indices(index);
+		if (idx) { return draw_recolored(idx, (*ps)[ts->palette], x, y, z, ts->x_flip, ts->y_flip); }
 	}
 
 	if (z == DEFAULT_ZOOM) {
@@ -103,6 +149,12 @@ bool Tileset::print_tile(const Tile_State *ts, int x, int y, bool active) const 
 		return true;
 	}
 
+	const Palettes *ps = Tile_State::palette_set();
+	if (ts->palette >= 0 && ps && (size_t)ts->palette < ps->size() && _has_color_indices) {
+		const uchar *idx = tile_color_indices(index);
+		if (idx) { return draw_recolored(idx, (*ps)[ts->palette], x, y, 1, ts->x_flip, ts->y_flip); }
+	}
+
 	int wt = _1x_image->w() / TILE_SIZE;
 	int tx = index % wt * TILE_SIZE, ty = index / wt * TILE_SIZE;
 
@@ -118,6 +170,29 @@ bool Tileset::print_tile(const Tile_State *ts, int x, int y, bool active) const 
 		int tld = ts->y_flip ? -ld : ld;
 		fl_draw_image(data, x, y, TILE_SIZE, TILE_SIZE, td, tld);
 	}
+	return true;
+}
+
+// Draw a tile recolored through the given palette: look up each pixel's stored index in the
+// palette, nearest-neighbor scale to zoom z, and apply flips. idx points at NUM_TILE_PIXELS bytes.
+bool Tileset::draw_recolored(const uchar *idx, const Palette &palette, int x, int y, int z, bool x_flip, bool y_flip) const {
+	int s = TILE_SIZE * z;
+	size_t nc = palette.size();
+	std::vector<uchar> buf((size_t)s * s * 3);
+	for (int py = 0; py < s; py++) {
+		int ty = py / z;
+		int sy = y_flip ? TILE_SIZE - 1 - ty : ty;
+		for (int px = 0; px < s; px++) {
+			int tx = px / z;
+			int sx = x_flip ? TILE_SIZE - 1 - tx : tx;
+			uchar ci = idx[sy * TILE_SIZE + sx];
+			uchar r = 0, g = 0, b = 0;
+			if (ci < nc) { Fl::get_color(palette[ci], r, g, b); }
+			size_t o = ((size_t)py * s + px) * 3;
+			buf[o] = r; buf[o+1] = g; buf[o+2] = b;
+		}
+	}
+	fl_draw_image(buf.data(), x, y, s, s, 3, 0);
 	return true;
 }
 
@@ -139,9 +214,122 @@ Tileset::Result Tileset::read_tiles(const char *f) {
 	return (_result = Result::TILESET_BAD_EXT);
 }
 
+// Decode an indexed (color type 3) PNG's raw palette indices, one byte per pixel, row-major.
+// Returns false for truecolor, interlaced, or unsupported PNGs (they simply get no indices).
+static bool read_indexed_png(const char *f, std::vector<uchar> &pixels, int &width, int &height) {
+	FILE *file = fl_fopen(f, "rb");
+	if (!file) { return false; }
+	uchar sig[8];
+	if (fread(sig, 1, 8, file) != 8 || memcmp(sig, "\x89PNG\r\n\x1a\n", 8)) { fclose(file); return false; }
+
+	uint32_t w = 0, h = 0;
+	int bit_depth = 0, color_type = -1, interlace = 0;
+	bool have_hdr = false;
+	std::vector<uchar> idat;
+	for (;;) {
+		uchar len4[4], typ[4];
+		if (fread(len4, 1, 4, file) != 4 || fread(typ, 1, 4, file) != 4) { break; }
+		uint32_t len = ((uint32_t)len4[0] << 24) | (len4[1] << 16) | (len4[2] << 8) | len4[3];
+		if (!memcmp(typ, "IHDR", 4)) {
+			uchar hdr[13];
+			if (len < 13 || fread(hdr, 1, 13, file) != 13) { break; }
+			w = ((uint32_t)hdr[0] << 24) | (hdr[1] << 16) | (hdr[2] << 8) | hdr[3];
+			h = ((uint32_t)hdr[4] << 24) | (hdr[5] << 16) | (hdr[6] << 8) | hdr[7];
+			bit_depth = hdr[8]; color_type = hdr[9]; interlace = hdr[12];
+			have_hdr = true;
+			fseek(file, (long)(len - 13) + 4, SEEK_CUR); // rest of IHDR + CRC
+		}
+		else if (!memcmp(typ, "IDAT", 4)) {
+			size_t off = idat.size();
+			idat.resize(off + len);
+			if (fread(idat.data() + off, 1, len, file) != len) { break; }
+			fseek(file, 4, SEEK_CUR); // CRC
+		}
+		else if (!memcmp(typ, "IEND", 4)) { break; }
+		else { fseek(file, (long)len + 4, SEEK_CUR); }
+	}
+	fclose(file);
+
+	if (!have_hdr || color_type != 3 || interlace != 0 || idat.empty()) { return false; }
+	if (bit_depth != 1 && bit_depth != 2 && bit_depth != 4 && bit_depth != 8) { return false; }
+
+	size_t scan = ((size_t)w * bit_depth + 7) / 8; // scanline bytes, excluding the filter byte
+	size_t raw_size = (scan + 1) * h;
+	std::vector<uchar> raw(raw_size);
+	uLongf dst = (uLongf)raw_size;
+	if (uncompress(raw.data(), &dst, idat.data(), (uLong)idat.size()) != Z_OK || dst != raw_size) { return false; }
+
+	// Reverse the PNG scanline filters (indexed <=8bpp means 1 byte per filter unit).
+	std::vector<uchar> out((size_t)scan * h);
+	for (uint32_t y = 0; y < h; y++) {
+		uchar ft = raw[(size_t)y * (scan + 1)];
+		const uchar *in = raw.data() + (size_t)y * (scan + 1) + 1;
+		uchar *cur = out.data() + (size_t)y * scan;
+		const uchar *prev = y ? out.data() + (size_t)(y - 1) * scan : NULL;
+		for (size_t i = 0; i < scan; i++) {
+			int a = i ? cur[i-1] : 0;
+			int b = prev ? prev[i] : 0;
+			int c = (prev && i) ? prev[i-1] : 0;
+			int v = in[i];
+			switch (ft) {
+			case 0: break;
+			case 1: v += a; break;
+			case 2: v += b; break;
+			case 3: v += (a + b) / 2; break;
+			case 4: {
+				int p = a + b - c, pa = abs(p - a), pb = abs(p - b), pc = abs(p - c);
+				v += (pa <= pb && pa <= pc) ? a : (pb <= pc) ? b : c;
+				break;
+			}
+			default: return false;
+			}
+			cur[i] = (uchar)v;
+		}
+	}
+
+	// Unpack indices (MSB-first within each byte for sub-8-bit depths).
+	pixels.assign((size_t)w * h, 0);
+	int mask = (1 << bit_depth) - 1, ppb = 8 / bit_depth;
+	for (uint32_t y = 0; y < h; y++) {
+		const uchar *row = out.data() + (size_t)y * scan;
+		for (uint32_t x = 0; x < w; x++) {
+			int val = bit_depth == 8 ? row[x] :
+				(row[x / ppb] >> (8 - bit_depth * ((int)(x % ppb) + 1))) & mask;
+			pixels[(size_t)y * w + x] = (uchar)val;
+		}
+	}
+	width = (int)w;
+	height = (int)h;
+	return true;
+}
+
 Tileset::Result Tileset::read_png_graphics(const char *f) {
 	Fl_PNG_Image *png = new Fl_PNG_Image(f);
-	return postprocess_graphics(png);
+	Result result = postprocess_graphics(png);
+	if (result == Result::TILESET_OK && _1x_image) {
+		std::vector<uchar> pixels;
+		int w = 0, h = 0;
+		if (read_indexed_png(f, pixels, w, h) && w == _1x_image->w() && h == _1x_image->h()) {
+			build_color_indices_from_pixels(pixels, w, h); // exact per-pixel indices from an indexed PNG
+		}
+	}
+	return result;
+}
+
+// Lay row-major pixel indices out tile-major to match tile_color_indices()/draw_tile().
+void Tileset::build_color_indices_from_pixels(const std::vector<uchar> &pixels, int w, int h) {
+	int wt = w / TILE_SIZE;
+	if (wt <= 0) { return; }
+	_color_indices.assign(_num_tiles, {});
+	for (int y = 0; y < h; y++) {
+		for (int x = 0; x < w; x++) {
+			size_t t = (size_t)(x / TILE_SIZE) + (size_t)(y / TILE_SIZE) * wt;
+			size_t k = (size_t)(y % TILE_SIZE) * TILE_SIZE + (x % TILE_SIZE);
+			size_t s = (size_t)y * w + x;
+			if (t < _color_indices.size() && s < pixels.size()) { _color_indices[t][k] = pixels[s]; }
+		}
+	}
+	_has_color_indices = true;
 }
 
 Tileset::Result Tileset::read_gif_graphics(const char *f) {
@@ -264,6 +452,7 @@ Tileset::Result Tileset::parse_1bpp_data(const std::vector<uchar> &data) {
 	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)_num_tiles * TILE_SIZE);
 	surface->set_current();
 
+	_color_indices.assign(_num_tiles, {});
 	Hue row[TILE_SIZE] = {};
 	for (size_t i = 0; i < _num_tiles; i++) {
 		for (size_t j = 0; j < TILE_SIZE; j++) {
@@ -273,9 +462,11 @@ Tileset::Result Tileset::parse_1bpp_data(const std::vector<uchar> &data) {
 				Hue hue = row[k];
 				fl_color(hue_colors[(int)hue]);
 				fl_point(k, (int)(i * TILE_SIZE + j));
+				_color_indices[i][j * TILE_SIZE + k] = (uchar)((b >> (TILE_SIZE - k - 1)) & 1);
 			}
 		}
 	}
+	_has_color_indices = true;
 
 	Fl_RGB_Image *img = surface->image();
 	delete surface;
@@ -294,6 +485,7 @@ Tileset::Result Tileset::parse_2bpp_data(const std::vector<uchar> &data) {
 	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)_num_tiles * TILE_SIZE);
 	surface->set_current();
 
+	_color_indices.assign(_num_tiles, {});
 	Hue row[TILE_SIZE] = {};
 	for (size_t i = 0; i < _num_tiles; i++) {
 		for (size_t j = 0; j < TILE_SIZE; j++) {
@@ -304,9 +496,11 @@ Tileset::Result Tileset::parse_2bpp_data(const std::vector<uchar> &data) {
 				Hue hue = row[k];
 				fl_color(hue_colors[(int)hue]);
 				fl_point(k, (int)(i * TILE_SIZE + j));
+				_color_indices[i][j * TILE_SIZE + k] = (uchar)(int)hue;
 			}
 		}
 	}
+	_has_color_indices = true;
 
 	Fl_RGB_Image *img = surface->image();
 	delete surface;
@@ -332,18 +526,23 @@ Tileset::Result Tileset::parse_4bpp_data(const std::vector<uchar> &data) {
 	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)_num_tiles * TILE_SIZE);
 	surface->set_current();
 
+	_color_indices.assign(_num_tiles, {});
 	for (size_t i = 0; i < _num_tiles; i++) {
 		for (size_t j = 0; j < TILE_SIZE; j++) {
 			int py = (int)(i * TILE_SIZE + j);
+			Tile_Color_Indices &tile = _color_indices[i];
 			for (int k = 0; k < TILE_SIZE / 2; k++) {
 				uchar b = data[i * BYTES_PER_4BPP_TILE + j * TILE_SIZE / 2 + k];
 				fl_color(bpp4_colors[LO_NYB(b)]);
 				fl_point(k * 2, py);
 				fl_color(bpp4_colors[HI_NYB(b)]);
 				fl_point(k * 2 + 1, py);
+				tile[j * TILE_SIZE + k * 2] = LO_NYB(b);
+				tile[j * TILE_SIZE + k * 2 + 1] = HI_NYB(b);
 			}
 		}
 	}
+	_has_color_indices = true;
 
 	Fl_RGB_Image *img = surface->image();
 	delete surface;
@@ -362,6 +561,7 @@ Tileset::Result Tileset::parse_8bpp_data(const std::vector<uchar> &data) {
 	Fl_Image_Surface *surface = new Fl_Image_Surface(TILE_SIZE, (int)_num_tiles * TILE_SIZE);
 	surface->set_current();
 
+	_color_indices.assign(_num_tiles, {});
 	for (size_t i = 0; i < _num_tiles; i++) {
 		for (size_t j = 0; j < TILE_SIZE; j++) {
 			int py = (int)(i * TILE_SIZE + j);
@@ -369,9 +569,11 @@ Tileset::Result Tileset::parse_8bpp_data(const std::vector<uchar> &data) {
 				uchar b = data[i * BYTES_PER_8BPP_TILE + j * TILE_SIZE + k];
 				fl_color(0xFF-b, 0xFF-b, 0xFF-b);
 				fl_point(k, py);
+				_color_indices[i][j * TILE_SIZE + k] = b;
 			}
 		}
 	}
+	_has_color_indices = true;
 
 	Fl_RGB_Image *img = surface->image();
 	delete surface;
