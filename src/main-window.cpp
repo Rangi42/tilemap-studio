@@ -12,6 +12,7 @@
 #include <FL/Fl_Multi_Label.H>
 #include <FL/Fl_Copy_Surface.H>
 #include <FL/Fl_Image_Surface.H>
+#include <FL/Fl_Color_Chooser.H>
 #pragma warning(pop)
 
 #include "version.h"
@@ -60,6 +61,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	for (int i = 0; i < NUM_RECENT; i++) {
 		_recent_tilemaps[i] = Preferences::get_string(Fl_Preferences::Name("recent-map%d", i));
 		_recent_tilesets[i] = Preferences::get_string(Fl_Preferences::Name("recent-set%d", i));
+		_recent_palettes[i] = Preferences::get_string(Fl_Preferences::Name("recent-pal%d", i));
 	}
 
 	int transparent = Preferences::get("transparent", 0);
@@ -135,8 +137,12 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_main_group = new Fl_Group(wx, wy, ww, wh);
 	wx += win_m; ww -= win_m * 2;
 	wy += win_m; wh -= win_m * 2;
-	// Left group
-	_left_group = new Fl_Group(wx, wy, 283, wh);
+	// Left group. Widened to allow for three tab labels (Tiles/Palettes/Colors) fit to the left of
+	// the tile-info controls (_top_group) that share the tab-bar band, instead of overlapping them.
+	int top_group_w = std::max(text_width("Map: 999x999", 3), text_width("Set: 999x999", 3)) + wgt_m * 2 + wgt_h * 3;
+	int tab_labels_w = text_width("Tiles", 5) + text_width("Palettes", 5) + text_width("Colors", 5);
+	int left_group_w = std::max(283, tab_labels_w + top_group_w + wgt_m * 2);
+	_left_group = new Fl_Group(wx, wy, left_group_w, wh);
 	int gx = _left_group->x(), gy = _left_group->y(), gw = _left_group->w(), gh = _left_group->h();
 	_tileset_name = new Label(gx, gy, gw, wgt_h);
 	gy += _tileset_name->h(); gh -= _tileset_name->h() + wgt_m + wgt_h - tab_h;
@@ -179,6 +185,30 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_transparency = new Default_Slider(ax+wgt_off, ay, aw-wgt_off, wgt_h, "Trans:");
 	_palettes_tab->end();
 	_palettes_tab->resizable(NULL);
+	_left_tabs->begin();
+	// Fixed-size color swatches (same 16px cells as the palette selector); the scroll viewport grows
+	// with the tab and scrolls when a palette has more rows than fit.
+	int csw_w = PALETTES_PER_ROW * TILE_SIZE_2X;
+	int csw_y = qy + 5 + wgt_h + wgt_m;
+	int csw_h = gh - (csw_y - qy) - 5;
+	_colors_tab = new OS_Tab(gx, qy, gw, gh, "Colors");
+	int spinner_off = text_width("Palette:", 3);
+	_palette_spinner = new Default_Spinner(gx+5+spinner_off, qy+5, TILE_SIZE_2X*3, wgt_h, "Palette:");
+	// "Clone <current palette> to <index>" control, to the right of the palette selector.
+	int clone_off = _palette_spinner->x() + _palette_spinner->w() + wgt_m * 2 + text_width("to:", 3);
+	_palette_clone_spinner = new Default_Spinner(clone_off, qy+5, TILE_SIZE_2X*3, wgt_h, "to:");
+	_palette_clone_button = new OS_Button(_palette_clone_spinner->x() + _palette_clone_spinner->w() + wgt_m,
+		qy+5, text_width("Clone", 12), wgt_h, "Clone");
+	_colors_scroll = new Workspace(gx+5, csw_y, csw_w + Fl::scrollbar_size() + 2, csw_h);
+	int cox = _colors_scroll->x() + Fl::box_dx(_colors_scroll->box());
+	int coy = _colors_scroll->y() + Fl::box_dy(_colors_scroll->box());
+	_palette_swatches = new Palette_Swatches(cox, coy, csw_w, csw_h);
+	_palette_swatches->callback((Fl_Callback *)edit_swatch_cb, this);
+	_colors_scroll->end();
+	_colors_scroll->type(Fl_Scroll::VERTICAL_ALWAYS);
+	_colors_scroll->resizable(NULL);
+	_colors_tab->end();
+	_colors_tab->resizable(_colors_scroll);
 	_left_tabs->resizable(_tiles_tab);
 	_left_group->begin();
 	wgt_w = std::max(text_width("Map: 999x999", 3), text_width("Set: 999x999", 3));
@@ -221,6 +251,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_tilemap_import_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
 	_tilemap_export_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	_tileset_load_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
+	_palette_load_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_FILE);
+	_palette_save_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	_image_print_chooser = new Fl_Native_File_Chooser(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	_error_dialog = new Modal_Dialog(this, "Error", Modal_Dialog::Icon::ERROR_ICON);
 	_success_dialog = new Modal_Dialog(this, "Success", Modal_Dialog::Icon::SUCCESS_ICON);
@@ -247,10 +279,13 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_tileset_dnd_receiver = new DnD_Receiver(0, 0, 0, 0);
 	_tileset_dnd_receiver->callback((Fl_Callback *)drag_and_drop_tileset_cb, this);
 	_tileset_dnd_receiver->user_data(this);
+	_palette_dnd_receiver = new DnD_Receiver(0, 0, 0, 0);
+	_palette_dnd_receiver->callback((Fl_Callback *)drag_and_drop_palette_cb, this);
+	_palette_dnd_receiver->user_data(this);
 
 	// Configure window
 	box(OS_BG_BOX);
-	size_range(647, 406);
+	size_range(647 + (left_group_w - 283), 406);
 	resizable(_main_group);
 	callback((Fl_Callback *)exit_cb, this);
 	xclass(PROGRAM_NAME);
@@ -268,6 +303,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_tilemap_scroll->dnd_receiver(_tilemap_dnd_receiver);
 	_tiles_scroll->dnd_receiver(_tileset_dnd_receiver);
 	_palettes_pane->dnd_receiver(_tileset_dnd_receiver);
+	_colors_scroll->dnd_receiver(_palette_dnd_receiver);
 
 	// Configure menu bar
 	_menu_bar->box(OS_PANEL_THIN_UP_BOX);
@@ -322,6 +358,41 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		OS_MENU_ITEM("&Unload", FL_COMMAND + 'W', (Fl_Callback *)unload_tilesets_cb, this, FL_MENU_DIVIDER),
 		OS_MENU_ITEM("Au&to-Load Tileset", 0, (Fl_Callback *)auto_load_tileset_cb, this,
 			FL_MENU_TOGGLE | (Config::auto_load_tileset() ? FL_MENU_VALUE : 0)),
+		{},
+		OS_SUBMENU("&Palette"),
+		OS_MENU_ITEM("&New from Tileset", 0, NULL, NULL, FL_SUBMENU),
+		// One item per NEW_PALETTE_FORMATS[] entry, in that order, all using new_palette_cb.
+		// Labelled extension-first; the two used in retro game-dev tooling lead, then a divider, then
+		// general art-tool formats.
+		OS_MENU_ITEM(".pal - PaintShop Pro (JASC)", 0, (Fl_Callback *)new_palette_cb, this, 0),
+		OS_MENU_ITEM(".pal - Assembly (RGB)", 0, (Fl_Callback *)new_palette_cb, this, FL_MENU_DIVIDER),
+		OS_MENU_ITEM(".gpl - GIMP", 0, (Fl_Callback *)new_palette_cb, this, 0),
+		OS_MENU_ITEM(".hex - Lospec", 0, (Fl_Callback *)new_palette_cb, this, 0),
+		OS_MENU_ITEM(".act - Adobe Color Table", 0, (Fl_Callback *)new_palette_cb, this, 0),
+		OS_MENU_ITEM(".txt - paint.net", 0, (Fl_Callback *)new_palette_cb, this, 0),
+		OS_MENU_ITEM(".map - Fractint", 0, (Fl_Callback *)new_palette_cb, this, 0),
+		OS_MENU_ITEM(".pal.png - Pixel image", 0, (Fl_Callback *)new_palette_cb, this, 0),
+		OS_MENU_ITEM(".pal.bmp - Pixel image", 0, (Fl_Callback *)new_palette_cb, this, 0),
+		{},
+		OS_MENU_ITEM("&Load...", 0, (Fl_Callback *)load_palette_cb, this, 0),
+		OS_MENU_ITEM("Load &Recent", 0, NULL, NULL, FL_SUBMENU),
+		// NUM_RECENT items with callback load_recent_palette_cb
+		OS_NULL_MENU_ITEM(0, (Fl_Callback *)load_recent_palette_cb, this, 0),
+		OS_NULL_MENU_ITEM(0, (Fl_Callback *)load_recent_palette_cb, this, 0),
+		OS_NULL_MENU_ITEM(0, (Fl_Callback *)load_recent_palette_cb, this, 0),
+		OS_NULL_MENU_ITEM(0, (Fl_Callback *)load_recent_palette_cb, this, 0),
+		OS_NULL_MENU_ITEM(0, (Fl_Callback *)load_recent_palette_cb, this, 0),
+		OS_NULL_MENU_ITEM(0, (Fl_Callback *)load_recent_palette_cb, this, 0),
+		OS_NULL_MENU_ITEM(0, (Fl_Callback *)load_recent_palette_cb, this, 0),
+		OS_NULL_MENU_ITEM(0, (Fl_Callback *)load_recent_palette_cb, this, 0),
+		OS_NULL_MENU_ITEM(0, (Fl_Callback *)load_recent_palette_cb, this, 0),
+		OS_NULL_MENU_ITEM(0, (Fl_Callback *)load_recent_palette_cb, this, 0),
+		OS_MENU_ITEM("Clear &Recent", 0, (Fl_Callback *)clear_recent_palettes_cb, this, 0),
+		{},
+		OS_MENU_ITEM("&Save", 0, (Fl_Callback *)save_palette_cb, this, 0),
+		OS_MENU_ITEM("Save &As...", 0, (Fl_Callback *)save_palette_as_cb, this, 0),
+		OS_MENU_ITEM("R&eload", 0, (Fl_Callback *)reload_palette_cb, this, FL_MENU_DIVIDER),
+		OS_MENU_ITEM("&Unload", 0, (Fl_Callback *)unload_palette_cb, this, 0),
 		{},
 		OS_SUBMENU("&Edit"),
 		OS_MENU_ITEM("&Undo", FL_COMMAND + 'z', (Fl_Callback *)undo_cb, this, 0),
@@ -397,9 +468,11 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	// Initialize menu bar items
 	int first_recent_tilemap_i = _menu_bar->find_index((Fl_Callback *)open_recent_tilemap_cb);
 	int first_recent_tileset_i = _menu_bar->find_index((Fl_Callback *)load_recent_tileset_cb);
+	int first_recent_palette_i = _menu_bar->find_index((Fl_Callback *)load_recent_palette_cb);
 	for (int i = 0; i < NUM_RECENT; i++) {
 		_recent_tilemap_mis[i] = const_cast<Fl_Menu_Item *>(&_menu_bar->menu()[first_recent_tilemap_i + i]);
 		_recent_tileset_mis[i] = const_cast<Fl_Menu_Item *>(&_menu_bar->menu()[first_recent_tileset_i + i]);
+		_recent_palette_mis[i] = const_cast<Fl_Menu_Item *>(&_menu_bar->menu()[first_recent_palette_i + i]);
 	}
 #define TS_FIND_MENU_ITEM_CB(c) (const_cast<Fl_Menu_Item *>(_menu_bar->find_item((Fl_Callback *)(c))))
 	_classic_theme_mi = TS_FIND_MENU_ITEM_CB(classic_theme_cb);
@@ -427,6 +500,10 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_print_mi = TS_FIND_MENU_ITEM_CB(print_cb);
 	_reload_tilesets_mi = TS_FIND_MENU_ITEM_CB(reload_tilesets_cb);
 	_unload_tilesets_mi = TS_FIND_MENU_ITEM_CB(unload_tilesets_cb);
+	_save_palette_mi = TS_FIND_MENU_ITEM_CB(save_palette_cb);
+	_save_palette_as_mi = TS_FIND_MENU_ITEM_CB(save_palette_as_cb);
+	_reload_palette_mi = TS_FIND_MENU_ITEM_CB(reload_palette_cb);
+	_unload_palette_mi = TS_FIND_MENU_ITEM_CB(unload_palette_cb);
 	_undo_mi = TS_FIND_MENU_ITEM_CB(undo_cb);
 	_redo_mi = TS_FIND_MENU_ITEM_CB(redo_cb);
 	_erase_selection_mi = TS_FIND_MENU_ITEM_CB(erase_selection_cb);
@@ -587,6 +664,17 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_transparency->callback((Fl_Callback *)transparency_cb, this);
 	_transparency->do_callback();
 
+	_palette_spinner->default_value(0);
+	_palette_spinner->range(0, MAX_NUM_PALETTES - 1);
+	_palette_spinner->step(1);
+	_palette_spinner->callback((Fl_Callback *)palette_spinner_cb, this);
+
+	_palette_clone_spinner->default_value(0);
+	_palette_clone_spinner->range(0, MAX_NUM_PALETTES - 1);
+	_palette_clone_spinner->step(1);
+	_palette_clone_button->tooltip("Clone the selected palette to the chosen index");
+	_palette_clone_button->callback((Fl_Callback *)clone_palette_cb, this);
+
 	// Configure containers
 
 	select_tile(0x000);
@@ -656,6 +744,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	update_zoom(Config::zoom());
 	update_recent_tilemaps();
 	update_recent_tilesets();
+	update_recent_palettes();
 	update_tilemap_metadata();
 	update_tileset_metadata();
 	update_active_controls();
@@ -667,6 +756,7 @@ Main_Window::~Main_Window() {
 	delete _main_group; // includes map and blocks
 	delete _tilemap_dnd_receiver;
 	delete _tileset_dnd_receiver;
+	delete _palette_dnd_receiver;
 	delete _tilemap_open_chooser;
 	delete _tilemap_save_chooser;
 	delete _tileset_load_chooser;
@@ -838,6 +928,46 @@ void Main_Window::update_recent_tilesets() {
 	}
 }
 
+void Main_Window::store_recent_palette() {
+	std::string last(_palette_file);
+	for (int i = 0; i < NUM_RECENT; i++) {
+		if (_recent_palettes[i] == _palette_file) {
+			_recent_palettes[i] = last;
+			break;
+		}
+		std::swap(last, _recent_palettes[i]);
+	}
+	update_recent_palettes();
+}
+
+void Main_Window::update_recent_palettes() {
+	int last = -1;
+	for (int i = 0; i < NUM_RECENT; i++) {
+		Fl_Multi_Label *ml = (Fl_Multi_Label *)_recent_palette_mis[i]->label();
+		if (ml->labelb && ml->labelb[0]) {
+			delete [] ml->labelb;
+			ml->labelb = "";
+		}
+		if (_recent_palettes[i].empty()) {
+			_recent_palette_mis[i]->hide();
+		}
+		else {
+			const char *basename = fl_filename_name(_recent_palettes[i].c_str());
+			char *label = new char[FL_PATH_MAX]();
+			strcpy(label, OS_MENU_ITEM_PREFIX);
+			strcat(label, basename);
+			strcat(label, OS_MENU_ITEM_SUFFIX);
+			ml->labelb = label;
+			_recent_palette_mis[i]->show();
+			last = i;
+		}
+		_recent_palette_mis[i]->flags &= ~FL_MENU_DIVIDER;
+	}
+	if (last > -1) {
+		_recent_palette_mis[last]->flags |= FL_MENU_DIVIDER;
+	}
+}
+
 void Main_Window::update_icons() {
 	bool dark = OS::is_dark_theme(OS::current_theme());
 	_grid_tb->image(dark ? GRID_DARK_ICON : GRID_ICON);
@@ -998,11 +1128,21 @@ void Main_Window::update_tilemap_metadata() {
 }
 
 void Main_Window::update_tileset_metadata() {
+	// On the Colors tab this heading shows the palette's identity instead of the tileset's; when only
+	// the tileset's own colors are shown (no palette loaded/created yet) it falls through to the tileset.
+	if (_left_tabs && _left_tabs->value() == _colors_tab) {
+		if (!_palette_file.empty()) {
+			_tileset_name->copy_label(fl_filename_name(_palette_file.c_str()));
+			return;
+		}
+		if (!_palette_colors.empty()) {
+			_tileset_name->copy_label("(Unsaved)"); // newly created, not yet written to a file
+			return;
+		}
+	}
 	if (!_tilesets.empty()) {
 		if (_tilesets.size() == 1) {
-			std::string &f = _tileset_files.front();
-			const char *basename = fl_filename_name(f.c_str());
-			_tileset_name->label(basename);
+			_tileset_name->copy_label(fl_filename_name(_tileset_files.front().c_str()));
 		}
 		else {
 			char buffer[FL_PATH_MAX] = {};
@@ -1102,6 +1242,35 @@ void Main_Window::update_active_controls() {
 		_shift_tileset_tb->deactivate();
 	}
 
+	if (!_palette_file.empty()) {
+		_reload_palette_mi->activate();
+	}
+	else {
+		_reload_palette_mi->deactivate();
+	}
+	if (!_palette_colors.empty()) {
+		_unload_palette_mi->activate(); // a loaded or newly-created palette is active
+	}
+	else {
+		_unload_palette_mi->deactivate();
+	}
+	if (_palette_writable && _palette_modified) {
+		_save_palette_mi->activate();
+	}
+	else {
+		_save_palette_mi->deactivate();
+	}
+	if (_palette_writable && !_palette_colors.empty()) {
+		_save_palette_as_mi->activate();
+		_palette_clone_spinner->activate();
+		_palette_clone_button->activate();
+	}
+	else {
+		_save_palette_as_mi->deactivate();
+		_palette_clone_spinner->deactivate();
+		_palette_clone_button->deactivate();
+	}
+
 	if (format_can_flip(Config::format())) {
 		_x_flip_tb->activate();
 		_y_flip_tb->activate();
@@ -1168,6 +1337,7 @@ void Main_Window::update_active_controls() {
 
 	if (format_can_edit_palettes(Config::format())) {
 		_palettes_tab->activate();
+		_colors_tab->activate();
 		int m = format_palettes_size(Config::format());
 		for (int i = 0; i < MAX_NUM_PALETTES; i++) {
 			_palettes_pane->remove(0);
@@ -1178,16 +1348,36 @@ void Main_Window::update_active_controls() {
 		if (Config::show_attributes() && _selected_palette->palette() >= m) {
 			select_palette(0);
 		}
+		_palette_spinner->range(0, std::max(m - 1, 0));
+		if ((int)_palette_spinner->value() >= m) {
+			_palette_spinner->value(0);
+		}
+		_palette_clone_spinner->range(0, std::max(m - 1, 0));
+		if ((int)_palette_clone_spinner->value() >= m) {
+			_palette_clone_spinner->value(0);
+		}
+		update_palette_swatches();
 	}
 	else {
 		_palettes_tab->deactivate();
-		if (_left_tabs->value() == _palettes_tab) {
+		_colors_tab->deactivate();
+		if (_left_tabs->value() == _palettes_tab || _left_tabs->value() == _colors_tab) {
 			_left_tabs->value(_tiles_tab);
 			_left_tabs->do_callback();
 		}
 	}
 
-	if (Config::show_attributes()) {
+	if (_left_tabs->value() == _colors_tab) {
+		// The Colors tab has no tile/attribute controls; hide them so they don't overlap its tab label.
+		_tile_heading->hide();
+		_current_tile->hide();
+		_x_flip_tb->hide();
+		_y_flip_tb->hide();
+		_current_attributes->hide();
+		_priority_tb->hide();
+		_obp1_tb->hide();
+	}
+	else if (Config::show_attributes()) {
 		_tile_heading->hide();
 		_current_tile->hide();
 		_x_flip_tb->hide();
@@ -1205,6 +1395,37 @@ void Main_Window::update_active_controls() {
 		_priority_tb->hide();
 		_obp1_tb->hide();
 	}
+
+	update_tileset_metadata(); // heading tracks the active tab (palette name on Colors, else tileset)
+}
+
+void Main_Window::update_palette_swatches(void) {
+	int idx = (int)_palette_spinner->value();
+	size_t n = (size_t)format_palette_size(Config::format());
+	Palette pal;
+	bool editable = false;
+	const Palettes *ps = Tile_State::palette_set();
+	if (ps && idx >= 0 && (size_t)idx < ps->size() && !(*ps)[idx].empty()) {
+		pal = (*ps)[idx];
+		editable = _palette_writable; // only formats write_palette() can save are editable
+	}
+	else if (idx == 0) {
+		// No external palette loaded for this slot: show the colors baked into the tileset image
+		// (the raw graphic's own palette, or the grayscale ramp for headerless .*bpp graphics).
+		for (const Tileset &t : _tilesets) {
+			if (t.has_color_indices()) { t.color_palette(pal, n); break; }
+		}
+	}
+	_palette_swatches->colors(pal, editable);
+	int cols = PALETTES_PER_ROW, rows = std::max(((int)pal.size() + cols - 1) / cols, 1);
+	int cw = cols * TILE_SIZE_2X, ch = rows * TILE_SIZE_2X;
+	int cox = _colors_scroll->x() + Fl::box_dx(_colors_scroll->box());
+	int coy = _colors_scroll->y() + Fl::box_dy(_colors_scroll->box());
+	_colors_scroll->scroll_to(0, 0);
+	_palette_swatches->resize(cox, coy, cw, ch);
+	_colors_scroll->init_sizes();
+	_colors_scroll->contents(cw, ch);
+	_colors_scroll->redraw();
 }
 
 void Main_Window::update_tileset_width(int tw) {
@@ -2017,6 +2238,13 @@ void Main_Window::drag_and_drop_tileset_cb(DnD_Receiver *dndr, Main_Window *mw) 
 	mw->load_tileset(filename.c_str());
 }
 
+void Main_Window::drag_and_drop_palette_cb(DnD_Receiver *dndr, Main_Window *mw) {
+	Fl_Window *top = Fl::modal();
+	if (top && top != mw) { return; }
+	std::string filename = dndr->text().substr(0, dndr->text().find('\n'));
+	mw->load_palette(filename.c_str());
+}
+
 void Main_Window::new_cb(Fl_Widget *, Main_Window *mw) {
 	if (mw->unsaved()) {
 		std::string msg = mw->modified_filename();
@@ -2233,6 +2461,131 @@ void Main_Window::load_tileset_cb(Fl_Widget *, Main_Window *mw) {
 	mw->load_tileset(filename);
 }
 
+// Round-trippable palette formats offered by Palette > New from Tileset (both read and written).
+static const Palette_Format NEW_PALETTE_FORMATS[] = {
+	Palette_Format::JASC, Palette_Format::RGB, Palette_Format::GPL, Palette_Format::HEX,
+	Palette_Format::ACT, Palette_Format::TXT, Palette_Format::MAP, Palette_Format::PNG, Palette_Format::BMP
+};
+
+void Main_Window::new_palette(Palette_Format fmt) {
+	Tilemap_Format tfmt = Config::format();
+	size_t pn = (size_t)format_palettes_size(tfmt);
+	size_t pc = (size_t)format_palette_size(tfmt);
+	if (pn == 0 || pc == 0) { return; } // this tilemap format has no editable palettes
+
+	// Seed from the tileset's baked colors (the raw graphic's own palette, or its grayscale ramp);
+	// fall back to a generated grayscale ramp when no indexed tileset is loaded.
+	Palette base;
+	for (const Tileset &t : _tilesets) {
+		if (t.has_color_indices()) { t.color_palette(base, pc); break; }
+	}
+	if (base.empty()) {
+		base.resize(pc);
+		for (size_t i = 0; i < pc; i++) {
+			uchar v = pc > 1 ? (uchar)(i * 255 / (pc - 1)) : 0;
+			base[i] = fl_rgb_color(v, v, v);
+		}
+	}
+
+	_palette_colors.assign(pn, base);
+	_palette_file.clear();
+	_palette_format = fmt;
+	_palette_writable = true;
+	_palette_modified = true; // unsaved until Palette > Save picks a file
+	Tile_State::palette_set(&_palette_colors);
+	update_active_controls();
+	update_palette_swatches();
+	_tilemap_scroll->redraw();
+	redraw();
+}
+
+void Main_Window::load_palette(const char *filename) {
+	Tilemap_Format fmt = Config::format();
+	size_t pn = (size_t)format_palettes_size(fmt);
+	size_t pc = (size_t)format_palette_size(fmt);
+	Palettes palettes;
+	Palette_Format detected = (Palette_Format)-1;
+	Palette_Result result = read_palette(filename, palettes, pn, pc, &detected);
+	if (result != Palette_Result::PALETTE_OK) {
+		const char *basename = fl_filename_name(filename);
+		std::string msg = "Could not load ";
+		msg = msg + basename + "!\n\n" + palette_error_message(result);
+		_error_dialog->message(msg);
+		_error_dialog->show(this);
+		return;
+	}
+	_palette_colors = palettes;
+	_palette_file.assign(filename);
+	_palette_format = detected;
+	_palette_writable = ((int)detected >= 0); // read_palette sets detected only for writable formats
+	_palette_modified = false;
+	store_recent_palette();
+	Tile_State::palette_set(&_palette_colors);
+	update_active_controls();
+	update_palette_swatches();
+	_tilemap_scroll->redraw();
+	redraw();
+}
+
+void Main_Window::load_recent_palette(int n) {
+	if (n < 0 || n >= NUM_RECENT || _recent_palettes[n].empty()) { return; }
+	load_palette(_recent_palettes[n].c_str());
+}
+
+void Main_Window::new_palette_cb(Fl_Menu_ *m, Main_Window *mw) {
+	int first = m->find_index((Fl_Callback *)new_palette_cb);
+	int i = m->find_index(m->mvalue()) - first;
+	if (i < 0 || i >= (int)(sizeof(NEW_PALETTE_FORMATS) / sizeof(*NEW_PALETTE_FORMATS))) { return; }
+	mw->new_palette(NEW_PALETTE_FORMATS[i]);
+}
+
+void Main_Window::load_palette_cb(Fl_Widget *, Main_Window *mw) {
+	int status = mw->_palette_load_chooser->show();
+	if (status == 1) { return; }
+
+	const char *filename = mw->_palette_load_chooser->filename();
+	const char *basename = fl_filename_name(filename);
+	if (status == -1) {
+		std::string msg = "Could not open ";
+		msg = msg + basename + "!\n\n" + mw->_palette_load_chooser->errmsg();
+		mw->_error_dialog->message(msg);
+		mw->_error_dialog->show(mw);
+		return;
+	}
+
+	mw->load_palette(filename);
+}
+
+void Main_Window::load_recent_palette_cb(Fl_Menu_ *m, Main_Window *mw) {
+	int first_recent_i = m->find_index((Fl_Callback *)load_recent_palette_cb);
+	int i = m->find_index(m->mvalue()) - first_recent_i;
+	mw->load_recent_palette(i);
+}
+
+void Main_Window::clear_recent_palettes_cb(Fl_Menu_ *, Main_Window *mw) {
+	for (int i = 0; i < NUM_RECENT; i++) {
+		mw->_recent_palettes[i].clear();
+		mw->_recent_palette_mis[i]->hide();
+	}
+}
+
+void Main_Window::reload_palette_cb(Fl_Widget *, Main_Window *mw) {
+	if (mw->_palette_file.empty()) { return; }
+	mw->load_palette(mw->_palette_file.c_str());
+}
+
+void Main_Window::unload_palette_cb(Fl_Widget *, Main_Window *mw) {
+	Tile_State::palette_set(nullptr);
+	mw->_palette_colors.clear();
+	mw->_palette_file.clear();
+	mw->_palette_writable = false;
+	mw->_palette_modified = false;
+	mw->update_active_controls();
+	mw->update_palette_swatches();
+	mw->_tilemap_scroll->redraw();
+	mw->redraw();
+}
+
 void Main_Window::add_tileset_cb(Fl_Widget *, Main_Window *mw) {
 	int status = mw->_tileset_load_chooser->show();
 	if (status == 1) { return; }
@@ -2441,6 +2794,9 @@ void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 	}
 	for (int i = 0; i < NUM_RECENT; i++) {
 		Preferences::set_string(Fl_Preferences::Name("recent-set%d", i), mw->_recent_tilesets[i]);
+	}
+	for (int i = 0; i < NUM_RECENT; i++) {
+		Preferences::set_string(Fl_Preferences::Name("recent-pal%d", i), mw->_recent_palettes[i]);
 	}
 	if (mw->_resize_dialog->initialized()) {
 		Preferences::set("resize-anchor", mw->_resize_dialog->anchor());
@@ -2892,6 +3248,96 @@ void Main_Window::select_palette_cb(Palette_Button *pb, Main_Window *mw) {
 		// Left-click to select
 		mw->select_palette(pb->palette());
 	}
+}
+
+void Main_Window::palette_spinner_cb(OS_Spinner *, Main_Window *mw) {
+	mw->update_palette_swatches();
+}
+
+void Main_Window::edit_swatch_cb(Palette_Swatches *ps, Main_Window *mw) {
+	int idx = (int)mw->_palette_spinner->value(), ci = ps->clicked();
+	if (idx < 0 || (size_t)idx >= mw->_palette_colors.size()) { return; }
+	Palette &pal = mw->_palette_colors[idx];
+	if (ci < 0 || (size_t)ci >= pal.size()) { return; }
+	uchar r, g, b;
+	Fl::get_color(pal[ci], r, g, b);
+	if (!fl_color_chooser("Edit Color", r, g, b)) { return; }
+	Fl_Color edited = fl_rgb_color(r, g, b);
+	if (edited == pal[ci]) { return; }
+	pal[ci] = edited; // Tile_State::palette_set() already points at _palette_colors -> tilemap recolors
+	mw->_palette_modified = true; // in-memory only; persisted by Palette > Save
+	mw->update_active_controls(); // enable the Save menu item
+	mw->update_palette_swatches();
+	mw->_tilemap_scroll->redraw();
+	mw->redraw();
+}
+
+bool Main_Window::save_palette(const char *filename) {
+	size_t pc = (size_t)format_palette_size(Config::format());
+	if (!write_palette(filename, _palette_colors, _palette_format, pc)) {
+		std::string msg = "Could not save ";
+		msg = msg + fl_filename_name(filename) + "!";
+		_error_dialog->message(msg);
+		_error_dialog->show(this);
+		return false;
+	}
+	_palette_file.assign(filename);
+	_palette_modified = false;
+	store_recent_palette();
+	update_active_controls();
+	return true;
+}
+
+void Main_Window::save_palette_cb(Fl_Widget *w, Main_Window *mw) {
+	if (!mw->_palette_writable || mw->_palette_colors.empty()) { return; }
+	if (mw->_palette_file.empty()) { save_palette_as_cb(w, mw); return; } // never saved: fall through to Save As
+	mw->save_palette(mw->_palette_file.c_str());
+}
+
+void Main_Window::save_palette_as_cb(Fl_Widget *, Main_Window *mw) {
+	if (!mw->_palette_writable || mw->_palette_colors.empty()) { return; }
+	std::string preset = mw->_palette_file;
+	if (preset.empty()) {
+		const char *ext = palette_extension(mw->_palette_format);
+		preset = std::string("palette") + (ext ? ext : "");
+	}
+	mw->_palette_save_chooser->preset_file(fl_filename_name(preset.c_str()));
+	int status = mw->_palette_save_chooser->show();
+	if (status != 0) { return; } // 1 = cancel, -1 = error
+	mw->save_palette(mw->_palette_save_chooser->filename());
+}
+
+// A palette slot counts as "empty" (safe to overwrite without confirmation) when it has no colors or
+// they are all black -- e.g. a slot the loaded file never populated, or a freshly padded clone target.
+static bool is_palette_empty(const Palette &pal) {
+	for (Fl_Color c : pal) {
+		if (c != FL_BLACK) { return false; }
+	}
+	return true;
+}
+
+void Main_Window::clone_palette_cb(Fl_Widget *, Main_Window *mw) {
+	if (!mw->_palette_writable || mw->_palette_colors.empty()) { return; }
+	int src = (int)mw->_palette_spinner->value(), dst = (int)mw->_palette_clone_spinner->value();
+	size_t pn = (size_t)format_palettes_size(Config::format());
+	size_t pc = (size_t)format_palette_size(Config::format());
+	if (src < 0 || dst < 0 || (size_t)dst >= pn || src == dst) { return; }
+	if ((size_t)src >= mw->_palette_colors.size() || is_palette_empty(mw->_palette_colors[src])) { return; } // nothing to clone
+	// Make sure the target slot exists (pad any gap with empty/black palettes).
+	if (mw->_palette_colors.size() <= (size_t)dst) { mw->_palette_colors.resize((size_t)dst + 1, Palette(pc, FL_BLACK)); }
+	if (!is_palette_empty(mw->_palette_colors[dst])) {
+		std::string msg = "Overwrite palette " + std::to_string(dst) + " with palette " + std::to_string(src) + "?";
+		mw->_unsaved_dialog->message(msg);
+		mw->_unsaved_dialog->show(mw);
+		if (mw->_unsaved_dialog->canceled()) { return; }
+	}
+	mw->_palette_colors[(size_t)dst] = mw->_palette_colors[(size_t)src];
+	mw->_palette_modified = true;
+	mw->_palette_spinner->value(dst); // show the clone result
+	mw->update_active_controls();
+	mw->update_palette_swatches();
+	mw->_tilemap_scroll->redraw();
+	mw->redraw();
 }
 
 void Main_Window::change_tile_cb(Tile_Tessera *tt, Main_Window *mw) {

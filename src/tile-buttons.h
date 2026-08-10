@@ -14,6 +14,7 @@
 #include "utils.h"
 #include "config.h"
 #include "tile.h"
+#include "palette-format.h"
 
 #define TILE_SIZE_2X (TILE_SIZE * DEFAULT_ZOOM)
 
@@ -25,8 +26,11 @@ struct Tile_State {
 private:
 	static std::vector<Tileset> *_tilesets;
 	static Fl_PNG_Image *_palette_bgs_image;
+	static const Palettes *_palette_set;
 public:
 	inline static void tilesets(std::vector<Tileset> *ts) { _tilesets = ts; }
+	inline static void palette_set(const Palettes *ps) { _palette_set = ps; }
+	inline static const Palettes *palette_set(void) { return _palette_set; }
 	static void alpha(uchar alfa);
 	static void update_zoom(void);
 public:
@@ -141,6 +145,22 @@ public:
 class Palette_Button : public Tile_Thing, public Fl_Radio_Button {
 public:
 	Palette_Button(int x, int y, int p = -1);
+	void draw(void);
+	int handle(int event);
+};
+
+// Displays one palette's actual colors as a grid of fixed-size swatches. When editable, clicking a
+// swatch fires the callback with clicked() set to that color's index.
+class Palette_Swatches : public Fl_Box {
+private:
+	Palette _colors;
+	bool _editable;
+	int _clicked;
+public:
+	Palette_Swatches(int x, int y, int w, int h);
+	inline void colors(const Palette &c, bool editable) { _colors = c; _editable = editable; }
+	inline const Palette &colors(void) const { return _colors; }
+	inline int clicked(void) const { return _clicked; }
 	void draw(void);
 	int handle(int event);
 };

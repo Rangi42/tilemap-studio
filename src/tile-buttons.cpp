@@ -132,6 +132,8 @@ std::vector<Tileset> *Tile_State::_tilesets = NULL;
 
 Fl_PNG_Image *Tile_State::_palette_bgs_image = NULL;
 
+const Palettes *Tile_State::_palette_set = NULL;
+
 void Tile_State::alpha(uchar alfa) {
 	const uchar trns_data[20] = {
 		0x74, 0x52, 0x4e, 0x53,
@@ -587,4 +589,33 @@ void Palette_Button::draw() {
 int Palette_Button::handle(int event) {
 	// Don't interfere with dragging onto the parent Droppable|Workpane
 	return event == FL_ENTER || event == FL_LEAVE || event == FL_DRAG ? 0 : Fl_Radio_Button::handle(event);
+}
+
+Palette_Swatches::Palette_Swatches(int x, int y, int w, int h) : Fl_Box(x, y, w, h), _colors(), _editable(false), _clicked(-1) {
+	box(FL_NO_BOX);
+}
+
+void Palette_Swatches::draw() {
+	int X = x(), Y = y();
+	fl_rectf(X, Y, w(), h(), FL_BACKGROUND2_COLOR);
+	int n = (int)_colors.size(), cols = PALETTES_PER_ROW;
+	for (int i = 0; i < n; i++) {
+		int x0 = X + (i % cols) * TILE_SIZE_2X, y0 = Y + (i / cols) * TILE_SIZE_2X;
+		fl_rectf(x0, y0, TILE_SIZE_2X, TILE_SIZE_2X, _colors[i]);
+		fl_color(FL_INACTIVE_COLOR);
+		fl_rect(x0, y0, TILE_SIZE_2X, TILE_SIZE_2X);
+	}
+}
+
+int Palette_Swatches::handle(int event) {
+	if (event == FL_PUSH && _editable && Fl::event_button() == FL_LEFT_MOUSE) {
+		int c = (Fl::event_x() - x()) / TILE_SIZE_2X, r = (Fl::event_y() - y()) / TILE_SIZE_2X;
+		int i = r * PALETTES_PER_ROW + c;
+		if (c >= 0 && c < PALETTES_PER_ROW && i >= 0 && i < (int)_colors.size()) {
+			_clicked = i;
+			do_callback();
+			return 1;
+		}
+	}
+	return Fl_Box::handle(event);
 }
