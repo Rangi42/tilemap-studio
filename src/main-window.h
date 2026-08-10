@@ -51,7 +51,7 @@ private:
 	Workspace *_tilemap_scroll;
 	Toolbar *_status_bar;
 	// GUI inputs
-	DnD_Receiver *_tilemap_dnd_receiver, *_tileset_dnd_receiver;
+	DnD_Receiver *_tilemap_dnd_receiver, *_tileset_dnd_receiver, *_palette_dnd_receiver;
 	Fl_Menu_Item *_recent_tilemap_mis[NUM_RECENT], *_recent_tileset_mis[NUM_RECENT], *_recent_palette_mis[NUM_RECENT];
 	Fl_Menu_Item *_classic_theme_mi = NULL, *_aero_theme_mi = NULL, *_metro_theme_mi = NULL, *_aqua_theme_mi = NULL,
 		*_greybird_theme_mi = NULL, *_ocean_theme_mi = NULL, *_blue_theme_mi = NULL, *_olive_theme_mi = NULL,
@@ -145,7 +145,7 @@ public:
 	}
 	inline bool map_editable(void) const { return _map_editable; }
 	inline void map_editable(bool e) { _map_editable = e; }
-	inline bool dropping(void) const { return _tilemap_scroll->dropping() || _tiles_scroll->dropping() || _palettes_pane->dropping(); }
+	inline bool dropping(void) const { return _tilemap_scroll->dropping() || _tiles_scroll->dropping() || _palettes_pane->dropping() || _colors_scroll->dropping(); }
 	void draw_overlay(void);
 	int handle(int event);
 	void clear_flips(void);
@@ -212,6 +212,7 @@ private:
 	// Drag-and-drop
 	static void drag_and_drop_tilemap_cb(DnD_Receiver *dndr, Main_Window *mw);
 	static void drag_and_drop_tileset_cb(DnD_Receiver *dndr, Main_Window *mw);
+	static void drag_and_drop_palette_cb(DnD_Receiver *dndr, Main_Window *mw);
 	// Window
 	static void exit_cb(Fl_Widget *w, Main_Window *mw);
 	// Tilemap menu

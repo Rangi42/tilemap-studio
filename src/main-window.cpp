@@ -279,6 +279,9 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_tileset_dnd_receiver = new DnD_Receiver(0, 0, 0, 0);
 	_tileset_dnd_receiver->callback((Fl_Callback *)drag_and_drop_tileset_cb, this);
 	_tileset_dnd_receiver->user_data(this);
+	_palette_dnd_receiver = new DnD_Receiver(0, 0, 0, 0);
+	_palette_dnd_receiver->callback((Fl_Callback *)drag_and_drop_palette_cb, this);
+	_palette_dnd_receiver->user_data(this);
 
 	// Configure window
 	box(OS_BG_BOX);
@@ -300,6 +303,7 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_tilemap_scroll->dnd_receiver(_tilemap_dnd_receiver);
 	_tiles_scroll->dnd_receiver(_tileset_dnd_receiver);
 	_palettes_pane->dnd_receiver(_tileset_dnd_receiver);
+	_colors_scroll->dnd_receiver(_palette_dnd_receiver);
 
 	// Configure menu bar
 	_menu_bar->box(OS_PANEL_THIN_UP_BOX);
@@ -752,6 +756,7 @@ Main_Window::~Main_Window() {
 	delete _main_group; // includes map and blocks
 	delete _tilemap_dnd_receiver;
 	delete _tileset_dnd_receiver;
+	delete _palette_dnd_receiver;
 	delete _tilemap_open_chooser;
 	delete _tilemap_save_chooser;
 	delete _tileset_load_chooser;
@@ -2219,6 +2224,13 @@ void Main_Window::drag_and_drop_tileset_cb(DnD_Receiver *dndr, Main_Window *mw) 
 	if (top && top != mw) { return; }
 	std::string filename = dndr->text().substr(0, dndr->text().find('\n'));
 	mw->load_tileset(filename.c_str());
+}
+
+void Main_Window::drag_and_drop_palette_cb(DnD_Receiver *dndr, Main_Window *mw) {
+	Fl_Window *top = Fl::modal();
+	if (top && top != mw) { return; }
+	std::string filename = dndr->text().substr(0, dndr->text().find('\n'));
+	mw->load_palette(filename.c_str());
 }
 
 void Main_Window::new_cb(Fl_Widget *, Main_Window *mw) {
